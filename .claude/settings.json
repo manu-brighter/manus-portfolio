@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(pnpm *)",
+      "Bash(pnpm install*)",
+      "Bash(pnpm add *)",
+      "Bash(pnpm remove *)",
+      "Bash(pnpm exec *)",
+      "Bash(pnpm dlx *)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git branch*)",
+      "Bash(git checkout *)",
+      "Bash(git restore *)",
+      "Bash(rsync --dry-run *)",
+      "Bash(jq *)",
+      "Bash(node --version)",
+      "Read(**)",
+      "Edit(src/**)",
+      "Edit(content/**)",
+      "Edit(messages/**)",
+      "Edit(.claude/**)",
+      "Edit(tests/**)",
+      "Edit(docs/**)",
+      "Write(src/**)",
+      "Write(content/**)",
+      "Write(messages/**)",
+      "Write(.claude/**)",
+      "Write(tests/**)"
+    ],
+    "deny": [
+      "Bash(rsync * deploy@*)",
+      "Bash(ssh deploy@*)",
+      "Bash(git push --force*)",
+      "Bash(git reset --hard*)",
+      "Read(.env*)",
+      "Read(**/.env*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=$(jq -r '.tool_input.file_path // empty' 2>/dev/null); if [ -n \"$f\" ] && echo \"$f\" | grep -qE '\\.(ts|tsx|css|json|jsonc|mjs|cjs|js|jsx)$'; then pnpm exec biome check --write --no-errors-on-unmatched \"$f\" >/dev/null 2>&1 || true; fi; exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}
