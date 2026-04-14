@@ -1,0 +1,25 @@
+# Brainstorming/scratch — not part of the project
+.superpowers/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Node / Bun (will apply once Phase 0 lands)
+node_modules/
+.next/
+out/
+*.log
+.turbo/
+coverage/
+playwright-report/
+test-results/
+.lighthouseci/
