@@ -27,3 +27,6 @@ test-results/
 
 # Contentlayer
 .contentlayer
+
+# TypeScript incremental build cache
+*.tsbuildinfo
