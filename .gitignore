@@ -23,3 +23,7 @@ coverage/
 playwright-report/
 test-results/
 .lighthouseci/
+
+
+# Contentlayer
+.contentlayer
