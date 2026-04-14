@@ -16,7 +16,8 @@
     "typecheck": "tsc --noEmit",
     "test": "playwright test",
     "test:a11y": "playwright test --grep @a11y",
-    "lighthouse": "lhci autorun"
+    "lighthouse": "lhci autorun",
+    "ci:local": "pnpm lint && pnpm typecheck && pnpm build && pnpm test"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.2.8",

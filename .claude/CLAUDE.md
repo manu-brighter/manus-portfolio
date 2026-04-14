@@ -11,7 +11,8 @@ force source. Static export → Nginx. Full spec in [`docs/plan.md`](../docs/pla
 - `pnpm lint` / `pnpm format` — Biome (project-wide)
 - `pnpm typecheck` — `tsc --noEmit`
 - `pnpm test` — Playwright smoke
-- `pnpm lighthouse` — LHCI against `./out`
+- `pnpm lighthouse` — LHCI against `./out` (broken on Windows; use CI)
+- `pnpm ci:local` — run lint + typecheck + build + test in one shot (mirrors CI stages 1–4; run before every push)
 
 **Package manager is pnpm**, not Bun — plan deviation (§3 still says Bun).
 
