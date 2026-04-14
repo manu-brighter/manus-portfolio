@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------
+ * Design tokens — "Riso Ink" palette (see docs/plan.md §4.1)
+ *
+ * @theme entries generate Tailwind utility classes:
+ *   --color-paper → bg-paper, text-paper, border-paper
+ *   --font-display → font-display
+ * Keep this block the single source of truth for the palette.
+ * --------------------------------------------------------------- */
+@theme {
+  /* Paper base — dominant 70%+ of surface area */
+  --color-paper: #f0e8dc;
+  --color-paper-tint: #fef2e2;
+  --color-paper-shade: #e4dbcd;
+  --color-paper-line: #d6cbb8;
+
+  /* Ink — text, bold outlines, Sobel edges */
+  --color-ink: #0a0608;
+  --color-ink-soft: #1a0e12;
+  --color-ink-muted: rgba(10, 6, 8, 0.55);
+  --color-ink-faint: rgba(10, 6, 8, 0.28);
+
+  /* Spot colors — the 4 Riso inks, posterized in the fluid shader */
+  --color-spot-rose: #ff6ba0;
+  --color-spot-amber: #ffc474;
+  --color-spot-mint: #7ce8c4;
+  --color-spot-violet: #b89aff;
+
+  /* Typography — display is non-variable Instrument Serif,
+     body + mono are variable fonts from @fontsource-variable */
+  --font-display: "Instrument Serif", ui-serif, Georgia, serif;
+  --font-body: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, "SF Mono", "Menlo", monospace;
+}
+
+/* Non-utility tokens — functional roles, not part of the palette */
+:root {
+  --focus-ring: var(--color-spot-mint);
+  --selection-bg: var(--color-spot-rose);
+  --selection-fg: var(--color-paper-tint);
+
+  color-scheme: light;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-body);
+    background: var(--color-paper);
+    color: var(--color-ink);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    min-height: 100dvh;
+  }
+
+  ::selection {
+    background: var(--selection-bg);
+    color: var(--selection-fg);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 3px;
+  }
+
+  /* Accessibility: reduced-motion reset.
+   * !important is canonical here — must override any component-level
+   * animation regardless of specificity (plan §9, WebAIM pattern). */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      /* biome-ignore lint/complexity/noImportantStyles: a11y override */
+      animation-duration: 0.01ms !important;
+      /* biome-ignore lint/complexity/noImportantStyles: a11y override */
+      animation-iteration-count: 1 !important;
+      /* biome-ignore lint/complexity/noImportantStyles: a11y override */
+      transition-duration: 0.01ms !important;
+      /* biome-ignore lint/complexity/noImportantStyles: a11y override */
+      scroll-behavior: auto !important;
+    }
+  }
+}
