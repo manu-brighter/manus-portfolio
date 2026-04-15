@@ -8,8 +8,7 @@ export default function HomePage() {
           letterSpacing: "-0.04em",
         }}
       >
-        Portfolio <span className="text-ink-muted not-italic">/</span> Manuel Heller —{" "}
-        <span className="text-spot-rose">booting…</span>
+        Portfolio <span className="not-italic">/</span> Manuel Heller — booting…
       </h1>
     </main>
   );
