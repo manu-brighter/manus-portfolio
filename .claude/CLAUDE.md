@@ -35,8 +35,14 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 
 - Palette: `--color-paper{,-tint,-shade,-line}`, `--color-ink{,-soft,-muted,-faint}`,
   4 spots `--color-spot-{rose,amber,mint,violet}`
-- Fonts: `--font-display` (Instrument Serif, italic), `--font-body` (Inter),
-  `--font-mono` (JetBrains Mono)
+- Fonts: `--font-display` (Instrument Serif, static — see note below),
+  `--font-body` (Inter Variable), `--font-mono` (JetBrains Mono Variable)
+  - Plan §4.3 specifies a Variable Instrument Serif; upstream ships
+    only a static family (Google Fonts + `@fontsource/instrument-serif`).
+    No `@fontsource-variable/instrument-serif` exists. Weight axis is
+    not available — Phase 5 Overprint-Reveal uses duplicated DOM char
+    copies with color offsets (per §6.3), not an axis morph, so static
+    cuts are sufficient. Do **not** re-file this as a bug.
 - Motion tokens in TS: `src/lib/motion/tokens.ts` (`ease.expo/riso/fluidDrag`,
   `dur.micro/short/medium/long/epic`)
 - **Hero is right-aligned (asymmetric) — never centered, never left-aligned.**
