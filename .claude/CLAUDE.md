@@ -86,3 +86,7 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 - Skip the reduced-motion branch — not optional
 - Add deps not listed in `docs/plan.md` §3 without asking first
 - Inline secrets in code or commits — use `.env.local` (gitignored)
+- Edit `docs/**` — the plan is a frozen spec; deviations go here in
+  `CLAUDE.md`, not in the plan itself. `.claude/settings.json` enforces
+  this by omitting `Edit/Write(docs/**)` — if a plan amendment is truly
+  warranted, the resulting permission prompt is the right friction.
