@@ -18,7 +18,11 @@
   /* Ink — text, bold outlines, Sobel edges */
   --color-ink: #0a0608;
   --color-ink-soft: #1a0e12;
-  --color-ink-muted: rgba(10, 6, 8, 0.55);
+  /* Plan §4.1 sketches 0.55 / 0.28 for muted/faint, but plan §9
+   * demands 4.5:1 AA for UI text. Muted is bumped to 0.7 (≈6.5:1
+   * on paper, AA at 12px small mono); faint is decorative-only —
+   * never use it for text content. See .claude/CLAUDE.md. */
+  --color-ink-muted: rgba(10, 6, 8, 0.7);
   --color-ink-faint: rgba(10, 6, 8, 0.28);
 
   /* Spot colors — the 4 Riso inks, posterized in the fluid shader */

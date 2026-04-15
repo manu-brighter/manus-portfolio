@@ -61,7 +61,7 @@ export function Nav() {
               <li key={locale.code}>
                 <span
                   aria-current={locale.active ? "true" : undefined}
-                  className={locale.active ? "type-label text-ink" : "type-label text-ink-faint"}
+                  className={locale.active ? "type-label text-ink" : "type-label text-ink-muted"}
                   data-locale={locale.code}
                 >
                   {locale.label}

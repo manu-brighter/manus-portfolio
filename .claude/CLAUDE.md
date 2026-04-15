@@ -35,6 +35,11 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 
 - Palette: `--color-paper{,-tint,-shade,-line}`, `--color-ink{,-soft,-muted,-faint}`,
   4 spots `--color-spot-{rose,amber,mint,violet}`
+  - Plan §4.1 sketches `--color-ink-muted` at `rgba(10,6,8,0.55)`, but
+    plan §9 demands AA 4.5:1 for UI text — at 12px small mono labels
+    that opacity yields only 4.27:1 (axe fails). Bumped to `0.7`
+    (≈6.5:1 on paper). `--color-ink-faint` (0.28) is decorative-only;
+    **never use it for text content**, the contrast is unrecoverable.
 - Fonts: `--font-display` (Instrument Serif, static — see note below),
   `--font-body` (Inter Variable), `--font-mono` (JetBrains Mono Variable)
   - Plan §4.3 specifies a Variable Instrument Serif; upstream ships
