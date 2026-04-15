@@ -3,6 +3,18 @@ import { defineConfig, devices } from "@playwright/test";
 const PORT = Number(process.env.PORT ?? 3000);
 const BASE_URL = `http://localhost:${PORT}`;
 
+/**
+ * Test target:
+ *   E2E_TARGET=prod → serve ./out (static export, matches production)
+ *   default         → pnpm dev (faster DX, what authors hit locally)
+ *
+ * CI always sets E2E_TARGET=prod so smoke + axe run against the exact
+ * artifact that ships to Nginx. Avoids "green CI, broken build" drift.
+ */
+const TARGET = process.env.E2E_TARGET ?? "dev";
+const SERVER_COMMAND =
+  TARGET === "prod" ? `pnpm dlx serve out --listen ${PORT} --no-clipboard` : "pnpm dev";
+
 export default defineConfig({
   testDir: "./tests",
   testMatch: /.*\.spec\.ts/,
@@ -24,7 +36,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "pnpm dev",
+    command: SERVER_COMMAND,
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,

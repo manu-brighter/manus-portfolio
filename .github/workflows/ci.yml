@@ -41,11 +41,16 @@ jobs:
       - name: TypeScript typecheck
         run: pnpm typecheck
 
+      - name: Build (static export)
+        run: pnpm build
+
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Playwright smoke
+      - name: Playwright (smoke + a11y) against ./out
         run: pnpm test
+        env:
+          E2E_TARGET: prod
 
       - name: Upload Playwright report
         if: failure()
@@ -54,9 +59,6 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
-
-      - name: Build (static export)
-        run: pnpm build
 
       - name: Lighthouse CI (budget from plan §8)
         run: pnpm lighthouse
