@@ -14,8 +14,9 @@
     "lint": "biome check .",
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit",
-    "test": "playwright test",
+    "test": "playwright test --grep-invert @visual",
     "test:a11y": "playwright test --grep @a11y",
+    "test:visual": "playwright test --grep @visual",
     "lighthouse": "lhci autorun",
     "ci:local": "pnpm lint && pnpm typecheck && pnpm build && E2E_TARGET=prod pnpm test"
   },
