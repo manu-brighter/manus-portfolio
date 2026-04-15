@@ -40,7 +40,26 @@
   --selection-bg: var(--color-spot-rose);
   --selection-fg: var(--color-paper-tint);
 
+  /* Layout — 12-col fluid grid, plan §4.5 */
+  --container-max: 96rem; /* 1536px, == 2xl breakpoint */
+  --container-gutter: 1.5rem;
+  --grid-gap: 1.5rem;
+
   color-scheme: light;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --container-gutter: 2rem;
+    --grid-gap: 2rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --container-gutter: 3rem;
+    --grid-gap: 2.5rem;
+  }
 }
 
 @layer base {
@@ -83,5 +102,144 @@
       /* biome-ignore lint/complexity/noImportantStyles: a11y override */
       scroll-behavior: auto !important;
     }
+  }
+}
+
+@layer components {
+  /* ------------------------------------------------------------
+   * Layout primitives
+   * ------------------------------------------------------------ */
+
+  /* Page-level container — caps width, paints gutters, no grid. */
+  .container-page {
+    width: 100%;
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-inline: var(--container-gutter);
+  }
+
+  /* 12-col grid inside .container-page — opt-in via .grid-12. */
+  .grid-12 {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--grid-gap);
+  }
+
+  /* Skip-link — first focusable element in <body> per WCAG 2.4.1.
+   * Hidden until focused, then snaps into view top-left. */
+  .skip-link {
+    position: fixed;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: 100;
+    padding: 0.5rem 0.875rem;
+    background: var(--color-ink);
+    color: var(--color-paper-tint);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transform: translateY(-200%);
+    transition: transform 0.14s ease-out;
+  }
+
+  .skip-link:focus-visible {
+    transform: translateY(0);
+  }
+
+  /* ------------------------------------------------------------
+   * Typography classes — plan §4.3 (Riso version)
+   * Composable: pair with text-* utilities for semantic colors.
+   * ------------------------------------------------------------ */
+
+  /* Hero / display — italic Instrument Serif, monumental, right-aligned
+   * by default (the asymmetric signature; never centered, never left). */
+  .type-display {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(3.5rem, 12vw, 11rem);
+    line-height: 0.88;
+    letter-spacing: -0.04em;
+    text-align: right;
+    text-wrap: balance;
+  }
+
+  .type-h1 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    line-height: 1;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+
+  .type-h2 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.75rem, 3.5vw, 2.75rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  .type-h3 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.25rem, 2vw, 1.625rem);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  .type-body {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.6;
+    max-width: 65ch;
+    text-wrap: pretty;
+  }
+
+  .type-body-lg {
+    font-family: var(--font-body);
+    font-size: 1.125rem;
+    line-height: 1.55;
+    max-width: 60ch;
+    text-wrap: pretty;
+  }
+
+  /* Mono UPPERCASE label — meta-info, eyebrows, dataline. */
+  .type-label {
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 0.75rem;
+    line-height: 1.2;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  /* Stamp variant — Risograph "Druckstempel": label inside ink-bordered box. */
+  .type-label-stamp {
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 0.6875rem;
+    line-height: 1;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4em 0.75em;
+    border: 1.5px solid var(--color-ink);
+    color: var(--color-ink);
+    background: transparent;
+    white-space: nowrap;
+  }
+
+  /* Vertical stack of mono labels — left-margin stamp column per plan §4.3. */
+  .stamp-column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
   }
 }
