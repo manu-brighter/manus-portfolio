@@ -1,6 +1,9 @@
 # Brainstorming/scratch — not part of the project
 .superpowers/
 
+# Claude Code per-machine permission overrides (not shared)
+.claude/settings.local.json
+
 # OS / editor
 .DS_Store
 Thumbs.db
