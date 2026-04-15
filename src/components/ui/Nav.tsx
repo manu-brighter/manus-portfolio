@@ -23,10 +23,10 @@ const NAV_ITEMS = [
 ] as const;
 
 const LOCALES = [
-  { code: "de", label: "DE", active: true },
-  { code: "en", label: "EN", active: false },
-  { code: "fr", label: "FR", active: false },
-  { code: "it", label: "IT", active: false },
+  { code: "de", label: "DE", name: "Deutsch", active: true },
+  { code: "en", label: "EN", name: "English", active: false },
+  { code: "fr", label: "FR", name: "Français", active: false },
+  { code: "it", label: "IT", name: "Italiano", active: false },
 ] as const;
 
 export function Nav() {
@@ -54,18 +54,22 @@ export function Nav() {
             ))}
           </ul>
 
-          {/* TODO(i18n): wire to next-intl router in Phase 2.
-              Static stamps for now so layout doesn't shift later. */}
-          <ul aria-label="Language" className="flex items-center gap-1.5">
+          {/* TODO(i18n): wire to next-intl router in Phase 2 — will become
+              <a aria-current="page" href="/<locale>/"> so that aria-current
+              actually carries weight with assistive tech. Until then these
+              are non-interactive <abbr>s announcing the full language name. */}
+          <ul aria-label="Sprache" className="flex items-center gap-1.5">
             {LOCALES.map((locale) => (
               <li key={locale.code}>
-                <span
-                  aria-current={locale.active ? "true" : undefined}
-                  className={locale.active ? "type-label text-ink" : "type-label text-ink-muted"}
+                <abbr
+                  className={`no-underline ${
+                    locale.active ? "type-label text-ink" : "type-label text-ink-muted"
+                  }`}
                   data-locale={locale.code}
+                  title={locale.active ? `Aktuelle Sprache: ${locale.name}` : locale.name}
                 >
                   {locale.label}
-                </span>
+                </abbr>
               </li>
             ))}
           </ul>

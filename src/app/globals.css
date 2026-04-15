@@ -122,7 +122,8 @@
     padding-inline: var(--container-gutter);
   }
 
-  /* 12-col grid inside .container-page — opt-in via .grid-12. */
+  /* 12-col grid — opt-in. Compose onto .container-page (same element)
+   * for full-bleed section grids, or nest inside for padded sub-grids. */
   .grid-12 {
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));

@@ -4,16 +4,18 @@
  * Layout:
  *   [ © · Basel-Region · MMXXVI ]            [ GH · LI · IG · MAIL ]
  *
- * Social handles are placeholders until the content gap in plan §15 is
- * filled. href="#" + aria-label keeps the markup semantic and axe-clean
- * without committing to dummy URLs.
+ * Social handles render as non-interactive <span> stamps until plan §15
+ * content gap is filled. Using <a href="#"> would satisfy axe but trap
+ * keyboard users on a no-op link; labels-as-spans avoid that while
+ * keeping the visual composition identical. aria-labels communicate
+ * the platform name to assistive tech.
  */
 
 const SOCIAL_LINKS = [
-  { label: "GH", href: "#", title: "GitHub" },
-  { label: "LI", href: "#", title: "LinkedIn" },
-  { label: "IG", href: "#", title: "Instagram" },
-  { label: "MAIL", href: "#", title: "Email" },
+  { label: "GH", title: "GitHub" },
+  { label: "LI", title: "LinkedIn" },
+  { label: "IG", title: "Instagram" },
+  { label: "MAIL", title: "Email" },
 ] as const;
 
 export function Footer() {
@@ -25,17 +27,13 @@ export function Footer() {
           <span aria-hidden="true"> · </span>MMXXVI
         </p>
 
-        <ul aria-label="Social links" className="flex items-center gap-2.5">
+        {/* TODO(content): swap <abbr> → <a href={url}> once plan §15 URLs land. */}
+        <ul aria-label="Social-Kanäle" className="flex items-center gap-2.5">
           {SOCIAL_LINKS.map((link) => (
             <li key={link.title}>
-              {/* TODO(content): wire real URLs once plan §15 gap is filled. */}
-              <a
-                aria-label={link.title}
-                className="type-label-stamp transition-colors hover:bg-ink hover:text-paper-tint"
-                href={link.href}
-              >
+              <abbr className="type-label-stamp no-underline" title={link.title}>
                 {link.label}
-              </a>
+              </abbr>
             </li>
           ))}
         </ul>

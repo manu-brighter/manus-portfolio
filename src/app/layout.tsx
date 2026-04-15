@@ -20,8 +20,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="de">
       <body className="flex min-h-dvh flex-col">
+        {/* TODO(i18n): move to next-intl messages in Phase 2. */}
         <a className="skip-link" href="#main">
-          Skip to content
+          Zum Inhalt springen
         </a>
         <Nav />
         <main id="main" className="flex-1">
