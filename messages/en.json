@@ -1,0 +1,57 @@
+{
+  "skipLink": {
+    "label": "Skip to content"
+  },
+  "brand": {
+    "label": "MH·STUDIO",
+    "aria": "Manuel Heller — home"
+  },
+  "nav": {
+    "ariaLabel": "Primary",
+    "items": {
+      "work": "Work",
+      "about": "About",
+      "playground": "Playground",
+      "contact": "Contact"
+    }
+  },
+  "localeSwitcher": {
+    "ariaLabel": "Language",
+    "currentLabel": "Current language: {name}",
+    "switchLabel": "Switch to {name}",
+    "locales": {
+      "de": "Deutsch",
+      "en": "English",
+      "fr": "Français",
+      "it": "Italiano"
+    }
+  },
+  "footer": {
+    "location": "Basel-Region",
+    "year": "MMXXVI",
+    "socialAriaLabel": "Social channels",
+    "social": {
+      "github": "GitHub",
+      "linkedin": "LinkedIn",
+      "instagram": "Instagram",
+      "email": "Email"
+    }
+  },
+  "hero": {
+    "statusStamps": {
+      "section": "Section 00 · Hero",
+      "status": "Status · Booting"
+    },
+    "bioStamps": {
+      "role": "zvoove AG · Frontend",
+      "sideProject": "Joggediballa · VP",
+      "location": "Basel-Region · CH"
+    },
+    "heading": {
+      "family": "Heller,",
+      "given": "Manuel."
+    },
+    "tagline": "Awwwards-grade craft portfolio",
+    "taglineSuffix": "booting …"
+  }
+}

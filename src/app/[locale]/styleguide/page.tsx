@@ -1,15 +1,18 @@
 import type { Metadata } from "next";
+import { setRequestLocale } from "next-intl/server";
+import { use } from "react";
 import { dur, ease } from "@/lib/motion/tokens";
 
 /**
- * Internal design-system reference. Visual baseline for tokens, not part
- * of the public site (root layout already sets robots: noindex globally;
- * this page repeats it for safety in case Phase 11 inverts the default).
+ * Internal design-system reference. Content stays English across all
+ * locales on purpose: token names, CSS vars, and motion identifiers
+ * are code-level artefacts — translating "--color-paper-tint" to
+ * "--couleur-papier-teinte" would be absurd. The page still lives under
+ * `[locale]` so the routing stays homogeneous and `generateStaticParams`
+ * doesn't need a special case.
  *
- * Keeping it as a real route (not a Storybook etc.) is deliberate:
- *   - same render path as production
- *   - same fonts, same Tailwind build, same a11y constraints
- *   - one Playwright snapshot covers the whole token surface
+ * Root layout already sets `robots: noindex` globally; repeated here for
+ * safety in case Phase 11 inverts the default.
  */
 
 export const metadata: Metadata = {
@@ -52,7 +55,14 @@ const TYPE_SAMPLES = [
   { className: "type-label", label: "type-label", sample: "Section · Eyebrow" },
 ] as const;
 
-export default function StyleguidePage() {
+type StyleguideProps = {
+  params: Promise<{ locale: string }>;
+};
+
+export default function StyleguidePage({ params }: StyleguideProps) {
+  const { locale } = use(params);
+  setRequestLocale(locale);
+
   return (
     <div className="container-page space-y-20 py-16">
       <header className="space-y-3">

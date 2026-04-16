@@ -1,0 +1,57 @@
+{
+  "skipLink": {
+    "label": "Zum Inhalt springen"
+  },
+  "brand": {
+    "label": "MH·STUDIO",
+    "aria": "Manuel Heller — Startseite"
+  },
+  "nav": {
+    "ariaLabel": "Hauptnavigation",
+    "items": {
+      "work": "Arbeiten",
+      "about": "Über",
+      "playground": "Playground",
+      "contact": "Kontakt"
+    }
+  },
+  "localeSwitcher": {
+    "ariaLabel": "Sprache",
+    "currentLabel": "Aktuelle Sprache: {name}",
+    "switchLabel": "Zu {name} wechseln",
+    "locales": {
+      "de": "Deutsch",
+      "en": "English",
+      "fr": "Français",
+      "it": "Italiano"
+    }
+  },
+  "footer": {
+    "location": "Basel-Region",
+    "year": "MMXXVI",
+    "socialAriaLabel": "Social-Kanäle",
+    "social": {
+      "github": "GitHub",
+      "linkedin": "LinkedIn",
+      "instagram": "Instagram",
+      "email": "E-Mail"
+    }
+  },
+  "hero": {
+    "statusStamps": {
+      "section": "Section 00 · Hero",
+      "status": "Status · Booting"
+    },
+    "bioStamps": {
+      "role": "zvoove AG · Frontend",
+      "sideProject": "Joggediballa · VP",
+      "location": "Basel-Region · CH"
+    },
+    "heading": {
+      "family": "Heller,",
+      "given": "Manuel."
+    },
+    "tagline": "Awwwards-taugliches Craft-Portfolio",
+    "taglineSuffix": "bootet …"
+  }
+}

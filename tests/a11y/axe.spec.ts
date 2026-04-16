@@ -7,8 +7,19 @@ import { expect, test } from "@playwright/test";
  *
  * Rule-tags scanned: wcag2a, wcag2aa, wcag21a, wcag21aa, best-practice.
  * Reduced-motion media emulated separately (plan §9 non-negotiable).
+ *
+ * Phase 2 stop-condition: axe must stay green across all 4 locales.
+ * Every locale × every user-facing page is covered here. The root `/`
+ * redirect page is a 2-element document (script + noscript); it is
+ * covered by the smoke-test redirect assertion and skipped by axe since
+ * there is no user-facing content to fail on.
  */
-const ROUTES = ["/", "/styleguide"] as const;
+const LOCALES = ["de", "en", "fr", "it"] as const;
+const PAGES = ["", "styleguide"] as const;
+
+const ROUTES = LOCALES.flatMap((locale) =>
+  PAGES.map((page) => (page ? `/${locale}/${page}` : `/${locale}`)),
+);
 
 for (const route of ROUTES) {
   test.describe(`@a11y axe — ${route}`, () => {

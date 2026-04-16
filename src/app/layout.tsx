@@ -6,9 +6,22 @@ import "@fontsource-variable/jetbrains-mono";
 
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { Footer } from "@/components/ui/Footer";
-import { Nav } from "@/components/ui/Nav";
 
+/**
+ * Root layout is a pass-through — the real `<html>`/`<body>` shell lives
+ * in `src/app/[locale]/layout.tsx` so that the `lang` attribute matches
+ * the rendered locale in the initial HTML (no client-hop correction).
+ * Pairs with a bare-root redirect page at `/` that owns its own `<html>`
+ * document; `pnpm build` has been verified to emit a valid `out/index.html`
+ * under this configuration, and Playwright smoke asserts the redirect.
+ *
+ * This is the documented next-intl v4 pattern for static-export sites
+ * that cannot run middleware — if that assumption ever breaks (e.g.
+ * Next's rules tighten), move `<html>` back here and fall back to a
+ * server-detected default locale.
+ *
+ * CSS + font imports stay here so they apply to the redirect page too.
+ */
 export const metadata: Metadata = {
   title: "Manuel Heller — Craft Portfolio",
   description: "Toon Fluid — an Awwwards-grade craft portfolio by Manuel Heller.",
@@ -17,19 +30,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
-  return (
-    <html lang="de">
-      <body className="flex min-h-dvh flex-col">
-        {/* TODO(i18n): move to next-intl messages in Phase 2. */}
-        <a className="skip-link" href="#main">
-          Zum Inhalt springen
-        </a>
-        <Nav />
-        <main id="main" className="flex-1">
-          {children}
-        </main>
-        <Footer />
-      </body>
-    </html>
-  );
+  return children;
 }
