@@ -7,6 +7,14 @@ import type { TierConfig } from "@/lib/gpu";
 import { subscribe } from "@/lib/raf";
 import { FluidOrchestrator, type PointerState } from "./FluidOrchestrator";
 
+type GLProps = { get: (o: object) => Record<string, unknown> };
+
+function patchTexture(renderer: THREE.WebGLRenderer, tex: THREE.Texture, glTex: WebGLTexture) {
+  const props = (renderer as unknown as { properties: GLProps }).properties.get(tex);
+  props.__webglTexture = glTex;
+  props.__webglInit = true;
+}
+
 type FluidSimProps = {
   config: TierConfig;
   measuring: boolean;
@@ -26,8 +34,11 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
     down: false,
     moved: false,
   });
-  const configRef = useRef(config);
-  configRef.current = config;
+  const measuringRef = useRef(measuring);
+  measuringRef.current = measuring;
+  const onFrametimeRef = useRef(onFrametime);
+  onFrametimeRef.current = onFrametime;
+  const prevConfigRef = useRef<TierConfig | null>(null);
 
   const outputTexture = useMemo(() => {
     const tex = new THREE.Texture();
@@ -44,34 +55,29 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
     onGLReady(context);
 
     const orchestrator = new FluidOrchestrator();
-    orchestrator.init(context, configRef.current);
+    orchestrator.init(context, config);
     orchestratorRef.current = orchestrator;
+    prevConfigRef.current = config;
 
-    const props = (
-      gl as unknown as { properties: { get: (o: object) => Record<string, unknown> } }
-    ).properties.get(outputTexture);
-    props.__webglTexture = orchestrator.getOutputTexture();
-    props.__webglInit = true;
+    patchTexture(gl, outputTexture, orchestrator.getOutputTexture());
 
     return () => {
       orchestrator.dispose();
       orchestratorRef.current = null;
+      prevConfigRef.current = null;
     };
-  }, [gl, onGLReady, outputTexture]);
+  }, [gl, onGLReady, outputTexture, config]);
 
   useEffect(() => {
     const orchestrator = orchestratorRef.current;
-    if (!orchestrator) return;
+    if (!orchestrator || config === prevConfigRef.current) return;
 
     const context = gl.getContext() as WebGL2RenderingContext;
     orchestrator.dispose();
     orchestrator.init(context, config);
+    prevConfigRef.current = config;
 
-    const props = (
-      gl as unknown as { properties: { get: (o: object) => Record<string, unknown> } }
-    ).properties.get(outputTexture);
-    props.__webglTexture = orchestrator.getOutputTexture();
-    props.__webglInit = true;
+    patchTexture(gl, outputTexture, orchestrator.getOutputTexture());
   }, [config, gl, outputTexture]);
 
   useEffect(() => {
@@ -85,22 +91,21 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
       if (!orchestrator) return;
 
       const dt = Math.min(deltaMs * 0.001, 0.033);
-
       const t0 = performance.now();
 
       orchestrator.step(dt, elapsedMs, pointerRef.current);
 
-      if (measuring) {
+      if (measuringRef.current) {
         const gl2 = gl.getContext() as WebGL2RenderingContext;
         gl2.finish();
-        onFrametime(performance.now() - t0);
+        onFrametimeRef.current(performance.now() - t0);
       }
 
       pointerRef.current.dx = 0;
       pointerRef.current.dy = 0;
       pointerRef.current.moved = false;
     }, 15);
-  }, [gl, measuring, onFrametime]);
+  }, [gl]);
 
   const onPointerMove = useCallback(
     (e: ThreeEvent<PointerEvent>) => {

@@ -190,6 +190,8 @@ export class FluidOrchestrator {
   private canvasWidth = 0;
   private canvasHeight = 0;
 
+  private emptyVAO: WebGLVertexArrayObject | null = null;
+
   private frameCount = 0;
   private paused = false;
   private lastPointerTime = 0;
@@ -234,6 +236,8 @@ export class FluidOrchestrator {
       renderToon: createProgram(gl, quadVert, toonFrag),
     };
 
+    this.emptyVAO = gl.createVertexArray();
+
     // Create FBOs at initial size
     this.canvasWidth = gl.drawingBufferWidth;
     this.canvasHeight = gl.drawingBufferHeight;
@@ -258,6 +262,10 @@ export class FluidOrchestrator {
     this.destroyFBOs();
     for (const program of Object.values(this.programs)) {
       gl.deleteProgram(program);
+    }
+    if (this.emptyVAO) {
+      gl.deleteVertexArray(this.emptyVAO);
+      this.emptyVAO = null;
     }
     this.uniformCache.clear();
   }
@@ -536,6 +544,9 @@ export class FluidOrchestrator {
       this.ambientStrength = Math.min(1, this.ambientStrength + dt / 2.0);
     }
 
+    // Bind empty VAO for attribute-less draws (avoids driver warnings)
+    gl.bindVertexArray(this.emptyVAO);
+
     // Disable blending for all sim passes
     gl.disable(gl.BLEND);
 
@@ -564,6 +575,7 @@ export class FluidOrchestrator {
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.bindFramebuffer(gl.FRAMEBUFFER, this.pressure.write.framebuffer);
       gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.clearColor(0, 0, 0, 1);
 
       this.runCurl();
       this.runVorticity(dt);
@@ -577,7 +589,8 @@ export class FluidOrchestrator {
     // Render-toon always runs (even at half-rate)
     this.runRenderToon(elapsed);
 
-    // Unbind framebuffer so R3F can render to screen
+    // Restore GL state for R3F
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.bindVertexArray(null);
   }
 }
