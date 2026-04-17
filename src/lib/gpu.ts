@@ -124,9 +124,7 @@ export function probeGPU(gl: WebGL2RenderingContext): {
   }
 
   const ext = gl.getExtension("WEBGL_debug_renderer_info");
-  const renderer = ext
-    ? (gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) as string)
-    : "unknown";
+  const renderer = ext ? (gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) as string) : "unknown";
 
   const matched = matchRenderer(renderer);
   if (matched) {
