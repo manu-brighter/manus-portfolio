@@ -95,3 +95,29 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   `CLAUDE.md`, not in the plan itself. `.claude/settings.json` enforces
   this by omitting `Edit/Write(docs/**)` — if a plan amendment is truly
   warranted, the resulting permission prompt is the right friction.
+
+## Phase 4 deviations
+
+- **curl.frag.glsl added**: Plan §5 lists 7 fluid shaders. Added dedicated
+  curl pass (8th) for cleaner separation.
+- **quad.vert.glsl in common/**: All passes share one fullscreen triangle
+  vertex shader rather than per-pass vertex shaders.
+- **CSS gradient as static fallback**: Plan §8 says WebP stills. Phase 4
+  uses CSS gradient; WebP stills follow once sim is visually polished.
+- **Adaptive GPU tiering**: Plan §8 describes fixed tiers. Added runtime
+  frametime measurement (30 frames) + localStorage caching for
+  unrecognized GPUs.
+- **`getContext()` via R3F**: FluidOrchestrator accesses the raw
+  `WebGL2RenderingContext` through `renderer.getContext()` rather than
+  creating its own.
+- **SceneErrorBoundary + WebGL2 check**: Not in plan. Catches R3F/WebGL
+  runtime failures gracefully, falls back to StaticFallback. Also gates
+  Canvas mount on `hasWebGL2()` to avoid crash in environments without
+  WebGL2 support.
+- **Turbopack GLSL rule**: Next.js 16 uses Turbopack for builds. Added
+  `turbopack.rules: { "*.glsl": { type: "raw" } }` alongside the
+  existing webpack `asset/source` rule.
+- **@types/three added as devDependency**: Three.js 0.183 requires
+  separate `@types/three` for TypeScript declarations.
+- **RafBridge passes elapsedMs to advance()**: R3F 9's `advance()`
+  requires a timestamp argument. Plan's `advance()` call was argument-less.
