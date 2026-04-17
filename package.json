@@ -51,6 +51,7 @@
     "@types/node": "^22.9.0",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
+    "@types/three": "^0.184.0",
     "leva": "^0.10.1",
     "postcss": "^8.4.49",
     "tailwindcss": "^4.2.2",

@@ -21,6 +21,11 @@ const nextConfig: NextConfig = {
       "@gsap/react",
     ],
   },
+  turbopack: {
+    rules: {
+      "*.glsl": { type: "raw" },
+    },
+  },
   webpack: (config) => {
     config.module.rules.push({
       test: /\.glsl$/,
