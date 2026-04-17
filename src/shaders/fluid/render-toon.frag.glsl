@@ -25,13 +25,14 @@ out vec4 fragColor;
 
 vec3 mapToSpotColor(float density) {
   float d = clamp(density, 0.0, 1.0);
-  float step = posterize(d, uLevels);
+  float q = posterize(d, uLevels);
+  float band = 1.0 / uLevels;
 
-  if (step < 0.2) return uPaperColor;
-  if (step < 0.4) return mix(uPaperColor, uSpotMint, (step - 0.2) * 5.0);
-  if (step < 0.6) return mix(uSpotMint, uSpotAmber, (step - 0.4) * 5.0);
-  if (step < 0.8) return mix(uSpotAmber, uSpotRose, (step - 0.6) * 5.0);
-  return mix(uSpotRose, uSpotViolet, (step - 0.8) * 5.0);
+  if (q < band)       return uPaperColor;
+  if (q < band * 2.0) return uSpotMint;
+  if (q < band * 3.0) return uSpotAmber;
+  if (q < band * 4.0) return uSpotRose;
+  return uSpotViolet;
 }
 
 void main() {
@@ -45,12 +46,12 @@ void main() {
   float edge = sobelEdge(uDye, vUv, edgeTexel);
   color = mix(color, uInkColor, smoothstep(uOutlineThreshold * 0.5, uOutlineThreshold, edge));
 
-  // Paper grain — procedural noise
+  // Paper grain — multiplicative (simulates ink-on-paper texture)
   float grain = snoise(vUv * 400.0 + uTime * 0.05);
-  color += grain * uGrainStrength;
+  color *= 1.0 + grain * uGrainStrength;
 
-  // Mix towards paper on low density
-  color = mix(uPaperColor, color, smoothstep(0.0, 0.15, density));
+  // Hard cutoff to paper at very low density
+  if (density < 0.05) color = uPaperColor;
 
   fragColor = vec4(color, 1.0);
 }
