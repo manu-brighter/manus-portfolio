@@ -3,8 +3,8 @@
 import { type ThreeEvent, useThree } from "@react-three/fiber";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
-import { subscribe } from "@/lib/raf";
 import type { TierConfig } from "@/lib/gpu";
+import { subscribe } from "@/lib/raf";
 import { FluidOrchestrator, type PointerState } from "./FluidOrchestrator";
 
 type FluidSimProps = {
@@ -19,7 +19,12 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
 
   const orchestratorRef = useRef<FluidOrchestrator | null>(null);
   const pointerRef = useRef<PointerState>({
-    x: 0, y: 0, dx: 0, dy: 0, down: false, moved: false,
+    x: 0,
+    y: 0,
+    dx: 0,
+    dy: 0,
+    down: false,
+    moved: false,
   });
   const configRef = useRef(config);
   configRef.current = config;
@@ -42,7 +47,9 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
     orchestrator.init(context, configRef.current);
     orchestratorRef.current = orchestrator;
 
-    const props = (gl as unknown as { properties: { get: (o: object) => Record<string, unknown> } }).properties.get(outputTexture);
+    const props = (
+      gl as unknown as { properties: { get: (o: object) => Record<string, unknown> } }
+    ).properties.get(outputTexture);
     props.__webglTexture = orchestrator.getOutputTexture();
     props.__webglInit = true;
 
@@ -60,16 +67,16 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
     orchestrator.dispose();
     orchestrator.init(context, config);
 
-    const props = (gl as unknown as { properties: { get: (o: object) => Record<string, unknown> } }).properties.get(outputTexture);
+    const props = (
+      gl as unknown as { properties: { get: (o: object) => Record<string, unknown> } }
+    ).properties.get(outputTexture);
     props.__webglTexture = orchestrator.getOutputTexture();
     props.__webglInit = true;
   }, [config, gl, outputTexture]);
 
   useEffect(() => {
-    orchestratorRef.current?.resize(
-      gl.domElement.width,
-      gl.domElement.height,
-    );
+    const dpr = gl.getPixelRatio();
+    orchestratorRef.current?.resize(Math.floor(size.width * dpr), Math.floor(size.height * dpr));
   }, [size, gl]);
 
   useEffect(() => {
@@ -95,18 +102,21 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
     }, 15);
   }, [gl, measuring, onFrametime]);
 
-  const onPointerMove = useCallback((e: ThreeEvent<PointerEvent>) => {
-    const event = e.nativeEvent;
-    const rect = gl.domElement.getBoundingClientRect();
-    const x = (event.clientX - rect.left) / rect.width;
-    const y = 1.0 - (event.clientY - rect.top) / rect.height;
+  const onPointerMove = useCallback(
+    (e: ThreeEvent<PointerEvent>) => {
+      const event = e.nativeEvent;
+      const rect = gl.domElement.getBoundingClientRect();
+      const x = (event.clientX - rect.left) / rect.width;
+      const y = 1.0 - (event.clientY - rect.top) / rect.height;
 
-    pointerRef.current.dx = x - pointerRef.current.x;
-    pointerRef.current.dy = y - pointerRef.current.y;
-    pointerRef.current.x = x;
-    pointerRef.current.y = y;
-    pointerRef.current.moved = true;
-  }, [gl]);
+      pointerRef.current.dx = x - pointerRef.current.x;
+      pointerRef.current.dy = y - pointerRef.current.y;
+      pointerRef.current.x = x;
+      pointerRef.current.y = y;
+      pointerRef.current.moved = true;
+    },
+    [gl],
+  );
 
   const onPointerDown = useCallback(() => {
     pointerRef.current.down = true;
@@ -137,11 +147,7 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
   }, []);
 
   return (
-    <mesh
-      onPointerMove={onPointerMove}
-      onPointerDown={onPointerDown}
-      onPointerUp={onPointerUp}
-    >
+    <mesh onPointerMove={onPointerMove} onPointerDown={onPointerDown} onPointerUp={onPointerUp}>
       <planeGeometry args={[2, 2]} />
       <meshBasicMaterial map={outputTexture} depthTest={false} depthWrite={false} />
     </mesh>

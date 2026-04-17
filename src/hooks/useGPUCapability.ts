@@ -1,7 +1,14 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { type GPUTier, type TierConfig, cacheTier, getTierConfig, probeGPU, tierFromFrametime } from "@/lib/gpu";
+import {
+  cacheTier,
+  type GPUTier,
+  getTierConfig,
+  probeGPU,
+  type TierConfig,
+  tierFromFrametime,
+} from "@/lib/gpu";
 
 type GPUCapability = {
   tier: GPUTier;
