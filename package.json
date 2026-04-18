@@ -54,6 +54,7 @@
     "@types/three": "^0.184.0",
     "leva": "^0.10.1",
     "postcss": "^8.4.49",
+    "raw-loader": "^4.0.2",
     "tailwindcss": "^4.2.2",
     "typescript": "^5.7.0"
   },

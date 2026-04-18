@@ -1,6 +1,6 @@
 "use client";
 
-import { Component, createContext, type ReactNode, useContext, useMemo } from "react";
+import { Component, createContext, type ReactNode, useContext, useEffect, useState } from "react";
 import { useGPUCapability } from "@/hooks/useGPUCapability";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import type { GPUTier, TierConfig } from "@/lib/gpu";
@@ -22,8 +22,7 @@ export function useScene() {
   return useContext(SceneContext);
 }
 
-function hasWebGL2(): boolean {
-  if (typeof document === "undefined") return false;
+function probeWebGL2(): boolean {
   try {
     const canvas = document.createElement("canvas");
     const gl = canvas.getContext("webgl2");
@@ -34,6 +33,14 @@ function hasWebGL2(): boolean {
   } catch {
     return false;
   }
+}
+
+function useWebGL2(): boolean {
+  const [supported, setSupported] = useState(false);
+  useEffect(() => {
+    setSupported(probeWebGL2());
+  }, []);
+  return supported;
 }
 
 type EBProps = { fallback: ReactNode; children: ReactNode };
@@ -56,7 +63,7 @@ type SceneProviderProps = {
 export function SceneProvider({ children }: SceneProviderProps) {
   const reducedMotion = useReducedMotion();
   const { capability, initProbe, recordFrametime } = useGPUCapability();
-  const webgl2 = useMemo(() => hasWebGL2(), []);
+  const webgl2 = useWebGL2();
 
   const isStatic = reducedMotion || capability.tier === "static" || !webgl2;
   const config = capability.config;

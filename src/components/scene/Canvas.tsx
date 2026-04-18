@@ -1,20 +1,7 @@
 "use client";
 
-import { Canvas as R3FCanvas, useThree } from "@react-three/fiber";
-import { type ReactNode, useEffect } from "react";
-import { subscribe } from "@/lib/raf";
-
-function RafBridge() {
-  const { advance } = useThree();
-
-  useEffect(() => {
-    return subscribe((_deltaMs, elapsedMs) => {
-      advance(elapsedMs);
-    }, 20);
-  }, [advance]);
-
-  return null;
-}
+import { Canvas as R3FCanvas } from "@react-three/fiber";
+import type { ReactNode } from "react";
 
 type SceneCanvasProps = {
   children: ReactNode;
@@ -40,7 +27,6 @@ export function SceneCanvas({ children }: SceneCanvasProps) {
       }}
       aria-hidden="true"
     >
-      <RafBridge />
       {children}
     </R3FCanvas>
   );

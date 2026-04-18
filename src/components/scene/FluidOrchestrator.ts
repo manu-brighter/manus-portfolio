@@ -183,7 +183,6 @@ export class FluidOrchestrator {
   private pressure!: DoubleFBO;
   private divergenceFBO!: FBO;
   private curlFBO!: FBO;
-  private outputFBO!: FBO;
 
   private simWidth = 0;
   private simHeight = 0;
@@ -197,6 +196,7 @@ export class FluidOrchestrator {
   private lastPointerTime = 0;
   private ambientStrength = 0;
   private splatColorIndex = 0;
+  private ambientActive = false;
 
   // Uniform cache: WebGLProgram -> (uniform name -> location)
   // Using a nested Map because WebGLProgram.toString() is not unique.
@@ -211,11 +211,11 @@ export class FluidOrchestrator {
     this.config = config;
     this.lastPointerTime = performance.now();
 
-    // Check float texture support
-    const halfFloat = gl.getExtension("EXT_color_buffer_half_float");
-    const floatLinear = gl.getExtension("OES_texture_half_float_linear");
-    if (!halfFloat || !floatLinear) {
-      throw new Error("Required WebGL2 extensions not available");
+    // WebGL2: half-float filtering is core; rendering to float FBOs needs
+    // EXT_color_buffer_float (covers both float and half-float targets).
+    const cbFloat = gl.getExtension("EXT_color_buffer_float");
+    if (!cbFloat) {
+      throw new Error("EXT_color_buffer_float not available");
     }
 
     // Compile all programs
@@ -242,7 +242,6 @@ export class FluidOrchestrator {
     this.canvasWidth = gl.drawingBufferWidth;
     this.canvasHeight = gl.drawingBufferHeight;
     this.createSimFBOs();
-    this.createOutputFBO();
   }
 
   resize(width: number, height: number): void {
@@ -254,7 +253,6 @@ export class FluidOrchestrator {
     // Destroy and recreate sim FBOs (aspect ratio may have changed)
     this.destroyFBOs();
     this.createSimFBOs();
-    this.createOutputFBO();
   }
 
   dispose(): void {
@@ -270,10 +268,6 @@ export class FluidOrchestrator {
     this.uniformCache.clear();
   }
 
-  getOutputTexture(): WebGLTexture {
-    return this.outputFBO.texture;
-  }
-
   pause(): void {
     this.paused = true;
   }
@@ -284,6 +278,15 @@ export class FluidOrchestrator {
 
   isPaused(): boolean {
     return this.paused;
+  }
+
+  /** Kick ambient motion immediately (called when loader finishes). */
+  triggerAmbient(): void {
+    this.ambientStrength = 1.0;
+    this.ambientActive = true;
+    // Set idle timer far into the future so ambient stays at full
+    // strength for a 5s grace period even if the cursor moves.
+    this.lastPointerTime = performance.now() + 5000;
   }
 
   // ---------------------------------------------------------------------------
@@ -306,17 +309,6 @@ export class FluidOrchestrator {
     this.curlFBO = createFBO(gl, w, h, gl.R16F, gl.RED, gl.HALF_FLOAT);
   }
 
-  private createOutputFBO(): void {
-    this.outputFBO = createFBO(
-      this.gl,
-      this.canvasWidth,
-      this.canvasHeight,
-      this.gl.RGBA8,
-      this.gl.RGBA,
-      this.gl.UNSIGNED_BYTE,
-    );
-  }
-
   private destroyFBOs(): void {
     const gl = this.gl;
     if (this.velocity) destroyDoubleFBO(gl, this.velocity);
@@ -324,7 +316,6 @@ export class FluidOrchestrator {
     if (this.pressure) destroyDoubleFBO(gl, this.pressure);
     if (this.divergenceFBO) destroyFBO(gl, this.divergenceFBO);
     if (this.curlFBO) destroyFBO(gl, this.curlFBO);
-    if (this.outputFBO) destroyFBO(gl, this.outputFBO);
   }
 
   // ---------------------------------------------------------------------------
@@ -409,9 +400,11 @@ export class FluidOrchestrator {
     this.drawQuad();
     this.velocity.swap();
 
-    // Dye splat
+    // Dye splat — scale intensity down so dye stays in [0,1] range
+    // and doesn't overwhelm the toon shader's Sobel edge detection.
+    const dyeScale = 0.15;
     this.bindTexture(p, "uTarget", this.dye.read.texture, 0);
-    this.setVec3(p, "uColor", color[0], color[1], color[2]);
+    this.setVec3(p, "uColor", color[0] * dyeScale, color[1] * dyeScale, color[2] * dyeScale);
     this.renderToFBO(this.dye.write);
     this.drawQuad();
     this.dye.swap();
@@ -493,7 +486,7 @@ export class FluidOrchestrator {
     this.setVec2(p, "uTexelSize", 1.0 / this.canvasWidth, 1.0 / this.canvasHeight);
     this.setFloat(p, "uLevels", 4.0);
     this.setFloat(p, "uOutlineThreshold", 0.15);
-    this.setFloat(p, "uGrainStrength", 0.04);
+    this.setFloat(p, "uGrainStrength", 0.07);
     this.setFloat(p, "uTime", elapsed * 0.001);
 
     this.setVec3(p, "uPaperColor", PAPER_COLOR[0], PAPER_COLOR[1], PAPER_COLOR[2]);
@@ -509,7 +502,10 @@ export class FluidOrchestrator {
       SPOT_COLORS.violet[2],
     );
 
-    this.renderToFBO(this.outputFBO);
+    // Render directly to screen (default framebuffer)
+    const gl = this.gl;
+    gl.viewport(0, 0, this.canvasWidth, this.canvasHeight);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     this.drawQuad();
   }
 
@@ -536,12 +532,20 @@ export class FluidOrchestrator {
     const gl = this.gl;
     this.frameCount++;
 
-    // Update ambient timer
+    // Update ambient timer — starts after 3s idle, ramps up over 2s.
+    // When pointer is active, reduce ambient but don't kill it entirely —
+    // keep 2 wandering points alive so cursor sim interacts with them.
     if (pointer.moved) {
       this.lastPointerTime = performance.now();
-      this.ambientStrength = Math.max(0, this.ambientStrength - dt / 0.5);
-    } else if (performance.now() - this.lastPointerTime > 10000) {
+      // Fade ambient down to a floor of 0.3 (keeps 2 points alive)
+      if (this.ambientActive) {
+        this.ambientStrength = Math.max(0.3, this.ambientStrength - dt / 0.8);
+      } else {
+        this.ambientStrength = Math.max(0, this.ambientStrength - dt / 0.5);
+      }
+    } else if (performance.now() - this.lastPointerTime > 3000) {
       this.ambientStrength = Math.min(1, this.ambientStrength + dt / 2.0);
+      this.ambientActive = true;
     }
 
     // Bind empty VAO for attribute-less draws (avoids driver warnings)
@@ -559,14 +563,34 @@ export class FluidOrchestrator {
         this.runSplat(pointer.x, pointer.y, pointer.dx, pointer.dy, this.nextSplatColor());
       }
 
-      // Ambient curl noise when idle
+      // Ambient motion when idle — multiple wandering points
+      // for an organic, breathing feel like layered Riso ink settling.
       if (this.ambientStrength > 0.01) {
         const t = elapsed * 0.0003;
-        const ax = 0.5 + 0.3 * Math.sin(t * 1.7);
-        const ay = 0.5 + 0.3 * Math.cos(t * 2.3);
-        const adx = Math.cos(t) * this.ambientStrength * 0.3;
-        const ady = Math.sin(t * 1.3) * this.ambientStrength * 0.3;
+        const s = this.ambientStrength;
+
+        // Point A: slow wide orbit (upper-right quadrant tendency)
+        const ax = 0.55 + 0.25 * Math.sin(t * 1.3);
+        const ay = 0.55 + 0.25 * Math.cos(t * 0.9);
+        const adx = Math.cos(t * 0.7) * s * 0.2;
+        const ady = Math.sin(t * 1.1) * s * 0.2;
         this.runSplat(ax, ay, adx, ady, this.nextSplatColor());
+
+        // Point B: faster small orbit (lower-left tendency) — offset phase
+        const bx = 0.4 + 0.2 * Math.sin(t * 2.1 + 2.0);
+        const by = 0.4 + 0.2 * Math.cos(t * 1.7 + 1.0);
+        const bdx = Math.cos(t * 1.5 + 3.0) * s * 0.15;
+        const bdy = Math.sin(t * 1.9 + 2.0) * s * 0.15;
+        this.runSplat(bx, by, bdx, bdy, this.nextSplatColor());
+
+        // Point C: very slow drift (center) — appears only at full ambient
+        if (s > 0.5) {
+          const cx = 0.5 + 0.15 * Math.sin(t * 0.7 + 4.0);
+          const cy = 0.5 + 0.15 * Math.cos(t * 0.5 + 3.0);
+          const cdx = Math.cos(t * 0.4 + 1.5) * (s - 0.5) * 0.25;
+          const cdy = Math.sin(t * 0.6 + 2.5) * (s - 0.5) * 0.25;
+          this.runSplat(cx, cy, cdx, cdy, this.nextSplatColor());
+        }
       }
 
       // Clear pressure field before solve

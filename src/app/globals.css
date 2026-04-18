@@ -74,6 +74,23 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    /* Hide native scrollbar — replaced by ScrollProgress dots.
+       Restored under reduced-motion (ScrollProgress is hidden). */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  html::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scrollbar-width: auto;
+    }
+
+    html::-webkit-scrollbar {
+      display: initial;
+    }
   }
 
   body {

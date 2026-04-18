@@ -1,19 +1,11 @@
 "use client";
 
-import { type ThreeEvent, useThree } from "@react-three/fiber";
-import { useCallback, useEffect, useMemo, useRef } from "react";
-import * as THREE from "three";
+import { useThree } from "@react-three/fiber";
+import { useEffect, useRef } from "react";
+import { isLoaderComplete } from "@/components/ui/Loader";
 import type { TierConfig } from "@/lib/gpu";
 import { subscribe } from "@/lib/raf";
 import { FluidOrchestrator, type PointerState } from "./FluidOrchestrator";
-
-type GLProps = { get: (o: object) => Record<string, unknown> };
-
-function patchTexture(renderer: THREE.WebGLRenderer, tex: THREE.Texture, glTex: WebGLTexture) {
-  const props = (renderer as unknown as { properties: GLProps }).properties.get(tex);
-  props.__webglTexture = glTex;
-  props.__webglInit = true;
-}
 
 type FluidSimProps = {
   config: TierConfig;
@@ -40,14 +32,6 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
   onFrametimeRef.current = onFrametime;
   const prevConfigRef = useRef<TierConfig | null>(null);
 
-  const outputTexture = useMemo(() => {
-    const tex = new THREE.Texture();
-    tex.minFilter = THREE.LinearFilter;
-    tex.magFilter = THREE.LinearFilter;
-    tex.generateMipmaps = false;
-    return tex;
-  }, []);
-
   useEffect(() => {
     const context = gl.getContext() as WebGL2RenderingContext;
     if (!context || !(context instanceof WebGL2RenderingContext)) return;
@@ -59,14 +43,12 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
     orchestratorRef.current = orchestrator;
     prevConfigRef.current = config;
 
-    patchTexture(gl, outputTexture, orchestrator.getOutputTexture());
-
     return () => {
       orchestrator.dispose();
       orchestratorRef.current = null;
       prevConfigRef.current = null;
     };
-  }, [gl, onGLReady, outputTexture, config]);
+  }, [gl, onGLReady, config]);
 
   useEffect(() => {
     const orchestrator = orchestratorRef.current;
@@ -76,15 +58,14 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
     orchestrator.dispose();
     orchestrator.init(context, config);
     prevConfigRef.current = config;
-
-    patchTexture(gl, outputTexture, orchestrator.getOutputTexture());
-  }, [config, gl, outputTexture]);
+  }, [config, gl]);
 
   useEffect(() => {
     const dpr = gl.getPixelRatio();
     orchestratorRef.current?.resize(Math.floor(size.width * dpr), Math.floor(size.height * dpr));
   }, [size, gl]);
 
+  // RAF loop: run sim + render to screen
   useEffect(() => {
     return subscribe((deltaMs, elapsedMs) => {
       const orchestrator = orchestratorRef.current;
@@ -107,32 +88,59 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
     }, 15);
   }, [gl]);
 
-  const onPointerMove = useCallback(
-    (e: ThreeEvent<PointerEvent>) => {
-      const event = e.nativeEvent;
-      const rect = gl.domElement.getBoundingClientRect();
-      const x = (event.clientX - rect.left) / rect.width;
-      const y = 1.0 - (event.clientY - rect.top) / rect.height;
+  // Pointer events on document — canvas is behind HTML content,
+  // so we listen globally to track the cursor everywhere.
+  useEffect(() => {
+    const canvas = gl.domElement;
+
+    const onMove = (e: PointerEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = 1.0 - (e.clientY - rect.top) / rect.height;
 
       pointerRef.current.dx = x - pointerRef.current.x;
       pointerRef.current.dy = y - pointerRef.current.y;
       pointerRef.current.x = x;
       pointerRef.current.y = y;
       pointerRef.current.moved = true;
-    },
-    [gl],
-  );
+    };
 
-  const onPointerDown = useCallback(() => {
-    pointerRef.current.down = true;
-  }, []);
+    const onDown = () => {
+      pointerRef.current.down = true;
+    };
+    const onUp = () => {
+      pointerRef.current.down = false;
+    };
 
-  const onPointerUp = useCallback(() => {
-    pointerRef.current.down = false;
-  }, []);
+    document.addEventListener("pointermove", onMove);
+    document.addEventListener("pointerdown", onDown);
+    document.addEventListener("pointerup", onUp);
 
+    return () => {
+      document.removeEventListener("pointermove", onMove);
+      document.removeEventListener("pointerdown", onDown);
+      document.removeEventListener("pointerup", onUp);
+    };
+  }, [gl]);
+
+  // Kick ambient motion the moment the loader finishes.
+  // Guard against race: if the loader already fired before this
+  // component mounted, trigger immediately.
   useEffect(() => {
-    const hero = document.getElementById("hero-heading")?.closest("section");
+    if (isLoaderComplete()) {
+      orchestratorRef.current?.triggerAmbient();
+      return;
+    }
+    const onLoaderComplete = () => {
+      orchestratorRef.current?.triggerAmbient();
+    };
+    window.addEventListener("loader-complete", onLoaderComplete, { once: true });
+    return () => window.removeEventListener("loader-complete", onLoaderComplete);
+  }, []);
+
+  // Pause sim when hero section leaves viewport
+  useEffect(() => {
+    const hero = document.getElementById("hero");
     if (!hero) return;
 
     const observer = new IntersectionObserver(
@@ -151,10 +159,5 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
     return () => observer.disconnect();
   }, []);
 
-  return (
-    <mesh onPointerMove={onPointerMove} onPointerDown={onPointerDown} onPointerUp={onPointerUp}>
-      <planeGeometry args={[2, 2]} />
-      <meshBasicMaterial map={outputTexture} depthTest={false} depthWrite={false} />
-    </mesh>
-  );
+  return null;
 }
