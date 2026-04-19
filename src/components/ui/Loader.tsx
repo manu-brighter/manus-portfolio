@@ -109,12 +109,11 @@ export function Loader() {
   return (
     <div
       ref={overlayRef}
+      role="status"
+      aria-live="polite"
+      aria-label={t("srStatus")}
       className="fixed inset-0 z-[9999] flex items-center justify-center bg-paper"
     >
-      {/* Screen reader loading announcement */}
-      <span className="sr-only" role="status">
-        {t("srStatus")}
-      </span>
       {/* SVG grain filter — mimics the sim's paper texture */}
       <svg className="absolute size-0" aria-hidden="true">
         <filter id="loader-grain">
@@ -146,9 +145,11 @@ export function Loader() {
         }}
       />
 
-      {/* Brand mark — appears through the ink */}
+      {/* Brand mark — appears through the ink. aria-hidden: visual only,
+          the loader's role="status" + aria-label handles SR announcement. */}
       <span
         ref={textRef}
+        aria-hidden="true"
         className="type-label relative text-ink"
         style={{ opacity: 0, letterSpacing: "0.35em", fontSize: "0.8125rem" }}
       >
