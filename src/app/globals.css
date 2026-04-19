@@ -74,6 +74,27 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    /* Hide native scrollbar — replaced by ScrollProgress dots.
+       Restored under reduced-motion (ScrollProgress is hidden). */
+    scrollbar-width: none; /* Firefox */
+    /* Suppress iOS Safari pull-to-refresh and horizontal back-swipe
+       on the fluid sim canvas. Lenis handles smooth scroll; the browser's
+       overscroll gestures would fight the fluid pointer input. */
+    overscroll-behavior: none;
+  }
+
+  html::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scrollbar-width: auto;
+    }
+
+    html::-webkit-scrollbar {
+      display: initial;
+    }
   }
 
   body {

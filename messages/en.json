@@ -37,6 +37,14 @@
       "email": "Email"
     }
   },
+  "loader": {
+    "brand": "MH·STUDIO",
+    "srStatus": "Page loading"
+  },
+  "scrollProgress": {
+    "ariaLabel": "Section navigation",
+    "heroLabel": "Hero"
+  },
   "hero": {
     "statusStamps": {
       "section": "Section 00 · Hero",

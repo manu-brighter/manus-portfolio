@@ -29,6 +29,7 @@ export default function HomePage({ params }: HomePageProps) {
 
   return (
     <section
+      id="hero"
       aria-labelledby="hero-heading"
       className="container-page grid-12 relative min-h-[calc(100dvh-9rem)] items-end gap-y-12 py-16 md:py-24"
     >

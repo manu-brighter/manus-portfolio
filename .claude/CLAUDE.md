@@ -95,3 +95,56 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   `CLAUDE.md`, not in the plan itself. `.claude/settings.json` enforces
   this by omitting `Edit/Write(docs/**)` — if a plan amendment is truly
   warranted, the resulting permission prompt is the right friction.
+
+## Phase 4 deviations
+
+- **curl.frag.glsl added**: Plan §5 lists 7 fluid shaders. Added dedicated
+  curl pass (8th) for cleaner separation.
+- **quad.vert.glsl in common/**: All passes share one fullscreen triangle
+  vertex shader rather than per-pass vertex shaders.
+- **CSS gradient as static fallback**: Plan §8 says WebP stills. Phase 4
+  uses CSS gradient; WebP stills follow once sim is visually polished.
+- **Adaptive GPU tiering**: Plan §8 describes fixed tiers. Added runtime
+  frametime measurement (30 frames) + localStorage caching for
+  unrecognized GPUs.
+- **`getContext()` via R3F**: FluidOrchestrator accesses the raw
+  `WebGL2RenderingContext` through `renderer.getContext()` rather than
+  creating its own.
+- **SceneErrorBoundary + WebGL2 check**: Not in plan. Catches R3F/WebGL
+  runtime failures gracefully, falls back to StaticFallback. Also gates
+  Canvas mount on `hasWebGL2()` to avoid crash in environments without
+  WebGL2 support.
+- **Turbopack GLSL rule**: Next.js 16 uses Turbopack for builds. Added
+  `turbopack.rules: { "*.glsl": { type: "raw" } }` alongside the
+  existing webpack `asset/source` rule.
+- **@types/three added as devDependency**: Three.js 0.183 requires
+  separate `@types/three` for TypeScript declarations.
+- **RafBridge passes elapsedMs to advance()**: R3F 9's `advance()`
+  requires a timestamp argument. Plan's `advance()` call was argument-less.
+- **Ink Drop Bloom Loader**: Plan §6.1 describes a generic loader. Phase 4
+  ships a GSAP ink-drop bloom in `components/ui/Loader.tsx` that cycles
+  through the 4 spot colors, announces progress via SR live region, and
+  fires a `loader-complete` window event consumed by `FluidSim` to trigger
+  ambient motion. Race-guarded so late-mounting consumers still pick up
+  completion (`isLoaderComplete()` helper).
+- **Ink Bleed Dots ScrollProgress**: Not in plan. Section-count dots on the
+  right edge driven by `IntersectionObserver`, filled as Lenis scrolls past
+  each anchor. Hidden under `prefers-reduced-motion` (native scrollbar
+  restored in its place — see below).
+- **Native scrollbar hidden**: `globals.css` hides the native scrollbar
+  (`scrollbar-width: none` + `::-webkit-scrollbar { display: none }`) since
+  ScrollProgress dots are the visible affordance. Restored under
+  `prefers-reduced-motion` so keyboard/AT users have a scroll indicator.
+- **`overscroll-behavior: none` on html**: Suppresses iOS Safari
+  pull-to-refresh and horizontal back-swipe that otherwise fight the
+  fluid-sim pointer input. Replaces the CSS-only `touch-action: none` on
+  the canvas (which doesn't reach the root document's overscroll gestures).
+- **Turbopack GLSL via `as: "*.js"` + raw-loader**: Plan §3 doesn't list a
+  GLSL transport dep. Turbopack's `type: "raw"` rule alone wasn't enough
+  for the inlined-string imports our orchestrator relies on — added
+  `raw-loader` and configured `turbopack.rules["*.glsl"].as = "*.js"` so
+  the loader output is treated as a module.
+- **Ambient motion params extracted**: `FluidOrchestrator.ts` now has a
+  top-level `AMBIENT_PARAMS` constant (3 wandering points, per-point
+  freq/range/force multipliers). Makes future Leva-dev tuning a one-file
+  change; previously hard-coded in the step loop.

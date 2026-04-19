@@ -55,7 +55,7 @@ test.describe("motion — reducedMotion: reduce", () => {
   });
 
   test("programmatic scroll is instant", async ({ page }) => {
-    await page.goto("/de/");
+    await page.goto("/de/", { waitUntil: "networkidle" });
     await addScrollableFiller(page);
 
     const scrollY = await page.evaluate(() => {
