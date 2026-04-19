@@ -65,6 +65,53 @@ const SPOT_COLORS = {
 const PAPER_COLOR = [0.941, 0.91, 0.863] as const; // #f0e8dc
 const INK_COLOR = [0.039, 0.024, 0.031] as const; // #0a0608
 
+// Ambient motion: 3 wandering points that splat fluid when no pointer input.
+// Extracted for future Leva-dev tuning. Time-scale governs the whole rig;
+// per-point freq/range/force multipliers are in AMBIENT_POINTS below.
+const AMBIENT_PARAMS = {
+  timeScale: 0.0003,
+  pointA: {
+    center: [0.55, 0.55] as [number, number],
+    range: 0.25,
+    freqX: 1.3,
+    freqY: 0.9,
+    forceFreqX: 0.7,
+    forceFreqY: 1.1,
+    forceStrength: 0.2,
+    phaseX: 0,
+    phaseY: 0,
+    phaseFX: 0,
+    phaseFY: 0,
+  },
+  pointB: {
+    center: [0.4, 0.4] as [number, number],
+    range: 0.2,
+    freqX: 2.1,
+    freqY: 1.7,
+    forceFreqX: 1.5,
+    forceFreqY: 1.9,
+    forceStrength: 0.15,
+    phaseX: 2.0,
+    phaseY: 1.0,
+    phaseFX: 3.0,
+    phaseFY: 2.0,
+  },
+  pointC: {
+    center: [0.5, 0.5] as [number, number],
+    range: 0.15,
+    freqX: 0.7,
+    freqY: 0.5,
+    forceFreqX: 0.4,
+    forceFreqY: 0.6,
+    forceStrength: 0.25,
+    phaseX: 4.0,
+    phaseY: 3.0,
+    phaseFX: 1.5,
+    phaseFY: 2.5,
+    gateThreshold: 0.5, // only splat when ambientStrength > this
+  },
+} as const;
+
 // ---------------------------------------------------------------------------
 // GL utility functions
 // ---------------------------------------------------------------------------
@@ -334,8 +381,8 @@ export class FluidOrchestrator {
     return programMap.get(name) ?? null;
   }
 
-  private bindProgram(program: WebGLProgram): void {
-    // biome-ignore lint/correctness/useHookAtTopLevel: WebGL API, not a React hook
+  private activateProgram(program: WebGLProgram): void {
+    // biome-ignore lint/correctness/useHookAtTopLevel: gl.useProgram is a WebGL API, not a React hook
     this.gl.useProgram(program);
   }
 
@@ -388,7 +435,7 @@ export class FluidOrchestrator {
     color: readonly [number, number, number],
   ): void {
     const p = this.programs.splat;
-    this.bindProgram(p);
+    this.activateProgram(p);
 
     // Velocity splat
     this.bindTexture(p, "uTarget", this.velocity.read.texture, 0);
@@ -412,7 +459,7 @@ export class FluidOrchestrator {
 
   private runCurl(): void {
     const p = this.programs.curl;
-    this.bindProgram(p);
+    this.activateProgram(p);
     this.bindTexture(p, "uVelocity", this.velocity.read.texture, 0);
     this.setVec2(p, "uTexelSize", 1.0 / this.simWidth, 1.0 / this.simHeight);
     this.renderToFBO(this.curlFBO);
@@ -421,7 +468,7 @@ export class FluidOrchestrator {
 
   private runVorticity(dt: number): void {
     const p = this.programs.vorticity;
-    this.bindProgram(p);
+    this.activateProgram(p);
     this.bindTexture(p, "uVelocity", this.velocity.read.texture, 0);
     this.bindTexture(p, "uCurl", this.curlFBO.texture, 1);
     this.setVec2(p, "uTexelSize", 1.0 / this.simWidth, 1.0 / this.simHeight);
@@ -434,7 +481,7 @@ export class FluidOrchestrator {
 
   private runAdvect(target: DoubleFBO, dissipation: number, dt: number): void {
     const p = this.programs.advect;
-    this.bindProgram(p);
+    this.activateProgram(p);
     this.bindTexture(p, "uVelocity", this.velocity.read.texture, 0);
     this.bindTexture(p, "uSource", target.read.texture, 1);
     this.setVec2(p, "uTexelSize", 1.0 / this.simWidth, 1.0 / this.simHeight);
@@ -447,7 +494,7 @@ export class FluidOrchestrator {
 
   private runDivergence(): void {
     const p = this.programs.divergence;
-    this.bindProgram(p);
+    this.activateProgram(p);
     this.bindTexture(p, "uVelocity", this.velocity.read.texture, 0);
     this.setVec2(p, "uTexelSize", 1.0 / this.simWidth, 1.0 / this.simHeight);
     this.renderToFBO(this.divergenceFBO);
@@ -456,7 +503,7 @@ export class FluidOrchestrator {
 
   private runPressure(): void {
     const p = this.programs.pressure;
-    this.bindProgram(p);
+    this.activateProgram(p);
     this.setVec2(p, "uTexelSize", 1.0 / this.simWidth, 1.0 / this.simHeight);
     this.bindTexture(p, "uDivergence", this.divergenceFBO.texture, 1);
 
@@ -470,7 +517,7 @@ export class FluidOrchestrator {
 
   private runGradientSubtract(): void {
     const p = this.programs.gradientSub;
-    this.bindProgram(p);
+    this.activateProgram(p);
     this.bindTexture(p, "uPressure", this.pressure.read.texture, 0);
     this.bindTexture(p, "uVelocity", this.velocity.read.texture, 1);
     this.setVec2(p, "uTexelSize", 1.0 / this.simWidth, 1.0 / this.simHeight);
@@ -481,7 +528,7 @@ export class FluidOrchestrator {
 
   private runRenderToon(elapsed: number): void {
     const p = this.programs.renderToon;
-    this.bindProgram(p);
+    this.activateProgram(p);
     this.bindTexture(p, "uDye", this.dye.read.texture, 0);
     this.setVec2(p, "uTexelSize", 1.0 / this.canvasWidth, 1.0 / this.canvasHeight);
     this.setFloat(p, "uLevels", 4.0);
@@ -566,29 +613,32 @@ export class FluidOrchestrator {
       // Ambient motion when idle — multiple wandering points
       // for an organic, breathing feel like layered Riso ink settling.
       if (this.ambientStrength > 0.01) {
-        const t = elapsed * 0.0003;
+        const t = elapsed * AMBIENT_PARAMS.timeScale;
         const s = this.ambientStrength;
 
+        const { pointA, pointB, pointC } = AMBIENT_PARAMS;
+
         // Point A: slow wide orbit (upper-right quadrant tendency)
-        const ax = 0.55 + 0.25 * Math.sin(t * 1.3);
-        const ay = 0.55 + 0.25 * Math.cos(t * 0.9);
-        const adx = Math.cos(t * 0.7) * s * 0.2;
-        const ady = Math.sin(t * 1.1) * s * 0.2;
+        const ax = pointA.center[0] + pointA.range * Math.sin(t * pointA.freqX + pointA.phaseX);
+        const ay = pointA.center[1] + pointA.range * Math.cos(t * pointA.freqY + pointA.phaseY);
+        const adx = Math.cos(t * pointA.forceFreqX + pointA.phaseFX) * s * pointA.forceStrength;
+        const ady = Math.sin(t * pointA.forceFreqY + pointA.phaseFY) * s * pointA.forceStrength;
         this.runSplat(ax, ay, adx, ady, this.nextSplatColor());
 
         // Point B: faster small orbit (lower-left tendency) — offset phase
-        const bx = 0.4 + 0.2 * Math.sin(t * 2.1 + 2.0);
-        const by = 0.4 + 0.2 * Math.cos(t * 1.7 + 1.0);
-        const bdx = Math.cos(t * 1.5 + 3.0) * s * 0.15;
-        const bdy = Math.sin(t * 1.9 + 2.0) * s * 0.15;
+        const bx = pointB.center[0] + pointB.range * Math.sin(t * pointB.freqX + pointB.phaseX);
+        const by = pointB.center[1] + pointB.range * Math.cos(t * pointB.freqY + pointB.phaseY);
+        const bdx = Math.cos(t * pointB.forceFreqX + pointB.phaseFX) * s * pointB.forceStrength;
+        const bdy = Math.sin(t * pointB.forceFreqY + pointB.phaseFY) * s * pointB.forceStrength;
         this.runSplat(bx, by, bdx, bdy, this.nextSplatColor());
 
         // Point C: very slow drift (center) — appears only at full ambient
-        if (s > 0.5) {
-          const cx = 0.5 + 0.15 * Math.sin(t * 0.7 + 4.0);
-          const cy = 0.5 + 0.15 * Math.cos(t * 0.5 + 3.0);
-          const cdx = Math.cos(t * 0.4 + 1.5) * (s - 0.5) * 0.25;
-          const cdy = Math.sin(t * 0.6 + 2.5) * (s - 0.5) * 0.25;
+        if (s > pointC.gateThreshold) {
+          const cs = s - pointC.gateThreshold;
+          const cx = pointC.center[0] + pointC.range * Math.sin(t * pointC.freqX + pointC.phaseX);
+          const cy = pointC.center[1] + pointC.range * Math.cos(t * pointC.freqY + pointC.phaseY);
+          const cdx = Math.cos(t * pointC.forceFreqX + pointC.phaseFX) * cs * pointC.forceStrength;
+          const cdy = Math.sin(t * pointC.forceFreqY + pointC.phaseFY) * cs * pointC.forceStrength;
           this.runSplat(cx, cy, cdx, cdy, this.nextSplatColor());
         }
       }
