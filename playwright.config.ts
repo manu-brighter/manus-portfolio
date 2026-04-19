@@ -21,7 +21,10 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  // Single worker everywhere: fluid-sim + SwiftShader on parallel Chromium
+  // instances produces GPU stalls that time out context teardown. CI already
+  // runs single-worker; local runs match so `ci:local` stays a reliable gate.
+  workers: 1,
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
   use: {
     baseURL: BASE_URL,
