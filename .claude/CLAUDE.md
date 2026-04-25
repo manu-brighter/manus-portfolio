@@ -148,3 +148,47 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   top-level `AMBIENT_PARAMS` constant (3 wandering points, per-point
   freq/range/force multipliers). Makes future Leva-dev tuning a one-file
   change; previously hard-coded in the step loop.
+
+## Phase 5 deviations
+
+- **Custom char splitter over GSAP SplitText**: Plan §6.3 references a
+  per-char split for the Overprint-Reveal. Shipped `src/lib/motion/
+  splitChars.ts` (~25 LOC, grapheme-safe via `Array.from`) instead of
+  importing `gsap/SplitText`. Saves ~6–8kB gz against the §12 bundle
+  budget (< 130kB gz), and SplitText's single-layer split wouldn't help
+  with the triple-layer (ink + rose ghost + mint ghost) duplication
+  anyway — we need three copies of every char regardless.
+- **IntersectionObserver one-shot, not ScrollTrigger**: Plan §6.3 says
+  "getimed per Lenis-Scroll-Velocity". Implemented via a one-shot IO at
+  `threshold: 0.35`, because ScrollTrigger adds ~12kB gz and the velocity
+  sync is already free: GSAP timelines ride `gsap.ticker`, which IS our
+  shared RAF (`src/lib/raf.ts`), so Lenis and the reveal settle inside
+  the same frame. No explicit Lenis coupling needed.
+- **AccName rescue via sr-only sibling**: The visual composition is
+  `inline-block` per char (three stacked spans per glyph). The ARIA
+  AccName algorithm treats each inline-block as a separate word, so the
+  accessible name would read `"H e l l e r , M a n u e l ."` —
+  screen readers spell-reading the hero. Fix: the entire char-stack
+  composition is wrapped in `aria-hidden="true"`, and a sibling
+  `<span className="sr-only">{text}</span>` carries the accessible name.
+  Ink layers inside also keep `data-layer="ink"` for test selectors but
+  are aria-hidden by inheritance. This is a real bug caught via
+  `page.locator().ariaSnapshot()` in Playwright — keep the sr-only
+  sibling if anyone refactors this primitive.
+- **`aria-label` intentionally absent on root span**: axe flags
+  `aria-label` on `role="generic"` (the default for `<span>`), so the
+  accessible name comes from the sr-only child, not an attribute.
+- **Resting misregistration preserved, not animated to 0**: Plan §6.3
+  describes the reveal as ghosts snapping into place; kept them at a
+  ±2px resting offset + ±1px deterministic per-char jitter so the
+  "print-registration" feel persists after the animation settles. Riso
+  plates never perfectly align — the static offset is the signature.
+- **Reduced-motion branch drops the split entirely**: Under
+  `prefers-reduced-motion: reduce` the component renders a plain
+  `<span>{text}</span>` — no ghosts, no per-char stacks, no GSAP
+  timeline. Simplest DOM, natural SR reading, zero animation cost.
+- **Hero choreography via `delay` prop, not a parent timeline**: The
+  H1 uses two `OverprintReveal` instances separated by an aria-hidden
+  slash; the second gets `delay={0.25}` so "Manuel." lands a beat
+  after "Heller,". Keeps the primitive self-contained — no shared
+  timeline orchestration, each reveal owns its own IO + GSAP lifecycle.

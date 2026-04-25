@@ -1,21 +1,25 @@
 import { useTranslations } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { use } from "react";
+import { OverprintReveal } from "@/components/motion/OverprintReveal";
 
 /**
- * Home — Phase 2 hero placeholder wired through next-intl.
+ * Home — hero section.
  *
- * The fluid sim arrives in Phase 4. Until then this page proves the
- * editorial layout works across all 4 locales: right-aligned Instrument
- * Serif italic anchored to the right edge, left mono-stamp column for
- * biographical meta. The left margin must read as "breathing room" —
- * that's the slot the fluid will eventually fill.
+ * Right-aligned Instrument Serif italic anchored to the right edge
+ * (never centered, never left); left-column mono stamps hold the
+ * biographical meta. The left margin breathes — it's the Fluid's slot.
  *
  * Mono stamps (Section 00 · Hero, zvoove AG · Frontend, …) stay in the
  * source literal form across locales by design: in the Riso editorial
  * language of plan §6.3 they read as typographic ornaments, not
  * translatable prose. Still piped through messages so Phase 6 can swap
  * per-locale if the stamp copy earns its keep.
+ *
+ * Phase 5 reveal: the H1 surname + given name are each wrapped in an
+ * `OverprintReveal` — rose + mint ghost copies drift in with ±2px
+ * resting misregistration, then the ink glyphs land on top. See
+ * `src/components/motion/OverprintReveal.tsx`.
  */
 type HomePageProps = {
   params: Promise<{ locale: string }>;
@@ -39,7 +43,11 @@ export default function HomePage({ params }: HomePageProps) {
       </div>
 
       <h1 id="hero-heading" className="type-display col-span-12 text-ink md:col-span-12">
-        {t("heading.family")} <span className="not-italic">/</span> {t("heading.given")}
+        <OverprintReveal text={t("heading.family")} className="inline-block" />
+        <span aria-hidden="true" className="not-italic inline-block">
+          &nbsp;/&nbsp;
+        </span>
+        <OverprintReveal text={t("heading.given")} className="inline-block" delay={0.25} />
       </h1>
 
       <div className="stamp-column col-span-12 md:col-span-5">
