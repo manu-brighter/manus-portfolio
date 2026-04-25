@@ -61,5 +61,153 @@
     },
     "tagline": "Awwwards-grade craft portfolio",
     "taglineSuffix": "booting …"
+  },
+  "about": {
+    "sectionLabel": "Section 01 · About",
+    "headline": "Full-Stack Developer mit künstlerischem Auge.",
+    "subhead": "Code, Foto, Design: alles dasselbe Handwerk in unterschiedlicher Form.",
+    "parts": [
+      {
+        "id": "wer-ich-bin",
+        "heading": "Wer ich bin",
+        "body": [
+          "Ich bin Manuel, Full-Stack Developer bei der zvoove Switzerland AG, seit November 2021. Beruflich tief drin in PHP und Vue, privat eingehend mit Kameras, Shadern und allem was zwischen Code und Bild Spass macht. Ich glaube nicht an die Trennung von 'technisch' und 'kreativ'; die spannenden Sachen passieren genau dazwischen."
+        ]
+      },
+      {
+        "id": "wie-angefangen",
+        "heading": "Wie ich angefangen habe",
+        "body": [
+          "Programmieren kam bei mir über Gaming. Ich habe einen eigenen Minecraft-Modpack-Server aufgesetzt und angefangen, Mining-Turtles in Lua zu programmieren. Das war der Moment in dem ich gemerkt habe: ich will verstehen, wie das alles unter der Haube läuft.",
+          "Die Berufslehre habe ich dann als Betriebsinformatiker EFZ bei Novartis gemacht. Eigentlich wollte ich Entwickler werden, aber Novartis bot nur den Betriebsinformatiker-Track, und so einen Ausbildungsplatz lässt man sich nicht entgehen. Vier Jahre Server, Netzwerk, Support: solide Grundlage, aber spätestens am Ende der Lehre war klar, ich bewerbe mich als Developer. Seit 2021 bin ich bei zvoove und arbeite am Hauptprodukt zvoove Core, an diversen Schnittstellen-Tools und an Cypress-E2E-Tests."
+        ]
+      },
+      {
+        "id": "ai-workflow",
+        "heading": "Wie ich mit AI arbeite",
+        "body": [
+          "Eine AI ist wie ein Pinsel: ein Werkzeug, das die Kunst nicht alleine macht. Sie ist nur so gut wie der Plan und der Prompt, den man ihr gibt, und sie braucht jemanden mit Geschmack, Kreativität und einem klaren Bild davon, wo es hingehen soll. AI-generierte Websites sehen heute alle gleich aus, weil die meisten Leute der AI nur sagen was sie wollen, nicht wie.",
+          "Ich nutze einen tief eingerichteten AI-Workflow: Custom Agents, Hooks, Skills, mehrstufige Prompts, klare Konventions-Dateien. Ich habe bisher zwei komplexe Webapps damit von Null auf produktionsreif gebracht (eine davon ist die Jogge di Balla-Plattform, die andere ist genau diese Seite hier). Die Kombination aus dieser Workflow-Tiefe und meinem visuellen Sinn aus Foto und Grafik ist das, was am Ende den Unterschied macht zwischen noch einer generischen Landing-Page und etwas, das man sich merkt."
+        ]
+      },
+      {
+        "id": "antrieb",
+        "heading": "Was mich antreibt",
+        "body": [
+          "Neugier, ehrlich gesagt. Ich bin für fast alles zu begeistern, und ich bin überzeugt, dass man gerade jetzt, im AI-Zeitalter, mehr denn je dranbleiben muss. Wer aufhört zu lernen, ist innerhalb von 12 Monaten abgehängt. Mir macht das Lernen aber auch einfach Spass, also ist das kein Druck, sondern Default."
+        ]
+      },
+      {
+        "id": "off-screen",
+        "heading": "Ausserhalb vom Bildschirm",
+        "body": [
+          "Wildlife-Fotografie ist meine grösste Leidenschaft. Ich reise solo nach Costa Rica oder Thailand und stapfe selbst in den Dschungel um Tiere in freier Wildbahn vor die Linse zu bekommen. Daneben Autos (siehe mein Audi-S5-Tuning-Projekt), Ski/Snowboard, Tauchen, und der Verein Jogge di Balla, in dem ich Vize-Präsident, Web-Entwickler, Vereinsfotograf, Kameramann und Social-Media-Manager bin."
+        ]
+      }
+    ],
+    "portrait": {
+      "alt": "Portraitfoto von Manuel Heller",
+      "caption": "Basel-Region · MMXXVI"
+    }
+  },
+  "aiPinsel": {
+    "quoteLine1": "«AI ist wie ein Pinsel.",
+    "quoteLine2": "Sie macht die Kunst nicht alleine.»",
+    "emphasisWord": "Pinsel",
+    "caption": "— über meinen Workflow mit Custom Agents, Hooks und Skills."
+  },
+  "currently": {
+    "label": "Currently",
+    "items": [
+      { "verb": "working on", "value": "diese Seite hier" },
+      { "verb": "learning", "value": "React 19 · R3F 9 · WebGPU-Shader" },
+      { "verb": "shooting", "value": "Wildlife in Costa Rica & Thailand" },
+      { "verb": "driving", "value": "Audi S5 B8.5 (Tuning-Projekt)" },
+      { "verb": "chasing", "value": "den zvoove Ping-Pong-Champion-Titel" }
+    ]
+  },
+  "skills": {
+    "sectionLabel": "Section 02 · Skills",
+    "headline": "Was ich mitbringe.",
+    "subhead": "Grösse transportiert Gewicht. Keine Jahre, keine Labels.",
+    "heroSkill": {
+      "eyebrow": "Hero-Skill",
+      "name": "AI-Workflow & Vibecoding",
+      "description": "Custom Agents, Hooks, Skills, mehrstufige Prompts. AI ist nicht das Tool, das ich nutze, sondern das Werkzeug, mit dem ich Werkzeuge baue."
+    },
+    "vibecodedMarker": "vibecoded",
+    "tiers": [
+      {
+        "id": "daily-driver",
+        "label": "Daily Driver · Production",
+        "weight": "xl",
+        "items": [
+          { "name": "PHP" },
+          { "name": "Vue" },
+          { "name": "MariaDB · MySQL" },
+          { "name": "HTML · CSS · Webdesign-Eye" }
+        ]
+      },
+      {
+        "id": "production",
+        "label": "Production · Operations",
+        "weight": "l",
+        "items": [
+          { "name": "Cypress" },
+          { "name": "Docker" },
+          { "name": "GitLab" },
+          { "name": "Yii" },
+          { "name": "OpenAPI · Swagger" },
+          { "name": "nginx · Linux-Server-Admin" },
+          { "name": "Vite" }
+        ]
+      },
+      {
+        "id": "vibecoded",
+        "label": "Vibecoded Stack",
+        "description": "Was ich mit AI-Workflow baue, nicht spontan ohne.",
+        "weight": "l",
+        "items": [
+          { "name": "TypeScript", "vibecoded": true },
+          { "name": "React", "vibecoded": true },
+          { "name": "Next.js", "vibecoded": true },
+          { "name": "Tailwind CSS", "vibecoded": true },
+          { "name": "tRPC", "vibecoded": true },
+          { "name": "Drizzle ORM", "vibecoded": true },
+          { "name": "shadcn/ui", "vibecoded": true },
+          { "name": "GSAP", "vibecoded": true },
+          { "name": "Three.js · React Three Fiber", "vibecoded": true },
+          { "name": "Lenis", "vibecoded": true }
+        ]
+      },
+      {
+        "id": "occasional",
+        "label": "Im Werkzeugkasten",
+        "description": "Kenne ich, nutze ich nicht täglich.",
+        "weight": "m",
+        "items": [
+          { "name": "Java" },
+          { "name": "Python" },
+          { "name": "PowerShell" },
+          { "name": "Bash" },
+          { "name": "Git" },
+          { "name": "Lightroom" },
+          { "name": "Photoshop" },
+          { "name": "DaVinci Resolve" }
+        ]
+      },
+      {
+        "id": "craft",
+        "label": "Craft · Eye",
+        "weight": "m",
+        "items": [
+          { "name": "Fotografie" },
+          { "name": "Videoschnitt" },
+          { "name": "Grafikdesign" },
+          { "name": "Live Web Fluid Simulations" },
+          { "name": "Shader-Spielereien" }
+        ]
+      }
+    ]
   }
 }
