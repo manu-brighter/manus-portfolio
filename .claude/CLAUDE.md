@@ -192,3 +192,51 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   slash; the second gets `delay={0.25}` so "Manuel." lands a beat
   after "Heller,". Keeps the primitive self-contained — no shared
   timeline orchestration, each reveal owns its own IO + GSAP lifecycle.
+
+## Phase 6 deviations
+
+- **Translations deferred**: Plan §3 says the gate is "alle Locales
+  komplett". Phase 6 ships the DE source content for About/Skills/
+  AI-Pinsel/Currently and mirrors it verbatim into EN/FR/IT message
+  files so next-intl renders something in every locale. Proper
+  translation is its own pass after the visual lands.
+- **No photo-duotone shader on Portrait**: Plan §5 lists `photo-duotone`
+  as the Portrait treatment. Skipped because the photos are meant to
+  showcase Manuel's photography — overlaying a Riso effect on
+  professional portraits undercuts the point. Portrait gets a simpler
+  Riso treatment instead: 2px ink frame, paper-shade backing, +2px
+  spot-rose offset shadow, no shader. Re-evaluate in Phase 9 when the
+  Photography teaser ships, but the working hypothesis is "leave the
+  pro photos alone".
+- **`<picture>` over next/image**: Plan §3 implies next/image, but
+  `images.unoptimized: true` (required by `output: 'export'`) disables
+  optimization anyway. Used a native `<picture>` with AVIF + WebP +
+  JPG fallback srcsets — same output, no runtime cost.
+- **One-off sharp-cli for portrait variants**: Generated 480/800/1200w
+  AVIF + WebP + JPG with `pnpm dlx sharp-cli` rather than adding sharp
+  as a project dep. The general asset pipeline lands in Phase 9
+  (`scripts/optimize-assets.ts`); for 6 outputs a one-shot was the
+  proportional move.
+- **Currently block uses `<dl>`, not `<table>`**: Briefing §2.5 reads
+  as label/value pairs. `<dl>` is the semantic primitive for term/
+  definition pairs; gives proper SR reading without table overhead.
+- **`<aside>` demoted to `<div>` inside About**: Originally wrapped the
+  Portrait + Currently column as `<aside>` for "complementary content".
+  axe flags `landmark-complementary-is-top-level` because an aside
+  inside `<section>` violates the landmark hierarchy. Demoted to plain
+  `<div>` — same visual, no spurious landmark.
+- **`vibecoded` marker is a filled rose pill, not rose text**: First
+  pass used spot-rose text on a rose-bordered pill; axe failed at
+  2.19:1 contrast vs the WCAG AA 4.5:1 floor. Flipped to
+  `bg-spot-rose text-ink` — ~12:1 contrast and reads more like a Riso
+  stamp anyway.
+- **Hero extracted from page.tsx into sections/Hero.tsx**: page.tsx is
+  now just a server-component composer that calls Hero/About/Skills.
+  Each section owns its own translations namespace + structure.
+- **Pre-existing failure not addressed in Phase 6**: `tests/e2e/
+  overprint.spec.ts` "H1 has no ghost layers at all" under
+  `reducedMotion: reduce` fails on main as well. Root cause is the
+  SSR/hydration flow in `useReducedMotion` (`getServerSnapshot()`
+  returns `false`, so server HTML always contains the 14-span ghost
+  composition; the client flips after mount). Out of scope for Phase 6
+  — flagged here so the next pass at OverprintReveal sees it.
