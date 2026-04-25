@@ -17,19 +17,16 @@ content-input/
 │       ├─ DSC01805.jpg
 │       ├─ DSC01833.jpg
 │       └─ ...
-├─ joggediballa/
-│   ├─ joggediballa-story.mdx         ← Original-Story von Manu (Quelle für Case Study)
-│   └─ screenshots/                   ← TODO Manu (siehe content-briefing.md §5.4)
-│       ├─ home.jpg
-│       ├─ events.jpg
-│       ├─ team.jpg
-│       ├─ shotcounter.jpg
-│       ├─ admin-dashboard.jpg
-│       ├─ overlay-stream.jpg
-│       └─ statistic.jpg
-└─ audio/
-    └─ playground-loop.mp3            ← lizenzfreier Audio-Loop für Playground B
-                                        (Claude sucht oder Manu liefert)
+└─ joggediballa/
+    ├─ joggediballa-story.mdx         ← Original-Story von Manu (Quelle für Case Study)
+    └─ screenshots/                   ← TODO Manu (siehe content-briefing.md §5.4)
+        ├─ home.jpg
+        ├─ events.jpg
+        ├─ team.jpg
+        ├─ shotcounter.jpg
+        ├─ admin-dashboard.jpg
+        ├─ overlay-stream.jpg
+        └─ statistic.jpg
 ```
 
 ---
@@ -45,7 +42,7 @@ content-input/
 
 ### Claude (automatisch, beim Implementieren)
 
-- `audio/playground-loop.mp3` — sucht lizenzfreien Loop (CC0 / Public Domain) und legt ihn ab, mit `LICENSE.md` daneben die die Quelle dokumentiert
+Aktuell keine. Audio-Loop wurde gestrichen, weil das ursprünglich geplante Audio-Blob-Playground-Experiment thematisch nicht zum Riso/Print-Narrativ passte (siehe `docs/content-briefing.md` §7.1).
 
 ---
 
@@ -56,7 +53,6 @@ Phase 9 des Plans (`docs/plan.md`) bringt ein Script `scripts/optimize-assets.ts
 1. Fotos aus `photography/source/` → AVIF (mehrere Sizes) + WebP-Fallback → `public/photos/`
 2. Screenshots aus `joggediballa/screenshots/` → optimiertes WebP → `public/projects/joggediballa/`
 3. Profilfoto → AVIF + responsive sizes → `public/profile/`
-4. Audio → Copy mit File-Hash → `public/audio/`
 
 Nur die `public/`-Outputs werden gecommittet. Die Roh-Inputs hier in `content-input/` bleiben lokal.
 

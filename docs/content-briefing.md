@@ -1,6 +1,6 @@
 # Content-Briefing · Manuel Heller Portfolio
 
-> Dieses Dokument schließt die in `docs/plan.md` §15 offenen Content-Gaps.
+> Dieses Dokument schliesst die in `docs/plan.md` §15 offenen Content-Gaps.
 > Es ist die **Single Source of Truth für alle Texte, Daten und Asset-Entscheidungen** der Portfolio-Seite.
 > Geschrieben am 24./25. April 2026 nach einem strukturierten Interview mit Manuel.
 >
@@ -22,7 +22,7 @@
 - "in today's fast-paced world"
 - "I'm thrilled to" / "freue mich, hier zu sein"
 - generische Superlative ohne Substanz ("amazing", "incredible", "wahnsinnig")
-- **Gedankenstrich `—` (em-dash)**: darf nur als Design Element verwendet werden, im text ist es eines der stärksten AI-Tells. Stattdessen Komma, Punkt, Doppelpunkt oder Klammern. Bei echten Aufzählungen `·` (Mittelpunkt) oder Bullet-Listen.
+- **Gedankenstrich `—` (em-dash) sparsam**: in Body-Copy lieber Komma, Klammer, Doppelpunkt oder Punkt. Massenhaftes em-dash-Pattern (drei pro Absatz) ist eines der stärksten AI-Tells. Als Design-Element (Trennzeichen in Mono-Stempeln, Editorial-Akzent) frei. Bei echten Aufzählungen `·` (Mittelpunkt) oder Bullet-Listen.
 
 **Grundregel**: Jede Aussage über Skill / Erfahrung muss durch ein konkretes Beispiel oder Projekt belegbar sein. Keine leeren Behauptungen.
 
@@ -87,18 +87,36 @@ Ich nutze einen tief eingerichteten AI-Workflow: Custom Agents, Hooks, Skills, m
 
 Neugier, ehrlich gesagt. Ich bin für fast alles zu begeistern, und ich bin überzeugt, dass man gerade jetzt, im AI-Zeitalter, mehr denn je dranbleiben muss. Wer aufhört zu lernen, ist innerhalb von 12 Monaten abgehängt. Mir macht das Lernen aber auch einfach Spass, also ist das kein Druck, sondern Default.
 
-**Außerhalb vom Bildschirm**
+**Ausserhalb vom Bildschirm**
 
 Wildlife-Fotografie ist meine grösste Leidenschaft. Ich reise solo nach Costa Rica oder Thailand und stapfe selbst in den Dschungel um Tiere in freier Wildbahn vor die Linse zu bekommen. Daneben Autos (siehe mein Audi-S5-Tuning-Projekt), Ski/Snowboard, Tauchen, und der Verein **Jogge di Balla**, in dem ich Vize-Präsident, Web-Entwickler, Vereinsfotograf, Kameramann und Social-Media-Manager bin (siehe eigene Case Study weiter unten).
 
-### 2.3 Portrait-Foto
+### 2.3 AI-Pinsel · Pull-Quote-Block
+
+> **Implementation-Hinweis**: Eigener visueller Moment auf der Seite, **nicht** in den About-Long-Read eingebettet. Volle Container-Breite, Instrument Serif Italic in XL, asymmetrisch links- oder rechtsbündig (Spiegel zur Hero-Ausrichtung). Riso-Misregistration auf das Schlüsselwort "Pinsel". Steht zwischen About-Long-Read und Portrait-Foto, oder als ankommender Section-Closer.
+>
+> Begründung: Das ist Manuels Differenzierungspunkt im 2026-Markt — wichtiger als jeder einzelne Stack-Eintrag. Verdient eine eigene editoriale Geste, nicht einen Absatz von vier.
+
+```
+"AI ist wie ein Pinsel.
+Sie macht die Kunst nicht alleine."
+```
+
+**Caption** (klein darunter, Mono):
+```
+— über meinen Workflow mit Custom Agents, Hooks und Skills.
+```
+
+(Der einzige em-dash in der ganzen Site, bewusst gesetzt, als typografische Signatur. Ja, das ist die Ausnahme die §0 erwähnt.)
+
+### 2.4 Portrait-Foto
 
 - **Asset**: `content-input/profile/Profilfoto.JPEG` (von Manu geliefert, ~14 MB JPEG, wird durch unsere Pipeline AVIF-konvertiert + via Riso-Duotone-Shader zur Laufzeit gerendert)
 - **Crop-Hinweis**: Hochformat, Kopf + Schulter zentriert. Falls Original zu wide ist, Center-Crop auf 4:5.
 - **Alt-Text (DE)**: "Portraitfoto von Manuel Heller"
 - **Behandlung**: Riso-Duotone Shader (siehe Plan §6.5), 2 Spot-Farben (Vorschlag: rose + ink), Halbton-Dot-Pattern aktiv.
 
-### 2.4 "Currently…"-Block (charmante Awwwards-Footer-Liste)
+### 2.5 "Currently…"-Block (charmante Awwwards-Footer-Liste)
 
 > **Hinweis**: Manueller, semi-statischer Block, ehrlich-ironisch. Wird ~2× pro Jahr aktualisiert. Statisch im MDX, kein CMS.
 
@@ -108,12 +126,10 @@ Currently:
 - learning    → React 19 / R3F 9 / WebGPU-Shader
 - shooting    → Wildlife in Costa Rica & Thailand
 - driving     → Audi S5 B8.5 (Tuning-Projekt)
-- chasing     → den zvoove Ping-Pong-Champion-Titel*
-
-* möglicherweise sarkastisch.
+- chasing     → den zvoove Ping-Pong-Champion-Titel
 ```
 
-→ Das letzte Bullet ist der Joke-Anchor. Awwwards-Sites lieben sowas weil's Persönlichkeit zeigt ohne aufdringlich zu sein.
+→ Das letzte Bullet steht selbstbewusst ohne Erklärung. Wenn jemand den Witz nicht versteht, ist das die richtige Filter-Funktion.
 
 ---
 
@@ -121,7 +137,7 @@ Currently:
 
 ### 3.1 Layout-Prinzip
 
-**Typografisch gewichtete Editorial-Liste**, kein Icon-Grid. Größere Schrift = wichtiger / häufiger genutzt. Keine Selbst-Einschätzungs-Labels ("Junior/Mid/Senior"), keine Erfahrungs-Jahre. Größe + Position transportieren das Gewicht implizit.
+**Typografisch gewichtete Editorial-Liste**, kein Icon-Grid. Grössere Schrift = wichtiger / häufiger genutzt. Keine Selbst-Einschätzungs-Labels ("Junior/Mid/Senior"), keine Erfahrungs-Jahre. Grösse + Position transportieren das Gewicht implizit.
 
 **Wichtig**: Skills die Manuel nur **über Vibecoding** beherrscht (= kann sie mit AI bauen aber nicht spontan ohne) müssen visuell klar markiert sein. Vorschlag: kleines Mono-Label `[vibecoded]` in Spot-Farbe direkt nach dem Skill-Namen. Nicht versteckt: Manu ist stolz darauf, dass er mit AI Sachen baut die er ohne nicht könnte. Das ist Teil der Story.
 
@@ -133,12 +149,14 @@ Currently:
 
   Sub-Text (1 Satz): "Custom Agents, Hooks, Skills, mehrstufige Prompts. AI ist nicht das Tool, das ich nutze, sondern das Werkzeug, mit dem ich Werkzeuge baue."
 
-#### Gross (XL · Production-Erfahrung, Daily Driver)
+#### Gross (XL · Daily Driver in Production)
 
 - PHP
 - Vue
 - MariaDB / MySQL
-- Frontend / Webdesign
+- HTML · CSS · Webdesign-Eye
+
+> Hinweis: "Frontend" ohne Framework-Suffix. Manuel arbeitet beruflich Vue, der visuelle Sinn (Layout, Typo, Webdesign-Geschmack) ist die eigentliche XL-Kompetenz. React/TypeScript-basiertes Frontend ist Vibecoding-Territorium und steht weiter unten klar getrennt.
 
 #### Mittel (L · Production-Erfahrung)
 
@@ -148,14 +166,16 @@ Currently:
 - Yii
 - OpenAPI / Swagger
 - nginx · Linux-Server-Admin
-- Tailwind CSS
 - Vite
 
-#### Mittel (L · Vibecoding-only, mit `[vibecoded]`-Marker)
+#### Mittel (L · Vibecoded · alle mit `[vibecoded]`-Marker visuell ausgezeichnet)
+
+> Block-Header sichtbar als eigene Sub-Headline ("Vibecoded Stack — was ich mit AI-Workflow baue, nicht spontan ohne"). Der Marker ist nicht versteckt, der ganze Block ist visuell als eigene Insel angelegt.
 
 - TypeScript `[vibecoded]`
 - React `[vibecoded]`
 - Next.js `[vibecoded]`
+- Tailwind CSS `[vibecoded]`
 - tRPC `[vibecoded]`
 - Drizzle ORM `[vibecoded]`
 - shadcn/ui `[vibecoded]`
@@ -188,7 +208,9 @@ Currently:
 
 ### 4.1 Anzahl
 
-**Drei Projekte gezeigt** (statt der ursprünglich geplanten 3 bis 6). Manuel hat keine weiteren Live-Projekte die er zeigen will. Das ist okay: drei starke Projekte schlagen sechs schwache. Plan §13 Phase 7 entsprechend kürzen.
+**Zwei Projekte gezeigt** (statt der ursprünglich geplanten 3 bis 6). Manuel hat keine weiteren Live-Projekte die er als Code-Showcase zeigen will. Das ist okay: zwei starke Code-Projekte plus eine eigene Photography-Section (§6) schlagen drei vermischte Einträge. Plan §13 Phase 7 entsprechend kürzen.
+
+Photography lebt bewusst in §6 als **eigene Section ausserhalb des Work-Grids**, nicht als drittes Code-Projekt verkauft. Das Adobe-Portfolio ist No-Code-Werkzeug, gehört nicht in eine Liste neben React- und WebGL-Projekten.
 
 ### 4.2 Projekt-Liste
 
@@ -212,24 +234,16 @@ Currently:
 - **Stack**: Next.js 16 · React 19 · TypeScript · Tailwind v4 · GSAP · Lenis · React Three Fiber · WebGL-Shader (eigene Navier-Stokes-Simulation) · next-intl · Contentlayer · MDX
 - **Live-URL**: TBD, Domain noch nicht gekauft (Plan: `manuelheller.dev` primary, `manuelheller.ch` redirect-alias)
 - **Kurzbeschreibung (1 Satz, für Card)**: "Diese Seite. Eine fullscreen GPU-Fluid-Simulation als Hero, Risograph-inspirierte Editorial-Ästhetik, vibecoded in mehrwöchigen Sessions mit Claude Code."
-- **Meta-Joke** (klein, ironisch): "Wenn du das hier liest, hat zumindest die Statik-Generierung funktioniert."
-
-#### Projekt 3: Fotografie-Portfolio
-
-- **Titel**: Fotografie-Portfolio
-- **Jahr**: 2023–laufend
-- **Rolle**: Fotograf, Kurator
-- **Stack**: Adobe Portfolio (kein Custom-Code; die Arbeit liegt vor der Linse, nicht im Repo)
-- **Live-URL**: https://manuelheller.myportfolio.com/
-- **Kurzbeschreibung (1 Satz, für Card)**: "Die Welt durch meine Linse: Wildlife, Sceneries, Autos. Über tausend Stunden Geduld, kein einziger Code-Commit."
+- **Meta-Note** (klein, selbstbewusst): "Du surfst gerade auf einer GPU-Fluid-Simulation. Kein Iframe, kein Video-Loop, keine Lottie-Datei. Echte Frames."
 
 ### 4.3 Was bewusst NICHT auftaucht
 
 - **zvoove Core / Berufs-Projekte**: NDA, kein öffentlicher Showcase. Kann als anonymisierter Mention im About verwendet werden ("Daily-Driver beruflich: Enterprise-Vue-Plattform mit ~14 Devs"), aber kein Screenshot, kein Repo-Link.
+- **Adobe-Portfolio-Photography**: kein Code, lebt in §6 als eigene Section mit eigener Inszenierung. Würde im Work-Grid neben React/WebGL-Projekten verwässern.
 
 ### 4.4 Card-Layout (Hinweis für Implementation)
 
-Jede Project-Card im 3D-Cel-Shaded-Gallery-Stil (Plan §6.4). Hover → Ink-Splat aus der Plane. Klick auf Jogge di Balla → Page-Transition zur Case-Study; Klick auf Portfolio (diese Seite) → smooth Scroll zurück zum Top mit Easter-Egg-Notice; Klick auf Fotografie-Portfolio → externer Link zu myportfolio (mit subtiler "external"-Indikation).
+Jede Project-Card im 3D-Cel-Shaded-Gallery-Stil (Plan §6.4). Hover → Ink-Splat aus der Plane. Klick auf Jogge di Balla → Page-Transition zur Case-Study; Klick auf Portfolio (diese Seite) → smooth Scroll zurück zum Top mit Easter-Egg-Notice. Mit nur zwei Karten kann das Grid asymmetrisch gross sein (jede Karte 50% / 60% Viewport-Breite), nicht in ein Drei-Spalten-Raster gequetscht.
 
 ---
 
@@ -326,22 +340,22 @@ SONY α7 IV · 24–600mm · seit 2023
 
 ### 6.2 Foto-Auswahl
 
-**Anzahl**: 6 Bilder im Teaser (mittlere Awwwards-Range). Vollscreen-Reveals beim Scroll, jedes mit Riso-Duotone-Shader-Treatment + prozeduralem Halbton.
+**Anzahl**: 4 Bilder im Teaser (knapp kuratiert, Performance-bewusst). Vollscreen-Reveals beim Scroll, jedes mit Riso-Duotone-Shader-Treatment + prozeduralem Halbton.
 
 **Quelle**: Manuel hat **29 Beispielbilder** in `Downloads\portfolio input\Example Bilder` geliefert. Diese sollen unter `content-input/photography/source/` ins Repo-Working-Directory wandern (gitignored, siehe §10).
 
 **Auswahl-Strategie für Claude**:
-Wähle 6 Bilder die **Vielfalt zeigen**, aufgeteilt nach Manuels Stärken-Hierarchie:
-- **2× Wildlife** (Manuels grösste Leidenschaft + grösste Stärke)
-- **2× Autos** (zweite Leidenschaft, Stärke)
-- **2× Sceneries / Landscape** (zur Abrundung)
+Wähle 4 Bilder die **Manuels Stärken-Hierarchie abbilden**:
+- **2× Wildlife** (Manuels grösste Leidenschaft + grösste Stärke, beidseitig im Teaser-Flow als Hook und Closer)
+- **1× Auto** (zweite Leidenschaft, Mittelteil)
+- **1× Landscape / Scenery** (zur Abrundung, zwischen den Wildlife-Bildern)
 
-Falls eine Kategorie in den Beispielbildern unterrepräsentiert ist: lieber mehr aus den starken Kategorien als ein schwaches Bild aus der schwachen.
+Falls eine Kategorie in den Beispielbildern unterrepräsentiert ist: lieber mehr aus den starken Kategorien als ein schwaches Bild aus der schwachen. Vier Bilder dürfen nicht "ein bisschen von allem" sein.
 
-**Reihenfolge** im Scroll: Stärkstes Bild zuerst (Hook), abwechslungsreiche Kategorien dazwischen, stärkstes Wildlife oder das emotional aufgeladenste Bild zum Schluss als Closer vor dem Link.
+**Reihenfolge** im Scroll: Stärkstes Wildlife-Bild zuerst (Hook), Auto + Landscape im Mittelteil, zweitstärkstes Wildlife oder das emotional aufgeladenste Bild zum Schluss als Closer vor dem Link.
 
 **Output für Manu zum Review**:
-Nachdem Claude eine Auswahl getroffen hat, soll er die 6 Filenames als nummerierte Liste in einem Kommentar im MDX hinterlassen, damit Manu vor Go-Live final approven oder swappen kann.
+Nachdem Claude eine Auswahl getroffen hat, soll er die 4 Filenames als nummerierte Liste in einem Kommentar im MDX hinterlassen, damit Manu vor Go-Live final approven oder swappen kann.
 
 ### 6.3 Footer-Link
 
@@ -361,11 +375,11 @@ mit external-icon. Öffnet in neuem Tab.
 
 ### 7.1 Konzept
 
-Drei interaktive Shader-Experimente. Pure Craft-Demonstration, kein Produkt-Kontext. Jedes Experiment lebt unter `/playground/[slug]` mit eigenem Detail-Screen + Leva-Panel-Controls.
+Zwei interaktive Shader-Experimente, beide auf dem Tinte-/Druck-Narrativ verankert. Pure Craft-Demonstration, kein Produkt-Kontext. Jedes Experiment lebt unter `/playground/[slug]` mit eigenem Detail-Screen + Leva-Panel-Controls.
 
-Auf der Hauptseite erscheinen sie als 3 Cards mit Live-Preview (low-res Loop oder reduzierte Sim).
+Auf der Hauptseite erscheinen sie als 2 Cards mit Live-Preview (low-res Loop oder reduzierte Sim). Zwei kuratierte Experimente schlagen drei vermischte; das ursprünglich geplante Audio-Blob-Experiment wurde gestrichen, weil es thematisch (Sound-Reaktivität) ausserhalb des Riso/Print-Narrativs der Site stand und unverhältnismässig Bundle-Last gekostet hätte.
 
-### 7.2 Die drei Experimente
+### 7.2 Die zwei Experimente
 
 #### A) Ink Drop Studio (`/playground/ink-drop-studio`)
 
@@ -374,19 +388,13 @@ Auf der Hauptseite erscheinen sie als 3 Cards mit Live-Preview (low-res Loop ode
   > "Spielwiese für die Hero-Simulation. Klick = Ink-Splat, Slider = Sim-Parameter, 'Bomb' wenn dir gerade nach Chaos ist."
 - **Stack-Note**: Direkt der Plan-§6.8-Sandbox-Block, kann 1:1 übernommen werden.
 
-#### B) Cel-Shaded Audio Blob (`/playground/audio-blob`)
+#### B) Type-as-Fluid (`/playground/type-as-fluid`)
 
-- **Konzept**: 3D-Blob (Toon-Shader mit Outline) deformiert sich entlang Frequenz-Bändern eines vorgeladenen Audio-Loops. Kein Mikrofon-Permission-Prompt; vorgeladener lizenzfreier Loop läuft per default. Optional: Play/Pause-Button.
-- **Caption** (DE):
-  > "Audio-reaktiver Toon-Blob. Frequenz-Bänder verformen die Geometrie, der Cel-Shader hält die Outlines clean. Kopfhörer empfohlen."
-- **Hinweis an Claude**: Audio-Loop muss lizenzfrei sein (CC0 / Public Domain). Vorschlag: kurzer (<30s) loopbarer Synth-Loop von freesound.org oder selbst generiert mit Tone.js. Datei landet unter `public/audio/` mit klarer Lizenz-Quellenangabe in einer `LICENSE.md` daneben. Falls keine Quelle gefunden wird → Manu fragen.
-
-#### C) Type-as-Fluid (`/playground/type-as-fluid`)
-
-- **Konzept**: Input-Feld, User tippt ein Wort. Buchstaben werden als Signed-Distance-Field in den Fluid injiziert und zerfließen langsam. "Schreibmaschine trifft Druckerei."
+- **Konzept**: Input-Feld, User tippt ein Wort. Buchstaben werden als Signed-Distance-Field in den Fluid injiziert und zerfliessen langsam. "Schreibmaschine trifft Druckerei."
 - **Caption** (DE):
   > "Tipp ein Wort. Es wird gedruckt, dann von der Tinte verschluckt. Sanft."
 - **Default-Wort beim Load**: `MANUEL` oder `JOGGE DI BALLA` (rotiert zufällig zwischen 3-4 Default-Wörtern als Demo)
+- **Accessibility-Note**: Das Input-Feld ist standard `<input>`, Visual-Feedback (Tinten-Verfall) ist Shader-only. Screen-Reader hören die getippten Buchstaben über das `<input>`, der Shader ist dekorativ und `aria-hidden`. Reduced-Motion → Tinten-Verfall wird durch sofortiges Fade-Out ersetzt.
 
 ---
 
@@ -431,7 +439,7 @@ Instagram  @joggediballa  (Vereins-Account, nicht persönlich)
 - **GitHub** mit subtiler `[semi-active]`-Notiz, nicht prominent platzieren. Manu ist dort nicht aktiv-aktiv, wir wollen niemanden anlocken der eine 100-Repo-Github-Glanzfassade erwartet.
 - **Telefon strikt nicht öffentlich**.
 - **Instagram persönlich existiert nicht** für die Öffentlichkeit. Nur das Jogge di Balla-Vereins-Konto wird verlinkt, klar als solches gekennzeichnet.
-- **Mail bleibt vorerst Bluewin** (`manuelheller@bluewin.ch`). Optional in Zukunft `manu@manuelheller.dev` via Cloudflare Email Routing → Forwarding zu Bluewin (gratis, 10 Min Setup). Wird in Phase 11 (Polish) nochmal evaluiert.
+- **Mail bleibt vorerst Bluewin** (`manuelheller@bluewin.ch`). Cloudflare Email Routing zu `manu@manuelheller.dev` ist 10-Min-Setup, aber Manu findet die Adresse selbst nicht clean genug — `manuel@heller.com` wäre die Wunsch-Adresse, lohnt aber den Zweit-Domain-Kauf aktuell nicht. Decision deferred bis Phase 11 (Polish): entweder Status quo Bluewin akzeptieren oder doch `manu@manuelheller.dev` einrichten als Kompromiss.
 
 ### 8.4 Impressum / Datenschutz
 
@@ -469,27 +477,25 @@ Bestehender Linux-Root-Server (siehe Plan §11). Nginx-Config liegt in `server/n
 
 ### 10.1 Wo legt Manu Inputs ab?
 
-Alle Manu-gelieferten Roh-Assets (Fotos, Screenshots, Profilfoto, Audio-Loops, alles was nicht in Git landen soll wegen Größe oder Privacy) gehören unter:
+Alle Manu-gelieferten Roh-Assets (Fotos, Screenshots, Profilfoto, alles was nicht in Git landen soll wegen Grösse oder Privacy) gehören unter:
 
 ```
 content-input/                       # gitignored, lokales Working-Directory
 ├─ profile/
-│   └─ profile-picture.jpg               # ← bereits geliefert (von Manu kopieren)
+│   └─ profile-picture.jpg           # ← bereits geliefert (von Manu kopieren)
 ├─ photography/
 │   └─ source/                       # die 29 (oder mehr) Original-JPEGs
 │       └─ DSC*.jpg
-├─ joggediballa/
-│   ├─ joggediballa-story.mdx        # ← Manu's Original-Story (siehe §5)
-│   └─ screenshots/                  # ← TODO Manu (siehe §5.4)
-│       ├─ home.jpg
-│       ├─ events.jpg
-│       ├─ team.jpg
-│       ├─ shotcounter.jpg
-│       ├─ admin-dashboard.jpg
-│       ├─ overlay-stream.jpg
-│       └─ statistic.jpg
-└─ audio/
-    └─ playground-loop.mp3           # ← Claude sucht oder Manu liefert
+└─ joggediballa/
+    ├─ joggediballa-story.mdx        # ← Manu's Original-Story (siehe §5)
+    └─ screenshots/                  # ← TODO Manu (siehe §5.4)
+        ├─ home.jpg
+        ├─ events.jpg
+        ├─ team.jpg
+        ├─ shotcounter.jpg
+        ├─ admin-dashboard.jpg
+        ├─ overlay-stream.jpg
+        └─ statistic.jpg
 ```
 
 ### 10.2 Build-Pipeline
@@ -499,11 +505,10 @@ Ein Script (`scripts/optimize-assets.ts`, kommt in Phase 9) verarbeitet `content
 - Fotos: Resize + AVIF-Konvertierung (mehrere Sizes), WebP-Fallback. Output unter `public/photos/`
 - Screenshots: Resize + WebP. Output unter `public/projects/joggediballa/`
 - Profilfoto: AVIF, mehrere Sizes für responsive `<picture>`-Tag. Output `public/profile/`
-- Audio: kein Re-encoding, einfach Copy mit File-Hash im Namen für Cache-Busting
 
 ### 10.3 .gitignore-Eintrag
 
-`content-input/` muss in `.gitignore` (wird beim Anlegen automatisch hinzugefügt). Roh-Assets sind zu groß für Git, und das Profilfoto + Jogge di Balla-Screenshots haben semi-private Komponenten.
+`content-input/` muss in `.gitignore` (wird beim Anlegen automatisch hinzugefügt). Roh-Assets sind zu gross für Git, und das Profilfoto + Jogge di Balla-Screenshots haben semi-private Komponenten.
 
 Optimierte `public/`-Outputs werden committed (sind klein nach AVIF-Pipeline).
 
@@ -518,8 +523,9 @@ Optimierte `public/`-Outputs werden committed (sind klein nach AVIF-Pipeline).
 1. **Quell-Sprache Deutsch**: Manuel schreibt / approved alle deutschen Texte (sind bereits in diesem Briefing definiert)
 2. **Übersetzungs-Phase** (separat, nach Phase 6 wenn About steht):
    - Claude übersetzt DE → EN, FR, IT
-   - Manu reviewt EN (er kann das, fließend)
-   - FR und IT bleiben ungeprüft beim Launch, mit kleinem Disclaimer im Sprach-Switcher (`FR/IT · translated, awaiting native review`)
+   - Manu reviewt EN (er kann das, fliessend)
+   - FR und IT bleiben ungeprüft beim Launch, **kein Disclaimer**. Bewusste Entscheidung: Manuel bewirbt sich nicht aktiv im FR/IT-sprachigen Markt, die Locales sind ein Schweizer-Höflichkeits-Add-on. Ein Disclaimer würde mehr Aufmerksamkeit auf eventuelle Übersetzungs-Schwächen ziehen als die Übersetzung selbst.
+   - Qualitäts-Hebel: Claude übersetzt mit explizitem Style-Prompt pro Locale (siehe §11.2), nicht mit billigem 1:1-Translate.
 3. **UI-Strings** (`messages/{locale}.json`): Claude befüllt alle 4 Locales gleichzeitig, Manu reviewt nur DE+EN
 
 ### 11.2 Tonalitäts-Anpassung
@@ -576,7 +582,7 @@ Erlaubt alle Crawler, verlinkt sitemap.
 - ❌ Ex-Arbeitgeber-Klatsch / Novartis-Interna
 - ❌ zvoove-Interna, Code-Snippets aus zvoove Core, Architektur-Diagramme, Kunden-Namen, interne Versions-/Modul-Bezeichnungen
 - ❌ Jogge di Balla-Interna die nicht in der öffentlichen Story stehen (interne Konflikte, finanzielle Details über die offen kommunizierte Gönner-Anzahl hinaus, Mitglieder-Klarnamen ausser sie sind eh öffentlich auf `/team`)
-- ❌ Costa-Rica-/Thailand-Reise-Interna außer dem was im Foto-Teaser-Subtext steht
+- ❌ Costa-Rica-/Thailand-Reise-Interna ausser dem was im Foto-Teaser-Subtext steht
 - ❌ AI-generierte Stock-Fotos / generische Hero-Illustrationen. Wenn ein Bild kein eigenes Foto ist, gehört es nicht aufs Portfolio.
 
 ---
@@ -590,7 +596,6 @@ Stand: 25.04.2026, nach dem Interview.
 - [ ] **Domain kaufen**: `manuelheller.dev` (primary) + `manuelheller.ch` (alias-redirect)
 - [x] **Jogge di Balla-Screenshots** liefern (siehe §5.4) → in `content-input/joggediballa/screenshots/`
 - [ ] **Foto-Auswahl** (6 Bilder): Claude trifft Vorschlag aus den 29 Beispielbildern, Manu approved
-- [ ] **Audio-Loop für Playground B**: Claude sucht lizenzfrei, oder Manu liefert
 - [ ] **Impressum + Datenschutz**: Boilerplate von Claude, Manu reviewt + ergänzt
 - [ ] **Alt-Texte für alle Fotos** (nach Auswahl): Manu reviewt Claude's Vorschläge
 - [ ] **Contact-Form-Integration**: Resend-Account erstellen, API-Key in `.env.local`
@@ -608,7 +613,7 @@ Stand: 25.04.2026, nach dem Interview.
 Dieses Briefing **ergänzt** den Plan, ersetzt ihn nicht. Konkret:
 
 - Plan §15 ("Offene Content-Gaps") wird durch dieses Briefing **vollständig geschlossen**, bis auf die in §14 oben gelisteten TODO-Manu-Items, die explizit Manus Asset-Lieferungen / Domain-Kauf brauchen.
-- Plan §13 Phase 7 (Work) sollte angepasst werden: statt "3–6 Projekte" jetzt **3 Projekte** (siehe §4.1).
+- Plan §13 Phase 7 (Work) sollte angepasst werden: statt "3–6 Projekte" jetzt **2 Projekte** (siehe §4.1). Photography lebt in §6 als eigene Section, nicht im Work-Grid.
 - Plan §13 Phase 6 (About) bekommt durch §2 dieses Briefings den DE-Quelltext; Übersetzungen folgen separat.
 - Plan §6 (Signature-Wow-Momente) bleibt unverändert. Dieses Briefing liefert das Content-Material *für* die Wow-Momente.
 
