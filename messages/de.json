@@ -209,5 +209,57 @@
         ]
       }
     ]
+  },
+  "work": {
+    "sectionLabel": "Section 03 · Work",
+    "headline": "Zwei Projekte. Beide vibecoded.",
+    "subhead": "Keine Werkschau, kein Stack-Buffet. Zwei ernsthafte Webapps von Null auf Live.",
+    "vibecodedStamp": "vibecoded",
+    "projects": [
+      {
+        "id": "portfolio",
+        "title": "Manuels Portfolio",
+        "subtitle": "Toon Fluid",
+        "year": "MMXXVI",
+        "role": "Konzept · Design · Entwicklung · Hosting",
+        "stack": [
+          "Next.js 16",
+          "React 19",
+          "TypeScript",
+          "Tailwind v4",
+          "GSAP",
+          "Lenis",
+          "R3F",
+          "WebGL Shader",
+          "next-intl"
+        ],
+        "description": "Diese Seite. Fullscreen GPU-Fluid-Simulation als Hero, Risograph-inspirierte Editorial-Ästhetik, vibecoded in mehrwöchigen Sessions mit Claude Code.",
+        "metaNote": "Du surfst gerade auf einer GPU-Fluid-Simulation. Kein Iframe, kein Video-Loop, keine Lottie-Datei. Echte Frames.",
+        "ctaLabel": "Du bist schon hier"
+      },
+      {
+        "id": "joggediballa",
+        "title": "Jogge di Balla",
+        "subtitle": "Vereinsplattform",
+        "year": "MMXXIV–MMXXVI",
+        "role": "Konzept · Design · Fullstack · Hosting",
+        "stack": [
+          "React 19",
+          "Vite",
+          "TypeScript",
+          "tRPC",
+          "Drizzle ORM",
+          "MySQL",
+          "Tailwind",
+          "shadcn/ui"
+        ],
+        "description": "Eine massgeschneiderte All-in-One-Vereinsplattform: von der Mitgliederverwaltung bis zum Live-Twitch-Overlay, vibecoded mit modernem TypeScript-Stack.",
+        "screenshot": {
+          "alt": "Screenshot der öffentlichen Startseite von joggediballa.ch",
+          "caption": "joggediballa.ch · home"
+        },
+        "ctaLabel": "Case Study"
+      }
+    ]
   }
 }

@@ -33,7 +33,13 @@ export function AiPinselQuote() {
         {hasEmphasis ? (
           <span className="block">
             {match[0]}
-            <OverprintReveal text={emphasisWord} className="inline-block align-baseline" />
+            <OverprintReveal
+              text={emphasisWord}
+              className="inline-block align-baseline"
+              threshold={0.6}
+              delay={0.2}
+              stagger={0.07}
+            />
             {match[1]}
           </span>
         ) : (

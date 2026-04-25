@@ -240,3 +240,69 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   returns `false`, so server HTML always contains the 14-span ghost
   composition; the client flips after mount). Out of scope for Phase 6
   — flagged here so the next pass at OverprintReveal sees it.
+
+## Phase 7 deviations
+
+- **No 3D toon-cel-shaded planes**: Plan §6.4 calls for a 3D Toon-Shader
+  gallery in the persistent R3F Canvas. With briefing §4.1's reduction
+  to 2 projects, a separate 3D scene next to the hero fluid-sim would
+  compete for attention and cost ~50kB+ bundle. Replaced with DOM/SVG
+  editorial cards that integrate INTO the existing fluid-sim by
+  dispatching colored splats — the cards become force-source inputs
+  rather than a parallel WebGL world. Toon-shader experiments may move
+  to Phase 10 Playground.
+- **`/work/[slug]` MDX routes deferred to Phase 8**: Briefing §4 has
+  two projects, only one (Jogge di Balla) needs a detail page, and
+  that detail page IS the Phase 8 case study deliverable. The Portfolio
+  card is self-referential. Building `/work/[slug]` infrastructure in
+  Phase 7 with no consumer would have been speculative scaffolding.
+- **Fluid-Ink-Wipe page-transition deferred to Phase 8**: Plan §6.4
+  describes the transition as the click-target reveal. With no real
+  routing destination in Phase 7, the transition primitive lands in
+  Phase 8 paired with the case-study route.
+- **Splat-injection bus (`src/lib/fluidBus.ts`) over context**: Cards
+  need to nudge the global FluidSim without holding an orchestrator
+  reference. Used a tiny pub/sub module rather than React context —
+  the orchestrator lives in a persistent root-layout Canvas, the cards
+  live deep in page.tsx, and the dispatch is fire-and-forget. Context
+  would have required threading a provider through the entire tree
+  for one event direction. Saves ~80 LOC and a re-render path.
+- **Pause-discards-splats**: When `#hero` leaves viewport,
+  FluidOrchestrator pauses (Phase 4 deviation). To avoid a glitch where
+  queued hover-splats from Work cards all dump at once on scroll-back,
+  the queue is cleared in `step()`'s pause early-return. Hover splats
+  while user is in Work section are silently dropped — acceptable: the
+  big click-burst on the Portfolio card lands AFTER smooth-scroll
+  completes (350ms timeout in `WorkCard.onClick`), by which time
+  IntersectionObserver has resumed the sim.
+- **Generative Portfolio card visual (no real screenshot)**: The
+  Portfolio card is a meta-card representing this site. Embedding a
+  real screenshot of the hero would force re-shooting at every iteration.
+  Shipped `src/components/ui/PortfolioCardVisual.tsx` — an SVG-only
+  abstraction (paper backing + 4 spot-color blurred blobs + halftone
+  pattern + signature mark) that captures the visual language without
+  pinning to a frame. Phase 11 swaps in a real screenshot once the hero
+  is final.
+- **Joggediballa CTA target is a not-yet-existent anchor**:
+  `#case-study` doesn't exist in Phase 7. The browser's default
+  behaviour for missing fragments is to do nothing, so the link is
+  inert until Phase 8 ships the section. No 404, no error, just a
+  no-op click — clean degradation.
+- **`vibecoded` stamp is a paper-bg shadow-pill, not a rose-fill pill**:
+  Skills section's stamp (Phase 6) lives ON the spot-rose pill colour
+  for visual emphasis. On Work cards the stamp sits in the corner of
+  the media frame, where rose-fill would clash with the screenshot
+  hues. Used `bg-paper text-ink shadow-[2px_2px_0_var(--color-ink)]`
+  for a different "Riso receipt" feel. Same data, different context,
+  intentionally different visual.
+- **One-off sharp script for screenshot variants**: Same pattern as
+  Phase 6 portrait. Inline `node -e` against the resolved sharp install
+  path rather than adding a script. Phase 9 will generalize this into
+  `scripts/optimize-assets.ts`.
+- **`dev.cmd` shipped for Windows pnpm/Corepack bypass**: Manuel's
+  Windows machine has WSL installed; pnpm 10.x picks up WSL's
+  `bash.exe` from PATH and routes scripts through Linux Node, breaking
+  `pnpm dev` (loads Linux SWC binaries instead of Windows). The cmd
+  shim invokes `node node_modules/next/dist/bin/next dev` directly,
+  bypassing pnpm. CI on Linux is unaffected. Documented inside the
+  file itself for future-Manuel.
