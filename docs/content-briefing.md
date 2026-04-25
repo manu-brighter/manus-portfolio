@@ -269,7 +269,7 @@ Manueller Story-Text liegt in `content-input/joggediballa/joggediballa-story.mdx
    - **Dynamisches Berechtigungssystem**: granulare Rechte (`edit_events`, `manage_sponsors`, `edit_shotcounter`...) pro Rolle in der "Berechtigungen-Card" zuweisbar, ohne Code-Änderung. Backend prüft jeden tRPC-Call durch eine eigene Middleware (`requirePermission()`).
    - **Mitglieder- + Anwesenheitsverwaltung**: pro Event generierbare Anwesenheitsliste, Daten fliessen in eine grafische Statistik die zeigt wer am aktivsten ist. Fördert Übersicht und ein bisschen internen Wettbewerb.
    - **Gönnermitglied-Verwaltung**: 68 Sponsoren über das System. Status (aktiv / abgelaufen / neu) wird automatisch berechnet und auf der öffentlichen Sponsoren-Seite live gespiegelt.
-   - **Smart-Thumbnail-Generierung**: erkennt Hochkant-Flyer automatisch, zeigt sie vollständig (`object-fit: contain`) und berechnet die dominante Farbe für den Hintergrund. Kein Cropping, keine hässlichen Ränder.
+   - **Live-Anwesenheits-Statistik***: Entnimmt Daten aus der Anwesenheitsverwaltung und baut daraus visuelle Grafiken um dem User einfach die wichtigsten Daten zu vermitteln. 
    - **Harassenlauf-Modul**: Online-Anmeldung für Teams, Daten landen strukturiert direkt im Admin-Dashboard.
 
 5. **Highlight 2: "Schlag den Kassier" Live-Overlay** (sichtbarstes Feature, sekundärer Highlight-Block)
@@ -298,7 +298,7 @@ Manueller Story-Text liegt in `content-input/joggediballa/joggediballa-story.mdx
 - [ ] **Shotcounter** (`/shotcounter`), Desktop
 - [ ] **Admin-Dashboard** (eingeloggt): repräsentative Übersicht, plus Berechtigungen-Card als zweites Asset (das ist der Tech-Highlight). Daten ggf. mit dummies / blur falls personenbezogen.
 - [ ] **Twitch-Overlay** im Stream-Look (16:9, dunkler Hintergrund) + ggf. Control-Panel daneben
-- [ ] **Smart-Thumbnail-Beispiel**: Event-Card mit Hochkant-Flyer + dynamischer Hintergrund-Farbe (Demonstration des Features)
+- [ ] **Live-Anwesenheits-Statistik**: (`/attendance/statistics`), Desktop
 
 Fallback wenn Screenshots fehlen: Shader-generierte Mockups mit "PLACEHOLDER" eingestempelt im Riso-Stil. Das ist ehrlicher als gefakte Screens.
 
@@ -328,7 +328,7 @@ SONY α7 IV · 24–600mm · seit 2023
 
 **Anzahl**: 6 Bilder im Teaser (mittlere Awwwards-Range). Vollscreen-Reveals beim Scroll, jedes mit Riso-Duotone-Shader-Treatment + prozeduralem Halbton.
 
-**Quelle**: Manuel hat **24 Beispielbilder** in `Downloads\portfolio input\Example Bilder` geliefert. Diese sollen unter `content-input/photography/source/` ins Repo-Working-Directory wandern (gitignored, siehe §10).
+**Quelle**: Manuel hat **29 Beispielbilder** in `Downloads\portfolio input\Example Bilder` geliefert. Diese sollen unter `content-input/photography/source/` ins Repo-Working-Directory wandern (gitignored, siehe §10).
 
 **Auswahl-Strategie für Claude**:
 Wähle 6 Bilder die **Vielfalt zeigen**, aufgeteilt nach Manuels Stärken-Hierarchie:
@@ -474,20 +474,20 @@ Alle Manu-gelieferten Roh-Assets (Fotos, Screenshots, Profilfoto, Audio-Loops, a
 ```
 content-input/                       # gitignored, lokales Working-Directory
 ├─ profile/
-│   └─ Profilfoto.JPEG               # ← bereits geliefert (von Manu kopieren)
+│   └─ profile-picture.jpg               # ← bereits geliefert (von Manu kopieren)
 ├─ photography/
-│   └─ source/                       # die 24 (oder mehr) Original-JPEGs
+│   └─ source/                       # die 29 (oder mehr) Original-JPEGs
 │       └─ DSC*.jpg
 ├─ joggediballa/
 │   ├─ joggediballa-story.mdx        # ← Manu's Original-Story (siehe §5)
 │   └─ screenshots/                  # ← TODO Manu (siehe §5.4)
-│       ├─ home.png
-│       ├─ events.png
-│       ├─ team.png
-│       ├─ shotcounter.png
-│       ├─ admin-dashboard.png
-│       ├─ overlay-stream.png
-│       └─ smart-thumbnail.png
+│       ├─ home.jpg
+│       ├─ events.jpg
+│       ├─ team.jpg
+│       ├─ shotcounter.jpg
+│       ├─ admin-dashboard.jpg
+│       ├─ overlay-stream.jpg
+│       └─ statistic.jpg
 └─ audio/
     └─ playground-loop.mp3           # ← Claude sucht oder Manu liefert
 ```
@@ -589,7 +589,7 @@ Stand: 25.04.2026, nach dem Interview.
 
 - [ ] **Domain kaufen**: `manuelheller.dev` (primary) + `manuelheller.ch` (alias-redirect)
 - [ ] **Jogge di Balla-Screenshots** liefern (siehe §5.4) → in `content-input/joggediballa/screenshots/`
-- [ ] **Foto-Auswahl** (6 Bilder): Claude trifft Vorschlag aus den 24 Beispielbildern, Manu approved
+- [ ] **Foto-Auswahl** (6 Bilder): Claude trifft Vorschlag aus den 29 Beispielbildern, Manu approved
 - [ ] **Audio-Loop für Playground B**: Claude sucht lizenzfrei, oder Manu liefert
 - [ ] **Impressum + Datenschutz**: Boilerplate von Claude, Manu reviewt + ergänzt
 - [ ] **Alt-Texte für alle Fotos** (nach Auswahl): Manu reviewt Claude's Vorschläge
