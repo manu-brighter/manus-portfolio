@@ -33,3 +33,7 @@ test-results/
 
 # TypeScript incremental build cache
 *.tsbuildinfo
+
+# Raw content inputs (large photos, screenshots, audio) — not for git
+content-input/*
+!content-input/README.md
