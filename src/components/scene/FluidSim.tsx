@@ -3,6 +3,7 @@
 import { useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import { isLoaderComplete } from "@/components/ui/Loader";
+import { subscribeToSplats } from "@/lib/fluidBus";
 import type { TierConfig } from "@/lib/gpu";
 import { subscribe } from "@/lib/raf";
 import { FluidOrchestrator, type PointerState } from "./FluidOrchestrator";
@@ -136,6 +137,15 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
     };
     window.addEventListener("loader-complete", onLoaderComplete, { once: true });
     return () => window.removeEventListener("loader-complete", onLoaderComplete);
+  }, []);
+
+  // External splat bus — Work-cards (and future callers) dispatch
+  // colored bursts via `dispatchSplat()` from src/lib/fluidBus.ts.
+  // Splats land in FluidOrchestrator's queue and are drained next step.
+  useEffect(() => {
+    return subscribeToSplats((req) => {
+      orchestratorRef.current?.injectSplat(req.x, req.y, req.color, req.dx ?? 0, req.dy ?? 0);
+    });
   }, []);
 
   // Pause sim when hero section leaves viewport
