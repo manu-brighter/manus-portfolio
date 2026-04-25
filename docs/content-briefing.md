@@ -588,7 +588,7 @@ Stand: 25.04.2026, nach dem Interview.
 ### Muss vor Go-Live geklärt sein
 
 - [ ] **Domain kaufen**: `manuelheller.dev` (primary) + `manuelheller.ch` (alias-redirect)
-- [ ] **Jogge di Balla-Screenshots** liefern (siehe §5.4) → in `content-input/joggediballa/screenshots/`
+- [x] **Jogge di Balla-Screenshots** liefern (siehe §5.4) → in `content-input/joggediballa/screenshots/`
 - [ ] **Foto-Auswahl** (6 Bilder): Claude trifft Vorschlag aus den 29 Beispielbildern, Manu approved
 - [ ] **Audio-Loop für Playground B**: Claude sucht lizenzfrei, oder Manu liefert
 - [ ] **Impressum + Datenschutz**: Boilerplate von Claude, Manu reviewt + ergänzt
@@ -597,7 +597,6 @@ Stand: 25.04.2026, nach dem Interview.
 
 ### Nice-to-have, kann nach Go-Live
 
-- [ ] **Custom-Email** `manu@manuelheller.dev` via Cloudflare Email Routing
 - [ ] **Aktualisierter CV** als PDF unter `/cv` (Riso-Print-Treatment). Siehe `docs/cv.md` für den modernisierten 2026er Entwurf als Schreibgrundlage.
 - [ ] **FR/IT Native-Review** (aktuell nur Claude-übersetzt mit Disclaimer)
 - [ ] **"Currently…"-Block aktualisieren** alle ~6 Monate
