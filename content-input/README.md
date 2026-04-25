@@ -10,9 +10,9 @@
 content-input/
 ├─ README.md                          ← du liest sie gerade
 ├─ profile/
-│   └─ Profilfoto.JPEG                ← Manuels Portraitfoto (für About-Section)
+│   └─ profile-picture.jpg            ← Manuels Portraitfoto (für About-Section)
 ├─ photography/
-│   └─ source/                        ← die ~24 Original-JPEGs aus
+│   └─ source/                        ← die ~29 Original-JPEGs aus
 │                                       Downloads\portfolio input\Example Bilder
 │       ├─ DSC01805.jpg
 │       ├─ DSC01833.jpg
@@ -20,13 +20,13 @@ content-input/
 ├─ joggediballa/
 │   ├─ joggediballa-story.mdx         ← Original-Story von Manu (Quelle für Case Study)
 │   └─ screenshots/                   ← TODO Manu (siehe content-briefing.md §5.4)
-│       ├─ home.png
-│       ├─ events.png
-│       ├─ team.png
-│       ├─ shotcounter.png
-│       ├─ admin-dashboard.png
-│       ├─ overlay-stream.png
-│       └─ smart-thumbnail.png
+│       ├─ home.jpg
+│       ├─ events.jpg
+│       ├─ team.jpg
+│       ├─ shotcounter.jpg
+│       ├─ admin-dashboard.jpg
+│       ├─ overlay-stream.jpg
+│       └─ statistic.jpg
 └─ audio/
     └─ playground-loop.mp3            ← lizenzfreier Audio-Loop für Playground B
                                         (Claude sucht oder Manu liefert)
@@ -38,10 +38,10 @@ content-input/
 
 ### Manu (manuell, einmalig)
 
-- [ ] `profile/Profilfoto.JPEG` — kopiere von `Downloads\portfolio input\Profilfoto\Profilfoto.JPEG`
-- [ ] `photography/source/*.jpg` — kopiere alle JPEGs aus `Downloads\portfolio input\Example Bilder\`
-- [ ] `joggediballa/joggediballa-story.mdx` — kopiere von `Downloads\portfolio input\joggediballa-story.mdx`
-- [ ] `joggediballa/screenshots/*.png` — neu erstellen, sobald Joggediballa-Plattform gescreenshotet ist (Liste siehe `docs/content-briefing.md` §5.4)
+- [x] `profile/profile-picture.jpg` — kopiere von `Downloads\portfolio input\Profilfoto\Profilfoto.JPEG`
+- [x] `photography/source/*.jpg` — kopiere alle JPEGs aus `Downloads\portfolio input\Example Bilder\`
+- [x] `joggediballa/joggediballa-story.mdx` — kopiere von `Downloads\portfolio input\joggediballa-story.mdx`
+- [x] `joggediballa/screenshots/*.jpg` — neu erstellen, sobald Joggediballa-Plattform gescreenshotet ist (Liste siehe `docs/content-briefing.md` §5.4)
 
 ### Claude (automatisch, beim Implementieren)
 

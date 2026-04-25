@@ -596,7 +596,7 @@ Stand: 25.04.2026, nach dem Interview.
 - [ ] **Contact-Form-Integration**: Resend-Account erstellen, API-Key in `.env.local`
 
 ### Nice-to-have, kann nach Go-Live
-
+ und 
 - [ ] **Aktualisierter CV** als PDF unter `/cv` (Riso-Print-Treatment). Siehe `docs/cv.md` für den modernisierten 2026er Entwurf als Schreibgrundlage.
 - [ ] **FR/IT Native-Review** (aktuell nur Claude-übersetzt mit Disclaimer)
 - [ ] **"Currently…"-Block aktualisieren** alle ~6 Monate
