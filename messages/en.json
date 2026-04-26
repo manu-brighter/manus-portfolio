@@ -119,11 +119,26 @@
   "currently": {
     "label": "Currently",
     "items": [
-      { "verb": "working on", "value": "diese Seite hier" },
-      { "verb": "learning", "value": "React 19 · R3F 9 · WebGPU-Shader" },
-      { "verb": "shooting", "value": "Wildlife in Costa Rica & Thailand" },
-      { "verb": "driving", "value": "Audi S5 B8.5 (Tuning-Projekt)" },
-      { "verb": "chasing", "value": "den zvoove Ping-Pong-Champion-Titel" }
+      {
+        "verb": "working on",
+        "value": "diese Seite hier"
+      },
+      {
+        "verb": "learning",
+        "value": "React 19 · R3F 9 · WebGPU-Shader"
+      },
+      {
+        "verb": "shooting",
+        "value": "Wildlife in Costa Rica & Thailand"
+      },
+      {
+        "verb": "driving",
+        "value": "Audi S5 B8.5 (Tuning-Projekt)"
+      },
+      {
+        "verb": "chasing",
+        "value": "den zvoove Ping-Pong-Champion-Titel"
+      }
     ]
   },
   "skills": {
@@ -142,10 +157,18 @@
         "label": "Daily Driver · Production",
         "weight": "xl",
         "items": [
-          { "name": "PHP" },
-          { "name": "Vue" },
-          { "name": "MariaDB · MySQL" },
-          { "name": "HTML · CSS · Webdesign-Eye" }
+          {
+            "name": "PHP"
+          },
+          {
+            "name": "Vue"
+          },
+          {
+            "name": "MariaDB · MySQL"
+          },
+          {
+            "name": "HTML · CSS · Webdesign-Eye"
+          }
         ]
       },
       {
@@ -153,13 +176,27 @@
         "label": "Production · Operations",
         "weight": "l",
         "items": [
-          { "name": "Cypress" },
-          { "name": "Docker" },
-          { "name": "GitLab" },
-          { "name": "Yii" },
-          { "name": "OpenAPI · Swagger" },
-          { "name": "nginx · Linux-Server-Admin" },
-          { "name": "Vite" }
+          {
+            "name": "Cypress"
+          },
+          {
+            "name": "Docker"
+          },
+          {
+            "name": "GitLab"
+          },
+          {
+            "name": "Yii"
+          },
+          {
+            "name": "OpenAPI · Swagger"
+          },
+          {
+            "name": "nginx · Linux-Server-Admin"
+          },
+          {
+            "name": "Vite"
+          }
         ]
       },
       {
@@ -168,16 +205,46 @@
         "description": "Was ich mit AI-Workflow baue, nicht spontan ohne.",
         "weight": "l",
         "items": [
-          { "name": "TypeScript", "vibecoded": true },
-          { "name": "React", "vibecoded": true },
-          { "name": "Next.js", "vibecoded": true },
-          { "name": "Tailwind CSS", "vibecoded": true },
-          { "name": "tRPC", "vibecoded": true },
-          { "name": "Drizzle ORM", "vibecoded": true },
-          { "name": "shadcn/ui", "vibecoded": true },
-          { "name": "GSAP", "vibecoded": true },
-          { "name": "Three.js · React Three Fiber", "vibecoded": true },
-          { "name": "Lenis", "vibecoded": true }
+          {
+            "name": "TypeScript",
+            "vibecoded": true
+          },
+          {
+            "name": "React",
+            "vibecoded": true
+          },
+          {
+            "name": "Next.js",
+            "vibecoded": true
+          },
+          {
+            "name": "Tailwind CSS",
+            "vibecoded": true
+          },
+          {
+            "name": "tRPC",
+            "vibecoded": true
+          },
+          {
+            "name": "Drizzle ORM",
+            "vibecoded": true
+          },
+          {
+            "name": "shadcn/ui",
+            "vibecoded": true
+          },
+          {
+            "name": "GSAP",
+            "vibecoded": true
+          },
+          {
+            "name": "Three.js · React Three Fiber",
+            "vibecoded": true
+          },
+          {
+            "name": "Lenis",
+            "vibecoded": true
+          }
         ]
       },
       {
@@ -186,14 +253,30 @@
         "description": "Kenne ich, nutze ich nicht täglich.",
         "weight": "m",
         "items": [
-          { "name": "Java" },
-          { "name": "Python" },
-          { "name": "PowerShell" },
-          { "name": "Bash" },
-          { "name": "Git" },
-          { "name": "Lightroom" },
-          { "name": "Photoshop" },
-          { "name": "DaVinci Resolve" }
+          {
+            "name": "Java"
+          },
+          {
+            "name": "Python"
+          },
+          {
+            "name": "PowerShell"
+          },
+          {
+            "name": "Bash"
+          },
+          {
+            "name": "Git"
+          },
+          {
+            "name": "Lightroom"
+          },
+          {
+            "name": "Photoshop"
+          },
+          {
+            "name": "DaVinci Resolve"
+          }
         ]
       },
       {
@@ -201,12 +284,74 @@
         "label": "Craft · Eye",
         "weight": "m",
         "items": [
-          { "name": "Fotografie" },
-          { "name": "Videoschnitt" },
-          { "name": "Grafikdesign" },
-          { "name": "Live Web Fluid Simulations" },
-          { "name": "Shader-Spielereien" }
+          {
+            "name": "Fotografie"
+          },
+          {
+            "name": "Videoschnitt"
+          },
+          {
+            "name": "Grafikdesign"
+          },
+          {
+            "name": "Live Web Fluid Simulations"
+          },
+          {
+            "name": "Shader-Spielereien"
+          }
         ]
+      }
+    ]
+  },
+  "work": {
+    "sectionLabel": "Section 03 · Work",
+    "headline": "Zwei Projekte. Beide vibecoded.",
+    "subhead": "Keine Werkschau, kein Stack-Buffet. Zwei ernsthafte Webapps von Null auf Live.",
+    "vibecodedStamp": "vibecoded",
+    "projects": [
+      {
+        "id": "portfolio",
+        "title": "Manuels Portfolio",
+        "subtitle": "Toon Fluid",
+        "year": "MMXXVI",
+        "role": "Konzept · Design · Entwicklung · Hosting",
+        "stack": [
+          "Next.js 16",
+          "React 19",
+          "TypeScript",
+          "Tailwind v4",
+          "GSAP",
+          "Lenis",
+          "R3F",
+          "WebGL Shader",
+          "next-intl"
+        ],
+        "description": "Diese Seite. Fullscreen GPU-Fluid-Simulation als Hero, Risograph-inspirierte Editorial-Ästhetik, vibecoded in mehrwöchigen Sessions mit Claude Code.",
+        "metaNote": "Du surfst gerade auf einer GPU-Fluid-Simulation. Kein Iframe, kein Video-Loop, keine Lottie-Datei. Echte Frames.",
+        "ctaLabel": "Du bist schon hier"
+      },
+      {
+        "id": "joggediballa",
+        "title": "Jogge di Balla",
+        "subtitle": "Vereinsplattform",
+        "year": "MMXXIV–MMXXVI",
+        "role": "Konzept · Design · Fullstack · Hosting",
+        "stack": [
+          "React 19",
+          "Vite",
+          "TypeScript",
+          "tRPC",
+          "Drizzle ORM",
+          "MySQL",
+          "Tailwind",
+          "shadcn/ui"
+        ],
+        "description": "Eine massgeschneiderte All-in-One-Vereinsplattform: von der Mitgliederverwaltung bis zum Live-Twitch-Overlay, vibecoded mit modernem TypeScript-Stack.",
+        "screenshot": {
+          "alt": "Screenshot der öffentlichen Startseite von joggediballa.ch",
+          "caption": "joggediballa.ch · home"
+        },
+        "ctaLabel": "Case Study"
       }
     ]
   }

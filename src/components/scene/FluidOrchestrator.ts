@@ -245,6 +245,17 @@ export class FluidOrchestrator {
   private splatColorIndex = 0;
   private ambientActive = false;
 
+  // External splat queue — drained inside step(). Used by Work-cards to
+  // inject colored bursts on click. Coordinates are normalised (0..1)
+  // matching the pointer convention.
+  private pendingSplats: Array<{
+    x: number;
+    y: number;
+    dx: number;
+    dy: number;
+    color: readonly [number, number, number];
+  }> = [];
+
   // Uniform cache: WebGLProgram -> (uniform name -> location)
   // Using a nested Map because WebGLProgram.toString() is not unique.
   private uniformCache = new Map<WebGLProgram, Map<string, WebGLUniformLocation | null>>();
@@ -573,8 +584,30 @@ export class FluidOrchestrator {
     return colors[index] as readonly [number, number, number];
   }
 
+  // Public splat-injection API for external callers (e.g. Work-cards
+  // dispatching a click-burst). Coordinates are normalised 0..1 with
+  // y measured from the bottom (same convention as `pointer`). `color`
+  // can be a Riso spot-name or a raw normalised RGB tuple. dx/dy give
+  // the velocity injection — pass radial-outward values for a "burst",
+  // (0,0) for a stationary dye dump.
+  injectSplat(
+    x: number,
+    y: number,
+    color: keyof typeof SPOT_COLORS | readonly [number, number, number],
+    dx = 0,
+    dy = 0,
+  ): void {
+    const resolved = typeof color === "string" ? SPOT_COLORS[color] : color;
+    this.pendingSplats.push({ x, y, dx, dy, color: resolved });
+  }
+
   step(dt: number, elapsed: number, pointer: PointerState): void {
-    if (this.paused) return;
+    if (this.paused) {
+      // Don't accumulate stale splats while paused — they'd all dump
+      // at once when the sim resumes and look like a glitch.
+      this.pendingSplats.length = 0;
+      return;
+    }
 
     const gl = this.gl;
     this.frameCount++;
@@ -608,6 +641,15 @@ export class FluidOrchestrator {
       // Splat from pointer
       if (pointer.moved || pointer.down) {
         this.runSplat(pointer.x, pointer.y, pointer.dx, pointer.dy, this.nextSplatColor());
+      }
+
+      // Drain external splats queued via injectSplat() — Work-card click
+      // bursts land here on the next step after dispatch.
+      if (this.pendingSplats.length > 0) {
+        for (const s of this.pendingSplats) {
+          this.runSplat(s.x, s.y, s.dx, s.dy, s.color);
+        }
+        this.pendingSplats.length = 0;
       }
 
       // Ambient motion when idle — multiple wandering points
