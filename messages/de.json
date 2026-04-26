@@ -261,5 +261,147 @@
         "ctaLabel": "Case Study"
       }
     ]
+  },
+  "caseStudy": {
+    "sectionLabel": "Section 04 · Case Study",
+    "eyebrow": "Deep-Dive · Joggediballa",
+    "headline": "Vom Vereins-Chaos zur eigenen Plattform.",
+    "subhead": "Excel-Listen raus, tRPC rein. Eine massgeschneiderte Webapp für einen 9-Mitglieder-Verein, weil's ging.",
+    "hook": "Vereine kämpfen alle mit demselben Mist: Excel-Listen, statische Websites, isolierte Tools. Für Jogge di Balla habe ich das aufgeräumt — eine massgeschneiderte Plattform, die von Mitgliederverwaltung bis Twitch-Overlay alles abdeckt. Vibecoded, selbst gehostet, übertrieben.",
+    "context": {
+      "label": "Was ist Jogge di Balla?",
+      "facts": [
+        { "key": "Gegründet", "value": "05.08.2022 in Brislach" },
+        { "key": "Aktive Mitglieder", "value": "9" },
+        { "key": "Gönner verwaltet", "value": "68" },
+        { "key": "Events / Jahr", "value": "4–8" },
+        { "key": "Instagram-Reichweite", "value": "1067+ Follower · ~100k Views / 30 Tage" }
+      ],
+      "story": [
+        "Idee zur Coronazeit: drei Freunde, nichts ging, also haben wir ausgefallene Events organisiert. Schlag den Kassier (an «Schlag den Raab» angelehnt, jeder kann sich gegen unseren Vereinskassier bewerben). Silvester 2.0 (im Frühling, für alle, die scheisse ins neue Jahr gestartet sind). Apres Ski Party (gab's so in der Region noch nicht).",
+        "Meine Rolle: Vize-Präsident, Web-Entwickler, Vereinsfotograf, Kameramann, Social-Media-Manager. Weil ich das Skillset hatte und Perfektionist genug bin, aus einer Vereins-Website eine selbst gehostete Webapp zu machen."
+      ]
+    },
+    "platform": {
+      "label": "Die Plattform",
+      "intro": "Stark typisierter Stack, End-to-End TypeScript, von der DB bis ins UI. Selbst gehostet auf einem Linux-Root-Server.",
+      "stack": [
+        {
+          "tech": "React 19 · Vite",
+          "use": "Frontend & Build",
+          "why": "Reaktiv, schnell, top DX."
+        },
+        {
+          "tech": "TypeScript",
+          "use": "Sprache (Fullstack)",
+          "why": "End-to-End-Typensicherheit, Bugs sterben vor dem Commit."
+        },
+        {
+          "tech": "tRPC",
+          "use": "API-Layer",
+          "why": "Frontend ↔ Backend ohne Schema-Doppelarbeit."
+        },
+        {
+          "tech": "Drizzle ORM · MySQL",
+          "use": "Datenbank",
+          "why": "Leichtgewichtig, schnell, volle TS-Inferenz auf SQL-Queries."
+        },
+        {
+          "tech": "Tailwind · shadcn/ui",
+          "use": "Styling & Komponenten",
+          "why": "Konsistent, accessible, ohne Custom-Design-System-Aufbau."
+        }
+      ],
+      "modules": "Module: Mitglieder- + Anwesenheitsverwaltung · Gönnerverwaltung · Event-Management mit Smart-Thumbnail-Logic · Finanzen · Live-Twitch-Overlay-Tooling · Harassenlauf-Anmeldung."
+    },
+    "highlights": {
+      "label": "Highlights",
+      "items": [
+        {
+          "id": "admin",
+          "kicker": "Highlight 01 · Tech-Substanz",
+          "title": "Das Admin-Dashboard",
+          "lede": "Für Besucher unsichtbar, für den Verein das Herzstück. Hier laufen alle Fäden zusammen.",
+          "screenshot": "admin-dashboard",
+          "screenshotAlt": "Admin-Dashboard mit Berechtigungs-Card und Mitgliederliste",
+          "features": [
+            {
+              "title": "Dynamisches Berechtigungssystem",
+              "body": "Granulare Rechte (edit_events, manage_sponsors, edit_shotcounter, …) per Card pro Rolle zuweisbar — ohne Code-Änderung. Backend prüft jeden tRPC-Call durch eine eigene requirePermission()-Middleware."
+            },
+            {
+              "title": "Anwesenheitsverwaltung mit Statistik",
+              "body": "Pro Event generierbare Anwesenheitsliste, Daten fliessen direkt in eine grafische Statistik. Fördert Übersicht und ein bisschen internen Wettbewerb."
+            },
+            {
+              "title": "Gönner-Lifecycle",
+              "body": "68 Sponsoren über das System. Status (aktiv / abgelaufen / neu) wird automatisch berechnet und auf der öffentlichen Sponsoren-Seite live gespiegelt."
+            }
+          ]
+        },
+        {
+          "id": "overlay",
+          "kicker": "Highlight 02 · Sichtbarstes Feature",
+          "title": "«Schlag den Kassier» Live-Overlay",
+          "lede": "Custom Twitch-Overlay direkt in die Plattform integriert. Statt teurer externer Dienste: einfach selbst gebaut.",
+          "screenshot": "overlay-stream",
+          "screenshotAlt": "Twitch-Overlay im Stream mit Live-Score und Vereinsdesign",
+          "features": [
+            {
+              "title": "Versteckte URL als Browser-Source",
+              "body": "OBS bindet /overlay/sdk ein, ein Control-Panel auf /overlay/sdk/control steuert den Spielstand live."
+            },
+            {
+              "title": "Echtzeit ohne Page-Reload",
+              "body": "tRPC-Polling synchronisiert das Overlay im Stream sofort. Goldener Shimmer-Effekt für Sieger, automatische Berechnung «mathematisch nicht mehr einholbar»."
+            },
+            {
+              "title": "Reichweite ehrlich klein",
+              "body": "~15–20 concurrent Viewer, ~100 total. Das Tooling ist trotzdem solide gebaut — und übertragbar."
+            }
+          ]
+        }
+      ]
+    },
+    "publicLayer": {
+      "label": "Öffentliche Schicht",
+      "screenshots": [
+        {
+          "slug": "home",
+          "alt": "Öffentliche Startseite von joggediballa.ch",
+          "caption": "Startseite — alle Inhalte aus dem Dashboard befüllbar"
+        },
+        {
+          "slug": "events",
+          "alt": "Events-Übersicht mit dynamischen Event-Cards",
+          "caption": "Events — inkl. Smart-Thumbnail-Logic für Hochkant-Flyer"
+        },
+        {
+          "slug": "team",
+          "alt": "Team-Seite mit Mitgliederprofilen",
+          "caption": "Team — Profile direkt aus dem Mitglieder-Modul"
+        },
+        {
+          "slug": "shotcounter",
+          "alt": "Shotcounter-Public-Seite",
+          "caption": "Shotcounter — laufender Vereins-Gag mit Live-Daten"
+        },
+        {
+          "slug": "statistic",
+          "alt": "Anwesenheitsstatistik mit Balkendiagrammen",
+          "caption": "Anwesenheits-Statistik — visuell aufbereitet aus dem Anwesenheitssystem"
+        }
+      ]
+    },
+    "reflection": {
+      "label": "Was ich heute anders machen würde",
+      "body": "Extrem viel Zeit in Testing und Bugfixes geflossen. Heute würde ich von Anfang an mehr automatisierte Tests einbauen, plus AI-gestützte Test-Generation, um schneller iterieren zu können."
+    },
+    "footerLink": {
+      "label": "Live im Einsatz",
+      "url": "https://joggediballa.ch",
+      "domain": "joggediballa.ch",
+      "external": "öffnet in neuem Tab"
+    }
   }
 }
