@@ -31,7 +31,13 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
 
   return (
     <html lang={locale}>
-      <body className="flex min-h-dvh flex-col">
+      {/* suppressHydrationWarning: browser extensions like ColorZilla
+          and Grammarly inject attributes onto <body> before React
+          hydrates (e.g. `cz-shortcut-listen`). These can't be
+          predicted server-side, so we silence the mismatch warning
+          for the body element only — children are still validated
+          normally. Standard Next.js pattern for this case. */}
+      <body className="flex min-h-dvh flex-col" suppressHydrationWarning>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <MotionProvider>
             <SceneProvider>
