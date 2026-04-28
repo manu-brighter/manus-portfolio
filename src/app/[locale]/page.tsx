@@ -1,6 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import { use } from "react";
 import { About } from "@/components/sections/About";
+import { CaseStudy } from "@/components/sections/CaseStudy";
 import { Hero } from "@/components/sections/Hero";
 import { Skills } from "@/components/sections/Skills";
 import { Work } from "@/components/sections/Work";
@@ -24,6 +25,7 @@ export default function HomePage({ params }: HomePageProps) {
       <About />
       <Skills />
       <Work />
+      <CaseStudy />
     </>
   );
 }

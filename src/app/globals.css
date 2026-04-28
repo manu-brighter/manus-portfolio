@@ -234,6 +234,14 @@
     text-wrap: pretty;
   }
 
+  .type-body-sm {
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    line-height: 1.55;
+    max-width: 70ch;
+    text-wrap: pretty;
+  }
+
   /* Mono UPPERCASE label — meta-info, eyebrows, dataline. */
   .type-label {
     font-family: var(--font-mono);

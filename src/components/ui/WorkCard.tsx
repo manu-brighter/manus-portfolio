@@ -2,6 +2,7 @@
 
 import gsap from "gsap";
 import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from "react";
+import { useLenis } from "@/hooks/useLenis";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { dispatchSplat, type SplatColorName } from "@/lib/fluidBus";
 import { dur, ease } from "@/lib/motion/tokens";
@@ -110,6 +111,7 @@ export function WorkCard(props: WorkCardProps) {
   } = props;
 
   const reducedMotion = useReducedMotion();
+  const lenis = useLenis();
 
   const rootRef = useRef<HTMLElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -285,8 +287,19 @@ export function WorkCard(props: WorkCardProps) {
           }
         }, 350);
       }
+      return;
     }
-    // anchor: native <a href> handles the scroll
+    // anchor → Lenis smooth-scroll if available, native fallback otherwise.
+    // No splat burst: anchor destinations live below the hero, where the
+    // fluid-sim is paused and dispatched splats would be silently dropped.
+    e.preventDefault();
+    const targetEl = document.querySelector<HTMLElement>(click.target);
+    if (!targetEl) return;
+    if (lenis && !reducedMotion) {
+      lenis.scrollTo(targetEl, { offset: -64 });
+    } else {
+      targetEl.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
+    }
   };
 
   const href = click.kind === "anchor" ? click.target : "#hero";

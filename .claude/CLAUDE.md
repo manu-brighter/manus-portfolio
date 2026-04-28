@@ -306,3 +306,67 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   shim invokes `node node_modules/next/dist/bin/next dev` directly,
   bypassing pnpm. CI on Linux is unaffected. Documented inside the
   file itself for future-Manuel.
+
+## Phase 8 deviations
+
+- **Inline `<CaseStudy />` instead of `/work/[slug]` route**: Plan §5
+  IA puts the case study as Section 04 of the long-scroll home page,
+  AND lists `/work/[slug]` as a route family. Phase 7's WorkCard CTA
+  already points at `#case-study` anchor. Going inline keeps the
+  single-page-portfolio narrative intact, avoids speculative routing
+  scaffolding for the lone consumer (only Jogge di Balla needs a
+  detail page; the Portfolio card is self-referential), and lets the
+  click choreography stay client-side scroll instead of a real route
+  transition. `/work/[slug]` infrastructure is now Phase 11 / on-demand.
+- **No photo-duotone shader on screenshots**: Plan §6.5 calls for a
+  runtime Risograph-Duotone shader on screenshots (luminance → 2 spot
+  colors + halftone). Same call as Phase 6 made on the portrait —
+  pro UI captures need to stay legible, the visitor reads code/UI in
+  these screenshots. Riso treatment lives entirely in the framing
+  (paper-shade backing block, 2px ink border, spot-color offset
+  shadow). Shader proper lands in Phase 9 (Photography), where
+  artistic recolor is the point; can backport to case-study later if
+  the look calls for it.
+- **No Fluid-Ink-Wipe page-transition primitive**: Phase 7 deviation
+  said this would land "paired with the case-study route". Since the
+  case study is inline (no route transition), there's nothing to
+  wipe between. Joggediballa CTA gets Lenis smooth-scroll +
+  scrollIntoView fallback (no splat burst — destination is below
+  hero, sim paused, splats would be silently dropped). The transition
+  primitive moves to Phase 11 if a real route ever ships.
+- **`scripts/generate-joggediballa-screenshots.mjs` (committed
+  script, not inline `node -e`)**: Phase 6/7 used inline node
+  invocations against the resolved sharp install. With 7 screenshots
+  × 3 widths × 2 codecs + JPG fallback = 49 outputs, an inline
+  command got unwieldy; reified into a script. Pulls sharp directly
+  from `node_modules/.pnpm/sharp@0.34.5/...` (sharp isn't a project
+  dep — same pattern as Phase 6). Phase 9 will fold this into the
+  generalised `scripts/optimize-assets.ts`.
+- **`type-body-sm` utility added to `globals.css`**: Phase 7 introduced
+  the class in `WorkCard.tsx` but never defined it — the rule was
+  silently a no-op. Phase 8 needed the same utility for the case-study
+  table cells and reflection block, so the CSS rule was added (font-
+  body, 0.875rem, line-height 1.55, max-width 70ch). Behaviour at the
+  Phase 7 use-sites is now slightly tighter than before; visually
+  acceptable, no test regressions.
+- **Spot-amber accent appears as fill, never as text**: Spot-amber
+  on paper hits ~1.28:1 contrast — far below the AA 4.5:1 floor.
+  Same lesson as Phase 6's vibecoded marker (rose text fail). For
+  the case-study eyebrow + highlight kickers, the amber lives in a
+  small filled square preceding the label (`<span className="size-2
+  bg-spot-amber" />`); the label itself is `text-ink type-label`.
+  Reads as a Riso ink-bleed dot next to the kicker — same colour
+  signal, AA-clean.
+- **Public-layer screenshot grid uses irregular layouts array, not
+  CSS-generated offsets**: Tried `nth-child` Tailwind variants for the
+  alternating col-span/col-start pattern; with 5 items and 3 distinct
+  shapes the math got hairier than just hard-coding the per-index
+  classes. Five `md:col-span-X md:col-start-Y md:mt-Z` strings in a
+  layouts array, looked up by `i`. Trivially editable, no surprise
+  cascade collisions.
+- **Translation deferred (DE source mirrored to EN/FR/IT)**: Same
+  pattern as Phase 6/7. The case-study namespace is large (~80 keys
+  with nested arrays); proper translation belongs in a dedicated
+  pass after the visual lands. Mirror-script: one-liner over
+  `messages/{de,en,fr,it}.json` that copies `caseStudy` from de to
+  the others.
