@@ -547,5 +547,33 @@
         "stamp": "TÁRCOLES · 2024 · WILDLIFE"
       }
     }
+  },
+  "playground": {
+    "sectionLabel": "06 · PLAYGROUND",
+    "eyebrow": "OFFENE WERKBANK",
+    "headline": "Wo der Fluid-Sim spielen darf.",
+    "lede": "Zwei Shader-Experimente, beide auf dem Tinte-/Druck-Narrativ verankert. Pure Craft-Demonstration, kein Produkt-Kontext.",
+    "openLabel": "Experiment öffnen",
+    "shell": {
+      "back": "ZURÜCK ZUM PLAYGROUND"
+    },
+    "experiments": {
+      "inkDropStudio": {
+        "cardTitle": "Ink Drop Studio",
+        "cardKicker": "01 · INK DROP STUDIO",
+        "cardBody": "Leere Paper-Canvas, Klick spawnt Ink-Tropfen in der gewählten Spot-Farbe. Slider für Sim-Parameter, Bomb-Button, Freeze-Button.",
+        "title": "Ink Drop Studio.",
+        "caption": "Spielwiese für die Hero-Simulation. Klick = Ink-Splat, Slider = Sim-Parameter, „Bomb\" wenn dir gerade nach Chaos ist."
+      },
+      "typeAsFluid": {
+        "cardTitle": "Type-as-Fluid",
+        "cardKicker": "02 · TYPE-AS-FLUID",
+        "cardBody": "Tipp ein Wort. Es wird gedruckt, dann von der Tinte verschluckt. Sanft.",
+        "title": "Type-as-Fluid.",
+        "caption": "Tipp ein Wort. Es wird gedruckt, dann von der Tinte verschluckt. Sanft.",
+        "inputLabel": "Tippe ein Wort",
+        "inputPlaceholder": "Wort eingeben…"
+      }
+    }
   }
 }

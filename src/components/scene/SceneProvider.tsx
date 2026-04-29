@@ -4,6 +4,7 @@ import { Component, createContext, type ReactNode, useContext, useEffect, useSta
 import { useGPUCapability } from "@/hooks/useGPUCapability";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import type { GPUTier, TierConfig } from "@/lib/gpu";
+import { useSceneVisibility } from "@/lib/sceneVisibility";
 import { SceneCanvas } from "./Canvas";
 import { FluidSim } from "./FluidSim";
 import { StaticFallback } from "./StaticFallback";
@@ -64,13 +65,17 @@ export function SceneProvider({ children }: SceneProviderProps) {
   const reducedMotion = useReducedMotion();
   const { capability, initProbe, recordFrametime } = useGPUCapability();
   const webgl2 = useWebGL2();
+  // Playground experiment routes flip this to true so the root Canvas
+  // unmounts and a per-experiment WebGL context can own the screen
+  // without competing for GPU time. Stays false on the home long-scroll.
+  const sceneHidden = useSceneVisibility((s) => s.hidden);
 
   const isStatic = reducedMotion || capability.tier === "static" || !webgl2;
   const config = capability.config;
 
   return (
     <SceneContext.Provider value={{ tier: capability.tier, config }}>
-      {isStatic || !config ? (
+      {sceneHidden ? null : isStatic || !config ? (
         <StaticFallback />
       ) : (
         <SceneErrorBoundary fallback={<StaticFallback />}>
