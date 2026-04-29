@@ -91,9 +91,17 @@ function TypeAsFluidCanvas() {
     canvas.height = Math.floor(window.innerHeight * dpr);
 
     const orchestrator = new FluidOrchestrator();
-    orchestrator.init(gl, getTierConfig("medium"));
-    // Soft ambient motion in the background — gives the text-dissolves-
-    // to-something feel rather than text-dissolves-to-paper.
+    // Override medium-tier dissipation defaults — at the stock 0.95
+    // dye dissipation a stamp fades to ~5% in one second, which reads
+    // as "word flashes and vanishes". Studio mode wants a "swallowed
+    // softly" feel: density survives ~10s, velocity persists ~30s so
+    // the text gets time to advect into actual flow patterns.
+    orchestrator.init(gl, {
+      ...getTierConfig("medium"),
+      velocityDissipation: 0.998,
+      dyeDissipation: 0.998,
+      confinement: 30,
+    });
     orchestrator.setAmbientEnabled(true);
     orchestrator.triggerAmbient();
     orchestratorRef.current = orchestrator;
@@ -106,7 +114,7 @@ function TypeAsFluidCanvas() {
       TYPE_AS_FLUID_DEFAULTS.defaultWords[
         Math.floor(Math.random() * TYPE_AS_FLUID_DEFAULTS.defaultWords.length)
       ] ?? "MANUEL";
-    stamperRef.current.stampText(initial, randomSpot(), 1.0, 3);
+    stampWord(stamperRef.current, orchestrator, initial);
 
     const onResize = () => {
       const ratio = Math.min(window.devicePixelRatio || 1, 2);
@@ -173,26 +181,28 @@ function TypeAsFluidCanvas() {
     lastTypedAtRef.current = performance.now();
     const handle = window.setTimeout(() => {
       const stamper = stamperRef.current;
-      if (!stamper) return;
-      stamper.stampText(text, randomSpot(), 1.0, 3);
+      const orchestrator = orchestratorRef.current;
+      if (!stamper || !orchestrator) return;
+      stampWord(stamper, orchestrator, text);
     }, 250);
     return () => window.clearTimeout(handle);
   }, [text]);
 
-  // ---- Idle rotation: default-word stamp every 5s when user hasn't typed ----
+  // ---- Idle rotation: default-word stamp every 7s when user hasn't typed ----
   useEffect(() => {
     const handle = window.setInterval(() => {
-      if (textRef.current.length > 0) return; // user is driving — back off
+      if (textRef.current.length > 0) return;
       const sinceTyped = performance.now() - lastTypedAtRef.current;
-      if (lastTypedAtRef.current !== 0 && sinceTyped < 4000) return;
+      if (lastTypedAtRef.current !== 0 && sinceTyped < 5000) return;
       const stamper = stamperRef.current;
-      if (!stamper) return;
+      const orchestrator = orchestratorRef.current;
+      if (!stamper || !orchestrator) return;
       const word =
         TYPE_AS_FLUID_DEFAULTS.defaultWords[
           Math.floor(Math.random() * TYPE_AS_FLUID_DEFAULTS.defaultWords.length)
         ] ?? "MANUEL";
-      stamper.stampText(word, randomSpot(), 1.0, 3);
-    }, 5000);
+      stampWord(stamper, orchestrator, word);
+    }, 7000);
     return () => window.clearInterval(handle);
   }, []);
 
@@ -231,4 +241,50 @@ function TypeAsFluidCanvas() {
 
 function randomSpot(): "rose" | "amber" | "mint" | "violet" {
   return SPOT_KEYS[Math.floor(Math.random() * SPOT_KEYS.length)] ?? "rose";
+}
+
+/**
+ * Stamp a word with a stronger, more-fluid presence than a single
+ * inject-density call gives:
+ *   - 3 stacked density stamps over ~80ms with descending strength,
+ *     each picking its own Riso spot. Cumulative density + per-stamp
+ *     colour gives a "soaking ink" feel rather than a flat decal.
+ *   - 5 small velocity-only splats around the centre with random
+ *     outward push so the just-stamped text immediately starts to
+ *     swirl, instead of sitting still until the slow ambient drift
+ *     catches up.
+ *
+ * The orchestrator's slow dye + velocity dissipation (0.998 each in
+ * TypeAsFluid) keeps the result legible for ~10s while the text is
+ * pulled apart by the flow.
+ */
+function stampWord(stamper: TextStamper, orchestrator: FluidOrchestrator, word: string) {
+  const color = randomSpot();
+  // Wave 0 — strongest base layer, biggest blur for soft edges.
+  stamper.stampText(word, color, 1.6, 4);
+
+  // Wave 1 + 2 — re-injections with different spots so the layered
+  // toon ladder reads as multi-pass Riso, not a single flat stroke.
+  window.setTimeout(() => stamper.stampText(word, randomSpot(), 1.0, 3), 40);
+  window.setTimeout(() => stamper.stampText(word, randomSpot(), 0.6, 3), 90);
+
+  // Velocity perturbation — 5 random outward pushes around the canvas
+  // centre. Color = transparent so we don't add dye, only kick the
+  // velocity field. The text rides this turbulence.
+  const transparent = [0, 0, 0] as const;
+  const PUSH = 5;
+  for (let i = 0; i < PUSH; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const r = 0.08 + Math.random() * 0.18;
+    const x = 0.5 + Math.cos(a) * r;
+    const y = 0.5 + Math.sin(a) * r;
+    const speed = 0.4 + Math.random() * 0.5;
+    orchestrator.injectSplat(
+      x,
+      y,
+      transparent,
+      Math.cos(a + Math.PI / 2) * speed,
+      Math.sin(a + Math.PI / 2) * speed,
+    );
+  }
 }
