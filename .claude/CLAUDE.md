@@ -370,3 +370,166 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   pass after the visual lands. Mirror-script: one-liner over
   `messages/{de,en,fr,it}.json` that copies `caseStudy` from de to
   the others.
+
+## Phase 9 deviations
+
+> **Major pivot mid-phase.** The first pass shipped a runtime
+> Riso-Duotone shader on every photo per plan §6.5 — wildlife portraits
+> and Koenigsegg shots got posterised to 3-tone composites. Manuel
+> rejected on visual review: the filter killed the actual
+> *photography*, which is the whole point of the section. Same lesson
+> Phase 6 (portrait) and Phase 8 (case-study screenshots) had already
+> taught — pro photos are sacred, the Riso aesthetic must live in
+> framing / animation / typography around them, never in pixel-level
+> recolor. The runtime-Riso-Duotone shader from plan §6.5 is now
+> formally retired site-wide; the photography-section animation lives
+> instead in an **Ink-Mask Reveal** that dissolves a paper overlay to
+> show the unmodified photo underneath.
+
+### Architecture (post-pivot)
+
+- **Photo lives in DOM as clean `<picture>`**. AVIF/WebP/JPG srcsets,
+  no shader recolor, no UV flip, no posterisation. Browser handles
+  decoding + responsive sizing per `sizes` attr.
+- **Per-photo `PhotoInkMask` `<canvas>` overlay** sits absolutely
+  positioned on top of the `<picture>` and dissolves on viewport
+  entry. Each instance owns an isolated WebGL2 context running a
+  simplified two-program fluid sim:
+  - `advect.frag.glsl` — semi-Lagrangian advection of a density
+    texture along a curl-noise velocity field (no pressure solve, no
+    full Navier-Stokes; the reveal only needs ink to *flow outward
+    and dissipate*, mass conservation is irrelevant)
+  - `splat.frag.glsl` — gaussian-falloff additive ink injection
+  - `mask.frag.glsl` — composes paper-color RGB + alpha from
+    `1 - density`, plus a halftone-dot fringe at the bleed boundary
+    (gives the "Riso plate dissolving" feel)
+- **Trigger — scroll-center proximity**: IO with `rootMargin:
+  "-20% 0px -20% 0px"` and `threshold: 0` fires the burst the moment
+  the photo enters the central 60% band of the viewport. Replaces the
+  first iteration's `threshold: 0.3` (which fired the moment the edge
+  peeked in — felt premature, was Manuel's correction). Click-to-
+  reveal override was tried + dropped: a11y lint demanded keyboard
+  parity, and since the IO trigger fires reliably on scroll there was
+  no real need for a manual shortcut. Photos read as content, not
+  buttons.
+- **Burst content**: scripted **~9 splats over ~1.6s** (centre splat
+  → inner ring at 120/200/280ms → outer-ring satellite cluster from
+  500ms covering the corners), plus **ambient pointer-velocity
+  splats** from the document-level `pointermove` while the slot is
+  in viewport — same global cursor that drives the hero fluid sim
+  now bleeds ink into the photo masks. That is the semantic coupling
+  Manuel asked for as "A-Full" without sharing WebGL contexts across
+  components.
+- **Fade-out, not hard cut**: when the burst completes + a 600ms
+  grace period (`POST_BURST_GRACE_MS`) lets the outer-ring splats
+  spread out, we kick a CSS opacity transition on the canvas
+  (`opacity 0` over 900ms, `cubic-bezier(0.22, 1, 0.36, 1)`). The
+  RAF keeps ticking the sim during the fade, so the eddies remain
+  visible while the paper recedes. Only after the fade completes do
+  we clear and `unsub()` from the shared RAF — zero GPU work after
+  that point per photo.
+- **No `gl.readPixels`-based coverage detection**. The first
+  iteration sampled the centre pixel every 200ms to confirm the
+  reveal was complete. Each readback stalls the WebGL pipeline
+  (Chrome surfaces this as the `GPU stall due to ReadPixels` driver
+  warning), and with 5 photos × every 200ms = 25 stalls/sec the
+  signal-to-noise was poor. Replaced with a deterministic time-based
+  trigger keyed off `lastBurstFireAt + POST_BURST_GRACE_MS`. The
+  scripted burst always covers the frame given enough advection
+  time, so the readback was redundant. Net: zero readPixels in
+  Photography post-pivot.
+
+### Editorial-asymmetric layout (no sticky pins)
+
+Manuel rejected the first pass's sticky-pin stack ("durch scrollen
+sieht komisch aus"). Replaced with an editorial-asymmetric flow that
+mixes full-bleed and side-text-paired layouts:
+
+| Slot | Image | Layout |
+|------|-------|--------|
+| 1 | Egret | full-bleed centre, ~80vh |
+| 2 | Koenigsegg | right-60% block + left meta-text column (`<h3>` italic + body prose) |
+| 3 | Panorama | full-bleed thin spread (3.72:1, breaks the container gutters via negative margin) |
+| 4 | Tree-Lake | left-70% block + right meta-text column (mirror of slot 2) |
+| 5 | Crocodile + butterfly | full-bleed centre, ~80vh |
+
+No GSAP ScrollTrigger, no sticky positioning, no pinning. Just normal
+flow + IntersectionObserver per slot. Captions slide in horizontally
+(`translate-x-4 → 0` + `opacity 0 → 1` over 700ms) parallel with the
+ink dissolve.
+
+### Adaptive fluid-sim lifecycle (rework)
+
+- **Default behaviour**: hero fluid sim runs everywhere by default
+  (lifted from "pause when hero leaves viewport"). The user's cursor
+  drives ink across all sections; in Photography this is what powers
+  the ambient splats into PhotoInkMask.
+- **Frametime watchdog**: rolling 60-sample (~1s at 60fps) average of
+  `deltaMs` from the shared RAF. If avg > 22ms (i.e. < 45fps) for 2s
+  cumulative → `perfModeRef` latches **on for the session** (no
+  oscillation).
+- **Once perf-mode is on**: a separate IntersectionObserver pauses the
+  sim while no priority section is in viewport. Priority IDs:
+  `#hero` and `#photography` (everywhere else, the sim's contribution
+  is purely background noise that's not worth the GPU cycles on a
+  struggling device).
+- Watchdog uses `deltaMs` rather than wrapping `gl.finish()` for
+  cheap measurement — `gl.finish()` itself stalls the pipeline and
+  would skew the metric upward in a feedback loop.
+
+### Lessons preserved from the discarded first pass
+
+These bit during the pre-pivot iteration. Preserved here so future
+WebGL components don't re-step the rakes:
+
+- **`loseContext()` in cleanup is poison under StrictMode**. React
+  dev-time double-invoke does mount → cleanup → mount on the *same*
+  canvas element. Per WebGL spec, `getContext` on a canvas with a
+  lost context returns *that same* dead context — not a fresh one.
+  Every subsequent compile then fails silently with `null` info-log.
+  PhotoInkMask's cleanup deletes programs/buffers/textures/VAOs
+  *only*, never `WEBGL_lose_context.loseContext()`. GC drops the
+  context when the canvas element actually unmounts.
+- **GLSL ES 3.00 requires `#version` to be the literal first line**.
+  Even comments before are an error. The codebase pattern (see also
+  `src/shaders/common/quad.vert.glsl`) puts `#version 300 es` on
+  line 1, comments after. PhotoInkMask additionally normalises
+  loaded shader source via regex strip-and-prepend in case raw-loader
+  / Turbopack HMR ever delivers a cached-stale newline before the
+  directive.
+- **ASCII-only in shader sources**. Some Windows ANGLE versions choke
+  on Unicode in comments (→, ×, °, etc.). Shaders use `->`, `x`,
+  `degrees` instead.
+- **`<aside>` inside `<section>` triggers axe `landmark-complementary-
+  is-top-level`**. Same trap that bit Phase 6 About. Photography's
+  side meta-text columns started as `<aside>`, demoted to `<div>`.
+- **`text-ink-faint` ≠ text colour**. Phases 6, 8, 9 (twice in 9 —
+  pre and post pivot) all rediscovered this. The token's contrast
+  ratio (1.91:1 on paper) is unrecoverable for AA. Caption uses
+  `text-ink-muted` (~6.5:1).
+
+### Other Phase-9 specifics
+
+- **`scripts/optimize-assets.mjs` (`.mjs`, not `.ts` per briefing
+  §10.2)**. No ts-runner in devDeps; ESM JS keeps the asset pipeline
+  one `node` invocation. Per-task `quality` field lets the photography
+  group override AVIF quality (q38–q50) since fullscreen detail shots
+  blow the §8 budget at default q60. Tree-lake runs at q38, others at
+  q42, panorama at q50.
+- **Editorial pano spread (`DSC06968`)**. Briefing §6 said "4 Bilder";
+  Phase 9 ships **5** because the panorama (3.72:1, Panama freighters
+  under cumulus) would have been ugly letterboxed in a regular slot.
+  Treated as a print spread, full-bleed thin band.
+- **Spot-amber repeats** (egret + panorama). 5 slots, 4 colours; mint,
+  rose, violet each fit exactly one subject (mint↔green-tree,
+  rose↔butterfly, violet↔cool-counter to the Koenigsegg's orange).
+  Amber is the multi-fit one.
+- **Translation deferred** (DE source mirrored across EN/FR/IT). Same
+  pattern as Phase 6/7/8.
+- **`<figure>` + `<figcaption>` proper pairing**. AT users hear
+  location/year/subject metadata associated with the image
+  semantically.
+- **Captions: best-guess locations** (Costa Rica, St. Moritz, Panama,
+  Lake Arenal, Tárcoles). Flagged for Manu review when alt-texts
+  get a proper pass. TÁRCOLES caption says "Schmetterling" (not
+  Eidechse — Manu corrected during the photo-selection dialogue).

@@ -511,5 +511,41 @@
       "domain": "joggediballa.ch",
       "external": "öffnet in neuem Tab"
     }
+  },
+  "photography": {
+    "sectionLabel": "05 / Photography",
+    "eyebrow": "Through the Lens",
+    "headline": "Through the Lens.",
+    "lede": "Wildlife und Autos sind meine zwei Welten. Die einen jage ich solo durch den Dschungel von Costa Rica oder Thailand, die anderen finden mich meist näher zuhause. Was beide verbindet: Geduld, Licht, und der eine Moment, der den ganzen Tag rechtfertigt.",
+    "techLabel": "SONY α7 IV · 24–600mm · seit 2023",
+    "ctaLabel": "Volles Portfolio auf manuelheller.myportfolio.com",
+    "ctaHref": "https://manuelheller.myportfolio.com/portfolio",
+    "ctaCaption": "Originale ohne Riso-Treatment, mit voller Galerie.",
+    "slides": {
+      "egret": {
+        "alt": "Schneereiher mit ausgebreiteten Flügeln am Wasser, Costa Rica",
+        "stamp": "COSTA RICA · 2024 · WILDLIFE"
+      },
+      "koenigsegg": {
+        "alt": "Koenigsegg-Hypercar unter einem Hotel-Bogen in der Abenddämmerung",
+        "stamp": "ST. MORITZ · 2025 · AUTO",
+        "title": "Stillstand bei 30 km/h.",
+        "body": "Manchmal ist das spannendste Bild nicht das mit der höchsten Verschlusszeit, sondern das mit dem Licht das nur fünf Minuten lang da ist."
+      },
+      "panorama": {
+        "alt": "Frachtschiffe vor einer dramatischen Wolkenformation am Horizont",
+        "stamp": "PANAMA · 2024 · SEASCAPE"
+      },
+      "treeLake": {
+        "alt": "Einsamer Baum am Ufer eines Sees, Spiegelung im Wasser, Costa Rica",
+        "stamp": "LAKE ARENAL · 2024 · LANDSCAPE",
+        "title": "Geduld als Bildkomposition.",
+        "body": "Lake Arenal: anderthalb Stunden auf den Wind gewartet, der die Wasseroberfläche endlich glättet. Reflexion macht das Bild, nicht der Baum."
+      },
+      "crocodile": {
+        "alt": "Krokodil mit einem Schmetterling auf der Schnauze, Costa Rica",
+        "stamp": "TÁRCOLES · 2024 · WILDLIFE"
+      }
+    }
   }
 }

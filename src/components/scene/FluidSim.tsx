@@ -33,6 +33,15 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
   onFrametimeRef.current = onFrametime;
   const prevConfigRef = useRef<TierConfig | null>(null);
 
+  // Frametime watchdog state — runs every frame, computes a rolling
+  // average over the last 60 samples (~1s at 60fps). If the avg
+  // exceeds the 22ms (45fps) floor for 2s straight, perfMode latches
+  // on and the IO further down throttles the sim to the priority
+  // sections only. Sticky for the session — we don't oscillate.
+  const perfModeRef = useRef(false);
+  const ftSamplesRef = useRef<number[]>([]);
+  const ftOverBudgetMsRef = useRef(0);
+
   useEffect(() => {
     const context = gl.getContext() as WebGL2RenderingContext;
     if (!context || !(context instanceof WebGL2RenderingContext)) return;
@@ -66,8 +75,12 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
     orchestratorRef.current?.resize(Math.floor(size.width * dpr), Math.floor(size.height * dpr));
   }, [size, gl]);
 
-  // RAF loop: run sim + render to screen
+  // RAF loop: run sim + render to screen, and feed the perf-mode
+  // watchdog with a cheap frametime estimate (no gl.finish() — that
+  // would itself cost frames; the deltaMs from gsap.ticker is the
+  // pragmatic signal).
   useEffect(() => {
+    const samples = ftSamplesRef.current;
     return subscribe((deltaMs, elapsedMs) => {
       const orchestrator = orchestratorRef.current;
       if (!orchestrator) return;
@@ -81,6 +94,22 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
         const gl2 = gl.getContext() as WebGL2RenderingContext;
         gl2.finish();
         onFrametimeRef.current(performance.now() - t0);
+      }
+
+      // Watchdog: track recent deltaMs (which is wall-clock between
+      // ticks — drops indicate the page can't sustain 60fps).
+      if (!perfModeRef.current && deltaMs > 0) {
+        samples.push(deltaMs);
+        if (samples.length > 60) samples.shift();
+        if (samples.length === 60) {
+          const avg = samples.reduce((s, v) => s + v, 0) / 60;
+          if (avg > 22) {
+            ftOverBudgetMsRef.current += deltaMs;
+            if (ftOverBudgetMsRef.current > 2000) perfModeRef.current = true;
+          } else {
+            ftOverBudgetMsRef.current = Math.max(0, ftOverBudgetMsRef.current - deltaMs);
+          }
+        }
       }
 
       pointerRef.current.dx = 0;
@@ -148,24 +177,34 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
     });
   }, []);
 
-  // Pause sim when hero section leaves viewport
+  // Adaptive sim lifecycle (Phase 9 rework — see CLAUDE.md "Phase 9
+  // deviations"). Default behaviour: sim runs everywhere, no IO pause.
+  // A frametime watchdog samples the RAF loop's GPU work and only
+  // engages a "perf-mode" pause if the device is genuinely struggling
+  // (rolling avg > 22ms over a 2s window). Once perf-mode is on for
+  // the session, the sim pauses while no priority section is in
+  // viewport (hero or photography — both consume the fluid visually).
   useEffect(() => {
-    const hero = document.getElementById("hero");
-    if (!hero) return;
-
+    const PRIORITY_IDS = ["hero", "photography"];
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry) return;
-        if (entry.isIntersecting) {
-          orchestratorRef.current?.resume();
-        } else {
-          orchestratorRef.current?.pause();
-        }
+      () => {
+        if (!perfModeRef.current) return; // not gating the sim yet
+        const anyVisible = PRIORITY_IDS.some((id) => {
+          const el = document.getElementById(id);
+          if (!el) return false;
+          const rect = el.getBoundingClientRect();
+          return rect.bottom > 0 && rect.top < window.innerHeight;
+        });
+        if (anyVisible) orchestratorRef.current?.resume();
+        else orchestratorRef.current?.pause();
       },
       { threshold: 0 },
     );
 
-    observer.observe(hero);
+    for (const id of PRIORITY_IDS) {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    }
     return () => observer.disconnect();
   }, []);
 
