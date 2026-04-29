@@ -244,6 +244,11 @@ export class FluidOrchestrator {
   private ambientStrength = 0;
   private splatColorIndex = 0;
   private ambientActive = false;
+  // Studio-mode toggles. Default behaviour matches the hero rig (ambient
+  // wandering points on, rotating Riso colours per splat). Playground's
+  // Ink Drop Studio flips both: clean paper, single user-picked colour.
+  private ambientEnabled = true;
+  private splatColorOverride: readonly [number, number, number] | null = null;
 
   // External splat queue — drained inside step(). Used by Work-cards to
   // inject colored bursts on click. Coordinates are normalised (0..1)
@@ -345,6 +350,97 @@ export class FluidOrchestrator {
     // Set idle timer far into the future so ambient stays at full
     // strength for a 5s grace period even if the cursor moves.
     this.lastPointerTime = performance.now() + 5000;
+  }
+
+  /**
+   * Live-tunable param overrides. Mutates `this.config` so step() picks
+   * up the new values on the very next frame without re-init / FBO
+   * teardown. Used by Ink Drop Studio's Leva sliders. Pressure-iters
+   * changes are also live since the count is read inside the solve loop.
+   */
+  setParams(partial: Partial<TierConfig>): void {
+    this.config = { ...this.config, ...partial };
+  }
+
+  /**
+   * Toggle the ambient wandering-points splat injection. Hero rig
+   * stays at the default (true). Ink Drop Studio sets false for a
+   * clean paper canvas the user fills via clicks alone.
+   */
+  setAmbientEnabled(enabled: boolean): void {
+    this.ambientEnabled = enabled;
+    if (!enabled) {
+      this.ambientStrength = 0;
+      this.ambientActive = false;
+    }
+  }
+
+  /**
+   * Override the colour used for pointer-driven splats. Pass null to
+   * restore the rotating Riso-spot cycle (hero default). Externally
+   * queued splats via injectSplat() still use their own colour — only
+   * the pointer/ambient rotation is affected.
+   */
+  setSplatColor(color: keyof typeof SPOT_COLORS | null): void {
+    this.splatColorOverride = color ? SPOT_COLORS[color] : null;
+  }
+
+  /**
+   * Clear the simulation state — empties velocity, dye, pressure,
+   * divergence, and curl FBOs back to zero, drops queued splats, and
+   * resets the ambient timer/strength. After reset() the canvas reads
+   * as fresh paper again. Does not destroy GL programs / FBOs (cheap
+   * to call from a button).
+   */
+  reset(): void {
+    const gl = this.gl;
+    const clearFBO = (fbo: FBO) => {
+      gl.bindFramebuffer(gl.FRAMEBUFFER, fbo.framebuffer);
+      gl.viewport(0, 0, fbo.width, fbo.height);
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+    };
+    clearFBO(this.velocity.read);
+    clearFBO(this.velocity.write);
+    clearFBO(this.dye.read);
+    clearFBO(this.dye.write);
+    clearFBO(this.pressure.read);
+    clearFBO(this.pressure.write);
+    clearFBO(this.divergenceFBO);
+    clearFBO(this.curlFBO);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+    this.pendingSplats.length = 0;
+    this.ambientStrength = 0;
+    this.ambientActive = false;
+    this.lastPointerTime = performance.now();
+    this.frameCount = 0;
+  }
+
+  /**
+   * Massive centre splat — the "Bomb" button in Ink Drop Studio.
+   * Queues several stacked splats with a large radius so the dye
+   * field saturates and the velocity field gets a real shockwave
+   * outward, not just a single small dot. `color` is the active ink.
+   */
+  injectBomb(x: number, y: number, color: keyof typeof SPOT_COLORS): void {
+    const resolved = SPOT_COLORS[color];
+    // 8 outward-pointing impulses around the centre + a stationary
+    // dump at the centre itself = an explosion that radiates while
+    // dropping a fat ink core.
+    const RING = 8;
+    const STRENGTH = 1.5;
+    for (let i = 0; i < RING; i++) {
+      const a = (i / RING) * Math.PI * 2;
+      this.pendingSplats.push({
+        x,
+        y,
+        dx: Math.cos(a) * STRENGTH,
+        dy: Math.sin(a) * STRENGTH,
+        color: resolved,
+      });
+    }
+    this.pendingSplats.push({ x, y, dx: 0, dy: 0, color: resolved });
   }
 
   // ---------------------------------------------------------------------------
@@ -623,7 +719,7 @@ export class FluidOrchestrator {
       } else {
         this.ambientStrength = Math.max(0, this.ambientStrength - dt / 0.5);
       }
-    } else if (performance.now() - this.lastPointerTime > 3000) {
+    } else if (this.ambientEnabled && performance.now() - this.lastPointerTime > 3000) {
       this.ambientStrength = Math.min(1, this.ambientStrength + dt / 2.0);
       this.ambientActive = true;
     }
@@ -640,7 +736,8 @@ export class FluidOrchestrator {
     if (runSim) {
       // Splat from pointer
       if (pointer.moved || pointer.down) {
-        this.runSplat(pointer.x, pointer.y, pointer.dx, pointer.dy, this.nextSplatColor());
+        const color = this.splatColorOverride ?? this.nextSplatColor();
+        this.runSplat(pointer.x, pointer.y, pointer.dx, pointer.dy, color);
       }
 
       // Drain external splats queued via injectSplat() — Work-card click
@@ -654,7 +751,8 @@ export class FluidOrchestrator {
 
       // Ambient motion when idle — multiple wandering points
       // for an organic, breathing feel like layered Riso ink settling.
-      if (this.ambientStrength > 0.01) {
+      // Studio mode disables this entirely (flag is false).
+      if (this.ambientEnabled && this.ambientStrength > 0.01) {
         const t = elapsed * AMBIENT_PARAMS.timeScale;
         const s = this.ambientStrength;
 

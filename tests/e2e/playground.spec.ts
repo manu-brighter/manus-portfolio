@@ -32,10 +32,35 @@ test.describe("playground experiment routes", () => {
 
   test("root scene canvas is unmounted on experiment route", async ({ page }) => {
     await page.goto("/de/playground/ink-drop-studio");
-    // The persistent SceneCanvas mounts a <canvas aria-hidden="true">
-    // at z-0 in the locale layout. Inside an experiment route the
-    // store should hide it — assert no such canvas exists.
-    const heroCanvas = page.locator('canvas[aria-hidden="true"]');
-    await expect(heroCanvas).toHaveCount(0);
+    // The persistent SceneCanvas tags itself with `data-scene="root"`
+    // — that flag is what distinguishes it from any per-experiment
+    // canvas (Ink Drop Studio mounts its own to host the orchestrator).
+    // Inside an experiment route the visibility-gate store should
+    // unmount the root one.
+    const rootSceneCanvas = page.locator('canvas[data-scene="root"]');
+    await expect(rootSceneCanvas).toHaveCount(0);
+  });
+
+  test("ink-drop-studio mounts its own canvas + button row", async ({ page }) => {
+    await page.goto("/de/playground/ink-drop-studio");
+    // The studio canvas is absolute-positioned within the chrome and
+    // has its own aria-hidden marker. We can find at least one canvas
+    // on this route once hydration completes.
+    const studioCanvas = page.locator("canvas").first();
+    await expect(studioCanvas).toBeAttached();
+    // Bomb / Freeze / Reset buttons live in the bottom toolbar.
+    await expect(page.getByRole("button", { name: /BOMB/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /FREEZE|RESUME/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /RESET/ })).toBeVisible();
+  });
+
+  test("reduced-motion: ink-drop-studio shows fallback, no canvas", async ({ browser }) => {
+    const context = await browser.newContext({ reducedMotion: "reduce" });
+    const page = await context.newPage();
+    await page.goto("/de/playground/ink-drop-studio");
+    // Fallback message renders, sim canvas does not mount.
+    await expect(page.locator("canvas")).toHaveCount(0);
+    await expect(page.getByText(/blende ich die laufende Simulation aus/i)).toBeVisible();
+    await context.close();
   });
 });

@@ -563,7 +563,12 @@
         "cardKicker": "01 · INK DROP STUDIO",
         "cardBody": "Leere Paper-Canvas, Klick spawnt Ink-Tropfen in der gewählten Spot-Farbe. Slider für Sim-Parameter, Bomb-Button, Freeze-Button.",
         "title": "Ink Drop Studio.",
-        "caption": "Spielwiese für die Hero-Simulation. Klick = Ink-Splat, Slider = Sim-Parameter, „Bomb\" wenn dir gerade nach Chaos ist."
+        "caption": "Spielwiese für die Hero-Simulation. Klick = Ink-Splat, Slider = Sim-Parameter, „Bomb\" wenn dir gerade nach Chaos ist.",
+        "buttonBomb": "BOMB",
+        "buttonFreeze": "FREEZE",
+        "buttonResume": "RESUME",
+        "buttonReset": "RESET",
+        "reducedMotionNote": "Dieses Experiment ist eine bewegte Spielwiese. Unter prefers-reduced-motion blende ich die laufende Simulation aus — zurück zum Playground für eine ruhigere Section."
       },
       "typeAsFluid": {
         "cardTitle": "Type-as-Fluid",

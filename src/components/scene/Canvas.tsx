@@ -26,6 +26,7 @@ export function SceneCanvas({ children }: SceneCanvasProps) {
         touchAction: "none",
       }}
       aria-hidden="true"
+      data-scene="root"
     >
       {children}
     </R3FCanvas>
