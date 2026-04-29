@@ -1,5 +1,6 @@
 # Brainstorming/scratch — not part of the project
 .superpowers/
+.tmp/
 
 # Claude Code per-machine permission overrides (not shared)
 .claude/settings.local.json

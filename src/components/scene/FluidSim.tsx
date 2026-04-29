@@ -66,7 +66,10 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
     orchestratorRef.current?.resize(Math.floor(size.width * dpr), Math.floor(size.height * dpr));
   }, [size, gl]);
 
-  // RAF loop: run sim + render to screen
+  // RAF loop: run sim + render to screen. `measuring` triggers a
+  // gl.finish() readback so SceneProvider's tier auto-tuner gets a
+  // real GPU frametime sample; outside that window the loop is
+  // overhead-free.
   useEffect(() => {
     return subscribe((deltaMs, elapsedMs) => {
       const orchestrator = orchestratorRef.current;
@@ -146,27 +149,6 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
     return subscribeToSplats((req) => {
       orchestratorRef.current?.injectSplat(req.x, req.y, req.color, req.dx ?? 0, req.dy ?? 0);
     });
-  }, []);
-
-  // Pause sim when hero section leaves viewport
-  useEffect(() => {
-    const hero = document.getElementById("hero");
-    if (!hero) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry) return;
-        if (entry.isIntersecting) {
-          orchestratorRef.current?.resume();
-        } else {
-          orchestratorRef.current?.pause();
-        }
-      },
-      { threshold: 0 },
-    );
-
-    observer.observe(hero);
-    return () => observer.disconnect();
   }, []);
 
   return null;
