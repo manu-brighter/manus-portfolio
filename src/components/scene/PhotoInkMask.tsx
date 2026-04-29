@@ -3,15 +3,22 @@
 // Per-photo ink-reveal mask.
 // The photo lives in the DOM as a clean <picture>; this component
 // renders an opaque paper-coloured mask <canvas> over it, then
-// dissolves the mask via a small advect-only fluid sim driven by:
-//   1. A scripted splat-burst when the slot enters viewport
-//      (the reveal animation)
-//   2. Ongoing pointer-velocity splats from the global cursor while
+// dissolves the mask via a small advect+splat fluid sim:
+//   1. One strong centre splat when the slot enters viewport, then
+//      tiny re-injection splats every ~120ms to keep the centre
+//      saturated as the wave propagates outward.
+//   2. The advect shader's radial-velocity term carries the centre
+//      density toward the edges (curl alone wouldn't — it just swirls).
+//   3. Ongoing pointer-velocity splats from the global cursor while
 //      the slot is in viewport (ambient flow that ties Photography
-//      semantically to the hero fluid sim)
+//      semantically to the hero fluid sim).
 //
-// Once enough density has accumulated to fully reveal the photo, the
-// mask locks transparent + RAF unsubscribes. No GPU work after that.
+// Once the reveal duration has elapsed the mask locks, opacity snaps
+// to 0 and RAF unsubscribes. No GPU work after that.
+//
+// Idle until reveal: the RAF callback early-returns (no GPU work)
+// until the parent flips `reveal` to true. A single initial mask draw
+// covers the photo in paper-color while we wait.
 //
 // Reduced motion: the mask canvas is not mounted at all — the photo
 // is rendered directly.
@@ -39,13 +46,21 @@ const SPOT_COLORS = {
 export type SpotColor = keyof typeof SPOT_COLORS;
 
 const DENSITY_RES = 256;
-// Time after the last burst splat fires at which we start the fade-out.
-// We used to gl.readPixels() the centre to confirm coverage, but every
-// readback stalls the WebGL pipeline (Chrome surfaces this as
-// "GPU stall due to ReadPixels"). The burst is fully scripted and the
-// advection is deterministic-enough that timing is sufficient — by
-// ~600ms after the last splat the outer ring has spread across the frame.
-const POST_BURST_GRACE_MS = 600;
+// Total reveal duration. The wavefront covers ~0.5 texture units of
+// distance in ~1.7s at the peak outward speed below; the full window
+// gives the curl noise + dissipation time to settle the boundary.
+const REVEAL_DURATION_MS = 3000;
+// Centre re-injection cadence. Without this the centre slowly drains
+// (dissipation 0.998/frame); cheap re-injections keep d ≈ 1.0 there.
+const REINJECT_INTERVAL_MS = 120;
+// Outward radial-velocity peak (texture units / sec). Tuned against
+// REVEAL_DURATION_MS so the wavefront just reaches the corners with
+// enough headroom for the boundary to settle (smoothstep cutoff 0.85).
+const OUTWARD_SPEED_PEAK = 0.45;
+// Cap ambient pointer splats drained per frame — a fast cursor sweep
+// can emit 50+ pointermoves between RAF ticks, and draining all of
+// them in one tick spikes the frame.
+const AMBIENT_DRAIN_PER_FRAME = 4;
 
 type PhotoInkMaskProps = {
   spotColor: SpotColor;
@@ -114,42 +129,16 @@ type Splat = {
   y: number; // 0..1 (gl coords; 0 = bottom)
   radius: number; // texture-space sigma
   strength: number; // peak ink addition
-  fireAt: number; // ms from start of reveal
 };
 
-// Scripted burst: a fast cluster around the centre, then 3-4 satellite
-// splats nudged off-axis. Total ~1.6s. The randomisation lives in the
-// component, not here, so each photo's burst is unique-but-deterministic
-// across renders (seeded per photo via a hash of the className).
-function buildBurst(seed: number): Splat[] {
-  const rng = (n: number) => {
-    const x = Math.sin(seed + n * 13.13) * 43758.5453;
-    return x - Math.floor(x);
-  };
-  const splats: Splat[] = [];
-  // Initial centre splat
-  splats.push({ x: 0.5, y: 0.5, radius: 0.18, strength: 0.55, fireAt: 0 });
-  // Inner ring — three quick follow-ups, slightly off-centre
-  for (let i = 0; i < 3; i++) {
-    splats.push({
-      x: 0.5 + (rng(i) - 0.5) * 0.4,
-      y: 0.5 + (rng(i + 7) - 0.5) * 0.35,
-      radius: 0.14 + rng(i + 11) * 0.05,
-      strength: 0.4 + rng(i + 17) * 0.15,
-      fireAt: 120 + i * 80,
-    });
-  }
-  // Outer ring — slower, larger, cover the corners
-  for (let i = 0; i < 5; i++) {
-    splats.push({
-      x: rng(i + 23),
-      y: rng(i + 31),
-      radius: 0.22 + rng(i + 41) * 0.08,
-      strength: 0.35 + rng(i + 47) * 0.2,
-      fireAt: 500 + i * 140,
-    });
-  }
-  return splats;
+// Outward-speed schedule: ramps up over the first 25% of the reveal,
+// holds at peak through the middle, tapers back to 0 over the last
+// 30%. Returns texture-units / second.
+function outwardSpeedAt(progress: number): number {
+  if (progress < 0.25) return (progress / 0.25) * OUTWARD_SPEED_PEAK;
+  if (progress < 0.7) return OUTWARD_SPEED_PEAK;
+  if (progress < 1.0) return (1.0 - (progress - 0.7) / 0.3) * OUTWARD_SPEED_PEAK;
+  return 0;
 }
 
 export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps) {
@@ -168,7 +157,9 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
       alpha: true,
       premultipliedAlpha: false,
       preserveDrawingBuffer: false,
-      powerPreference: "low-power",
+      // Match the hero R3F Canvas's "high-performance" hint so we don't
+      // ping-pong between integrated/discrete GPUs on hybrid laptops.
+      powerPreference: "high-performance",
     }) as WebGL2RenderingContext | null;
     if (!gl) return;
 
@@ -215,11 +206,9 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
 
-    // Burst seeded from current spotColor + a per-mount entropy seed
-    const seed = SPOT_COLORS[spotColor][0] * 47.0 + Math.random() * 13.0;
-    const burst = buildBurst(seed);
+    // Reveal-clock state
     let burstStart: number | null = null;
-    let nextBurstIdx = 0;
+    let lastReinjectAt = 0;
 
     // Ambient splat queue (driven by global pointer-velocity)
     const ambientQueue: Splat[] = [];
@@ -231,6 +220,7 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
       dt: gl.getUniformLocation(advectProg, "uDt"),
       time: gl.getUniformLocation(advectProg, "uTime"),
       dissipation: gl.getUniformLocation(advectProg, "uDissipation"),
+      outwardSpeed: gl.getUniformLocation(advectProg, "uOutwardSpeed"),
     };
     const splatU = {
       density: gl.getUniformLocation(splatProg, "uDensity"),
@@ -263,17 +253,11 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
       const x = (e.clientX - rect.left) / rect.width;
       // Flip Y: canvas client coords go top→bottom, GL/UV is bottom→top.
       const y = 1.0 - (e.clientY - rect.top) / rect.height;
-      ambientQueue.push({ x, y, radius: 0.06, strength: 0.18, fireAt: 0 });
+      ambientQueue.push({ x, y, radius: 0.06, strength: 0.18 });
     };
     document.addEventListener("pointermove", onPointer, { passive: true });
 
     let locked = false;
-    // Fade-out lifecycle: once the burst has fired and a grace period
-    // has elapsed, we don't yank the canvas — we start a CSS opacity
-    // fade and let the sim keep advecting underneath. Once the fade
-    // completes we clear and unsub.
-    const FADE_OUT_MS = 900;
-    let fadeStartAt: number | null = null;
 
     const drawTo = (
       program: WebGLProgram,
@@ -289,7 +273,7 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     };
 
-    const runAdvect = (dt: number, time: number) => {
+    const runAdvect = (dt: number, time: number, outwardSpeed: number) => {
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, read?.tex ?? null);
       // biome-ignore lint/correctness/useHookAtTopLevel: WebGL useProgram
@@ -299,6 +283,7 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
       gl.uniform1f(advectU.dt, dt);
       gl.uniform1f(advectU.time, time);
       gl.uniform1f(advectU.dissipation, 0.998);
+      gl.uniform1f(advectU.outwardSpeed, outwardSpeed);
       drawTo(advectProg, write?.fb ?? null, DENSITY_RES, DENSITY_RES);
       const tmp = read;
       read = write;
@@ -341,61 +326,65 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
       gl.disable(gl.BLEND);
     };
 
-    // Time the last scripted burst splat fires (relative to burstStart).
-    // Used to schedule the fade-out — see Phase-9 deviation note about
-    // dropping gl.readPixels-based coverage detection.
-    const lastBurstFireAt = burst.length > 0 ? (burst[burst.length - 1]?.fireAt ?? 0) : 0;
+    // Initial paint: render the paper-color mask once before any
+    // simulation runs so the photo is covered while we idle waiting
+    // for the IO-driven `reveal` flip. Density is zero everywhere →
+    // mask alpha is 1.0 → fully opaque paper.
+    runMask(0);
 
     const unsub = subscribe((deltaMs, elapsedMs) => {
       if (locked) return;
 
-      // Kick off the burst the first frame `reveal` is true.
-      if (revealRef.current && burstStart === null) burstStart = elapsedMs;
+      // Idle: no GPU work until the parent flips `reveal` true.
+      if (!revealRef.current && burstStart === null) return;
 
-      // Advect every frame so ambient splats have something to flow on
-      const dt = Math.min(deltaMs * 0.001, 0.033);
-      runAdvect(dt, elapsedMs * 0.001);
-
-      // Fire scheduled burst splats whose fireAt has passed
-      if (burstStart !== null) {
-        const t = elapsedMs - burstStart;
-        let next = burst[nextBurstIdx];
-        while (next !== undefined && next.fireAt <= t) {
-          runSplat(next);
-          nextBurstIdx++;
-          next = burst[nextBurstIdx];
-        }
+      // First reveal-true frame: anchor the clock and fire one strong
+      // centre splat — the "clean free splat in the middle" that the
+      // outward velocity field will then carry to the edges.
+      if (revealRef.current && burstStart === null) {
+        burstStart = elapsedMs;
+        runSplat({ x: 0.5, y: 0.5, radius: 0.18, strength: 0.85 });
+        lastReinjectAt = elapsedMs;
       }
 
-      // Drain ambient pointer-velocity splats
-      for (;;) {
+      // Reveal progress 0..1
+      const t = burstStart === null ? 0 : elapsedMs - burstStart;
+      const progress = Math.min(t / REVEAL_DURATION_MS, 1.0);
+
+      // Advect with current outward-velocity ramp
+      const dt = Math.min(deltaMs * 0.001, 0.033);
+      runAdvect(dt, elapsedMs * 0.001, outwardSpeedAt(progress));
+
+      // Centre re-injection — radial advection drains the centre as
+      // density transports outward, so we drip small splats back in
+      // through the first ~85% of the reveal to keep d ≈ 1.0 there.
+      // After that the wavefront has reached the edges; further
+      // injection would just delay the final fade.
+      if (progress < 0.85 && elapsedMs - lastReinjectAt >= REINJECT_INTERVAL_MS) {
+        runSplat({ x: 0.5, y: 0.5, radius: 0.12, strength: 0.18 });
+        lastReinjectAt = elapsedMs;
+      }
+
+      // Drain ambient pointer-velocity splats — capped per frame to
+      // prevent fast cursor sweeps (50+ pointermoves between ticks)
+      // from spiking the frame budget. Older queued splats drop.
+      let drained = 0;
+      while (drained < AMBIENT_DRAIN_PER_FRAME) {
         const s = ambientQueue.shift();
         if (!s) break;
         runSplat(s);
+        drained++;
       }
+      if (ambientQueue.length > AMBIENT_DRAIN_PER_FRAME * 2) ambientQueue.length = 0;
 
       runMask(elapsedMs * 0.001);
 
-      // Fade-trigger: once the burst is drained AND a grace period has
-      // elapsed (so the outer ring has had time to advect outward),
-      // kick off the CSS opacity fade. The sim keeps running
-      // underneath, so the visual reads as "ink continues to flow
-      // while the paper recedes" — never a hard cut.
-      if (
-        fadeStartAt === null &&
-        burstStart !== null &&
-        nextBurstIdx >= burst.length &&
-        elapsedMs - burstStart >= lastBurstFireAt + POST_BURST_GRACE_MS
-      ) {
-        fadeStartAt = elapsedMs;
-        canvas.style.transition = `opacity ${FADE_OUT_MS}ms cubic-bezier(0.22, 1, 0.36, 1)`;
-        canvas.style.opacity = "0";
-      }
-
-      // Fade complete → final transparent clear + unsub. RAF keeps
-      // ticking the sim during the fade so eddies remain visible.
-      if (fadeStartAt !== null && elapsedMs - fadeStartAt >= FADE_OUT_MS) {
+      // Reveal complete: snap to opacity 0 (the mask shader output is
+      // already ~98% transparent everywhere by this point — the snap
+      // is imperceptible and guards against compositor edge-cases).
+      if (progress >= 1.0) {
         locked = true;
+        canvas.style.opacity = "0";
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         gl.clearColor(0, 0, 0, 0);
         gl.clear(gl.COLOR_BUFFER_BIT);
