@@ -29,8 +29,6 @@ export type InkDropStudioParams = {
   pressureIterations: number;
   /** Splat radius factor (multiplies the tier default). */
   splatRadius: number;
-  /** Default ink color for click splats; user-pickable in panel. */
-  inkColor: SpotColor;
 };
 
 export type TypeAsFluidParams = {
@@ -74,13 +72,18 @@ export function getExperiment(slug: string): Experiment | null {
 
 // ---- defaults per experiment ----------------------------------------------
 
+// Studio defaults are tuned away from the hero's "smooth bubble" look
+// toward visible wavy/fingery flow detail:
+//   - high velocityDissipation lets eddies live long enough to be seen
+//   - high dyeDissipation keeps splats around for ~5x longer than hero
+//   - higher vorticity confinement amplifies curl-noise eddies
+//   - smaller splat radius so individual flow features stand out
 export const INK_DROP_STUDIO_DEFAULTS: InkDropStudioParams = {
-  velocityDissipation: 0.97,
-  dyeDissipation: 0.95,
-  vorticity: 18.0,
+  velocityDissipation: 0.99,
+  dyeDissipation: 0.99,
+  vorticity: 30.0,
   pressureIterations: 30,
-  splatRadius: 1.0,
-  inkColor: "rose",
+  splatRadius: 0.6,
 };
 
 export const TYPE_AS_FLUID_DEFAULTS: TypeAsFluidParams = {

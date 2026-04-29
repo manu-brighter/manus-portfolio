@@ -34,16 +34,13 @@ const BASE_SPLAT_RADIUS = 0.015;
 
 const SPOT_COLOR_KEYS = ["rose", "amber", "mint", "violet"] as const satisfies readonly SpotColor[];
 
-// "auto" rotates through the four Riso spots (matches hero behaviour);
-// the named options pin every splat to a single colour.
-type InkChoice = SpotColor | "auto";
-const INK_CHOICES: readonly InkChoice[] = ["auto", "rose", "amber", "mint", "violet"];
-
-function pickInkColor(choice: InkChoice): SpotColor {
-  if (choice === "auto") {
-    return SPOT_COLOR_KEYS[Math.floor(Math.random() * SPOT_COLOR_KEYS.length)] ?? "rose";
-  }
-  return choice;
+// The toon render shader (render-toon.frag.glsl) maps dye *magnitude*
+// to a fixed mint→amber→rose→violet ladder rather than reading the
+// dye RGB itself — so a single-colour override can't show through the
+// layered Riso look. Studio embraces that: every splat picks a random
+// Riso spot and the visual feel is layered ink, just like the hero.
+function randomSpot(): SpotColor {
+  return SPOT_COLOR_KEYS[Math.floor(Math.random() * SPOT_COLOR_KEYS.length)] ?? "rose";
 }
 
 export function InkDropStudio() {
@@ -76,9 +73,10 @@ function InkDropStudioCanvas() {
     down: false,
     moved: false,
   });
-  // Mirrors the live `Ink` Leva value into a ref so pointer/button
-  // handlers (mounted once) always read the current choice.
-  const inkChoiceRef = useRef<InkChoice>("auto");
+  // Active interval handle while the BOMB button is being held —
+  // pointerup / pointerleave clear it. Lets the user "rain bombs"
+  // for as long as they hold instead of getting one short blip.
+  const bombIntervalRef = useRef<number | null>(null);
   const [paused, setPaused] = useState(false);
 
   // Leva controls — values reactive, Leva re-renders the component on
@@ -114,10 +112,6 @@ function InkDropStudioCanvas() {
       min: 0.3,
       max: 4.0,
       step: 0.1,
-    },
-    Ink: {
-      value: "auto" as InkChoice,
-      options: INK_CHOICES as unknown as string[],
     },
   });
 
@@ -155,9 +149,8 @@ function InkDropStudioCanvas() {
     });
     orchestrator.setAmbientEnabled(false);
     // Hover-trail uses the orchestrator's built-in auto-pointer-splat
-    // (rotating Riso colours when the override is null, single colour
-    // when set). Click-burst is layered on top via injectSplat() in
-    // the pointerdown handler — we keep both paths active.
+    // with the rotating Riso-spot cycle (override stays null). Click-
+    // burst + bomb layer additional splats on top via injectSplat().
     orchestratorRef.current = orchestrator;
 
     const onResize = () => {
@@ -188,12 +181,6 @@ function InkDropStudioCanvas() {
       pressureIterations: params["Pressure Iters"],
       splatRadius: params["Splat Radius"] * BASE_SPLAT_RADIUS,
     });
-    const choice = params.Ink as InkChoice;
-    inkChoiceRef.current = choice;
-    // The orchestrator's hover-trail splat colour: null = rotate,
-    // specific = pinned. Click-burst + bomb pick per-splat colours
-    // independently in the handlers below.
-    orchestrator.setSplatColor(choice === "auto" ? null : choice);
   }, [params]);
 
   // RAF loop — drives orchestrator.step. The orchestrator's auto-
@@ -249,15 +236,13 @@ function InkDropStudioCanvas() {
       pointerRef.current.down = true;
 
       // Click burst — radial splatter from the click point. Each
-      // satellite picks its own colour independently of the others
-      // (great in "auto" mode for the bunte Riso feel) and gets a
-      // random outward velocity so the burst reads as "ink splash"
-      // rather than the hover trail's "ink drag".
+      // satellite picks its own random Riso spot so the burst reads
+      // as bunte "ink splash", with outward velocity to differentiate
+      // it from the hover trail's "ink drag".
       const o = orchestratorRef.current;
       if (!o) return;
       const x = e.clientX / window.innerWidth;
       const y = 1.0 - e.clientY / window.innerHeight;
-      const choice = inkChoiceRef.current;
       const RING = 6;
       const baseAngle = Math.random() * Math.PI * 2;
       for (let i = 0; i < RING; i++) {
@@ -267,12 +252,12 @@ function InkDropStudioCanvas() {
         o.injectSplat(
           x + Math.cos(angle) * offset,
           y + Math.sin(angle) * offset,
-          pickInkColor(choice),
+          randomSpot(),
           Math.cos(angle) * speed,
           Math.sin(angle) * speed,
         );
       }
-      o.injectSplat(x, y, pickInkColor(choice), 0, 0);
+      o.injectSplat(x, y, randomSpot(), 0, 0);
     };
 
     const onUp = () => {
@@ -289,25 +274,54 @@ function InkDropStudioCanvas() {
     };
   }, []);
 
-  const onBomb = () => {
+  /**
+   * One bomb wave — 4–8 random splats scattered across the canvas
+   * with random outward velocities. Press-and-hold rains waves at
+   * 110ms cadence (see onBombStart/End). Two stacked splats per
+   * position with crossed velocity vectors amplify the impact and
+   * give vorticity something to tear apart.
+   */
+  const fireBombWave = () => {
     const o = orchestratorRef.current;
     if (!o) return;
-    // Scattered detonation: 4–8 splats at random positions across the
-    // canvas (not concentrated where the cursor happens to be). Each
-    // gets its own outward velocity vector and an independent colour
-    // pick so the bomb reads as "many ink-bombs going off at once".
     const COUNT = 4 + Math.floor(Math.random() * 5);
-    const choice = inkChoiceRef.current;
     for (let i = 0; i < COUNT; i++) {
-      // Keep splats off the very edges (0.1..0.9) so the burst stays
-      // visible — splats too close to the rim get half-clipped.
       const x = 0.1 + Math.random() * 0.8;
       const y = 0.1 + Math.random() * 0.8;
       const angle = Math.random() * Math.PI * 2;
-      const speed = 1.0 + Math.random() * 1.0;
-      o.injectSplat(x, y, pickInkColor(choice), Math.cos(angle) * speed, Math.sin(angle) * speed);
+      const speed = 1.2 + Math.random() * 1.5;
+      o.injectSplat(x, y, randomSpot(), Math.cos(angle) * speed, Math.sin(angle) * speed);
+      o.injectSplat(
+        x,
+        y,
+        randomSpot(),
+        Math.cos(angle + Math.PI / 2) * speed * 0.6,
+        Math.sin(angle + Math.PI / 2) * speed * 0.6,
+      );
     }
   };
+
+  const onBombStart = () => {
+    fireBombWave();
+    if (bombIntervalRef.current !== null) return;
+    bombIntervalRef.current = window.setInterval(fireBombWave, 110);
+  };
+  const onBombEnd = () => {
+    if (bombIntervalRef.current !== null) {
+      window.clearInterval(bombIntervalRef.current);
+      bombIntervalRef.current = null;
+    }
+  };
+
+  // Safety: clear the interval if the component unmounts while held.
+  useEffect(() => {
+    return () => {
+      if (bombIntervalRef.current !== null) {
+        window.clearInterval(bombIntervalRef.current);
+        bombIntervalRef.current = null;
+      }
+    };
+  }, []);
   const onFreezeToggle = () => {
     const o = orchestratorRef.current;
     if (!o) return;
@@ -334,7 +348,8 @@ function InkDropStudioCanvas() {
       />
       <ButtonRow
         paused={paused}
-        onBomb={onBomb}
+        onBombStart={onBombStart}
+        onBombEnd={onBombEnd}
         onFreezeToggle={onFreezeToggle}
         onReset={onReset}
       />
@@ -390,19 +405,22 @@ function LevaPaperTheme() {
 
 type ButtonRowProps = {
   paused: boolean;
-  onBomb: () => void;
+  /** Press-and-hold: start bombing on pointerdown. */
+  onBombStart: () => void;
+  /** Stop bombing on pointerup / leave / cancel. */
+  onBombEnd: () => void;
   onFreezeToggle: () => void;
   onReset: () => void;
 };
 
-function ButtonRow({ paused, onBomb, onFreezeToggle, onReset }: ButtonRowProps) {
+function ButtonRow({ paused, onBombStart, onBombEnd, onFreezeToggle, onReset }: ButtonRowProps) {
   const t = useTranslations("playground.experiments.inkDropStudio");
   return (
     <div
       data-no-splat
       className="-translate-x-1/2 pointer-events-auto absolute bottom-8 left-1/2 z-20 flex items-stretch gap-2"
     >
-      <ToolbarButton onClick={onBomb} label={t("buttonBomb")} />
+      <HoldButton onPress={onBombStart} onRelease={onBombEnd} label={t("buttonBomb")} />
       <ToolbarButton
         onClick={onFreezeToggle}
         label={paused ? t("buttonResume") : t("buttonFreeze")}
@@ -412,13 +430,39 @@ function ButtonRow({ paused, onBomb, onFreezeToggle, onReset }: ButtonRowProps) 
   );
 }
 
+const TOOLBAR_BUTTON_CLASS =
+  "type-label-stamp border-[1.5px] border-ink bg-paper px-4 py-2 text-ink shadow-[2px_2px_0_var(--color-ink)] transition-[transform,box-shadow] hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-[3px_3px_0_var(--color-ink)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none";
+
 function ToolbarButton({ onClick, label }: { onClick: () => void; label: string }) {
+  return (
+    <button type="button" onClick={onClick} data-no-splat className={TOOLBAR_BUTTON_CLASS}>
+      {label}
+    </button>
+  );
+}
+
+/** Press-and-hold variant. Fires onPress on pointerdown and onRelease
+ *  on pointerup OR pointerleave / pointercancel — the leave guard
+ *  matters because if the user drags off the button while still holding,
+ *  pointerup fires elsewhere and we'd otherwise leak the interval. */
+function HoldButton({
+  onPress,
+  onRelease,
+  label,
+}: {
+  onPress: () => void;
+  onRelease: () => void;
+  label: string;
+}) {
   return (
     <button
       type="button"
-      onClick={onClick}
       data-no-splat
-      className="type-label-stamp border-[1.5px] border-ink bg-paper px-4 py-2 text-ink shadow-[2px_2px_0_var(--color-ink)] transition-[transform,box-shadow] hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-[3px_3px_0_var(--color-ink)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+      onPointerDown={onPress}
+      onPointerUp={onRelease}
+      onPointerLeave={onRelease}
+      onPointerCancel={onRelease}
+      className={TOOLBAR_BUTTON_CLASS}
     >
       {label}
     </button>
