@@ -69,6 +69,13 @@ function InkDropStudioCanvas() {
     down: false,
     moved: false,
   });
+  // Last position the pointer was over the canvas (not over a button or
+  // the Leva panel). Bomb fires here so clicking the BOMB button
+  // doesn't detonate at the button's own location.
+  const lastCanvasPointerRef = useRef({ x: 0.5, y: 0.5 });
+  // Mirrors the live `Ink` Leva value into a ref so pointer event
+  // handlers (set up once at mount) always read the current colour.
+  const inkColorRef = useRef<SpotColor>(INK_DROP_STUDIO_DEFAULTS.inkColor);
   const [paused, setPaused] = useState(false);
 
   // Leva controls — values reactive, Leva re-renders the component on
@@ -144,7 +151,11 @@ function InkDropStudioCanvas() {
       splatRadius: params["Splat Radius"] * BASE_SPLAT_RADIUS,
     });
     orchestrator.setAmbientEnabled(false);
-    orchestrator.setSplatColor(params.Ink as SpotColor);
+    // Studio drives splats manually so click-burst and drag-trail can
+    // diverge — the orchestrator's auto-pointer-splat block would
+    // otherwise also fire continuous splats and steal control of the
+    // colour rotation.
+    orchestrator.setPointerSplatEnabled(false);
     orchestratorRef.current = orchestrator;
 
     const onResize = () => {
@@ -175,44 +186,97 @@ function InkDropStudioCanvas() {
       pressureIterations: params["Pressure Iters"],
       splatRadius: params["Splat Radius"] * BASE_SPLAT_RADIUS,
     });
-    orchestrator.setSplatColor(params.Ink as SpotColor);
+    // Mirror the picked colour into a ref so the pointer handlers
+    // below (mounted once with [] deps) read the live value each event.
+    inkColorRef.current = params.Ink as SpotColor;
   }, [params]);
 
-  // RAF loop
+  // RAF loop — drives the orchestrator step and injects the drag-trail
+  // splat each frame (one splat at the cursor with motion velocity)
+  // when the pointer is held down and moving over the canvas. The
+  // click-burst is fired in the pointerdown handler below, not here.
   useEffect(() => {
     return subscribe((deltaMs, elapsedMs) => {
       const orchestrator = orchestratorRef.current;
       if (!orchestrator) return;
+
+      const p = pointerRef.current;
+      // Drag trail: continuous splats with motion velocity. dx/dy are
+      // scaled up to give a visible flow direction; matches the hero
+      // rig's auto-pointer scale (×10 inside runSplat). Only fires
+      // while the pointer is actually moving — holding still doesn't
+      // re-stamp the same point.
+      if (p.down && p.moved) {
+        orchestrator.injectSplat(p.x, p.y, inkColorRef.current, p.dx * 6, p.dy * 6);
+      }
+
       const dt = Math.min(deltaMs * 0.001, 0.033);
-      orchestrator.step(dt, elapsedMs, pointerRef.current);
-      pointerRef.current.dx = 0;
-      pointerRef.current.dy = 0;
-      pointerRef.current.moved = false;
+      orchestrator.step(dt, elapsedMs, p);
+      p.dx = 0;
+      p.dy = 0;
+      p.moved = false;
     }, 15);
   }, []);
 
   // Pointer events at document level — the canvas is full-screen so
-  // any pointermove on the page maps directly to a sim coordinate.
-  // Splats only fire while pointerdown is held (briefing semantics:
-  // "Klick spawnt Ink-Tropfen", and dragging keeps drawing).
+  // any pointermove maps to sim coordinates. Click bursts fire on
+  // pointerdown over the canvas; drag-trail is handled in the RAF
+  // loop above.
   useEffect(() => {
+    const isOverChrome = (target: EventTarget | null) =>
+      !!(target as HTMLElement | null)?.closest("[data-no-splat]");
+
     const onMove = (e: PointerEvent) => {
       const x = e.clientX / window.innerWidth;
       const y = 1.0 - e.clientY / window.innerHeight;
-      pointerRef.current.dx = x - pointerRef.current.x;
-      pointerRef.current.dy = y - pointerRef.current.y;
-      pointerRef.current.x = x;
-      pointerRef.current.y = y;
-      pointerRef.current.moved = true;
+      const p = pointerRef.current;
+      p.dx = x - p.x;
+      p.dy = y - p.y;
+      p.x = x;
+      p.y = y;
+      p.moved = true;
+      // Only update the bomb-target ref when the pointer is over the
+      // canvas — moving the mouse onto the BOMB button must not move
+      // the bomb's detonation site.
+      if (!isOverChrome(e.target)) {
+        lastCanvasPointerRef.current.x = x;
+        lastCanvasPointerRef.current.y = y;
+      }
     };
+
     const onDown = (e: PointerEvent) => {
-      // Don't trip splats when the user clicks Leva or a button.
-      if ((e.target as HTMLElement)?.closest("[data-no-splat]")) return;
+      if (isOverChrome(e.target)) return;
       pointerRef.current.down = true;
+      // Click burst — small radial splash at the click point. 6 satellites
+      // with random angle jitter + outward velocity, plus a centred dump
+      // so the impact has both a core and a spread. Reads as "ink hits
+      // paper" rather than the trail's "ink dragged across paper".
+      const o = orchestratorRef.current;
+      if (!o) return;
+      const x = e.clientX / window.innerWidth;
+      const y = 1.0 - e.clientY / window.innerHeight;
+      const color = inkColorRef.current;
+      const RING = 6;
+      const baseAngle = Math.random() * Math.PI * 2;
+      for (let i = 0; i < RING; i++) {
+        const angle = baseAngle + (i / RING) * Math.PI * 2 + (Math.random() - 0.5) * 0.6;
+        const speed = 0.7 + Math.random() * 0.6;
+        const offset = 0.006 + Math.random() * 0.012;
+        o.injectSplat(
+          x + Math.cos(angle) * offset,
+          y + Math.sin(angle) * offset,
+          color,
+          Math.cos(angle) * speed,
+          Math.sin(angle) * speed,
+        );
+      }
+      o.injectSplat(x, y, color, 0, 0);
     };
+
     const onUp = () => {
       pointerRef.current.down = false;
     };
+
     document.addEventListener("pointermove", onMove);
     document.addEventListener("pointerdown", onDown);
     document.addEventListener("pointerup", onUp);
@@ -226,10 +290,12 @@ function InkDropStudioCanvas() {
   const onBomb = () => {
     const o = orchestratorRef.current;
     if (!o) return;
-    // Fire at the last known pointer position — lets the user "aim"
-    // the bomb by hovering before clicking. Falls back to centre if
-    // the cursor hasn't moved yet (initial pointerRef.x = 0.5).
-    o.injectBomb(pointerRef.current.x, pointerRef.current.y, params.Ink as SpotColor);
+    // Fire at the last position where the pointer was OVER the canvas
+    // (not over the bomb button itself). Without this, hovering the
+    // bomb button would move the detonation site to the button's own
+    // location and the explosion would be invisible behind the chrome.
+    const t = lastCanvasPointerRef.current;
+    o.injectBomb(t.x, t.y, inkColorRef.current);
   };
   const onFreezeToggle = () => {
     const o = orchestratorRef.current;

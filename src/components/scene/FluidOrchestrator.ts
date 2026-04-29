@@ -245,9 +245,12 @@ export class FluidOrchestrator {
   private splatColorIndex = 0;
   private ambientActive = false;
   // Studio-mode toggles. Default behaviour matches the hero rig (ambient
-  // wandering points on, rotating Riso colours per splat). Playground's
-  // Ink Drop Studio flips both: clean paper, single user-picked colour.
+  // wandering points on, rotating Riso colours per splat, auto pointer
+  // splat from the PointerState). Playground's Ink Drop Studio disables
+  // ambient + auto-pointer-splat and drives splats manually via
+  // injectSplat() so it can split click-burst from drag-trail behavior.
   private ambientEnabled = true;
+  private pointerSplatEnabled = true;
   private splatColorOverride: readonly [number, number, number] | null = null;
 
   // External splat queue — drained inside step(). Used by Work-cards to
@@ -383,6 +386,17 @@ export class FluidOrchestrator {
    */
   setSplatColor(color: keyof typeof SPOT_COLORS | null): void {
     this.splatColorOverride = color ? SPOT_COLORS[color] : null;
+  }
+
+  /**
+   * Toggle the auto-pointer-splat block in step(). When false, the
+   * orchestrator never reads from PointerState.x/y/dx/dy/down and the
+   * caller is expected to drive splats manually via injectSplat(),
+   * which lets the caller distinguish click-burst from drag-trail
+   * behaviour. Hero stays at the default (true).
+   */
+  setPointerSplatEnabled(enabled: boolean): void {
+    this.pointerSplatEnabled = enabled;
   }
 
   /**
@@ -734,8 +748,10 @@ export class FluidOrchestrator {
     const runSim = !this.config.halfRate || this.frameCount % 2 === 0;
 
     if (runSim) {
-      // Splat from pointer
-      if (pointer.moved || pointer.down) {
+      // Splat from pointer (hero default; studio mode disables this and
+      // drives splats manually via injectSplat() so click-burst and
+      // drag-trail can have distinct behaviour).
+      if (this.pointerSplatEnabled && (pointer.moved || pointer.down)) {
         const color = this.splatColorOverride ?? this.nextSplatColor();
         this.runSplat(pointer.x, pointer.y, pointer.dx, pointer.dy, color);
       }
