@@ -468,8 +468,9 @@
         "cardBody": "Tipp ein Wort. Es wird gedruckt, dann von der Tinte verschluckt. Sanft.",
         "title": "Type-as-Fluid.",
         "caption": "Tipp ein Wort. Es wird gedruckt, dann von der Tinte verschluckt. Sanft.",
-        "inputLabel": "Tippe ein Wort",
-        "inputPlaceholder": "Wort eingeben…"
+        "inputLabel": "TIPPE EIN WORT",
+        "inputPlaceholder": "Manuel",
+        "reducedMotionNote": "Dieses Experiment druckt Wörter live in eine laufende Fluid-Simulation. Unter prefers-reduced-motion blende ich die Animation aus — zurück zum Playground für eine ruhigere Section."
       }
     }
   }

@@ -9,6 +9,7 @@ import advectFrag from "@/shaders/fluid/advect.frag.glsl";
 import curlFrag from "@/shaders/fluid/curl.frag.glsl";
 import divergenceFrag from "@/shaders/fluid/divergence.frag.glsl";
 import gradientSubFrag from "@/shaders/fluid/gradient-subtract.frag.glsl";
+import injectDensityFrag from "@/shaders/fluid/inject-density.frag.glsl";
 import pressureFrag from "@/shaders/fluid/pressure.frag.glsl";
 import renderToonFrag from "@/shaders/fluid/render-toon.frag.glsl";
 import splatFrag from "@/shaders/fluid/splat.frag.glsl";
@@ -49,6 +50,7 @@ type Programs = {
   pressure: WebGLProgram;
   gradientSub: WebGLProgram;
   renderToon: WebGLProgram;
+  injectDensity: WebGLProgram;
 };
 
 // ---------------------------------------------------------------------------
@@ -300,6 +302,7 @@ export class FluidOrchestrator {
       pressure: createProgram(gl, quadVert, pressureFrag),
       gradientSub: createProgram(gl, quadVert, gradientSubFrag),
       renderToon: createProgram(gl, quadVert, toonFrag),
+      injectDensity: createProgram(gl, quadVert, injectDensityFrag),
     };
 
     this.emptyVAO = gl.createVertexArray();
@@ -429,6 +432,48 @@ export class FluidOrchestrator {
     this.ambientActive = false;
     this.lastPointerTime = performance.now();
     this.frameCount = 0;
+  }
+
+  /**
+   * Stamp an external alpha texture into the dye field, multiplied by
+   * `color × strength`. Used by Type-as-Fluid's TextStamper to bake
+   * a soft text mask into the running fluid sim — the dye field then
+   * advects + dissipates the stamp as if it were any other ink. The
+   * texture is read in normalised UV (0..1) and only the .r channel
+   * is sampled (consistent with R8 stamp uploads).
+   *
+   * dyeColor accepts either a Riso spot key or a raw RGB triplet so
+   * callers can either match the palette or inject something custom.
+   * Strength typically lives in 0.3..1.5 — feel by feel.
+   */
+  injectDensityTexture(
+    stamp: WebGLTexture,
+    color: keyof typeof SPOT_COLORS | readonly [number, number, number],
+    strength = 1.0,
+  ): void {
+    const gl = this.gl;
+    const resolved = typeof color === "string" ? SPOT_COLORS[color] : color;
+    const p = this.programs.injectDensity;
+    this.activateProgram(p);
+    this.bindTexture(p, "uDye", this.dye.read.texture, 0);
+    this.bindTexture(p, "uStamp", stamp, 1);
+    this.setVec3(p, "uColor", resolved[0], resolved[1], resolved[2]);
+    this.setFloat(p, "uStrength", strength);
+    gl.bindVertexArray(this.emptyVAO);
+    this.renderToFBO(this.dye.write);
+    this.drawQuad();
+    this.dye.swap();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  }
+
+  /**
+   * Read-only access to the simulation grid dimensions. TextStamper
+   * needs to size its blur FBOs to match (otherwise the stamp would
+   * be sampled at a different resolution and either pixelate or
+   * over-blur). Returns the same w/h that the dye/velocity FBOs use.
+   */
+  getSimSize(): { width: number; height: number } {
+    return { width: this.simWidth, height: this.simHeight };
   }
 
   /**

@@ -14,10 +14,27 @@ test.describe("playground experiment routes", () => {
     );
   });
 
-  test("type-as-fluid renders with chrome and back link", async ({ page }) => {
+  test("type-as-fluid renders with chrome, input field, and back link", async ({ page }) => {
     await page.goto("/de/playground/type-as-fluid");
     await expect(page.getByRole("heading", { name: /Type-as-Fluid/ })).toBeVisible();
     await expect(page.getByRole("link", { name: /ZURÜCK ZUM PLAYGROUND/i })).toBeVisible();
+    await expect(page.getByLabel(/TIPPE EIN WORT/i)).toBeVisible();
+  });
+
+  test("type-as-fluid: typing into the input updates the value", async ({ page }) => {
+    await page.goto("/de/playground/type-as-fluid");
+    const input = page.getByLabel(/TIPPE EIN WORT/i);
+    await input.fill("HELLER");
+    await expect(input).toHaveValue("HELLER");
+  });
+
+  test("reduced-motion: type-as-fluid shows fallback, no canvas", async ({ browser }) => {
+    const context = await browser.newContext({ reducedMotion: "reduce" });
+    const page = await context.newPage();
+    await page.goto("/de/playground/type-as-fluid");
+    await expect(page.locator("canvas")).toHaveCount(0);
+    await expect(page.getByText(/blende ich die Animation aus/i)).toBeVisible();
+    await context.close();
   });
 
   test("unknown slug renders a 404", async ({ page }) => {
