@@ -458,24 +458,26 @@ flow + IntersectionObserver per slot. Captions slide in horizontally
 (`translate-x-4 → 0` + `opacity 0 → 1` over 700ms) parallel with the
 ink dissolve.
 
-### Adaptive fluid-sim lifecycle (rework)
+### Fluid-sim lifecycle
 
-- **Default behaviour**: hero fluid sim runs everywhere by default
-  (lifted from "pause when hero leaves viewport"). The user's cursor
-  drives ink across all sections; in Photography this is what powers
-  the ambient splats into PhotoInkMask.
-- **Frametime watchdog**: rolling 60-sample (~1s at 60fps) average of
-  `deltaMs` from the shared RAF. If avg > 22ms (i.e. < 45fps) for 2s
-  cumulative → `perfModeRef` latches **on for the session** (no
-  oscillation).
-- **Once perf-mode is on**: a separate IntersectionObserver pauses the
-  sim while no priority section is in viewport. Priority IDs:
-  `#hero` and `#photography` (everywhere else, the sim's contribution
-  is purely background noise that's not worth the GPU cycles on a
-  struggling device).
-- Watchdog uses `deltaMs` rather than wrapping `gl.finish()` for
-  cheap measurement — `gl.finish()` itself stalls the pipeline and
-  would skew the metric upward in a feedback loop.
+- **Hero fluid sim runs everywhere, period.** No IntersectionObserver
+  pause, no frametime watchdog. The cursor drives ink across all
+  sections; in Photography it powers the ambient splats into
+  PhotoInkMask. The earlier Phase 9 watchdog + perf-mode IO pause was
+  removed — on Iris Xe with 5 always-on PhotoInkMask contexts the
+  watchdog latched within seconds of load, then pinned the sim to
+  hero/photography for the rest of the session, which is exactly the
+  opposite of what was wanted.
+- **GPU capability tiering is the right place for "this device can't
+  cope" decisions** — `lib/gpu.ts` + `useGPUCapability` pick a tier
+  (`high`/`medium`/`low`/`minimal`/`static`) up front, with `static`
+  falling all the way back to `<StaticFallback />` (no Canvas at all).
+  That's a startup decision based on renderer name + an initial
+  frametime probe, not a runtime watchdog. Don't reintroduce a
+  runtime watchdog in `FluidSim.tsx` — if a tier proves too heavy in
+  the wild, drop its config in `lib/gpu.ts` instead.
+- The `measuring` / `recordFrametime` flow in `FluidSim` stays — it's
+  the tier auto-tuner, not perf-mode.
 
 ### Lessons preserved from the discarded first pass
 
