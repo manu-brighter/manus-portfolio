@@ -91,19 +91,24 @@ function TypeAsFluidCanvas() {
     canvas.height = Math.floor(window.innerHeight * dpr);
 
     const orchestrator = new FluidOrchestrator();
-    // Override medium-tier dissipation defaults — at the stock 0.95
-    // dye dissipation a stamp fades to ~5% in one second, which reads
-    // as "word flashes and vanishes". Studio mode wants a "swallowed
-    // softly" feel: density survives ~10s, velocity persists ~30s so
-    // the text gets time to advect into actual flow patterns.
+    // Calm-paper baseline so the typed word reads CLEARLY first, then
+    // dissolves gently — briefing's "sanft":
+    //   - velocityDissipation 0.95 → motion settles within ~1s of no
+    //     input, so leftover momentum from one stamp doesn't smear
+    //     the next word
+    //   - dyeDissipation 0.99 → text stays at ~30% density at 2s,
+    //     fades to invisible by ~5s. Readable window of ~3s.
+    //   - confinement 8 → mild vorticity, doesn't tear letterforms
+    // Ambient wandering points OFF — that was the source of the
+    // "storm pulling to upper-left" feel; the text should sit on
+    // paper, not float in turbulent ink.
     orchestrator.init(gl, {
       ...getTierConfig("medium"),
-      velocityDissipation: 0.998,
-      dyeDissipation: 0.998,
-      confinement: 30,
+      velocityDissipation: 0.95,
+      dyeDissipation: 0.99,
+      confinement: 8,
     });
-    orchestrator.setAmbientEnabled(true);
-    orchestrator.triggerAmbient();
+    orchestrator.setAmbientEnabled(false);
     orchestratorRef.current = orchestrator;
 
     stamperRef.current = new TextStamper(gl, orchestrator);
@@ -244,47 +249,17 @@ function randomSpot(): "rose" | "amber" | "mint" | "violet" {
 }
 
 /**
- * Stamp a word with a stronger, more-fluid presence than a single
- * inject-density call gives:
- *   - 3 stacked density stamps over ~80ms with descending strength,
- *     each picking its own Riso spot. Cumulative density + per-stamp
- *     colour gives a "soaking ink" feel rather than a flat decal.
- *   - 5 small velocity-only splats around the centre with random
- *     outward push so the just-stamped text immediately starts to
- *     swirl, instead of sitting still until the slow ambient drift
- *     catches up.
+ * One clean stamp per word. The previous multi-stamp + velocity-
+ * perturbation pass made the text unreadable: it landed at the same
+ * tick as a turbulent shockwave and got shredded before the toon
+ * shader could resolve letterforms. Now: single stamp with enough
+ * strength to peg the dye field, no velocity injection. The
+ * orchestrator's slow dissipation does the dissolving.
  *
- * The orchestrator's slow dye + velocity dissipation (0.998 each in
- * TypeAsFluid) keeps the result legible for ~10s while the text is
- * pulled apart by the flow.
+ * The `_orchestrator` parameter is kept in the signature for symmetry
+ * with future-me wanting to add a SOFT velocity hint (single splat
+ * at canvas centre, low force) — not used yet.
  */
-function stampWord(stamper: TextStamper, orchestrator: FluidOrchestrator, word: string) {
-  const color = randomSpot();
-  // Wave 0 — strongest base layer, biggest blur for soft edges.
-  stamper.stampText(word, color, 1.6, 4);
-
-  // Wave 1 + 2 — re-injections with different spots so the layered
-  // toon ladder reads as multi-pass Riso, not a single flat stroke.
-  window.setTimeout(() => stamper.stampText(word, randomSpot(), 1.0, 3), 40);
-  window.setTimeout(() => stamper.stampText(word, randomSpot(), 0.6, 3), 90);
-
-  // Velocity perturbation — 5 random outward pushes around the canvas
-  // centre. Color = transparent so we don't add dye, only kick the
-  // velocity field. The text rides this turbulence.
-  const transparent = [0, 0, 0] as const;
-  const PUSH = 5;
-  for (let i = 0; i < PUSH; i++) {
-    const a = Math.random() * Math.PI * 2;
-    const r = 0.08 + Math.random() * 0.18;
-    const x = 0.5 + Math.cos(a) * r;
-    const y = 0.5 + Math.sin(a) * r;
-    const speed = 0.4 + Math.random() * 0.5;
-    orchestrator.injectSplat(
-      x,
-      y,
-      transparent,
-      Math.cos(a + Math.PI / 2) * speed,
-      Math.sin(a + Math.PI / 2) * speed,
-    );
-  }
+function stampWord(stamper: TextStamper, _orchestrator: FluidOrchestrator, word: string) {
+  stamper.stampText(word, randomSpot(), 1.4, 3);
 }
