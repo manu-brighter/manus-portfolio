@@ -60,8 +60,13 @@ export function TypeAsFluidMiniSim({ paused }: Props) {
     const orchestrator = new FluidOrchestrator();
     orchestrator.init(gl, {
       ...getTierConfig("minimal"),
-      velocityDissipation: 0.95,
-      dyeDissipation: 0.995,
+      velocityDissipation: 0.94,
+      // Faster fade than the full route's 0.995 — at this cadence
+      // each word has to clear out of the way before the next one
+      // lands, otherwise stamps stack into illegible mush. 0.985
+      // means the previous word is at ~7% density by 3s, basically
+      // gone by the time the next stamp arrives.
+      dyeDissipation: 0.985,
       confinement: 8,
     });
     orchestrator.setAmbientEnabled(false);
@@ -97,8 +102,10 @@ export function TypeAsFluidMiniSim({ paused }: Props) {
   }, [reducedMotion]);
 
   // Auto-stamp loop — only fires while the card is hovered (not paused).
-  // setInterval over RAF here because stamping is expensive (rasterize +
-  // upload + blur) and we want a fixed 1.8s cadence rather than per-frame.
+  // 3000ms cadence pairs with the bumped dyeDissipation so each word
+  // has room to fade before the next lands. setInterval over RAF
+  // because stamping is expensive (rasterize + upload + blur) and we
+  // want a fixed cadence, not per-frame.
   useEffect(() => {
     if (reducedMotion || paused) return;
     const handle = window.setInterval(() => {
@@ -109,7 +116,7 @@ export function TypeAsFluidMiniSim({ paused }: Props) {
           Math.floor(Math.random() * TYPE_AS_FLUID_DEFAULTS.defaultWords.length)
         ] ?? "MANUEL";
       stamper.stampText(word, randomSpot(), 1.4, 1);
-    }, 1800);
+    }, 3000);
     return () => window.clearInterval(handle);
   }, [paused, reducedMotion]);
 
