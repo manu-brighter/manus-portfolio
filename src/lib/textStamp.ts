@@ -191,8 +191,14 @@ export class TextStamper {
     const gl = this.gl;
 
     // ---- CPU rasterize + GPU upload ----
+    // UNPACK_FLIP_Y_WEBGL flips rows during upload so the texture's
+    // row 0 is the BOTTOM of the rasterized canvas. Then quad.vert's
+    // vUv.y=0 (which corresponds to gl_Position.y=-1, the bottom of
+    // the screen) samples the bottom of the text. Without this flip
+    // letters render upside-down (Canvas2D is Y-down, GL UV is Y-up).
     const pixels = rasterizeText(text, this.width, this.height);
     gl.bindTexture(gl.TEXTURE_2D, this.uploadTex);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.texSubImage2D(
       gl.TEXTURE_2D,
       0,
@@ -204,13 +210,17 @@ export class TextStamper {
       gl.UNSIGNED_BYTE,
       pixels,
     );
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
 
     // ---- Separable Gaussian blur, ping-pong over blurA / blurB ----
+    // Stride 1.0 = 9-tap kernel covers ~4px each side, so a single H+V
+    // iteration adds a soft Riso-bleed at the letter edges without
+    // mushing the letterforms into blobs. Caller picks iterations.
     // biome-ignore lint/correctness/useHookAtTopLevel: gl.useProgram is a WebGL API
     gl.useProgram(this.blurProgram);
     gl.bindVertexArray(this.vao);
     gl.uniform2f(this.uTexelSize, 1 / this.width, 1 / this.height);
-    gl.uniform1f(this.uStride, 1.4);
+    gl.uniform1f(this.uStride, 1.0);
 
     let read: WebGLTexture = this.uploadTex;
     let write: FBO = this.blurA;

@@ -104,8 +104,11 @@ function TypeAsFluidCanvas() {
     // paper, not float in turbulent ink.
     orchestrator.init(gl, {
       ...getTierConfig("medium"),
+      // velocity decays in ~1s of no input — gentle motion windows after
+      // each stamp, no accumulating storms.
       velocityDissipation: 0.95,
-      dyeDissipation: 0.99,
+      // text-density slow-fade: ~70% at 1s, ~40% at 3s, gone by ~10s.
+      dyeDissipation: 0.995,
       confinement: 8,
     });
     orchestrator.setAmbientEnabled(false);
@@ -249,17 +252,27 @@ function randomSpot(): "rose" | "amber" | "mint" | "violet" {
 }
 
 /**
- * One clean stamp per word. The previous multi-stamp + velocity-
- * perturbation pass made the text unreadable: it landed at the same
- * tick as a turbulent shockwave and got shredded before the toon
- * shader could resolve letterforms. Now: single stamp with enough
- * strength to peg the dye field, no velocity injection. The
- * orchestrator's slow dissipation does the dissolving.
+ * Stamp a word, then nudge it gently into motion.
  *
- * The `_orchestrator` parameter is kept in the signature for symmetry
- * with future-me wanting to add a SOFT velocity hint (single splat
- * at canvas centre, low force) — not used yet.
+ *   - 1 blur iteration (~3px softening) so letters keep their shape
+ *     instead of blurring into blobs (the previous 3 iterations were
+ *     much too aggressive for 256² sim grids — sigma was ~12px,
+ *     bigger than half the stem-width of typical letterforms).
+ *   - 8 velocity-only splats at random points around the canvas with
+ *     low force (0.10..0.25). Velocity dissipation 0.95 means this
+ *     flow window lasts ~1s, so the text gets a gentle ride and
+ *     then settles to slow-fade. No storms because the splat magnitude
+ *     is much smaller than the previous 0.4..0.5 perturbation pass.
  */
-function stampWord(stamper: TextStamper, _orchestrator: FluidOrchestrator, word: string) {
-  stamper.stampText(word, randomSpot(), 1.4, 3);
+function stampWord(stamper: TextStamper, orchestrator: FluidOrchestrator, word: string) {
+  stamper.stampText(word, randomSpot(), 1.4, 1);
+
+  const transparent = [0, 0, 0] as const;
+  for (let i = 0; i < 8; i++) {
+    const x = 0.15 + Math.random() * 0.7;
+    const y = 0.15 + Math.random() * 0.7;
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 0.1 + Math.random() * 0.15;
+    orchestrator.injectSplat(x, y, transparent, Math.cos(angle) * speed, Math.sin(angle) * speed);
+  }
 }
