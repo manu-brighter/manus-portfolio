@@ -4,6 +4,22 @@ import { expect, test } from "@playwright/test";
 // Sprint 1 ships the route shell + scene-visibility plumbing; the
 // experiments themselves are stubs until Sprints 2 and 3.
 
+test.describe("home playground section", () => {
+  test("renders header + two cards linking to experiment routes", async ({ page }) => {
+    await page.goto("/de/");
+    const section = page.locator("#playground");
+    await expect(section).toBeAttached();
+
+    const heading = section.getByRole("heading", { name: /Wo der Fluid-Sim spielen darf/i });
+    await expect(heading).toBeVisible();
+
+    const inkDropLink = section.getByRole("link", { name: /Ink Drop Studio/i });
+    const typeAsFluidLink = section.getByRole("link", { name: /Type-as-Fluid/i });
+    await expect(inkDropLink).toHaveAttribute("href", /\/de\/playground\/ink-drop-studio$/);
+    await expect(typeAsFluidLink).toHaveAttribute("href", /\/de\/playground\/type-as-fluid$/);
+  });
+});
+
 test.describe("playground experiment routes", () => {
   test("ink-drop-studio renders with chrome and back link", async ({ page }) => {
     await page.goto("/de/playground/ink-drop-studio");

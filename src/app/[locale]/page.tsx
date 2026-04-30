@@ -4,6 +4,7 @@ import { About } from "@/components/sections/About";
 import { CaseStudy } from "@/components/sections/CaseStudy";
 import { Hero } from "@/components/sections/Hero";
 import { Photography } from "@/components/sections/Photography";
+import { Playground } from "@/components/sections/Playground";
 import { Skills } from "@/components/sections/Skills";
 import { Work } from "@/components/sections/Work";
 import { routing } from "@/i18n/routing";
@@ -28,6 +29,7 @@ export default function HomePage({ params }: HomePageProps) {
       <Work />
       <CaseStudy />
       <Photography />
+      <Playground />
     </>
   );
 }
