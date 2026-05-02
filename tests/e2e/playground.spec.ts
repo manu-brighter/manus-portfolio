@@ -18,6 +18,19 @@ test.describe("home playground section", () => {
     await expect(inkDropLink).toHaveAttribute("href", /\/de\/playground\/ink-drop-studio$/);
     await expect(typeAsFluidLink).toHaveAttribute("href", /\/de\/playground\/type-as-fluid$/);
   });
+
+  test("ink-wipe transition overlay is mounted in locale layout", async ({ page }) => {
+    await page.goto("/de/");
+    await expect(page.locator('canvas[data-scene="ink-wipe"]')).toHaveCount(1);
+  });
+
+  test("reduced-motion: ink-wipe overlay is not mounted", async ({ browser }) => {
+    const context = await browser.newContext({ reducedMotion: "reduce" });
+    const page = await context.newPage();
+    await page.goto("/de/");
+    await expect(page.locator('canvas[data-scene="ink-wipe"]')).toHaveCount(0);
+    await context.close();
+  });
 });
 
 test.describe("playground experiment routes", () => {

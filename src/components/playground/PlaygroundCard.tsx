@@ -1,10 +1,17 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { type ComponentType, type CSSProperties, type ReactNode, useState } from "react";
+import {
+  type ComponentType,
+  type CSSProperties,
+  type MouseEvent as ReactMouseEvent,
+  type ReactNode,
+  useState,
+} from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import type { ExperimentSlug, SpotColor } from "@/lib/content/playground";
+import { GROW_MS, useInkWipeStore } from "@/lib/inkWipeStore";
 
 type PlaygroundCardProps = {
   slug: ExperimentSlug;
@@ -58,6 +65,8 @@ export function PlaygroundCard({ slug, i18nKey, cardSpot, visual, LiveSim }: Pla
   const t = useTranslations(`playground.experiments.${i18nKey}`);
   const tCommon = useTranslations("playground");
   const reducedMotion = useReducedMotion();
+  const router = useRouter();
+  const startGrow = useInkWipeStore((s) => s.startGrow);
 
   const [hovered, setHovered] = useState(false);
   const [activated, setActivated] = useState(false);
@@ -71,6 +80,38 @@ export function PlaygroundCard({ slug, i18nKey, cardSpot, visual, LiveSim }: Pla
   };
   const onLeave = () => setHovered(false);
 
+  /**
+   * Click handler for the Fluid-Ink-Wipe transition. Intercepts the
+   * Link's default navigation IF this is a plain primary-button click;
+   * for cmd/ctrl/middle-click (open-in-new-tab intents), keyboard
+   * Enter via the Link, or reduced-motion users we let the browser /
+   * default behavior handle the navigation as-is.
+   *
+   * On a normal click:
+   *   1. Read the click coordinates (so the wipe grows from where the
+   *      user actually clicked, not card centre — feels causal).
+   *   2. Fire startGrow on the inkWipe store; the overlay component
+   *      mounted in the locale layout picks this up and starts
+   *      animating.
+   *   3. Schedule router.push 60ms before grow completes so the route
+   *      swap finishes during the `covered` window, hiding the
+   *      destination's loading state behind ink.
+   */
+  const onLinkClick = (e: ReactMouseEvent<HTMLAnchorElement>) => {
+    if (reducedMotion) return; // browser navigates normally
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    e.preventDefault();
+    const x = e.clientX / window.innerWidth;
+    const y = e.clientY / window.innerHeight;
+    startGrow({ x, y, color: cardSpot });
+    window.setTimeout(
+      () => {
+        router.push(`/playground/${slug}`);
+      },
+      Math.max(GROW_MS - 60, 0),
+    );
+  };
+
   return (
     <Link
       href={`/playground/${slug}`}
@@ -81,6 +122,7 @@ export function PlaygroundCard({ slug, i18nKey, cardSpot, visual, LiveSim }: Pla
       onMouseLeave={onLeave}
       onFocus={onEnter}
       onBlur={onLeave}
+      onClick={onLinkClick}
     >
       {/* Media frame */}
       <div

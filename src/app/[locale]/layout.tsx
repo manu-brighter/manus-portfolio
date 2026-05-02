@@ -3,6 +3,7 @@ import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import type { ReactNode } from "react";
 import { MotionProvider } from "@/components/motion/MotionProvider";
+import { InkWipeOverlay } from "@/components/scene/InkWipeOverlay";
 import { SceneProvider } from "@/components/scene/SceneProvider";
 import { Footer } from "@/components/ui/Footer";
 import { Loader } from "@/components/ui/Loader";
@@ -51,6 +52,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
               <Footer />
               <ScrollProgress />
               <Loader />
+              <InkWipeOverlay />
             </SceneProvider>
           </MotionProvider>
         </NextIntlClientProvider>
