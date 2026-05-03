@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Auto-unstage next-env.d.ts before each commit.
+#
+# Next.js regenerates this file with subtly different content between
+# `next dev` and `next build` (`dev/types` vs. `types` reference). Committing
+# it produces churn for every contributor who runs the other command first.
+# `.claude/CLAUDE.md` mandates manual `git checkout -- next-env.d.ts` before
+# every `git add`; this hook is the durable automation of that rule.
+#
+# Activated by `scripts/install-git-hooks.mjs` (run via package.json prepare)
+# which sets `core.hooksPath` to `.githooks`.
+
+if git diff --cached --name-only --diff-filter=ACMR | grep -qx 'next-env.d.ts'; then
+  git restore --staged next-env.d.ts >/dev/null 2>&1 || git reset HEAD -- next-env.d.ts >/dev/null 2>&1
+  git checkout -- next-env.d.ts >/dev/null 2>&1 || true
+  echo "pre-commit: unstaged next-env.d.ts (auto-generated, never commit)"
+fi
+
+exit 0
