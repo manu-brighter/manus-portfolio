@@ -38,6 +38,7 @@
 
 import gsap from "gsap";
 import { type CSSProperties, useEffect, useId, useRef } from "react";
+import { isLoaderComplete } from "@/components/ui/Loader";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { splitChars } from "@/lib/motion/splitChars";
 import { dur, ease } from "@/lib/motion/tokens";
@@ -55,7 +56,23 @@ type OverprintRevealProps = {
   stagger?: number;
   /** Style pass-through — lets callers set line-height etc. */
   style?: CSSProperties;
+  /**
+   * Defer the timeline until the Loader fires `loader-complete` AND a
+   * post-paint settle window has elapsed. The Hero passes this so its
+   * reveal isn't eaten by the first-frame jank that hits right when the
+   * loader fades (font swap, R3F mount, sim warm-up). Non-Hero consumers
+   * fire on scroll-into-view long after the loader, so they leave this
+   * off and animate immediately.
+   */
+  waitForLoader?: boolean;
 };
+
+/**
+ * Post-loader-fade settle window before the Hero reveal kicks off. Tuned
+ * by eye: ≥ 250ms covers the worst first-frame jank we observed
+ * (font swap + R3F warmup), > 500ms starts feeling laggy.
+ */
+const LOADER_SETTLE_MS = 350;
 
 /** Resting misregistration — kept after snap, the signature "print" feel. */
 const RESTING_OFFSET_PX = 2;
@@ -81,6 +98,7 @@ export function OverprintReveal({
   delay = 0,
   stagger,
   style,
+  waitForLoader = false,
 }: OverprintRevealProps) {
   const rootRef = useRef<HTMLSpanElement>(null);
   const reducedMotion = useReducedMotion();
@@ -111,6 +129,94 @@ export function OverprintReveal({
 
     let fired = false;
     let timeline: gsap.core.Timeline | null = null;
+    let settleTimer: number | null = null;
+    let pendingLoaderListener: (() => void) | null = null;
+
+    const startTimeline = () => {
+      timeline = gsap.timeline({ delay });
+
+      // Ghosts fly in toward their resting misregistration with a
+      // per-char stagger. Each ghost gets its own deterministic
+      // jitter so the row has "handset" inconsistency.
+      timeline.to(
+        roseLayer,
+        {
+          x: (_i, el) => {
+            const c = (el as HTMLElement).dataset.char ?? "";
+            const idx = Number((el as HTMLElement).dataset.index ?? 0);
+            return RESTING_OFFSET_PX + jitterFor(c, idx);
+          },
+          y: (_i, el) => {
+            const c = (el as HTMLElement).dataset.char ?? "";
+            const idx = Number((el as HTMLElement).dataset.index ?? 0);
+            return -RESTING_OFFSET_PX + jitterFor(c, idx + 7);
+          },
+          opacity: 0.85,
+          duration: dur.medium,
+          ease: easeCurve,
+          stagger: resolvedStagger,
+        },
+        0,
+      );
+
+      timeline.to(
+        mintLayer,
+        {
+          x: (_i, el) => {
+            const c = (el as HTMLElement).dataset.char ?? "";
+            const idx = Number((el as HTMLElement).dataset.index ?? 0);
+            return -RESTING_OFFSET_PX + jitterFor(c, idx + 13);
+          },
+          y: (_i, el) => {
+            const c = (el as HTMLElement).dataset.char ?? "";
+            const idx = Number((el as HTMLElement).dataset.index ?? 0);
+            return RESTING_OFFSET_PX + jitterFor(c, idx + 19);
+          },
+          opacity: 0.85,
+          duration: dur.medium,
+          ease: easeCurve,
+          stagger: resolvedStagger,
+        },
+        0,
+      );
+
+      // Ink layer fades in on top a beat after ghosts start snapping —
+      // gives the viewer a moment to read the misregistration before
+      // the "final print" lands.
+      timeline.to(
+        inkLayer,
+        {
+          opacity: 1,
+          duration: dur.short,
+          ease: "power2.out",
+          stagger: resolvedStagger,
+        },
+        dur.medium * 0.55,
+      );
+    };
+
+    const fireWhenReady = () => {
+      // If the consumer asked us to wait for the loader, gate the
+      // timeline until the loader-complete event has fired, then add a
+      // settle window so the first-frame jank doesn't eat the animation.
+      // Non-loader-gated consumers go straight through.
+      if (!waitForLoader) {
+        startTimeline();
+        return;
+      }
+      const launch = () => {
+        settleTimer = window.setTimeout(startTimeline, LOADER_SETTLE_MS);
+      };
+      if (isLoaderComplete()) {
+        launch();
+      } else {
+        pendingLoaderListener = () => {
+          pendingLoaderListener = null;
+          launch();
+        };
+        window.addEventListener("loader-complete", pendingLoaderListener, { once: true });
+      }
+    };
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -118,67 +224,7 @@ export function OverprintReveal({
           if (!entry.isIntersecting || fired) continue;
           fired = true;
           observer.disconnect();
-
-          timeline = gsap.timeline({ delay });
-
-          // Ghosts fly in toward their resting misregistration with a
-          // per-char stagger. Each ghost gets its own deterministic
-          // jitter so the row has "handset" inconsistency.
-          timeline.to(
-            roseLayer,
-            {
-              x: (_i, el) => {
-                const c = (el as HTMLElement).dataset.char ?? "";
-                const idx = Number((el as HTMLElement).dataset.index ?? 0);
-                return RESTING_OFFSET_PX + jitterFor(c, idx);
-              },
-              y: (_i, el) => {
-                const c = (el as HTMLElement).dataset.char ?? "";
-                const idx = Number((el as HTMLElement).dataset.index ?? 0);
-                return -RESTING_OFFSET_PX + jitterFor(c, idx + 7);
-              },
-              opacity: 0.85,
-              duration: dur.medium,
-              ease: easeCurve,
-              stagger: resolvedStagger,
-            },
-            0,
-          );
-
-          timeline.to(
-            mintLayer,
-            {
-              x: (_i, el) => {
-                const c = (el as HTMLElement).dataset.char ?? "";
-                const idx = Number((el as HTMLElement).dataset.index ?? 0);
-                return -RESTING_OFFSET_PX + jitterFor(c, idx + 13);
-              },
-              y: (_i, el) => {
-                const c = (el as HTMLElement).dataset.char ?? "";
-                const idx = Number((el as HTMLElement).dataset.index ?? 0);
-                return RESTING_OFFSET_PX + jitterFor(c, idx + 19);
-              },
-              opacity: 0.85,
-              duration: dur.medium,
-              ease: easeCurve,
-              stagger: resolvedStagger,
-            },
-            0,
-          );
-
-          // Ink layer fades in on top a beat after ghosts start snapping —
-          // gives the viewer a moment to read the misregistration before
-          // the "final print" lands.
-          timeline.to(
-            inkLayer,
-            {
-              opacity: 1,
-              duration: dur.short,
-              ease: "power2.out",
-              stagger: resolvedStagger,
-            },
-            dur.medium * 0.55,
-          );
+          fireWhenReady();
         }
       },
       { threshold },
@@ -189,8 +235,11 @@ export function OverprintReveal({
     return () => {
       observer.disconnect();
       timeline?.kill();
+      if (settleTimer !== null) window.clearTimeout(settleTimer);
+      if (pendingLoaderListener)
+        window.removeEventListener("loader-complete", pendingLoaderListener);
     };
-  }, [reducedMotion, threshold, delay, stagger]);
+  }, [reducedMotion, threshold, delay, stagger, waitForLoader]);
 
   // Reduced-motion branch: no ghost layers, no per-char split. Renders
   // the text as a plain inline string — simplest DOM, zero animation,

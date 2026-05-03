@@ -34,11 +34,16 @@ export function Hero() {
       </div>
 
       <h1 id="hero-heading" className="type-display col-span-12 text-ink md:col-span-12">
-        <OverprintReveal text={t("heading.family")} className="inline-block" />
+        <OverprintReveal text={t("heading.family")} className="inline-block" waitForLoader />
         <span aria-hidden="true" className="not-italic inline-block">
           &nbsp;/&nbsp;
         </span>
-        <OverprintReveal text={t("heading.given")} className="inline-block" delay={0.25} />
+        <OverprintReveal
+          text={t("heading.given")}
+          className="inline-block"
+          delay={0.25}
+          waitForLoader
+        />
       </h1>
 
       <div className="stamp-column col-span-12 md:col-span-5">

@@ -18,9 +18,13 @@ import { routing } from "@/i18n/routing";
  * `NextIntlClientProvider` which wraps the locale layout.
  */
 
+// Order matches the on-page section flow in [locale]/page.tsx:
+//   Hero → About → Skills → Work → CaseStudy → Photography → Playground → Contact
+// Skills/CaseStudy/Photography are intentionally absent from the nav
+// (they read as part of the Work / About story, not standalone stops).
 const NAV_ITEMS = [
-  { href: "#work", key: "work" },
   { href: "#about", key: "about" },
+  { href: "#work", key: "work" },
   { href: "#playground", key: "playground" },
   { href: "#contact", key: "contact" },
 ] as const;

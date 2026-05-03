@@ -1,8 +1,10 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
+import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
 import { PhotoInkMask, type SpotColor } from "@/components/scene/PhotoInkMask";
+import { useLenis } from "@/hooks/useLenis";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 /**
  * Photography — Section 05 · "Through the Lens".
@@ -97,30 +99,90 @@ const SLIDES: readonly [Slide, Slide, Slide, Slide, Slide] = [
   },
 ];
 
+/**
+ * Distance (as a fraction of viewport height) within which the photo's
+ * vertical centre must land relative to the viewport's centre to trigger
+ * the reveal. ~12% gives enough hysteresis that natural scroll always
+ * fires within a single rAF tick of the photo passing through centre,
+ * but tight enough that "edge peek" or "just-scrolled-past" don't
+ * trigger early.
+ */
+const CENTER_PROXIMITY_FRACTION = 0.12;
+
 function PhotoFrame({ slide, index, total }: { slide: Slide; index: number; total: number }) {
   const t = useTranslations("photography");
   const ref = useRef<HTMLDivElement | null>(null);
   const [reveal, setReveal] = useState(false);
+  const lenis = useLenis();
+  const reducedMotion = useReducedMotion();
 
+  // Reveal when the photo's vertical centre crosses the viewport centre
+  // (within CENTER_PROXIMITY_FRACTION × viewport-height). Replaces the
+  // earlier rootMargin-shrunk IO that fired on edge entry — Manuel
+  // explicitly wanted the reveal to land when the photo IS the focus,
+  // not when it first peeks in.
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    // Scroll-center proximity: fire the reveal when the photo enters
-    // the central 60% of the viewport. The negative rootMargin shrinks
-    // the IO root to that band, so the photo "lights up" right as it
-    // becomes the visual focus — not when its edge first peeks in.
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) {
-          setReveal(true);
-          io.disconnect();
-        }
-      },
-      { rootMargin: "-20% 0px -20% 0px", threshold: 0 },
-    );
-    io.observe(el);
-    return () => io.disconnect();
+    let frame = 0;
+    let triggered = false;
+
+    const check = () => {
+      frame = 0;
+      if (triggered) return;
+      const rect = el.getBoundingClientRect();
+      const photoCenter = rect.top + rect.height / 2;
+      const viewportCenter = window.innerHeight / 2;
+      if (Math.abs(photoCenter - viewportCenter) < window.innerHeight * CENTER_PROXIMITY_FRACTION) {
+        triggered = true;
+        setReveal(true);
+      }
+    };
+
+    const onScroll = () => {
+      if (frame !== 0) return;
+      frame = requestAnimationFrame(check);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    // Initial check covers the case where the photo is already centred
+    // on first paint (deep-link to #photography or short viewport).
+    check();
+
+    return () => {
+      if (frame !== 0) cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+    };
   }, []);
+
+  // Click / Enter / Space scrolls the photo's centre to the viewport
+  // centre; the scroll handler above then fires the reveal organically
+  // once the position lands. Lenis owns smooth scroll site-wide, so we
+  // route through it; reduced-motion users get an instant jump
+  // (and the global *,*::before,*::after rule already snaps any GSAP
+  // animation duration to 0.01ms, so the reveal fires immediately).
+  const onActivate = useCallback(() => {
+    if (reveal) return;
+    const el = ref.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const targetY = rect.top + window.scrollY + rect.height / 2 - window.innerHeight / 2;
+    if (lenis && !reducedMotion) {
+      lenis.scrollTo(targetY, { duration: 0.9 });
+    } else {
+      window.scrollTo({
+        top: targetY,
+        behavior: reducedMotion ? "auto" : "smooth",
+      });
+    }
+  }, [reveal, lenis, reducedMotion]);
+
+  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      onActivate();
+    }
+  };
 
   const avif = slide.widths
     .map((w) => `/photography/${slide.baseName}-${w}w.avif ${w}w`)
@@ -137,9 +199,19 @@ function PhotoFrame({ slide, index, total }: { slide: Slide; index: number; tota
   return (
     <figure
       ref={ref}
-      className="relative w-full"
+      className={`relative w-full ${reveal ? "" : "cursor-pointer"}`}
       style={{ aspectRatio: slide.aspect }}
       data-photo-slide={slide.baseName}
+      // Pre-reveal the figure is interactive (click/enter/space scrolls
+      // photo to viewport centre, organic reveal trigger fires there).
+      // Post-reveal we drop the affordances — photo is just content.
+      // No aria-pressed (this isn't a toggle); role="button" is a
+      // one-shot affordance the user activates exactly once per slot.
+      onClick={reveal ? undefined : onActivate}
+      onKeyDown={reveal ? undefined : onKeyDown}
+      tabIndex={reveal ? -1 : 0}
+      role={reveal ? undefined : "button"}
+      aria-label={reveal ? undefined : t(`slides.${slide.altKey}.alt`)}
     >
       <picture>
         <source type="image/avif" srcSet={avif} sizes={sizes} />

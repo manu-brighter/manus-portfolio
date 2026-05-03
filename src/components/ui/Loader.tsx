@@ -5,11 +5,19 @@ import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
-/** Module-level flag so FluidSim can check if loader already fired. */
+/** Module-level flag so FluidSim + OverprintReveal can check if loader
+ *  already fired in this session. Survives component re-mounts; only
+ *  resets on full page reload (sessionStorage handles cross-mount
+ *  persistence inside the same tab session — see useEffect below). */
 let loaderFired = false;
 export function isLoaderComplete(): boolean {
   return loaderFired;
 }
+
+/** sessionStorage key — survives locale switches that re-mount the
+ *  whole locale layout subtree (Next swaps `<html lang>` between /de
+ *  and /en, which forces React to re-mount everything underneath). */
+const LOADER_SESSION_KEY = "manuelheller:loader-shown";
 
 /**
  * Ink Drop Bloom loader — full-screen overlay that covers the page
@@ -31,6 +39,26 @@ export function Loader() {
   const t = useTranslations("loader");
 
   useEffect(() => {
+    // Locale switches re-mount this component (Next reconciles a new
+    // `<html lang>`). Skip the loader entirely if it already played in
+    // this tab session — the DOM flash is a single frame at most because
+    // we set visible=false synchronously inside the effect, before the
+    // GSAP timeline gets a chance to start.
+    let alreadyShown = false;
+    try {
+      alreadyShown = sessionStorage.getItem(LOADER_SESSION_KEY) === "1";
+    } catch {
+      // sessionStorage can throw in private-browsing modes; treat as fresh.
+    }
+    if (alreadyShown) {
+      loaderFired = true;
+      setVisible(false);
+      // Dispatch immediately so OverprintReveal's loader gate clears
+      // and the Hero animation runs on this navigation too.
+      window.dispatchEvent(new CustomEvent("loader-complete"));
+      return;
+    }
+
     const overlay = overlayRef.current;
     const drop = dropRef.current;
     const text = textRef.current;
@@ -38,6 +66,11 @@ export function Loader() {
 
     const onComplete = () => {
       loaderFired = true;
+      try {
+        sessionStorage.setItem(LOADER_SESSION_KEY, "1");
+      } catch {
+        // ignore — flag is a perf optimisation, not load-bearing.
+      }
       setVisible(false);
       window.dispatchEvent(new CustomEvent("loader-complete"));
     };
