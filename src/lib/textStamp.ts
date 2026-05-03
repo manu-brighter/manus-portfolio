@@ -22,27 +22,15 @@
  */
 
 import type { FluidOrchestrator } from "@/components/scene/FluidOrchestrator";
+import { compileShader } from "@/lib/gl/compileShader";
 import quadVert from "@/shaders/common/quad.vert.glsl";
 import blurFrag from "@/shaders/text-fluid/blur.frag.glsl";
 
 type FBO = { framebuffer: WebGLFramebuffer; texture: WebGLTexture };
 
-function compileShader(gl: WebGL2RenderingContext, type: number, src: string): WebGLShader {
-  const s = gl.createShader(type);
-  if (!s) throw new Error("createShader failed");
-  gl.shaderSource(s, src);
-  gl.compileShader(s);
-  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
-    const log = gl.getShaderInfoLog(s);
-    gl.deleteShader(s);
-    throw new Error(`text-fluid shader compile: ${log}`);
-  }
-  return s;
-}
-
 function createBlurProgram(gl: WebGL2RenderingContext): WebGLProgram {
-  const v = compileShader(gl, gl.VERTEX_SHADER, quadVert);
-  const f = compileShader(gl, gl.FRAGMENT_SHADER, blurFrag);
+  const v = compileShader(gl, gl.VERTEX_SHADER, quadVert, "text-fluid.vert");
+  const f = compileShader(gl, gl.FRAGMENT_SHADER, blurFrag, "text-fluid.blur");
   const p = gl.createProgram();
   if (!p) throw new Error("createProgram failed");
   gl.attachShader(p, v);

@@ -412,31 +412,37 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   parity, and since the IO trigger fires reliably on scroll there was
   no real need for a manual shortcut. Photos read as content, not
   buttons.
-- **Burst content**: scripted **~9 splats over ~1.6s** (centre splat
-  → inner ring at 120/200/280ms → outer-ring satellite cluster from
-  500ms covering the corners), plus **ambient pointer-velocity
-  splats** from the document-level `pointermove` while the slot is
-  in viewport — same global cursor that drives the hero fluid sim
-  now bleeds ink into the photo masks. That is the semantic coupling
-  Manuel asked for as "A-Full" without sharing WebGL contexts across
-  components.
-- **Fade-out, not hard cut**: when the burst completes + a 600ms
-  grace period (`POST_BURST_GRACE_MS`) lets the outer-ring splats
-  spread out, we kick a CSS opacity transition on the canvas
-  (`opacity 0` over 900ms, `cubic-bezier(0.22, 1, 0.36, 1)`). The
-  RAF keeps ticking the sim during the fade, so the eddies remain
-  visible while the paper recedes. Only after the fade completes do
-  we clear and `unsub()` from the shared RAF — zero GPU work after
-  that point per photo.
-- **No `gl.readPixels`-based coverage detection**. The first
-  iteration sampled the centre pixel every 200ms to confirm the
-  reveal was complete. Each readback stalls the WebGL pipeline
-  (Chrome surfaces this as the `GPU stall due to ReadPixels` driver
-  warning), and with 5 photos × every 200ms = 25 stalls/sec the
-  signal-to-noise was poor. Replaced with a deterministic time-based
-  trigger keyed off `lastBurstFireAt + POST_BURST_GRACE_MS`. The
-  scripted burst always covers the frame given enough advection
-  time, so the readback was redundant. Net: zero readPixels in
+- **Burst content** (post-`1d3e436` simplification): one strong
+  centre splat (`strength 0.85`, `radius 0.18`) when the slot enters
+  viewport, then small re-injection splats every ~120ms through the
+  first 85% of the reveal to keep the centre saturated as the
+  outward radial-velocity term carries density toward the edges.
+  *Earlier iteration scripted ~9 splats with explicit inner/outer-
+  ring satellites; the radial-velocity model produces equivalent
+  coverage with one-tenth the splat math.* Plus **ambient pointer-
+  velocity splats** from the document-level `pointermove` while the
+  slot is in viewport — same global cursor that drives the hero
+  fluid sim now bleeds ink into the photo masks. That is the
+  semantic coupling Manuel asked for as "A-Full" without sharing
+  WebGL contexts across components.
+- **Lock-time listener removal**: when the reveal completes, the
+  document `pointermove` listener is detached *and* the ambient
+  splat queue is cleared (Phase-11 review fix). Without this, 5
+  photos × document listeners survive past completion; every
+  cursor sweep over the (already revealed) page paid 5
+  getBoundingClientRects per pointermove for the rest of the
+  session.
+- **Reveal duration**: `REVEAL_DURATION_MS = 3000`. At progress >=
+  1.0 the canvas opacity is snapped to 0 (the mask shader output is
+  already ~98% transparent everywhere by that point — the snap
+  guards against compositor edge-cases) and the RAF tick
+  unsubscribes. Zero GPU work per photo after that point.
+- **No `gl.readPixels`-based coverage detection**. An earlier
+  iteration sampled the centre pixel every 200ms; readback stalls
+  the WebGL pipeline (Chrome surfaces this as `GPU stall due to
+  ReadPixels`), and with 5 photos × every 200ms = 25 stalls/sec the
+  signal-to-noise was poor. Replaced with the deterministic
+  duration-based completion above. Net: zero readPixels in
   Photography post-pivot.
 
 ### Editorial-asymmetric layout (no sticky pins)
@@ -535,3 +541,133 @@ WebGL components don't re-step the rakes:
   Lake Arenal, Tárcoles). Flagged for Manu review when alt-texts
   get a proper pass. TÁRCOLES caption says "Schmetterling" (not
   Eidechse — Manu corrected during the photo-selection dialogue).
+
+## Phase 10 deviations
+
+- **Leva remains a dev-only dep** but is bundled into the playground
+  routes' client JS, not just dev. Plan §3 lists it under "Shader
+  parameter tuning (dev only)"; we ship it in prod because the
+  playground experiments are themselves the demo, and runtime
+  parameter exploration IS the user-facing feature. Treated as
+  intentional plan deviation. Bundle impact is contained to
+  `/playground/[slug]` routes via dynamic import in
+  `ExperimentRouter`, so the home long-scroll never pays the cost.
+- **`SceneVisibilityGate` + `sceneVisibility` zustand store**:
+  Plan §3 doesn't reference a scene-visibility store, but the
+  persistent root-layout `<Canvas>` + `<InkWipeOverlay>` need to be
+  hidden inside `/playground/[slug]` (the experiment owns the
+  viewport) without being unmounted (re-mount would lose hero state).
+  Solution: a tiny store that the experiment route flips, plus a
+  `<SceneVisibilityGate>` that toggles `display: none` on the root
+  scene. Cleanup runs on unmount → back-nav restores the hero.
+- **`inkWipeStore` for the page-transition primitive**: a 4-phase
+  state machine (`idle → growing → covered → retracting → idle`)
+  driven by `PlaygroundCard` clicks; consumed by the `InkWipeOverlay`
+  component in the locale layout. State lives in zustand because
+  the consumer is mounted in the layout shell while the producer is
+  deep in a card; lifting through context would mean re-rendering
+  every section on every transition tick.
+- **Single shared `compileShader` helper at `src/lib/gl/compileShader.ts`**
+  (Phase-11 review extraction). Prior to extraction the same logic
+  lived in `PhotoInkMask`, `InkWipeOverlay`, and `textStamp.ts` —
+  only PhotoInkMask handled the leading-whitespace-before-`#version`
+  trap from the Phase 9 deviations. The other two were one HMR cache
+  slip away from a silent compile failure on Windows ANGLE. Shared
+  helper has the strip-and-prepend; PhotoInkMask wraps it in
+  try/catch to preserve its existing soft-failure mount path.
+- **`PlaygroundCard` click → `setTimeout(router.push)` is tracked
+  in a ref and cleared on unmount** (Phase-11 review fix). Without
+  cleanup, a card click followed by a fast unmount (locale switch
+  mid-grow) would race against the user's actual destination.
+- **`TypeAsFluid` rasterises text via Canvas2D + Gaussian blur**, not
+  a JFA-computed signed distance field as briefing §7.2 implied.
+  At typical text sizes a wide Gaussian is visually
+  indistinguishable from a real SDF once the result hits the fluid
+  sim, which destroys precise distances within frames anyway. Saves
+  ~10 shader passes and the seed-encoding plumbing.
+- **`UNPACK_FLIP_Y_WEBGL` on text-stamp upload**: Canvas2D is
+  Y-down, GL UV is Y-up. Without the flip, letters render
+  upside-down. Counter-balanced by setting back to `false` at the
+  end so the orchestrator's other texture uploads aren't affected.
+- **Mini-sims on Playground cards stay mounted in `paused` state
+  after first hover/focus**, so re-hovers are instant. The
+  orchestrator's `setPaused(true)` halts the sim; the visual is
+  cross-faded out to the static SVG. Memory cost: one orchestrator
+  per card × 2 cards. Acceptable on the home page; gives way to a
+  full-screen orchestrator inside `/playground/[slug]`.
+- **Playground translation deferred** (DE source mirrored across
+  EN/FR/IT). Same pattern as Phase 6/7/8/9.
+
+## Phase 11 deviations
+
+- **Two-commit sprint structure**: tooling concern (the pre-commit
+  hook) committed separately from the launch deliverables (Contact,
+  Legal, 404). One concern per commit per Manuel's CLAUDE.md.
+- **Pre-commit hook auto-unstages `next-env.d.ts`** via
+  `.githooks/pre-commit` + `scripts/install-git-hooks.mjs` (cross-
+  platform, no `simple-git-hooks` dep). `package.json` `prepare`
+  script wires `core.hooksPath` once on `pnpm install`. The hook
+  short-circuits cleanly when `.git` is missing (CI tarball
+  contexts). Replaces the manual "`git checkout -- next-env.d.ts`
+  before every `git add`" rule that existed earlier in this file.
+- **`src/lib/site.ts` as central identity module**, not a
+  next-intl namespace. URL, contact email, social links, author
+  region. These are *technical* constants (consumed by Contact +
+  Sprint 3 SEO/meta layer + JSON-LD), not user-facing copy that
+  changes per locale. Living in `messages/*.json` would mean four
+  JSON files to keep in sync for one URL. URL hardcoded for now;
+  swap to `process.env.NEXT_PUBLIC_SITE_URL ?? "https://manuelheller.dev"`
+  when CI gains a preview-vs-prod split.
+- **Contact form is fully built but submit is stubbed** to a 320ms
+  graceful fallback that surfaces a `mailto:` to `SITE.author.email`.
+  The Cloudflare Worker bridge to Resend lands in Sprint 6 (Server
+  pass). Honeypot pattern (`bot-trap`, off-screen, `tabIndex=-1`,
+  `aria-hidden`) is real: bots fill the field blindly, real users
+  never see/focus it. **Honeypot trip is silently swallowed** — the
+  earlier draft showed the fallback state with the mailto link,
+  which would have handed bots Manuel's email. The fix: just `return`
+  after `preventDefault()`.
+- **`setTimeout(setStatus, 320)` is tracked in a ref and cleared on
+  unmount** to avoid React's "state update on unmounted component"
+  warning if the user submits then navigates within the timer
+  window.
+- **`/[locale]/impressum` and `/[locale]/datenschutz`** as separate
+  routes (not query-modes on a single legal page). Both render
+  through a shared `<LegalDocument namespace="legal.impressum" |
+  "legal.datenschutz">` server component. Boilerplate is CH-conform
+  for a private non-commercial portfolio with a contact form (DSG
+  revDSG + EU DSGVO informationally). No cookie banner because the
+  site sets no cookies; documented explicitly in datenschutz.
+- **Global 404 at `src/app/not-found.tsx`** owns its own
+  `<html>`/`<body>` shell because the root layout is a pass-through
+  (same pattern as `src/app/page.tsx`). Strings come from the
+  `notFound` namespace at `routing.defaultLocale` — page is served
+  by Nginx for ANY unknown URL incl. ones the user typed at
+  `/en/...`, so route-based locale detection doesn't apply. `<html
+  lang="de">` is hardcoded to match the rendered copy; SEO is
+  `noindex` so the AT signal is the only consumer (DE voice is
+  correct here). Locale-switch row in the footer hands users back
+  into their preferred locale's home.
+- **Form primitives (`riso-input`, `riso-submit`)** added to
+  `globals.css`. Riso "print-receipt" feel: paper-tint inputs with
+  1.5px ink border, focus snaps a 3px spot-mint offset shadow that
+  mimics a Riso plate misregistration; submit button is the inverse
+  with hover-snap to -2/-2px and a spot-rose shadow underneath.
+- **Footer social stamps remain decorative `<abbr>` elements**, not
+  real `<a>` links. The same handles ARE exposed as real anchors in
+  the Contact section's direct-channels list. The footer treats them
+  as ornamental Riso stamps; the Contact section treats them as
+  functional links. Keep both — different visual contexts, different
+  affordances. (Reviewer flagged the inconsistency; intentional.)
+- **Phase 11 review (post-Sprint 1)**: Phase 9 splat-count drift
+  corrected in this file; PhotoInkMask listener-on-lock leak fixed;
+  `compileShader` helper extracted (see Phase 10 deviations);
+  Photography `bg-spot-${slide.spot}` dynamic class replaced with
+  static `SPOT_BG_CLASS` map (same trap PlaygroundCard already
+  documented). PlaygroundCard `setTimeout` orphan + ContactForm
+  `setTimeout` orphan both ref-tracked + cleaned on unmount.
+- **Translation deferred for body content** (`legal.*`, `contact.*`,
+  `notFound.*`) — DE-mirrored across EN/FR/IT. Shell strings
+  (`nav.items.impressum`, `datenschutz`, `footer.legalAriaLabel`)
+  ARE properly translated per locale (matches Phase 6/7/8/9 pattern:
+  shell translated, body mirrored). Sprint 2 closes the gap.

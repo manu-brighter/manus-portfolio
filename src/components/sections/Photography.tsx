@@ -36,6 +36,19 @@ type Slide = {
   widths: number[];
 };
 
+// Tailwind v4's class scanner can't see runtime-built class names, so
+// dynamic `bg-spot-${slide.spot}` won't be picked up. Even though the
+// four spot bg-classes are referenced statically elsewhere on the home
+// page (so they happen to be in the bundle), that's fragile coupling —
+// PlaygroundCard documented the same trap. Static map keeps the lookup
+// honest.
+const SPOT_BG_CLASS: Record<SpotColor, string> = {
+  rose: "bg-spot-rose",
+  amber: "bg-spot-amber",
+  mint: "bg-spot-mint",
+  violet: "bg-spot-violet",
+};
+
 const SLIDES: readonly [Slide, Slide, Slide, Slide, Slide] = [
   {
     baseName: "01-egret",
@@ -148,7 +161,7 @@ function PhotoFrame({ slide, index, total }: { slide: Slide; index: number; tota
         }`}
         style={{ top: "100%" }}
       >
-        <span aria-hidden="true" className={`inline-block size-2 bg-spot-${slide.spot}`} />
+        <span aria-hidden="true" className={`inline-block size-2 ${SPOT_BG_CLASS[slide.spot]}`} />
         <span>{t(`slides.${slide.stampKey}.stamp`)}</span>
         <span aria-hidden="true" className="text-ink-muted">
           ·

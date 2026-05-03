@@ -6,6 +6,8 @@ import {
   type CSSProperties,
   type MouseEvent as ReactMouseEvent,
   type ReactNode,
+  useEffect,
+  useRef,
   useState,
 } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -70,6 +72,20 @@ export function PlaygroundCard({ slug, i18nKey, cardSpot, visual, LiveSim }: Pla
 
   const [hovered, setHovered] = useState(false);
   const [activated, setActivated] = useState(false);
+  const navTimerRef = useRef<number | null>(null);
+
+  // Cancel a pending router.push if the card unmounts before the wipe
+  // completes (e.g. user navigates via the locale switcher mid-grow).
+  // Without this, `router.push` fires after unmount → no warning, but
+  // it can race with the user's actual destination.
+  useEffect(() => {
+    return () => {
+      if (navTimerRef.current !== null) {
+        window.clearTimeout(navTimerRef.current);
+        navTimerRef.current = null;
+      }
+    };
+  }, []);
 
   const cssVars = { "--card-spot": SPOT_CSS_VAR[cardSpot] } as CSSProperties;
   const showLive = LiveSim && !reducedMotion;
@@ -104,9 +120,10 @@ export function PlaygroundCard({ slug, i18nKey, cardSpot, visual, LiveSim }: Pla
     const x = e.clientX / window.innerWidth;
     const y = e.clientY / window.innerHeight;
     startGrow({ x, y, color: cardSpot });
-    window.setTimeout(
+    navTimerRef.current = window.setTimeout(
       () => {
         router.push(`/playground/${slug}`);
+        navTimerRef.current = null;
       },
       Math.max(GROW_MS - 60, 0),
     );

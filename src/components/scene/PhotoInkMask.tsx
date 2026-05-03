@@ -29,6 +29,7 @@
 
 import { useEffect, useRef } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { compileShader } from "@/lib/gl/compileShader";
 import { subscribe } from "@/lib/raf";
 import quadVertSrc from "@/shaders/common/quad.vert.glsl";
 import advectFragSrc from "@/shaders/ink-mask/advect.frag.glsl";
@@ -70,21 +71,18 @@ type PhotoInkMaskProps = {
   reveal: boolean;
 };
 
+// Soft-failure wrapper around the shared compileShader helper. The mount
+// effect bails on the first null without crashing the page (covers
+// initialisation in environments without WebGL2 or with broken drivers);
+// the shared helper itself throws on failure.
 function compile(gl: WebGL2RenderingContext, type: number, src: string): WebGLShader | null {
-  const shader = gl.createShader(type);
-  if (!shader) return null;
-  // Some loaders (Turbopack raw-loader) preserve a leading newline
-  // before #version; normalise so the directive is always line 1.
-  const stripped = src.replace(/^[\s﻿]*#version[^\n]*\r?\n?/m, "");
-  gl.shaderSource(shader, `#version 300 es\n${stripped}`);
-  gl.compileShader(shader);
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+  try {
+    return compileShader(gl, type, src, "ink-mask");
+  } catch (err) {
     // biome-ignore lint/suspicious/noConsole: shader compile failure is a dev signal
-    console.error("ink-mask shader compile error:", gl.getShaderInfoLog(shader));
-    gl.deleteShader(shader);
+    console.error(err);
     return null;
   }
-  return shader;
 }
 
 function link(
@@ -146,6 +144,12 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const revealRef = useRef(reveal);
   revealRef.current = reveal;
+  // spotColor flows through a ref so changing it doesn't tear down the
+  // WebGL context and re-init the sim. In practice the prop is fixed per
+  // slide; the ref pattern future-proofs against ever wanting to swap
+  // colour mid-reveal.
+  const spotColorRef = useRef(spotColor);
+  spotColorRef.current = spotColor;
 
   useEffect(() => {
     if (reducedMotion) return;
@@ -209,6 +213,10 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
     // Reveal-clock state
     let burstStart: number | null = null;
     let lastReinjectAt = 0;
+    // `locked` declared here (above the pointermove listener that closes
+    // over it) so the read order matches the write order — earlier this
+    // sat below `addEventListener` and worked only by closure-capture.
+    let locked = false;
 
     // Ambient splat queue (driven by global pointer-velocity)
     const ambientQueue: Splat[] = [];
@@ -256,8 +264,6 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
       ambientQueue.push({ x, y, radius: 0.06, strength: 0.18 });
     };
     document.addEventListener("pointermove", onPointer, { passive: true });
-
-    let locked = false;
 
     const drawTo = (
       program: WebGLProgram,
@@ -319,7 +325,7 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
       gl.uniform1i(maskU.density, 0);
       gl.uniform2f(maskU.resolution, canvas.width, canvas.height);
       gl.uniform3f(maskU.paper, ...PAPER_COLOR);
-      gl.uniform3f(maskU.spot, ...(SPOT_COLORS[spotColor] as [number, number, number]));
+      gl.uniform3f(maskU.spot, ...(SPOT_COLORS[spotColorRef.current] as [number, number, number]));
       gl.uniform1f(maskU.time, time);
       gl.bindVertexArray(vao);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -388,6 +394,12 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         gl.clearColor(0, 0, 0, 0);
         gl.clear(gl.COLOR_BUFFER_BIT);
+        // Detach the document pointermove listener now that we're done
+        // — fast cursor sweeps after multiple photo reveals would
+        // otherwise pay 5+ getBoundingClientRect()s per pointermove
+        // for the rest of the session.
+        document.removeEventListener("pointermove", onPointer);
+        ambientQueue.length = 0;
         unsub();
       }
     }, 70);
@@ -415,7 +427,10 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
       // No loseContext() — see comment on equivalent path in the
       // legacy PhotoDuotone iteration (StrictMode trap).
     };
-  }, [reducedMotion, spotColor]);
+    // spotColor intentionally NOT a dep — it flows through spotColorRef
+    // so changes don't tear down the WebGL context. See ref declaration
+    // at the top of the component.
+  }, [reducedMotion]);
 
   if (reducedMotion) return null;
 

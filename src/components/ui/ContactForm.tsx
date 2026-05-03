@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { SITE } from "@/lib/site";
 
 /**
@@ -36,20 +36,36 @@ export function ContactForm() {
   const trapId = useId();
 
   const [status, setStatus] = useState<"idle" | "sending" | "fallback" | "error">("idle");
+  const fallbackTimerRef = useRef<number | null>(null);
+
+  // Cancel any in-flight stub timer on unmount so React doesn't warn
+  // about a state update on an unmounted component.
+  useEffect(() => {
+    return () => {
+      if (fallbackTimerRef.current !== null) {
+        window.clearTimeout(fallbackTimerRef.current);
+        fallbackTimerRef.current = null;
+      }
+    };
+  }, []);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
 
-    if (formData.get("bot-trap")) {
-      setStatus("fallback");
-      return;
-    }
+    // Honeypot tripped — silently swallow. Setting `fallback` here
+    // would hand the bot a visible mailto link with Manuel's address;
+    // the whole point of the trap is to look like a successful submit
+    // to the bot while doing nothing.
+    if (formData.get("bot-trap")) return;
 
     setStatus("sending");
     // Phase-11 Sprint-1 stub: Resend Worker not deployed yet — graceful
     // fallback to direct email. Replaced in Sprint 6 with real fetch.
-    setTimeout(() => setStatus("fallback"), 320);
+    fallbackTimerRef.current = window.setTimeout(() => {
+      setStatus("fallback");
+      fallbackTimerRef.current = null;
+    }, 320);
   }
 
   const isSending = status === "sending";

@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import type { SpotColor } from "@/lib/content/playground";
+import { compileShader } from "@/lib/gl/compileShader";
 import { GROW_MS, HOLD_MS, RETRACT_MS, useInkWipeStore } from "@/lib/inkWipeStore";
 import { subscribe } from "@/lib/raf";
 import quadVertSrc from "@/shaders/common/quad.vert.glsl";
@@ -34,19 +35,6 @@ const SPOT_RGB: Record<SpotColor, [number, number, number]> = {
   mint: [0.486, 0.91, 0.769],
   violet: [0.722, 0.604, 1.0],
 };
-
-function compile(gl: WebGL2RenderingContext, type: number, src: string): WebGLShader {
-  const s = gl.createShader(type);
-  if (!s) throw new Error("createShader failed");
-  gl.shaderSource(s, src);
-  gl.compileShader(s);
-  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
-    const log = gl.getShaderInfoLog(s);
-    gl.deleteShader(s);
-    throw new Error(`ink-wipe shader compile: ${log}`);
-  }
-  return s;
-}
 
 function link(gl: WebGL2RenderingContext, vert: WebGLShader, frag: WebGLShader): WebGLProgram {
   const p = gl.createProgram();
@@ -83,8 +71,8 @@ export function InkWipeOverlay() {
     }) as WebGL2RenderingContext | null;
     if (!gl) return;
 
-    const vert = compile(gl, gl.VERTEX_SHADER, quadVertSrc);
-    const frag = compile(gl, gl.FRAGMENT_SHADER, wipeFragSrc);
+    const vert = compileShader(gl, gl.VERTEX_SHADER, quadVertSrc, "ink-wipe.vert");
+    const frag = compileShader(gl, gl.FRAGMENT_SHADER, wipeFragSrc, "ink-wipe.frag");
     const program = link(gl, vert, frag);
     const vao = gl.createVertexArray();
 
