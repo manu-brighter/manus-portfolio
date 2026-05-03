@@ -12,7 +12,9 @@
       "work": "Arbeiten",
       "about": "Über",
       "playground": "Playground",
-      "contact": "Kontakt"
+      "contact": "Kontakt",
+      "impressum": "Impressum",
+      "datenschutz": "Datenschutz"
     }
   },
   "localeSwitcher": {
@@ -30,6 +32,7 @@
     "location": "Basel-Region",
     "year": "MMXXVI",
     "socialAriaLabel": "Social-Kanäle",
+    "legalAriaLabel": "Rechtliches",
     "social": {
       "github": "GitHub",
       "linkedin": "LinkedIn",
@@ -473,5 +476,148 @@
         "reducedMotionNote": "Dieses Experiment druckt Wörter live in eine laufende Fluid-Simulation. Unter prefers-reduced-motion blende ich die Animation aus — zurück zum Playground für eine ruhigere Section."
       }
     }
+  },
+  "contact": {
+    "sectionLabel": "Section 07 · Contact",
+    "headline": "Let's talk.",
+    "subhead": "Auftrag, Frage, Tipp oder einfach Hallo — die Inbox ist offen.",
+    "intro": {
+      "label": "Ein paar Worte vorab",
+      "body": "Ich antworte üblicherweise innerhalb von ein bis zwei Tagen. Für Recruiter und Anfragen aus der Vereinswelt: bitte kurz schreiben woher du kommst, das spart die zweite Mail."
+    },
+    "channels": {
+      "label": "Direkt-Kanäle",
+      "note": "GitHub ist nur semi-aktiv — kein 100-Repo-Glanzfassaden-Account. Telefon bleibt privat.",
+      "email": "E-Mail",
+      "github": "GitHub",
+      "linkedin": "LinkedIn",
+      "photos": "Fotos"
+    },
+    "form": {
+      "name": {
+        "label": "Name",
+        "placeholder": "Wie heisst du?"
+      },
+      "email": {
+        "label": "E-Mail",
+        "placeholder": "deine@adresse.ch"
+      },
+      "message": {
+        "label": "Nachricht",
+        "placeholder": "Was beschäftigt dich? (mind. 10 Zeichen)"
+      },
+      "honeypot": {
+        "label": "Bitte nicht ausfüllen"
+      },
+      "submit": {
+        "label": "Senden",
+        "sending": "Sende …"
+      },
+      "status": {
+        "fallback": "Form-Versand ist gerade noch nicht verdrahtet. Schreib mir direkt:",
+        "error": "Hat nicht geklappt. Bitte direkt per E-Mail.",
+        "mailSubject": "Anfrage über manuelheller.dev"
+      }
+    }
+  },
+  "legal": {
+    "common": {
+      "lastUpdatedLabel": "Stand",
+      "lastUpdated": "1. Mai 2026",
+      "backLabel": "Zurück zur Startseite"
+    },
+    "impressum": {
+      "metaTitle": "Impressum · Manuel Heller",
+      "metaDescription": "Impressum und rechtliche Angaben zu manuelheller.dev.",
+      "sectionLabel": "Legal · Impressum",
+      "headline": "Impressum",
+      "lede": "Diese Website ist ein privates, nicht-kommerzielles Portfolio. Es werden keine entgeltlichen Dienstleistungen angeboten.",
+      "sections": [
+        {
+          "id": "responsible",
+          "heading": "Verantwortlich für den Inhalt",
+          "body": ["Manuel Heller", "Basel-Region, Schweiz", "manuelheller@bluewin.ch"]
+        },
+        {
+          "id": "character",
+          "heading": "Charakter dieser Seite",
+          "body": [
+            "Diese Website dient ausschliesslich der Selbstdarstellung und dem Showcase eigener Arbeit. Es werden keine Produkte verkauft, keine kostenpflichtigen Dienstleistungen angeboten und keine Werbung geschaltet."
+          ]
+        },
+        {
+          "id": "liability",
+          "heading": "Haftungsausschluss",
+          "body": [
+            "Inhalte werden mit Sorgfalt erstellt, aber ohne Gewähr für Vollständigkeit oder Aktualität. Verweise und Links auf externe Websites erfolgen ohne Verantwortung für deren Inhalte."
+          ]
+        },
+        {
+          "id": "copyright",
+          "heading": "Urheberrecht",
+          "body": [
+            "Alle Texte, Fotos, Grafiken, Code-Beispiele und Shader-Quelltexte unterliegen dem Urheberrecht von Manuel Heller, sofern nicht anders gekennzeichnet. Eine Verwendung ausserhalb dieser Website bedarf der schriftlichen Zustimmung."
+          ]
+        }
+      ]
+    },
+    "datenschutz": {
+      "metaTitle": "Datenschutz · Manuel Heller",
+      "metaDescription": "Datenschutzerklärung für manuelheller.dev — keine Cookies, kein Analytics, kein Tracking.",
+      "sectionLabel": "Legal · Datenschutz",
+      "headline": "Datenschutzerklärung",
+      "lede": "Kurzfassung: Diese Seite setzt keine Cookies, nutzt kein Tracking und kein Analytics. Es gibt keinen Cookie-Banner, weil es nichts gibt das einer Einwilligung bedürfte.",
+      "sections": [
+        {
+          "id": "responsible",
+          "heading": "Verantwortlicher",
+          "body": ["Manuel Heller, Basel-Region, Schweiz · manuelheller@bluewin.ch"]
+        },
+        {
+          "id": "data",
+          "heading": "Welche Daten erhoben werden",
+          "body": [
+            "Diese Website setzt keine Cookies und keinen LocalStorage. Es gibt kein Tracking, kein Analytics, keine Werbenetzwerke und keine Social-Media-Pixel. Es werden keine Daten an Dritte zu Werbezwecken weitergegeben."
+          ]
+        },
+        {
+          "id": "logs",
+          "heading": "Server-Logs",
+          "body": [
+            "Der Hosting-Server (Linux mit nginx, eigenes Hosting in der Schweiz) protokolliert technisch notwendige Zugriffe: IP-Adresse, Zeitstempel, abgerufene URL, Referrer, User-Agent. Diese Logs werden nach 14 Tagen automatisch gelöscht und ausschliesslich zur Fehleranalyse und Sicherheitsüberwachung verwendet."
+          ]
+        },
+        {
+          "id": "form",
+          "heading": "Kontaktformular",
+          "body": [
+            "Wenn du das Kontaktformular nutzt, werden Name, E-Mail-Adresse und deine Nachricht via Resend (Resend.com, USA) an mich übermittelt. Resend speichert diese Daten zur technischen Übermittlung; es gelten deren Datenschutzbestimmungen.",
+            "Deine Nachricht wird nach Beantwortung gelöscht, spätestens nach sechs Monaten. Du kannst jederzeit Auskunft, Berichtigung oder Löschung verlangen — schreib einfach an manuelheller@bluewin.ch."
+          ]
+        },
+        {
+          "id": "fonts",
+          "heading": "Schriftarten",
+          "body": [
+            "Schriftarten (Instrument Serif, Inter, JetBrains Mono) werden lokal vom eigenen Server ausgeliefert. Es bestehen keine Verbindungen zu Google Fonts oder anderen Drittservern."
+          ]
+        },
+        {
+          "id": "rights",
+          "heading": "Deine Rechte",
+          "body": [
+            "Nach Schweizer Datenschutzgesetz (revDSG) und EU-DSGVO hast du das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung und Datenportabilität. Wende dich für alle Anfragen an: manuelheller@bluewin.ch."
+          ]
+        }
+      ]
+    }
+  },
+  "notFound": {
+    "metaTitle": "404 · Im Fluid versickert",
+    "stamp": "Error 404",
+    "headline": "Diese Seite ist im Fluid versickert.",
+    "body": "Die URL existiert nicht — entweder Tippfehler, alter Link, oder die Tinte hat sie verschluckt. Beides ist möglich.",
+    "backHome": "Zurück zur Startseite",
+    "backWork": "Arbeiten ansehen"
   }
 }

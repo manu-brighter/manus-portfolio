@@ -276,4 +276,75 @@
     gap: 0.5rem;
     align-items: flex-start;
   }
+
+  /* ------------------------------------------------------------
+   * Form primitives — Riso "print-receipt" style.
+   * Used by Contact section (Phase 11). Inputs are paper-tint with a
+   * 1.5px ink border; focus snaps a 3px spot-mint offset shadow that
+   * mimics a Riso plate misregistration. Submit button is the inverse:
+   * solid ink stamp on paper, hover lifts -2/-2px and reveals a rose
+   * shadow underneath (snap-print feel).
+   * ------------------------------------------------------------ */
+
+  .riso-input {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    color: var(--color-ink);
+    background: var(--color-paper-tint);
+    border: 1.5px solid var(--color-ink);
+    padding: 0.75rem 0.875rem;
+    line-height: 1.4;
+    transition:
+      box-shadow 0.14s ease-out,
+      background-color 0.14s ease-out;
+  }
+
+  .riso-input::placeholder {
+    color: var(--color-ink-muted);
+  }
+
+  .riso-input:focus-visible {
+    outline: none;
+    background: var(--color-paper);
+    box-shadow: 3px 3px 0 var(--color-spot-mint);
+  }
+
+  .riso-input:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  .riso-submit {
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 0.75rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-paper-tint);
+    background: var(--color-ink);
+    padding: 0.875rem 1.5rem;
+    border: 1.5px solid var(--color-ink);
+    cursor: pointer;
+    transition:
+      transform 0.14s cubic-bezier(0.7, 0, 0.2, 1),
+      box-shadow 0.14s cubic-bezier(0.7, 0, 0.2, 1);
+  }
+
+  .riso-submit:hover:not(:disabled),
+  .riso-submit:focus-visible:not(:disabled) {
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 var(--color-spot-rose);
+  }
+
+  .riso-submit:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .riso-submit:hover:not(:disabled),
+    .riso-submit:focus-visible:not(:disabled) {
+      transform: none;
+    }
+  }
 }

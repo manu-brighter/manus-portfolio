@@ -2,6 +2,7 @@ import { setRequestLocale } from "next-intl/server";
 import { use } from "react";
 import { About } from "@/components/sections/About";
 import { CaseStudy } from "@/components/sections/CaseStudy";
+import { Contact } from "@/components/sections/Contact";
 import { Hero } from "@/components/sections/Hero";
 import { Photography } from "@/components/sections/Photography";
 import { Playground } from "@/components/sections/Playground";
@@ -30,6 +31,7 @@ export default function HomePage({ params }: HomePageProps) {
       <CaseStudy />
       <Photography />
       <Playground />
+      <Contact />
     </>
   );
 }
