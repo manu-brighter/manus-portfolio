@@ -105,6 +105,13 @@ function getCachedTier(): GPUTier | null {
   }
 }
 
+/** Public synchronous read of the cached tier — used by useGPUCapability
+ *  for lazy-init so the FluidSim mounts with the correct config from the
+ *  first paint and never has to dispose+reinit mid-session. */
+export function readCachedTier(): GPUTier | null {
+  return getCachedTier();
+}
+
 export function cacheTier(tier: GPUTier): void {
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify({ tier, ts: Date.now() }));
@@ -117,10 +124,15 @@ export function probeGPU(gl: WebGL2RenderingContext): {
   tier: GPUTier;
   renderer: string;
   fromCache: boolean;
+  /** True when the tier came from a positive renderer-string pattern
+   *  match (or from cache). False means we fell back to the "medium"
+   *  default for an unknown renderer — those need the 30-frame
+   *  measurement to pick a real tier. */
+  matched: boolean;
 } {
   const cached = getCachedTier();
   if (cached) {
-    return { tier: cached, renderer: "(cached)", fromCache: true };
+    return { tier: cached, renderer: "(cached)", fromCache: true, matched: true };
   }
 
   const ext = gl.getExtension("WEBGL_debug_renderer_info");
@@ -128,10 +140,10 @@ export function probeGPU(gl: WebGL2RenderingContext): {
 
   const matched = matchRenderer(renderer);
   if (matched) {
-    return { tier: matched, renderer, fromCache: false };
+    return { tier: matched, renderer, fromCache: false, matched: true };
   }
 
-  return { tier: "medium", renderer, fromCache: false };
+  return { tier: "medium", renderer, fromCache: false, matched: false };
 }
 
 export function tierFromFrametime(medianMs: number): Exclude<GPUTier, "static"> {

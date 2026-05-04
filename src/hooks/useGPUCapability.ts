@@ -6,6 +6,7 @@ import {
   type GPUTier,
   getTierConfig,
   probeGPU,
+  readCachedTier,
   type TierConfig,
   tierFromFrametime,
 } from "@/lib/gpu";
@@ -17,19 +18,42 @@ type GPUCapability = {
   measuring: boolean;
 };
 
-export function useGPUCapability() {
-  const [capability, setCapability] = useState<GPUCapability>({
+/**
+ * Pick the initial capability state. Reads localStorage synchronously
+ * during lazy init so subsequent visits (cache hit) start with the
+ * correct tier — no mid-mount config swap, no FluidSim dispose/reinit
+ * flash. Fresh visits start with the medium fallback and let the GL
+ * probe correct it once the canvas mounts.
+ */
+function pickInitialCapability(): GPUCapability {
+  if (typeof window !== "undefined") {
+    const cached = readCachedTier();
+    if (cached && cached !== "static") {
+      return {
+        tier: cached,
+        config: getTierConfig(cached),
+        renderer: "(cached)",
+        measuring: false,
+      };
+    }
+  }
+  return {
     tier: "medium",
     config: getTierConfig("medium"),
     renderer: "",
     measuring: false,
-  });
+  };
+}
+
+export function useGPUCapability() {
+  const [capability, setCapability] = useState<GPUCapability>(pickInitialCapability);
 
   const frametimesRef = useRef<number[]>([]);
-  const adaptiveDoneRef = useRef(false);
+  // If we hydrated from cache, the adaptive auto-tuner has nothing to do.
+  const adaptiveDoneRef = useRef(capability.renderer === "(cached)");
 
   const initProbe = useCallback((gl: WebGL2RenderingContext) => {
-    const { tier, renderer, fromCache } = probeGPU(gl);
+    const { tier, renderer, fromCache, matched } = probeGPU(gl);
 
     if (tier === "static") {
       setCapability({ tier: "static", config: null, renderer, measuring: false });
@@ -37,16 +61,23 @@ export function useGPUCapability() {
     }
 
     const config = getTierConfig(tier);
+    // Confidence sources: localStorage cache OR a positive renderer-
+    // string pattern match. Both bypass the 30-frame measurement so
+    // the orchestrator doesn't dispose+reinit mid-session.
+    const isConfident = fromCache || matched;
 
     setCapability({
       tier,
       config,
       renderer,
-      measuring: !fromCache,
+      measuring: !isConfident,
     });
 
-    if (fromCache) {
+    if (isConfident) {
       adaptiveDoneRef.current = true;
+      // Persist matched-but-uncached tiers so the next visit lazy-inits
+      // from cache directly (no probe, no swap, no flash).
+      if (!fromCache) cacheTier(tier);
     }
   }, []);
 
