@@ -246,6 +246,13 @@ export class FluidOrchestrator {
   private ambientStrength = 0;
   private splatColorIndex = 0;
   private ambientActive = false;
+  // Auto-ambient gate: the 3s-idle timer in step() only fires once
+  // `triggerAmbient()` has been called. Without this, the orchestrator
+  // would auto-kick ambient ~3s after init, racing the loader/hero
+  // start-up dramaturgy. Hero rig sets this true via triggerAmbient
+  // after the loader+hero-reveal cadence; studio mode can flip it
+  // through setAmbientEnabled.
+  private ambientReady = false;
   // Studio-mode toggles. Default behaviour matches the hero rig (ambient
   // wandering points on, rotating Riso colours per splat, auto pointer
   // splat from the PointerState). Playground's Ink Drop Studio disables
@@ -349,8 +356,12 @@ export class FluidOrchestrator {
     return this.paused;
   }
 
-  /** Kick ambient motion immediately (called when loader finishes). */
+  /** Kick ambient motion immediately (called when loader finishes
+   *  + hero-reveal settle window — see FluidSim.tsx). Also opens the
+   *  auto-ambient gate so the in-step idle timer can re-kick ambient
+   *  if the user goes idle later. */
   triggerAmbient(): void {
+    this.ambientReady = true;
     this.ambientStrength = 1.0;
     this.ambientActive = true;
     // Set idle timer far into the future so ambient stays at full
@@ -778,7 +789,11 @@ export class FluidOrchestrator {
       } else {
         this.ambientStrength = Math.max(0, this.ambientStrength - dt / 0.5);
       }
-    } else if (this.ambientEnabled && performance.now() - this.lastPointerTime > 3000) {
+    } else if (
+      this.ambientEnabled &&
+      this.ambientReady &&
+      performance.now() - this.lastPointerTime > 3000
+    ) {
       this.ambientStrength = Math.min(1, this.ambientStrength + dt / 2.0);
       this.ambientActive = true;
     }
