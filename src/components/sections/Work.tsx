@@ -140,19 +140,18 @@ export function Work() {
                 <picture className="block h-full w-full">
                   <source
                     type="image/avif"
-                    srcSet="/projects/joggediballa/home-480w.avif 480w, /projects/joggediballa/home-800w.avif 800w, /projects/joggediballa/home-1200w.avif 1200w"
+                    srcSet="/projects/joggediballa/homepage-480w.avif 480w, /projects/joggediballa/homepage-800w.avif 800w, /projects/joggediballa/homepage-1200w.avif 1200w"
                     sizes="(min-width: 1024px) 40rem, (min-width: 640px) 60vw, 100vw"
                   />
                   <source
                     type="image/webp"
-                    srcSet="/projects/joggediballa/home-480w.webp 480w, /projects/joggediballa/home-800w.webp 800w, /projects/joggediballa/home-1200w.webp 1200w"
-                    sizes="(min-width: 1024px) 40rem, (min-width: 640px) 60vw, 100vw"
+                    srcSet="/projects/joggediballa/homepage-480w.webp 480w, /projects/joggediballa/homepage-800w.webp 800w, /projects/joggediballa/homepage-1200w.webp 1200w"
                   />
                   <img
-                    src="/projects/joggediballa/home-800w.jpg"
+                    src="/projects/joggediballa/homepage-800w.jpg"
                     alt={joggediballa.screenshot?.alt ?? joggediballa.title}
                     width={800}
-                    height={1000}
+                    height={450}
                     loading="lazy"
                     decoding="async"
                     className="block h-full w-full object-cover object-top"
