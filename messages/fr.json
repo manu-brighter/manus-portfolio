@@ -583,6 +583,33 @@
       "url": "https://joggediballa.ch",
       "domain": "joggediballa.ch",
       "external": "öffnet in neuem Tab"
+    },
+    "stations": {
+      "hook": {
+        "datestamp": "2022.05",
+        "polaroidCaption": "Joggediballa · Mobile · Live"
+      },
+      "what": {
+        "datestamp": "2022 →",
+        "polaroidCaption": "Verein · gegründet 2022"
+      },
+      "stack": {
+        "heading": "Stack-Notiz",
+        "rule": "Was ich nehme, warum"
+      },
+      "highlightAdmin": {
+        "datestamp": "Admin · v3",
+        "polaroidCaption": "Admin-Dashboard · Daily Driver"
+      },
+      "highlightOverlay": {
+        "datestamp": "Twitch-Overlay",
+        "polaroidCaption": "Schlag-den-Kassier · Live-Stream"
+      },
+      "publicShots": [
+        { "datestamp": "Stats", "caption": "Statistik · Mitglieder & Saisons" },
+        { "datestamp": "Members", "caption": "Gönnerverwaltung · CRM-Light" },
+        { "datestamp": "Form", "caption": "Anmeldeformular · Mobile" }
+      ]
     }
   },
   "photography": {
