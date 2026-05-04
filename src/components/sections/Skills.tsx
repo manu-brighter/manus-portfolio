@@ -1,4 +1,6 @@
 import { useTranslations } from "next-intl";
+import { HeroSkillPulse } from "@/components/skills/HeroSkillPulse";
+import { VibecodedStamp } from "@/components/skills/VibecodedStamp";
 
 /**
  * Skills — Section 02.
@@ -7,9 +9,18 @@ import { useTranslations } from "next-intl";
  * the XXL hero-skill (AI-Workflow) gets its own feature block at the
  * top; everything else flows as tier groups sized by `weight` (xl / l / m).
  *
- * The [vibecoded] marker is intentionally not hidden — briefing §3.1
- * wants it visible. It's a small mono pill in spot-rose, tucked against
- * the baseline of each vibecoded item.
+ * The [vibecoded] marker animates in via `<VibecodedStamp>` (C1) — each
+ * stamp lands with a scale/rotate snap and a brief rose halo, staggered
+ * by the item's index in its tier so siblings cascade.
+ *
+ * Skill names wrap in `.misreg-hover` (C2) — pseudo-elements (mint -2px,
+ * rose +2px) appear on `:hover` and `:focus-visible`, giving the live
+ * Riso-misregistration twitch when the user hovers a word. `tabIndex=0`
+ * on the wrapper makes the effect keyboard-equivalent.
+ *
+ * The XXL hero-skill block hosts an ambient `<HeroSkillPulse>` (C3) —
+ * a continuously-cycling spot-color halo behind the headline that
+ * keeps the section feeling "alive" without competing for attention.
  *
  * Items use `display: inline-block` with Instrument Serif upright so
  * they read as a mixed typographic column, not as list items. Between
@@ -57,11 +68,14 @@ export function Skills() {
         </div>
       </header>
 
-      {/* Hero-Skill: XXL feature block, Riso-stamped border. */}
+      {/* Hero-Skill: XXL feature block, Riso-stamped border. The
+          relative wrapper hosts the ambient `<HeroSkillPulse>` (C3)
+          which cycles through the 4 Riso spot-colors behind the text. */}
       <article
         aria-labelledby="skill-hero"
-        className="mb-20 border-ink border-t-2 border-b-2 py-10 md:mb-28 md:py-16"
+        className="relative mb-20 border-ink border-t-2 border-b-2 py-10 md:mb-28 md:py-16"
       >
+        <HeroSkillPulse />
         <p className="mb-4 text-ink-muted type-label">{t("heroSkill.eyebrow")}</p>
         <h3
           id="skill-hero"
@@ -96,11 +110,19 @@ export function Skills() {
                       ·
                     </span>
                   ) : null}
-                  <span>{item.name}</span>
+                  {/* C2: misreg-hover wrapper — pseudo-elements borrow
+                      the host text via `attr(data-text)` for the
+                      mint/rose ghost split on :hover / :focus-visible.
+                      tabIndex=0 is intentional: gives keyboard users
+                      the same misreg twitch via :focus-visible. The
+                      span carries no action — it's a decorative-effect
+                      affordance, not an interactive control. */}
+                  {/* biome-ignore lint/a11y/noNoninteractiveTabindex: keyboard-equivalent for the decorative misreg-hover effect — see CLAUDE.md Phase 11 polish-rework deviation */}
+                  <span className="misreg-hover" data-text={item.name} tabIndex={0}>
+                    {item.name}
+                  </span>
                   {item.vibecoded ? (
-                    <span className="translate-y-[-0.15em] rounded-[2px] bg-spot-rose px-1.5 py-0.5 font-mono text-[0.55em] uppercase tracking-[0.18em] text-ink">
-                      {marker}
-                    </span>
+                    <VibecodedStamp delay={i * 0.08}>{marker}</VibecodedStamp>
                   ) : null}
                 </li>
               ))}
