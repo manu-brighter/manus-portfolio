@@ -55,17 +55,17 @@ export function VibecodedStamp({ children, delay = 0 }: Props) {
             scale: 1,
             rotate: 0,
             opacity: 1,
-            duration: dur.short,
+            duration: dur.medium,
             ease: easeCurve,
           });
           tl.to(
             halo,
-            { opacity: 0.55, scale: 1.4, duration: dur.micro, ease: "power2.out" },
+            { opacity: 0.55, scale: 1.4, duration: dur.short, ease: "power2.out" },
             "<",
-          ).to(halo, { opacity: 0, scale: 1.8, duration: 0.18, ease: "power1.out" });
+          ).to(halo, { opacity: 0, scale: 1.8, duration: 0.32, ease: "power1.out" });
         }
       },
-      { threshold: 0.4 },
+      { threshold: 0.6 },
     );
     observer.observe(wrap);
 

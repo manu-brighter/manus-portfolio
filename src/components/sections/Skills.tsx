@@ -122,7 +122,11 @@ export function Skills() {
                     {item.name}
                   </span>
                   {item.vibecoded ? (
-                    <VibecodedStamp delay={i * 0.08}>{marker}</VibecodedStamp>
+                    // Stagger base 0.6s + 0.18s per item — gives the user
+                    // a beat to register that something IS animating in
+                    // (the prior 80ms cadence was so fast siblings cascaded
+                    // before the eye could land on them).
+                    <VibecodedStamp delay={0.6 + i * 0.18}>{marker}</VibecodedStamp>
                   ) : null}
                 </li>
               ))}
