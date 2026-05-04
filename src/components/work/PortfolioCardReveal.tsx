@@ -136,7 +136,7 @@ export function PortfolioCardReveal({
               centered with a generous right padding. The two
               OverprintReveal instances + FadeIn slash get bumped keys
               per hover so the char-stagger re-fires from the start. */}
-          <div className="flex items-baseline gap-2 text-right text-[clamp(2rem,6vw,4.5rem)]">
+          <div className="flex items-baseline gap-2 text-right text-[clamp(2.5rem,7.5vw,5.5rem)]">
             <span className="font-display italic text-ink leading-none">
               <OverprintReveal
                 key={`surname-${revealCount}`}
