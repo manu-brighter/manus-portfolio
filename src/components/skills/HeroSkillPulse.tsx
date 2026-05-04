@@ -41,12 +41,18 @@ export function HeroSkillPulse() {
     gsap.set(halo, { opacity: 0 });
     let i = 0;
     let killed = false;
+    // Track the active timeline so cleanup can kill ALL its tweens —
+    // including the dummy hold-tween (`tl.to({}, ...)`) whose target
+    // isn't `halo` and would survive a bare `gsap.killTweensOf(halo)`,
+    // firing its onComplete cycle on a unmounted component.
+    let activeTl: gsap.core.Timeline | null = null;
 
     const cycle = () => {
       if (killed) return;
       halo.style.backgroundColor = COLORS[i % COLORS.length] ?? COLORS[0];
       i++;
       const tl = gsap.timeline({ onComplete: cycle });
+      activeTl = tl;
       tl.to(halo, { opacity: 0.55, duration: 1.4, ease: "sine.inOut" })
         .to(halo, { opacity: 0, duration: 1.4, ease: "sine.inOut" })
         .to({}, { duration: 1.2 });
@@ -55,6 +61,7 @@ export function HeroSkillPulse() {
 
     return () => {
       killed = true;
+      activeTl?.kill();
       gsap.killTweensOf(halo);
     };
   }, [reducedMotion]);

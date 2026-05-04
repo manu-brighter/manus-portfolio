@@ -117,7 +117,7 @@ export function About() {
         <BodyProse paragraphs={bodyOf("wer-ich-bin")} />
       </AboutBlock>
 
-      <StampDivider />
+      <StampDivider spot="rose" />
 
       {/* 02 Anfangen */}
       <AboutBlock
@@ -139,7 +139,7 @@ export function About() {
         <BodyProse paragraphs={bodyOf("wie-angefangen")} />
       </AboutBlock>
 
-      <StampDivider />
+      <StampDivider spot="mint" />
 
       {/* 03 Portrait-Anchor — editorial composition: portrait left,
           editorial-flank right (plate-stamp -> asterism -> label ->
@@ -191,7 +191,7 @@ export function About() {
         </div>
       </section>
 
-      <StampDivider />
+      <StampDivider spot="rose" />
 
       {/* 04 AI-Workflow (loud-centered, wide container). The
           "AI ist wie ein Pinsel" closer was dropped (Phase 11
@@ -204,7 +204,7 @@ export function About() {
         <BodyProse paragraphs={bodyOf("ai-workflow")} />
       </AboutBlock>
 
-      <StampDivider />
+      <StampDivider spot="amber" />
 
       {/* 05 Antrieb (short-centered) */}
       <AboutBlock id="antrieb" spot="violet" layout="short-centered">
@@ -212,7 +212,7 @@ export function About() {
         <BodyProse paragraphs={bodyOf("antrieb")} />
       </AboutBlock>
 
-      <StampDivider />
+      <StampDivider spot="violet" />
 
       {/* 06 Object-Grid (replaces part 5 + Currently) */}
       <ObjectGrid />

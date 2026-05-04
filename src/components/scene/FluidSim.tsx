@@ -31,8 +31,13 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
   measuringRef.current = measuring;
   const onFrametimeRef = useRef(onFrametime);
   onFrametimeRef.current = onFrametime;
-  const prevConfigRef = useRef<TierConfig | null>(null);
 
+  // Mount + config-change: init orchestrator, dispose on cleanup.
+  // The `config` dep handles the auto-tuner's tier swap — first effect
+  // cleanup (dispose) runs before the next mount (init with new config),
+  // which means a separate "if config changed" effect (previously here)
+  // would always short-circuit. Single effect = single source of truth
+  // for orchestrator lifecycle.
   useEffect(() => {
     const context = gl.getContext() as WebGL2RenderingContext;
     if (!context || !(context instanceof WebGL2RenderingContext)) return;
@@ -42,24 +47,12 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
     const orchestrator = new FluidOrchestrator();
     orchestrator.init(context, config);
     orchestratorRef.current = orchestrator;
-    prevConfigRef.current = config;
 
     return () => {
       orchestrator.dispose();
       orchestratorRef.current = null;
-      prevConfigRef.current = null;
     };
   }, [gl, onGLReady, config]);
-
-  useEffect(() => {
-    const orchestrator = orchestratorRef.current;
-    if (!orchestrator || config === prevConfigRef.current) return;
-
-    const context = gl.getContext() as WebGL2RenderingContext;
-    orchestrator.dispose();
-    orchestrator.init(context, config);
-    prevConfigRef.current = config;
-  }, [config, gl]);
 
   useEffect(() => {
     const dpr = gl.getPixelRatio();

@@ -421,9 +421,14 @@
   }
 
   /* Word-highlight inside a pull-quote. The keyword span carries
-   * .pull-highlight + the parent block's --block-spot. */
+   * .pull-highlight + the parent block's --block-spot. The
+   * descendant rule re-asserts spot-color on OverprintReveal's
+   * ink layer (which sets `text-ink` Tailwind directly and would
+   * otherwise override the inherited highlight). The rose/mint
+   * ghost layers stay on their own spot inks via inline style. */
 
-  .pull-highlight {
+  .pull-highlight,
+  .pull-highlight [data-layer="ink"] {
     color: var(--block-spot);
   }
 

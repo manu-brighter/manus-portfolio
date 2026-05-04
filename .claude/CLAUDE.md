@@ -742,13 +742,14 @@ rework-design.md`. Implementation plan at
   stamp has a brief rose-halo burst at impact (200ms blur+fade)
   layered behind the stamp via a sibling absolutely-positioned
   `<span>`.
-- **C2 hover-misreg keyboard parity** via `tabIndex={0}` on the
-  wrapping span + `:focus-visible` in the CSS. Skill names get the
-  misreg both on mouse-hover and tab-focus. Biome's
-  `noNoninteractiveTabindex` rule fires on the span — ignored with
-  rationale comment because the misreg is a decorative-effect
-  affordance, not an interactive control. Same precedent as other
-  keyboard-equivalent decorative wrappers in the codebase.
+- **C2 hover-misreg is mouse-only** (post-review). The earlier
+  `tabIndex={0}` keyboard-parity attempt was reverted: it added
+  20+ Tab stops behind the skill names with no action attached,
+  which is keyboard-noise rather than parity. Decorative effects
+  with no semantic information aren't worth a focus stop. The
+  CSS `:focus-visible` selector stays in `.misreg-hover` for
+  callers that legitimately make the wrapper interactive (none
+  on About/Skills today; future-proofing).
 - **C3 HeroSkillPulse loops continuously** without an IO gate. The
   cost is negligible (one GSAP timeline animating an `opacity` on a
   blurred div), and adding an IO gate would introduce a re-mount
@@ -782,3 +783,27 @@ rework-design.md`. Implementation plan at
   the new about-rework keys (`pullQuotes`, `marginalia`,
   `objectGrid`, `portrait.{plate,label,stamps}`). Same pattern as
   Phase 6/7/8/9/11-sprint-1 body content. Sprint 5 closes the gap.
+- **Post-review fixes (PR #6 review pass)**:
+  1. `.pull-highlight` re-asserts `--block-spot` on
+     `[data-layer="ink"]` descendants — OverprintReveal's ink layer
+     sets `text-ink` Tailwind directly, which would otherwise win
+     the cascade and the highlighted keyword would render in
+     ink-black instead of spot-color (visible signature dead).
+  2. `<StampDivider>` takes a `spot` prop now (typed `Spot`) — it's
+     rendered as a *sibling* of `<AboutBlock>`, not nested, so
+     `--block-spot` cascade can't reach it. Each call-site in
+     `<About />` passes the outgoing block's spot. The fallback
+     `var(--color-ink-muted)` stays for future call-sites that
+     don't have an outgoing spot.
+  3. `<HeroSkillPulse>` cleanup tracks `activeTl` and calls
+     `activeTl?.kill()` on unmount. The previous
+     `gsap.killTweensOf(halo)` missed the dummy hold-tween whose
+     target is `{}`, not `halo` — surviving the unmount and firing
+     `onComplete: cycle` against the unmounted component (guarded
+     by the `killed` flag, so behaviour was correct, but timelines
+     leaked into GSAP's global ticker until self-resolution).
+  4. `<FluidSim>` had a dead second `useEffect` that was supposed
+     to handle config-swap, but always short-circuited because the
+     first effect's deps include `config` and dispose+reinit happen
+     in cleanup+mount of that effect already. Deleted; behaviour
+     unchanged.

@@ -117,13 +117,13 @@ export function Skills() {
                   ) : null}
                   {/* C2: misreg-hover wrapper — pseudo-elements borrow
                       the host text via `attr(data-text)` for the
-                      mint/rose ghost split on :hover / :focus-visible.
-                      tabIndex=0 is intentional: gives keyboard users
-                      the same misreg twitch via :focus-visible. The
-                      span carries no action — it's a decorative-effect
-                      affordance, not an interactive control. */}
-                  {/* biome-ignore lint/a11y/noNoninteractiveTabindex: keyboard-equivalent for the decorative misreg-hover effect — see CLAUDE.md Phase 11 polish-rework deviation */}
-                  <span className="misreg-hover" data-text={item.name} tabIndex={0}>
+                      mint/rose ghost split on :hover only. The earlier
+                      tabIndex=0 was dropped (review feedback): it
+                      added 20+ Tab stops with no action behind them,
+                      which is keyboard-noise rather than parity. The
+                      misreg is a passive decorative effect, not an
+                      affordance — keyboard users lose nothing actionable. */}
+                  <span className="misreg-hover" data-text={item.name}>
                     {item.name}
                   </span>
                   {item.vibecoded ? (
