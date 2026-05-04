@@ -40,15 +40,25 @@ export function Loader() {
 
   useEffect(() => {
     // Locale switches re-mount this component (Next reconciles a new
-    // `<html lang>`). Skip the loader entirely if it already played in
-    // this tab session — the DOM flash is a single frame at most because
-    // we set visible=false synchronously inside the effect, before the
-    // GSAP timeline gets a chance to start.
+    // `<html lang>`). On those switches we want to skip the loader — the
+    // user is already mid-session. But on a manual reload (F5 / Cmd-R)
+    // we want the loader to play again because that IS the user asking
+    // for a fresh start. Use the Performance Navigation API to tell the
+    // two apart: `type === "reload"` means F5; everything else (the
+    // initial load, client-side route navigations, locale-switch
+    // re-mounts) is treated as same-session.
+    const navEntries = (
+      typeof performance !== "undefined" ? performance.getEntriesByType("navigation") : []
+    ) as PerformanceNavigationTiming[];
+    const isReload = navEntries[0]?.type === "reload";
+
     let alreadyShown = false;
-    try {
-      alreadyShown = sessionStorage.getItem(LOADER_SESSION_KEY) === "1";
-    } catch {
-      // sessionStorage can throw in private-browsing modes; treat as fresh.
+    if (!isReload) {
+      try {
+        alreadyShown = sessionStorage.getItem(LOADER_SESSION_KEY) === "1";
+      } catch {
+        // sessionStorage can throw in private-browsing modes; treat as fresh.
+      }
     }
     if (alreadyShown) {
       loaderFired = true;

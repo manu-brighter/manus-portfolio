@@ -143,6 +143,16 @@
     padding-inline: var(--container-gutter);
   }
 
+  /* Wide variant — used by About object-grid + loud-centered block
+   * so they breathe on ultrawide displays without bumping the global
+   * container cap (which would shift Hero + Work). 110rem ~= 1760px. */
+  .container-page-wide {
+    width: 100%;
+    max-width: 110rem;
+    margin-inline: auto;
+    padding-inline: var(--container-gutter);
+  }
+
   /* 12-col grid — opt-in. Compose onto .container-page (same element)
    * for full-bleed section grids, or nest inside for padded sub-grids. */
   .grid-12 {
@@ -346,5 +356,142 @@
     .riso-submit:focus-visible:not(:disabled) {
       transform: none;
     }
+  }
+
+  /* ------------------------------------------------------------
+   * About-rework primitives (Phase 11 polish-sprint)
+   * ------------------------------------------------------------ */
+
+  /* Per-block spot-color slot. Each AboutBlock sets `--block-spot`
+   * to one of `var(--color-spot-{rose,mint,amber,violet})`. The
+   * drop-cap, word-highlight, and stamp-divider all read this. */
+
+  .about-block {
+    --block-spot: var(--color-spot-rose);
+  }
+
+  /* Drop-Cap on the first paragraph's first letter inside an
+   * about-block's body-prose region. ~4x line-height, dropped 3
+   * lines tight. Outline-style: spot-color fill + thin ink outline
+   * via 8-direction text-shadow.
+   *
+   * Implementation note: `-webkit-text-stroke` is NOT in the CSS
+   * spec's allowed property list for `::first-letter` (only the
+   * limited set: font-*, background-*, color, text-shadow, text-
+   * decoration, etc.). text-shadow IS allowed, and an 8-direction
+   * 2px shadow gives a clean ink outline that reads at 4.5em font
+   * size against the spot-color fill. */
+
+  .about-block-body > p:first-of-type::first-letter {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 4.5em;
+    line-height: 0.85;
+    float: left;
+    margin: 0.05em 0.08em -0.15em 0;
+    color: var(--block-spot);
+    text-shadow:
+      2px 0 0 var(--color-ink),
+      -2px 0 0 var(--color-ink),
+      0 2px 0 var(--color-ink),
+      0 -2px 0 var(--color-ink),
+      1.5px 1.5px 0 var(--color-ink),
+      -1.5px -1.5px 0 var(--color-ink),
+      1.5px -1.5px 0 var(--color-ink),
+      -1.5px 1.5px 0 var(--color-ink);
+  }
+
+  /* Pull-quote primitive — editorial italic Instrument Serif sized
+   * for a quote-block (NOT type-display, which is hero-only). The
+   * OverprintReveal misregistration is consumed inline; sizing here
+   * keeps the per-char inline-block stacks within a single line at
+   * typical column widths. */
+
+  .pull-quote {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(1.625rem, 3.2vw, 3rem);
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    text-align: left;
+    text-wrap: balance;
+    color: var(--color-ink);
+  }
+
+  /* Word-highlight inside a pull-quote. The keyword span carries
+   * .pull-highlight + the parent block's --block-spot. The
+   * descendant rule re-asserts spot-color on OverprintReveal's
+   * ink layer (which sets `text-ink` Tailwind directly and would
+   * otherwise override the inherited highlight). The rose/mint
+   * ghost layers stay on their own spot inks via inline style. */
+
+  .pull-highlight,
+  .pull-highlight [data-layer="ink"] {
+    color: var(--block-spot);
+  }
+
+  /* Hover-misregistration: pseudo-element ghost layers around any
+   * inline element. Used by .misreg-hover wrapper around skill
+   * words. Pseudo-elements borrow the host's text content via
+   * `attr(data-text)`. Triggered by :hover and :focus-visible.
+   *
+   * Note: data-text attribute is required on the element for the
+   * pseudo-elements to render the same glyphs in offset position. */
+
+  .misreg-hover {
+    position: relative;
+    display: inline-block;
+  }
+
+  .misreg-hover::before,
+  .misreg-hover::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    mix-blend-mode: multiply;
+    transition:
+      opacity 150ms ease-out,
+      transform 150ms ease-out;
+  }
+
+  .misreg-hover::before {
+    color: var(--color-spot-mint);
+    transform: translate(0, 0);
+  }
+
+  .misreg-hover::after {
+    color: var(--color-spot-rose);
+    transform: translate(0, 0);
+  }
+
+  .misreg-hover:hover::before,
+  .misreg-hover:focus-visible::before {
+    opacity: 0.7;
+    transform: translate(-2px, -1px);
+  }
+
+  .misreg-hover:hover::after,
+  .misreg-hover:focus-visible:hover::after,
+  .misreg-hover:focus-visible::after {
+    opacity: 0.7;
+    transform: translate(2px, 1px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .misreg-hover::before,
+    .misreg-hover::after {
+      display: none;
+    }
+  }
+
+  /* Plate-corner marks — small `+` registration crosses at the four
+   * corners of a section/block. Container needs `position: relative`. */
+
+  .plate-corners {
+    position: relative;
   }
 }

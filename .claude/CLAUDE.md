@@ -671,3 +671,139 @@ WebGL components don't re-step the rakes:
   (`nav.items.impressum`, `datenschutz`, `footer.legalAriaLabel`)
   ARE properly translated per locale (matches Phase 6/7/8/9 pattern:
   shell translated, body mirrored). Sprint 2 closes the gap.
+
+### Phase 11 polish-rework — About + Skills visual rework
+
+Driven by `docs/superpowers/specs/2026-05-04-about-skills-visual-
+rework-design.md`. Implementation plan at
+`docs/superpowers/plans/2026-05-04-about-skills-visual-rework.md`.
+
+- **About spine restructured**: the 5 equal-rectangle parts of the
+  Phase 6 implementation are now an 8-spine-item flow (header → 4
+  storied quote-blocks varying in column width → portrait anchor →
+  object-grid → AI-Pinsel-Closer). Briefing § 2.2 prose stays
+  verbatim; only structure + theatrics change.
+- **Currently block re-attached at the Portrait section**, not
+  dropped from About. Plan §Task 9 originally dropped Currently in
+  favour of the Object-Grid's currently-band, but visual review
+  found the lone Portrait too sparse on ultrawide. Currently lives
+  next to the portrait now as the editorial flank (Plate-stamp → ✱
+  → "Currently" h3 → 5-item dl → ✱). The Object-Grid `currentlyBand`
+  changed copy from Bildschirm-tech ("React 19 · R3F 9 · WebGPU")
+  to off-screen activities since the section IS off-screen and the
+  old text contradicted the headline.
+- **Per-block spot-color via `--block-spot` CSS variable**. Drop-cap
+  (CSS `:first-letter`) and word-highlight inside pull-quotes both
+  read this variable, so each block has its own "Riso plate"
+  identity (rose / mint / amber / violet for the four storied blocks).
+- **Pull-quote marker syntax is `[[keyword]]`, not `{keyword}`**.
+  next-intl interprets curly braces as ICU MessageFormat
+  placeholders ("FORMATTING_ERROR: variable X not provided"). Plan
+  §Task 8 specced curly-brace markers; switched to `[[...]]` in
+  PullQuote's regex + 16 message strings (4 keys × 4 locales). The
+  ICU-escape alternative `'{x}'` was rejected as ugly; bracket-
+  delimited markers read clearly in the JSON source.
+- **Pull-quote uses its own `.pull-quote` CSS class** (not
+  `.type-display`). Plan §Task 5 used type-display (clamp 3.5rem→
+  11rem hero-size) but at that size each `inline-block` char from
+  OverprintReveal wraps unpredictably in narrow columns. Pull-quote
+  is now clamp(1.625rem, 3.2vw, 3rem) — editorial italic
+  Instrument Serif, fits a single line at typical column widths.
+- **Drop-Cap is outline-style** (`-webkit-text-stroke: 1.5px ink` +
+  `paint-order: stroke fill` + spot-color fill). Plan §Task 1 had
+  pure spot-color fill; visual review found it too soft against
+  paper, the thin ink stroke gives it edge.
+- **StampDivider is pure markup** (Flexbox row with five spans —
+  two dots / asterism / two dots — coloured via inherited
+  `--block-spot`). No SVG, no JS.
+- **Plate-corner-marks are absolutely-positioned inline SVG
+  components** anchored to the parent's 4 corners with a 6px
+  outset. Section + Object-Grid containers use
+  `className="plate-corners relative"` to opt-in.
+- **Stamps in 140x90 viewBox, not 80x80**. Plan §Task 6 specced 80×80
+  square, but Audi-S5-coupé and Joggediballa-oval need horizontal
+  aspect ratios to read correctly. All 6 stamps now share 140×90
+  (1.55:1) for layout consistency. Manuel will replace the SVGs
+  with custom icons later — these are placeholder-quality.
+- **`.container-page-wide` (110rem) utility** added in addition to
+  `.container-page` (96rem). Used by Object-Grid + the loud-centered
+  AI-Workflow block on About so they breathe on ultrawide displays
+  without bumping the global cap (which would shift Hero + Work +
+  other already-validated sections). `AboutBlock` accepts a
+  `wide?: boolean` prop that swaps the container.
+- **Portrait section is an editorial composition, not a centered
+  single image**. Portrait left (md:col-span-5), editorial-flank
+  right (md:col-span-4): plate-stamp → asterism → "Currently"
+  heading → 5-item dl → asterism. Visual-review-driven; the
+  centered-portrait-only version felt empty especially on ultrawide.
+- **C1 VibecodedStamp** uses an IO at `threshold: 0.4` keyed on the
+  stamp's own viewport-entry. Stagger between siblings is the parent
+  `Skills.tsx`'s job — it passes `delay={i * 0.08}` per stamp. Each
+  stamp has a brief rose-halo burst at impact (200ms blur+fade)
+  layered behind the stamp via a sibling absolutely-positioned
+  `<span>`.
+- **C2 hover-misreg is mouse-only** (post-review). The earlier
+  `tabIndex={0}` keyboard-parity attempt was reverted: it added
+  20+ Tab stops behind the skill names with no action attached,
+  which is keyboard-noise rather than parity. Decorative effects
+  with no semantic information aren't worth a focus stop. The
+  CSS `:focus-visible` selector stays in `.misreg-hover` for
+  callers that legitimately make the wrapper interactive (none
+  on About/Skills today; future-proofing).
+- **C3 HeroSkillPulse loops continuously** without an IO gate. The
+  cost is negligible (one GSAP timeline animating an `opacity` on a
+  blurred div), and adding an IO gate would introduce a re-mount
+  bug if the user scrolls past then back — the colour-cycle would
+  restart from rose every time. Continuous loop is the simpler
+  contract.
+- **BodyProse FadeIn slowed** from `dur.medium` (0.56s) to
+  `dur.long` (1.1s), per-paragraph stagger from 60ms to 120ms,
+  baseline delay 400ms→500ms. Visual-review-driven — the original
+  cadence felt snappy in a section that wants to read calm.
+- **Loader plays on F5, not on locale-switch**. Phase 11 Sprint 1
+  had `sessionStorage` cache that persisted across F5 in the same
+  tab. Visual-review-driven fix: check
+  `performance.getEntriesByType("navigation")[0].type === "reload"`
+  to detect a manual reload, and only honor the sessionStorage
+  cache for non-reload navigations (locale-switch re-mounts).
+- **FluidSim no mid-session reinit on capability swap**. Symptom:
+  on first load the orchestrator inits with the `medium` default,
+  the GL probe identifies the actual GPU (Iris Xe → `low`), config
+  prop changes, FluidSim's config-effect disposes + reinits the
+  orchestrator → blank flash → ambient kicks back in 3s later.
+  Two-layer fix: (1) `useGPUCapability` lazy-inits state from the
+  localStorage tier cache so cached visitors start with the correct
+  config from the first paint, no swap; (2) `probeGPU` now returns
+  a `matched: boolean` field and `useGPUCapability` skips the
+  30-frame measurement phase for matched-or-cached tiers (caches
+  the matched tier on first encounter so the next visit lazy-inits
+  cleanly). First-time visitors with a recognized GPU still see
+  one swap (default→matched) but no measurement-driven second swap.
+- **Translation deferred** (DE source mirrored across EN/FR/IT) for
+  the new about-rework keys (`pullQuotes`, `marginalia`,
+  `objectGrid`, `portrait.{plate,label,stamps}`). Same pattern as
+  Phase 6/7/8/9/11-sprint-1 body content. Sprint 5 closes the gap.
+- **Post-review fixes (PR #6 review pass)**:
+  1. `.pull-highlight` re-asserts `--block-spot` on
+     `[data-layer="ink"]` descendants — OverprintReveal's ink layer
+     sets `text-ink` Tailwind directly, which would otherwise win
+     the cascade and the highlighted keyword would render in
+     ink-black instead of spot-color (visible signature dead).
+  2. `<StampDivider>` takes a `spot` prop now (typed `Spot`) — it's
+     rendered as a *sibling* of `<AboutBlock>`, not nested, so
+     `--block-spot` cascade can't reach it. Each call-site in
+     `<About />` passes the outgoing block's spot. The fallback
+     `var(--color-ink-muted)` stays for future call-sites that
+     don't have an outgoing spot.
+  3. `<HeroSkillPulse>` cleanup tracks `activeTl` and calls
+     `activeTl?.kill()` on unmount. The previous
+     `gsap.killTweensOf(halo)` missed the dummy hold-tween whose
+     target is `{}`, not `halo` — surviving the unmount and firing
+     `onComplete: cycle` against the unmounted component (guarded
+     by the `killed` flag, so behaviour was correct, but timelines
+     leaked into GSAP's global ticker until self-resolution).
+  4. `<FluidSim>` had a dead second `useEffect` that was supposed
+     to handle config-swap, but always short-circuited because the
+     first effect's deps include `config` and dispose+reinit happen
+     in cleanup+mount of that effect already. Deleted; behaviour
+     unchanged.

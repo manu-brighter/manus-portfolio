@@ -31,8 +31,13 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
   measuringRef.current = measuring;
   const onFrametimeRef = useRef(onFrametime);
   onFrametimeRef.current = onFrametime;
-  const prevConfigRef = useRef<TierConfig | null>(null);
 
+  // Mount + config-change: init orchestrator, dispose on cleanup.
+  // The `config` dep handles the auto-tuner's tier swap — first effect
+  // cleanup (dispose) runs before the next mount (init with new config),
+  // which means a separate "if config changed" effect (previously here)
+  // would always short-circuit. Single effect = single source of truth
+  // for orchestrator lifecycle.
   useEffect(() => {
     const context = gl.getContext() as WebGL2RenderingContext;
     if (!context || !(context instanceof WebGL2RenderingContext)) return;
@@ -42,24 +47,12 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
     const orchestrator = new FluidOrchestrator();
     orchestrator.init(context, config);
     orchestratorRef.current = orchestrator;
-    prevConfigRef.current = config;
 
     return () => {
       orchestrator.dispose();
       orchestratorRef.current = null;
-      prevConfigRef.current = null;
     };
   }, [gl, onGLReady, config]);
-
-  useEffect(() => {
-    const orchestrator = orchestratorRef.current;
-    if (!orchestrator || config === prevConfigRef.current) return;
-
-    const context = gl.getContext() as WebGL2RenderingContext;
-    orchestrator.dispose();
-    orchestrator.init(context, config);
-    prevConfigRef.current = config;
-  }, [config, gl]);
 
   useEffect(() => {
     const dpr = gl.getPixelRatio();
@@ -127,19 +120,41 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
     };
   }, [gl]);
 
-  // Kick ambient motion the moment the loader finishes.
+  // Kick ambient motion AFTER the hero reveal — the hero `OverprintReveal`
+  // has a 350ms loader-settle window plus ~1.1s of reveal cadence (per-
+  // char stagger + ink fade-in), so we wait ~1500ms after the loader
+  // before the 3 ambient wandering points appear. That preserves the
+  // start-up dramaturgy (loader → hero text settles → fluid wakes up)
+  // and stops the simultaneous "everything moves at once" jank that
+  // smothered the smooth open.
+  //
   // Guard against race: if the loader already fired before this
-  // component mounted, trigger immediately.
+  // component mounted, schedule immediately (with the same delay).
   useEffect(() => {
+    const HERO_REVEAL_MS = 1500;
+    let timer: number | null = null;
+
+    const scheduleAmbient = () => {
+      timer = window.setTimeout(() => {
+        orchestratorRef.current?.triggerAmbient();
+      }, HERO_REVEAL_MS);
+    };
+
     if (isLoaderComplete()) {
-      orchestratorRef.current?.triggerAmbient();
-      return;
+      scheduleAmbient();
+      return () => {
+        if (timer !== null) window.clearTimeout(timer);
+      };
     }
+
     const onLoaderComplete = () => {
-      orchestratorRef.current?.triggerAmbient();
+      scheduleAmbient();
     };
     window.addEventListener("loader-complete", onLoaderComplete, { once: true });
-    return () => window.removeEventListener("loader-complete", onLoaderComplete);
+    return () => {
+      window.removeEventListener("loader-complete", onLoaderComplete);
+      if (timer !== null) window.clearTimeout(timer);
+    };
   }, []);
 
   // External splat bus — Work-cards (and future callers) dispatch

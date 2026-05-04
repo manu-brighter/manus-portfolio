@@ -110,14 +110,75 @@
     ],
     "portrait": {
       "alt": "Portraitfoto von Manuel Heller",
-      "caption": "Basel-Region · MMXXVI"
+      "caption": "Basel-Region · MMXXVI",
+      "plate": "Plate Nº 03",
+      "label": "Selbstporträt",
+      "stamps": [
+        { "label": "Location", "value": "Basel-Region" },
+        { "label": "Year", "value": "MMXXVI" },
+        { "label": "Signed", "value": "manu" }
+      ]
+    },
+    "pullQuotes": {
+      "werIchBin": "Die spannenden Sachen passieren genau [[dazwischen]].",
+      "anfangen": "Ich will verstehen, [[wie das alles unter der Haube]] läuft.",
+      "aiWorkflow": "AI-generierte Websites sehen heute alle gleich aus, weil die meisten Leute der AI nur sagen was sie wollen, nicht [[wie]].",
+      "antrieb": "Wer aufhört zu [[lernen]], ist innerhalb von 12 Monaten abgehängt."
+    },
+    "marginalia": {
+      "werIchBin": {
+        "counter": "01 / 04",
+        "label": "Identität",
+        "year": "MMXXVI"
+      },
+      "anfangen": {
+        "counter": "02 / 04",
+        "stamps": [
+          { "label": "Minecraft", "year": "2014" },
+          { "label": "Novartis EFZ", "year": "2017–2021" },
+          { "label": "zvoove", "year": "2021—" }
+        ]
+      },
+      "aiWorkflow": {
+        "counter": "03 / 04",
+        "label": "Vibecoded"
+      },
+      "antrieb": {
+        "counter": "04 / 04",
+        "label": "Antrieb"
+      }
+    },
+    "objectGrid": {
+      "sectionLabel": "Off the screen",
+      "headline": "Wenn der Bildschirm aus ist.",
+      "currentlyBand": "Snapshot 2026 · Wildlife-Reise in Planung · Wintersaison · Paddle griffbereit",
+      "tiles": {
+        "camera": {
+          "name": "Kamera",
+          "caption": "shooting · Sony α7 IV · Wildlife"
+        },
+        "audi": {
+          "name": "Audi S5",
+          "caption": "driving · B8.5 · Tuning-Projekt"
+        },
+        "joggediballa": {
+          "name": "Jogge di Balla",
+          "caption": "co-running · Verein · Vize-Präsident"
+        },
+        "schnee": {
+          "name": "Schnee",
+          "caption": "carving · Ski/Snowboard · Wintersaison"
+        },
+        "tauchen": {
+          "name": "Tiefe",
+          "caption": "diving · Wo's geht"
+        },
+        "pingpong": {
+          "name": "Ping-Pong",
+          "caption": "chasing · zvoove-Champion-Titel"
+        }
+      }
     }
-  },
-  "aiPinsel": {
-    "quoteLine1": "«AI ist wie ein Pinsel.",
-    "quoteLine2": "Sie macht die Kunst nicht alleine.»",
-    "emphasisWord": "Pinsel",
-    "caption": "— über meinen Workflow mit Custom Agents, Hooks und Skills."
   },
   "currently": {
     "label": "Currently",
