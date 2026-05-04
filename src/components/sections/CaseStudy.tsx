@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { InkSweep } from "@/components/case-study/InkSweep";
 import { StationContainer } from "@/components/case-study/StationContainer";
 import { StationFrame } from "@/components/case-study/StationFrame";
 import { HighlightStation } from "@/components/case-study/stations/HighlightStation";
@@ -9,27 +10,20 @@ import { PublicStation } from "@/components/case-study/stations/PublicStation";
 import { StackStation } from "@/components/case-study/stations/StackStation";
 import { WhatStation } from "@/components/case-study/stations/WhatStation";
 
-// NOTE — Phase-12 first-iteration overlays disabled:
-//
-//   • PaperWorkplace (full-bleed detail-layer SVG): the 6000×1000 viewBox
-//     with `preserveAspectRatio="none"` stretched into the section's
-//     100vh × auto block, distorting the inkblot decorations into giant
-//     blurred shapes that dominated the foreground.
-//
-//   • InkTransition (1 shared WebGL canvas): the canvas covers the
-//     viewport with `position: fixed` + `z-30` and the mask-composite
-//     shader paints paper-color over the entire scene whenever active=
-//     true. Without an opacity drain after the splat, it left the
-//     stations completely covered through the entire pinned phase.
-//
-//   • Lupe / CoffeeRing / TintenSpot cliparts: positioned `absolute` on
-//     the outer wrapper, they don't move with the horizontal track and
-//     anchor to fixed positions during the pinned phase, drifting visually
-//     out of context.
-//
-// All three primitives stay in the codebase and will be re-architected
-// in a follow-up sprint. The horizontal-scroll + station fade-in is the
-// load-bearing visual; we ship that solid first.
+/**
+ * Per-station scatter (Phase-12 rework). Hand-tuned vertical offsets +
+ * rotations give the horizontal track a "hand-laid notes on a table"
+ * feel rather than a dead-center grid. Reduced-motion clamps both to 0
+ * (handled inside StationFrame).
+ */
+const STATION_LAYOUT = {
+  hook: { offsetYVh: -6, rotate: -2 },
+  what: { offsetYVh: 4, rotate: 1.5 },
+  stack: { offsetYVh: -3, rotate: -1 },
+  admin: { offsetYVh: 6, rotate: 2 },
+  overlay: { offsetYVh: -5, rotate: -1.5 },
+  public: { offsetYVh: 3, rotate: 1 },
+} as const;
 
 type Fact = { key: string; value: string };
 type StackRow = { tech: string; use: string; why: string };
@@ -78,18 +72,31 @@ export function CaseStudy() {
       <h2 id="case-study-heading" className="sr-only">
         {t("headline")}
       </h2>
+      <InkSweep />
       <StationContainer>
-        <StationFrame spot="rose">
+        <StationFrame
+          spot="rose"
+          offsetYVh={STATION_LAYOUT.hook.offsetYVh}
+          rotate={STATION_LAYOUT.hook.rotate}
+        >
           <HookStation
             hookText={t("hook")}
             datestamp={hookStation.datestamp}
             polaroidCaption={hookStation.polaroidCaption ?? ""}
           />
         </StationFrame>
-        <StationFrame spot="amber">
+        <StationFrame
+          spot="amber"
+          offsetYVh={STATION_LAYOUT.what.offsetYVh}
+          rotate={STATION_LAYOUT.what.rotate}
+        >
           <WhatStation label={t("context.label")} facts={facts} storyParas={storyParas} />
         </StationFrame>
-        <StationFrame spot="mint">
+        <StationFrame
+          spot="mint"
+          offsetYVh={STATION_LAYOUT.stack.offsetYVh}
+          rotate={STATION_LAYOUT.stack.rotate}
+        >
           <StackStation
             heading={stackStation.heading}
             rule={stackStation.rule}
@@ -99,7 +106,11 @@ export function CaseStudy() {
           />
         </StationFrame>
         {adminHighlight ? (
-          <StationFrame spot="rose">
+          <StationFrame
+            spot="rose"
+            offsetYVh={STATION_LAYOUT.admin.offsetYVh}
+            rotate={STATION_LAYOUT.admin.rotate}
+          >
             <HighlightStation
               kicker={adminHighlight.kicker}
               title={adminHighlight.title}
@@ -115,7 +126,11 @@ export function CaseStudy() {
           </StationFrame>
         ) : null}
         {overlayHighlight ? (
-          <StationFrame spot="amber">
+          <StationFrame
+            spot="amber"
+            offsetYVh={STATION_LAYOUT.overlay.offsetYVh}
+            rotate={STATION_LAYOUT.overlay.rotate}
+          >
             <HighlightStation
               kicker={overlayHighlight.kicker}
               title={overlayHighlight.title}
@@ -130,7 +145,11 @@ export function CaseStudy() {
             />
           </StationFrame>
         ) : null}
-        <StationFrame spot="violet">
+        <StationFrame
+          spot="violet"
+          offsetYVh={STATION_LAYOUT.public.offsetYVh}
+          rotate={STATION_LAYOUT.public.rotate}
+        >
           <PublicStation
             publicShots={PUBLIC_SHOT_CONFIG.map((cfg, i) => ({
               ...cfg,

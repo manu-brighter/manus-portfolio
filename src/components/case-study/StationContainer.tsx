@@ -44,25 +44,48 @@ export function StationContainer({ children }: Props) {
     const track = trackRef.current;
     if (!section || !track) return;
 
-    const trackWidth = track.scrollWidth;
-    const viewportWidth = section.clientWidth;
-    const distance = trackWidth - viewportWidth;
-    if (distance <= 0) return;
+    let trigger: ScrollTrigger | null = null;
+    let raf2 = 0;
 
-    const trigger = ScrollTrigger.create({
-      trigger: section,
-      start: "top top",
-      end: () => `+=${distance}`,
-      pin: true,
-      scrub: 0.6,
-      anticipatePin: 1,
-      onUpdate: (self) => {
-        gsap.set(track, { x: -distance * self.progress });
-      },
+    // Two-frame delay so React commit + child layout + font swap settle
+    // before we measure scrollWidth — without this the first measurement
+    // runs against an under-sized track (children not yet laid out at
+    // their final 65vw widths) and the horizontal sweep ends prematurely.
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => {
+        const trackWidth = track.scrollWidth;
+        const viewportWidth = section.clientWidth;
+        let distance = trackWidth - viewportWidth;
+        if (distance <= 0) return;
+
+        trigger = ScrollTrigger.create({
+          trigger: section,
+          start: "top top",
+          end: () => `+=${distance}`,
+          pin: true,
+          scrub: 0.6,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+          onRefresh: () => {
+            // Re-measure so end-distance tracks viewport / font / image
+            // size changes after creation.
+            distance = track.scrollWidth - section.clientWidth;
+          },
+          onUpdate: (self) => {
+            gsap.set(track, { x: -distance * self.progress });
+          },
+        });
+
+        // Final refresh after the trigger is wired so its end-distance
+        // matches the freshly measured layout.
+        ScrollTrigger.refresh();
+      });
     });
 
     return () => {
-      trigger.kill();
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+      trigger?.kill();
       gsap.set(track, { x: 0 });
     };
   }, [reducedMotion, isMobile]);

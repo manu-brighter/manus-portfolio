@@ -9,6 +9,13 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
  * entry and fades out on leave. Includes a small spot-color "wet-ink"
  * accent in the corner.
  *
+ * Width default is 65vw (Phase-12 rework) so multiple stations are
+ * visible simultaneously in the horizontal track — the cohesive
+ * Foto-Workplace feel needs adjacent stations peeking in. Per-station
+ * `offsetYVh` + `rotate` props give the table a hand-laid "scattered"
+ * feel: each station sits at a slightly different vertical position +
+ * rotation, deterministic per-index from CaseStudy.tsx.
+ *
  * The original SVG-mask + path-tween "ink-blob → rectangle" morph
  * (Phase 12 first iteration) was dropped because:
  * (a) `maskUnits="userSpaceOnUse"` with 500×500 path coords didn't scale
@@ -27,13 +34,21 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 type Props = {
   spot: "rose" | "amber" | "mint" | "violet";
   children: ReactNode;
-  /** Optional explicit width (px). Default: 100vw. */
-  width?: number;
+  /** Width in vw. Default 65 (Phase 12 rework — narrower for adjacency). */
+  widthVw?: number;
+  /** Vertical offset in vh (negative = up, positive = down). Default 0. */
+  offsetYVh?: number;
+  /** Rotation in degrees. Default 0. */
+  rotate?: number;
 };
 
-export function StationFrame({ spot, children, width }: Props) {
+export function StationFrame({ spot, children, widthVw, offsetYVh, rotate }: Props) {
   const reducedMotion = useReducedMotion();
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Under reduced-motion, no scatter — clean grid alignment.
+  const effectiveOffsetY = reducedMotion ? 0 : (offsetYVh ?? 0);
+  const effectiveRotate = reducedMotion ? 0 : (rotate ?? 0);
 
   useEffect(() => {
     if (reducedMotion) return;
@@ -73,13 +88,16 @@ export function StationFrame({ spot, children, width }: Props) {
     <div
       ref={containerRef}
       className="relative h-screen flex-shrink-0"
-      style={{ width: width ?? "100vw" }}
+      style={{
+        width: `${widthVw ?? 65}vw`,
+        transform: `translateY(${effectiveOffsetY}vh) rotate(${effectiveRotate}deg)`,
+      }}
     >
       {children}
       {!reducedMotion ? (
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute right-8 bottom-12 size-12 rounded-full opacity-40 blur-[8px]"
+          className="pointer-events-none absolute right-8 bottom-12 size-12 rounded-full opacity-40 blur-[8px] motion-safe:animate-[ink-spot-pulse_4s_ease-in-out_infinite]"
           style={{ backgroundColor: `var(--color-spot-${spot})` }}
         />
       ) : null}
