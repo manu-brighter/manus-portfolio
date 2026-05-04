@@ -21,7 +21,10 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
  */
 
 const REVEAL_THRESHOLD = 0.45;
-const HOLD_MS = 2500; // total visible time of the reveal before retract
+/** When (since timeline start) the fade-out begins. Reveal is fully
+ *  visible from ~0.4s (post fade-in) to this point, ~2.1s of full hold. */
+const FADE_OUT_START_MS = 2500;
+/** Duration of the fade-out tween. Total reveal lifetime ≈ FADE_OUT_START_MS + FADE_OUT_MS = 3.1s. */
 const FADE_OUT_MS = 600;
 
 type Props = {
@@ -46,6 +49,7 @@ export function PortfolioCardReveal({
   const screenshotRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const firedRef = useRef(false);
+  const tlRef = useRef<gsap.core.Timeline | null>(null);
 
   useEffect(() => {
     if (reducedMotion) return;
@@ -61,14 +65,21 @@ export function PortfolioCardReveal({
       if (firedRef.current) return;
       firedRef.current = true;
 
+      tlRef.current?.kill();
       const tl = gsap.timeline();
+      tlRef.current = tl;
+
       tl.to(screenshot, { opacity: 0.5, duration: 0.4, ease: "power2.out" }, 0);
       tl.to(stage, { opacity: 1, duration: 0.4, ease: "power2.out" }, 0);
-      tl.to(stage, { opacity: 0, duration: FADE_OUT_MS / 1000, ease: "power2.in" }, HOLD_MS / 1000);
+      tl.to(
+        stage,
+        { opacity: 0, duration: FADE_OUT_MS / 1000, ease: "power2.in" },
+        FADE_OUT_START_MS / 1000,
+      );
       tl.to(
         screenshot,
         { opacity: 1, duration: FADE_OUT_MS / 1000, ease: "power2.in" },
-        HOLD_MS / 1000,
+        FADE_OUT_START_MS / 1000,
       );
     };
 
@@ -88,6 +99,8 @@ export function PortfolioCardReveal({
     return () => {
       io.disconnect();
       container.removeEventListener("pointerenter", onHover);
+      tlRef.current?.kill();
+      tlRef.current = null;
     };
   }, [reducedMotion]);
 
