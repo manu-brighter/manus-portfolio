@@ -20,10 +20,13 @@ type Props = {
   width?: number;
 };
 
+// Both paths must have identical command structure for `lerpPath` to
+// interpolate them (same command sequence, same coord-count per command).
+// Layout: M + 4 Q + Z. The Z is skipped by the parser (not in the
+// [MLQCmlqc] alphabet) and re-emitted unchanged. Each Q has 4 coords.
 const BLOB_PATH =
-  "M 100 250 Q 50 100, 250 80 Q 450 60, 470 200 Q 490 350, 350 380 Q 200 410, 100 250 Z";
-const RECT_PATH =
-  "M 0 0 Q 0 0, 250 0 Q 500 0, 500 0 Q 500 250, 500 500 Q 250 500, 0 500 Q 0 250, 0 0 Z";
+  "M 100 250 Q 50 100, 250 80 Q 450 60, 470 250 Q 490 400, 250 420 Q 100 410, 100 250 Z";
+const RECT_PATH = "M 0 0 Q 250 0, 500 0 Q 500 250, 500 500 Q 250 500, 0 500 Q 0 250, 0 0 Z";
 
 export function StationFrame({ spot, children, width }: Props) {
   const reducedMotion = useReducedMotion();
