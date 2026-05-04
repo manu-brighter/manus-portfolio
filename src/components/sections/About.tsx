@@ -6,7 +6,6 @@ import { PlateCornerMarks } from "@/components/about/PlateCornerMarks";
 import { PullQuote } from "@/components/about/PullQuote";
 import { StampDivider } from "@/components/about/StampDivider";
 import { FadeIn } from "@/components/motion/FadeIn";
-import { VibecodedStamp } from "@/components/skills/VibecodedStamp";
 import { AiPinselQuote } from "@/components/ui/AiPinselQuote";
 import { Portrait } from "@/components/ui/Portrait";
 
@@ -72,9 +71,6 @@ function BodyProse({ paragraphs }: { paragraphs: string[] }) {
 
 export function About() {
   const t = useTranslations("about");
-  // The vibecoded marker text lives in the `skills` namespace (single
-  // source for both Skills section + About loud-block stamp).
-  const tSkills = useTranslations("skills");
   // Currently-list (5 verbs) is rendered next to the portrait as the
   // editorial flank — refilled into the spine after originally being
   // dropped in favour of the Object-Grid's "currently learning" band.
@@ -198,16 +194,16 @@ export function About() {
 
       <StampDivider />
 
-      {/* 04 AI-Workflow (loud-centered, wide container) — B7:
-          VibecodedStamp as eyepoint above the pull-quote, animates
-          in on viewport-entry via the stamp's own IO. Wide container
-          so the loud block breathes on ultrawide displays. */}
+      {/* 04 AI-Workflow (loud-centered, wide container).
+          Closes with the embedded `<AiPinselQuote />` so the "AI is
+          like a brush" statement punctuates the workflow block in
+          the same logical context — instead of floating at the end
+          of About after Antrieb + Object-Grid where the reader has
+          already left the AI thread. */}
       <AboutBlock id="ai-workflow" spot="amber" layout="loud-centered" wide>
-        <div className="mb-4 flex justify-end">
-          <VibecodedStamp>{tSkills("vibecodedMarker")}</VibecodedStamp>
-        </div>
         <PullQuote text={t("pullQuotes.aiWorkflow")} />
         <BodyProse paragraphs={bodyOf("ai-workflow")} />
+        <AiPinselQuote />
       </AboutBlock>
 
       <StampDivider />
@@ -222,11 +218,6 @@ export function About() {
 
       {/* 06 Object-Grid (replaces part 5 + Currently) */}
       <ObjectGrid />
-
-      <StampDivider />
-
-      {/* 07 AI-Pinsel-Closer */}
-      <AiPinselQuote />
     </section>
   );
 }
