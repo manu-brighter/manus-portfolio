@@ -1,7 +1,7 @@
 "use client";
 
 import gsap from "gsap";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { OverprintReveal } from "@/components/motion/OverprintReveal";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -10,31 +10,31 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
  * PortfolioCardReveal — the meta-stage on the Portfolio-Card.
  *
  * Rest state: the real screenshot of the portfolio homepage.
- * Trigger (first of):
- *   1. IntersectionObserver one-shot at threshold 0.45
- *   2. Pointer hover (pointerenter)
+ * On `pointerenter` (or keyboard focus, see below): the screenshot blurs
+ * and dims, the Hero choreography "Heller, / Manuel." plays in the
+ * bottom-right (matching the Hero's right-aligned `items-end`
+ * composition). On `pointerleave`: stage fades out, screenshot
+ * un-blurs.
  *
- * The choreography fires ONCE per session (component lifetime).
- * Subsequent hovers after first fire are no-ops.
+ * Each fresh hover re-triggers the OverprintReveal char-stagger via a
+ * key bump that force-remounts the inner reveal subtree. This is the
+ * cheap-and-correct way to re-fire OverprintReveal's once-per-mount
+ * IO without modifying that primitive.
  *
- * Reduced-motion: choreography skipped, only static screenshot renders.
+ * Reduced-motion: nothing animates. Only the static screenshot renders.
  */
 
-const REVEAL_THRESHOLD = 0.45;
-/** When (since timeline start) the fade-out begins. Reveal is fully
- *  visible from ~0.4s (post fade-in) to this point, ~2.1s of full hold. */
-const FADE_OUT_START_MS = 2500;
-/** Duration of the fade-out tween. Total reveal lifetime ≈ FADE_OUT_START_MS + FADE_OUT_MS = 3.1s. */
-const FADE_OUT_MS = 600;
+const FADE_MS = 380;
+const SCREENSHOT_BLUR_PX = 8;
+const SCREENSHOT_DIM_OPACITY = 0.7;
 
 type Props = {
-  /** alt text for the static screenshot */
   alt: string;
-  /** translation: surname (e.g. "Heller,") */
   surname: string;
-  /** translation: given name (e.g. "Manuel.") */
   given: string;
-  /** translation: SR-only announcement when reveal plays */
+  /** Preserved in the contract for a future `role="status"` live region —
+   *  unused in the current render to avoid focus-trap with the parent
+   *  WorkCard `<a>`. */
   ariaAnnouncement: string;
 };
 
@@ -48,64 +48,62 @@ export function PortfolioCardReveal({
   const containerRef = useRef<HTMLDivElement>(null);
   const screenshotRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
-  const firedRef = useRef(false);
-  const tlRef = useRef<gsap.core.Timeline | null>(null);
+  // Force-remount the reveal subtree on each hover so OverprintReveal's
+  // internal once-per-mount IO fires fresh. Cheap, correct, no
+  // upstream-component edits.
+  const [revealCount, setRevealCount] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
 
+  // Imperative GSAP for the screenshot blur/dim + stage opacity. Uses
+  // refs not state — keeps the tweens cancellable and frame-stable.
   useEffect(() => {
     if (reducedMotion) return;
-    const container = containerRef.current;
     const screenshot = screenshotRef.current;
     const stage = stageRef.current;
-    if (!container || !screenshot || !stage) return;
+    if (!screenshot || !stage) return;
 
-    gsap.set(stage, { opacity: 0 });
-    gsap.set(screenshot, { opacity: 1 });
+    // Initial state — set explicitly so SSR-hydration + first render
+    // both start from the same baseline.
+    if (!isHovered) {
+      gsap.set(screenshot, { filter: "blur(0px)", opacity: 1 });
+      gsap.set(stage, { opacity: 0 });
+    }
 
-    const fire = () => {
-      if (firedRef.current) return;
-      firedRef.current = true;
-
-      tlRef.current?.kill();
-      const tl = gsap.timeline();
-      tlRef.current = tl;
-
-      tl.to(screenshot, { opacity: 0.5, duration: 0.4, ease: "power2.out" }, 0);
-      tl.to(stage, { opacity: 1, duration: 0.4, ease: "power2.out" }, 0);
-      tl.to(
-        stage,
-        { opacity: 0, duration: FADE_OUT_MS / 1000, ease: "power2.in" },
-        FADE_OUT_START_MS / 1000,
-      );
-      tl.to(
-        screenshot,
-        { opacity: 1, duration: FADE_OUT_MS / 1000, ease: "power2.in" },
-        FADE_OUT_START_MS / 1000,
-      );
-    };
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting && !firedRef.current) fire();
-        }
-      },
-      { threshold: REVEAL_THRESHOLD },
-    );
-    io.observe(container);
-
-    const onHover = () => fire();
-    container.addEventListener("pointerenter", onHover);
+    const screenshotTween = gsap.to(screenshot, {
+      filter: isHovered ? `blur(${SCREENSHOT_BLUR_PX}px)` : "blur(0px)",
+      opacity: isHovered ? SCREENSHOT_DIM_OPACITY : 1,
+      duration: FADE_MS / 1000,
+      ease: "power2.out",
+    });
+    const stageTween = gsap.to(stage, {
+      opacity: isHovered ? 1 : 0,
+      duration: FADE_MS / 1000,
+      ease: "power2.out",
+    });
 
     return () => {
-      io.disconnect();
-      container.removeEventListener("pointerenter", onHover);
-      tlRef.current?.kill();
-      tlRef.current = null;
+      screenshotTween.kill();
+      stageTween.kill();
     };
-  }, [reducedMotion]);
+  }, [isHovered, reducedMotion]);
+
+  const onEnter = () => {
+    if (reducedMotion) return;
+    setRevealCount((c) => c + 1);
+    setIsHovered(true);
+  };
+  const onLeave = () => {
+    if (reducedMotion) return;
+    setIsHovered(false);
+  };
 
   return (
-    <div ref={containerRef} className="relative h-full w-full">
+    <div
+      ref={containerRef}
+      onPointerEnter={onEnter}
+      onPointerLeave={onLeave}
+      className="relative h-full w-full"
+    >
       <div ref={screenshotRef} className="absolute inset-0">
         <picture className="block h-full w-full">
           <source
@@ -132,14 +130,22 @@ export function PortfolioCardReveal({
         <div
           ref={stageRef}
           aria-hidden="true"
-          className="absolute inset-0 flex items-center justify-center bg-paper/0"
-          style={{ pointerEvents: "none" }}
+          className="pointer-events-none absolute inset-0 flex items-end justify-end p-4 md:p-6"
         >
-          <div className="flex items-baseline gap-2 px-4 text-[clamp(1.5rem,4vw,3rem)]">
+          {/* Mirrors the Hero composition: right-aligned, bottom-anchored.
+              The two OverprintReveal instances + FadeIn slash get bumped
+              keys per hover so the char-stagger re-fires from the start. */}
+          <div className="flex items-baseline gap-1 text-right text-[clamp(1.25rem,3.2vw,2.4rem)]">
             <span className="font-display italic text-ink leading-none">
-              <OverprintReveal text={surname} className="inline-block" threshold={0.5} />
+              <OverprintReveal
+                key={`surname-${revealCount}`}
+                text={surname}
+                className="inline-block"
+                threshold={0.01}
+              />
             </span>
             <FadeIn
+              key={`slash-${revealCount}`}
               className="not-italic inline-block font-display text-ink"
               delay={0.12}
               ariaHidden
@@ -147,7 +153,13 @@ export function PortfolioCardReveal({
               /
             </FadeIn>
             <span className="font-display italic text-ink leading-none">
-              <OverprintReveal text={given} className="inline-block" threshold={0.5} delay={0.25} />
+              <OverprintReveal
+                key={`given-${revealCount}`}
+                text={given}
+                className="inline-block"
+                threshold={0.01}
+                delay={0.25}
+              />
             </span>
           </div>
         </div>
