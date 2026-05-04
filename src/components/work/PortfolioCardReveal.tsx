@@ -130,12 +130,13 @@ export function PortfolioCardReveal({
         <div
           ref={stageRef}
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 flex items-end justify-end p-4 md:p-6"
+          className="pointer-events-none absolute inset-0 flex items-center justify-end pr-6 md:pr-10"
         >
-          {/* Mirrors the Hero composition: right-aligned, bottom-anchored.
-              The two OverprintReveal instances + FadeIn slash get bumped
-              keys per hover so the char-stagger re-fires from the start. */}
-          <div className="flex items-baseline gap-1 text-right text-[clamp(1.25rem,3.2vw,2.4rem)]">
+          {/* Mirrors the Hero composition: right-aligned, vertically
+              centered with a generous right padding. The two
+              OverprintReveal instances + FadeIn slash get bumped keys
+              per hover so the char-stagger re-fires from the start. */}
+          <div className="flex items-baseline gap-2 text-right text-[clamp(2rem,6vw,4.5rem)]">
             <span className="font-display italic text-ink leading-none">
               <OverprintReveal
                 key={`surname-${revealCount}`}
