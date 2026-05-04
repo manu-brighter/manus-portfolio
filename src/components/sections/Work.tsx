@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
-import { PortfolioCardVisual } from "@/components/ui/PortfolioCardVisual";
 import { WorkCard } from "@/components/ui/WorkCard";
+import { PortfolioCardReveal } from "@/components/work/PortfolioCardReveal";
 
 /**
  * Work — Section 03.
@@ -33,6 +33,11 @@ type WorkProject = {
     alt: string;
     caption?: string;
   };
+  reveal?: {
+    surname: string;
+    given: string;
+    ariaAnnouncement: string;
+  };
 };
 
 export function Work() {
@@ -51,7 +56,7 @@ export function Work() {
     <section
       id="work"
       aria-labelledby="work-heading"
-      className="container-page relative py-20 md:py-28"
+      className="container-page-wide relative py-20 md:py-28"
     >
       <header className="grid-12 mb-16 gap-y-4 md:mb-20">
         <p className="col-span-12 text-ink-muted type-label md:col-span-4">{t("sectionLabel")}</p>
@@ -80,7 +85,38 @@ export function Work() {
               vibecoded
               vibecodedLabel={vibecodedLabel}
               click={{ kind: "scroll-hero" }}
-              media={<PortfolioCardVisual className="absolute inset-0 h-full w-full" />}
+              media={
+                portfolio.reveal ? (
+                  <PortfolioCardReveal
+                    alt={portfolio.screenshot?.alt ?? portfolio.title}
+                    surname={portfolio.reveal.surname}
+                    given={portfolio.reveal.given}
+                    ariaAnnouncement={portfolio.reveal.ariaAnnouncement}
+                  />
+                ) : (
+                  <picture className="block h-full w-full">
+                    <source
+                      type="image/avif"
+                      srcSet="/projects/portfolio/homepage-480w.avif 480w, /projects/portfolio/homepage-800w.avif 800w, /projects/portfolio/homepage-1200w.avif 1200w"
+                      sizes="(min-width: 1024px) 40rem, (min-width: 640px) 60vw, 100vw"
+                    />
+                    <source
+                      type="image/webp"
+                      srcSet="/projects/portfolio/homepage-480w.webp 480w, /projects/portfolio/homepage-800w.webp 800w, /projects/portfolio/homepage-1200w.webp 1200w"
+                    />
+                    <img
+                      src="/projects/portfolio/homepage-800w.jpg"
+                      alt={portfolio.screenshot?.alt ?? portfolio.title}
+                      width={800}
+                      height={450}
+                      loading="lazy"
+                      className="block h-full w-full object-cover object-top"
+                    />
+                  </picture>
+                )
+              }
+              mediaAlt={portfolio.screenshot?.alt}
+              mediaCaption={portfolio.screenshot?.caption}
             />
           </div>
         ) : null}

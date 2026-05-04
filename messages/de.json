@@ -299,7 +299,16 @@
         ],
         "description": "Diese Seite. Fullscreen GPU-Fluid-Simulation als Hero, Risograph-inspirierte Editorial-Ästhetik, vibecoded in mehrwöchigen Sessions mit Claude Code.",
         "metaNote": "Du surfst gerade auf einer GPU-Fluid-Simulation. Kein Iframe, kein Video-Loop, keine Lottie-Datei. Echte Frames.",
-        "ctaLabel": "Du bist schon hier"
+        "ctaLabel": "Du bist schon hier",
+        "screenshot": {
+          "alt": "Screenshot der Hero-Section von manuelheller.dev",
+          "caption": "manuelheller.dev · hero"
+        },
+        "reveal": {
+          "surname": "Heller,",
+          "given": "Manuel.",
+          "ariaAnnouncement": "Vorschau-Animation der Hero-Section"
+        }
       },
       {
         "id": "joggediballa",
