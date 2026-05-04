@@ -1,12 +1,6 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useRef } from "react";
-import { CoffeeRing } from "@/components/case-study/cliparts/CoffeeRing";
-import { Lupe } from "@/components/case-study/cliparts/Lupe";
-import { TintenSpot } from "@/components/case-study/cliparts/TintenSpot";
-import { InkTransition } from "@/components/case-study/InkTransition";
-import { PaperWorkplace } from "@/components/case-study/PaperWorkplace";
 import { StationContainer } from "@/components/case-study/StationContainer";
 import { StationFrame } from "@/components/case-study/StationFrame";
 import { HighlightStation } from "@/components/case-study/stations/HighlightStation";
@@ -14,6 +8,28 @@ import { HookStation } from "@/components/case-study/stations/HookStation";
 import { PublicStation } from "@/components/case-study/stations/PublicStation";
 import { StackStation } from "@/components/case-study/stations/StackStation";
 import { WhatStation } from "@/components/case-study/stations/WhatStation";
+
+// NOTE — Phase-12 first-iteration overlays disabled:
+//
+//   • PaperWorkplace (full-bleed detail-layer SVG): the 6000×1000 viewBox
+//     with `preserveAspectRatio="none"` stretched into the section's
+//     100vh × auto block, distorting the inkblot decorations into giant
+//     blurred shapes that dominated the foreground.
+//
+//   • InkTransition (1 shared WebGL canvas): the canvas covers the
+//     viewport with `position: fixed` + `z-30` and the mask-composite
+//     shader paints paper-color over the entire scene whenever active=
+//     true. Without an opacity drain after the splat, it left the
+//     stations completely covered through the entire pinned phase.
+//
+//   • Lupe / CoffeeRing / TintenSpot cliparts: positioned `absolute` on
+//     the outer wrapper, they don't move with the horizontal track and
+//     anchor to fixed positions during the pinned phase, drifting visually
+//     out of context.
+//
+// All three primitives stay in the codebase and will be re-architected
+// in a follow-up sprint. The horizontal-scroll + station fade-in is the
+// load-bearing visual; we ship that solid first.
 
 type Fact = { key: string; value: string };
 type StackRow = { tech: string; use: string; why: string };
@@ -43,7 +59,6 @@ const PUBLIC_SHOT_CONFIG: {
 
 export function CaseStudy() {
   const t = useTranslations("caseStudy");
-  const triggerRef = useRef<HTMLDivElement>(null);
 
   const facts = t.raw("context.facts") as Fact[];
   const storyParas = t.raw("context.story") as string[];
@@ -59,15 +74,10 @@ export function CaseStudy() {
   const overlayHighlight = highlights.find((h) => h.id === "overlay");
 
   return (
-    <div ref={triggerRef} className="relative">
-      <PaperWorkplace />
-      <Lupe className="absolute top-1/3 left-[42%] z-10" />
-      <CoffeeRing className="absolute top-1/2 left-[33%] z-10" />
-      <TintenSpot spot="rose" className="absolute right-[8%] bottom-1/4 z-10" />
+    <div className="relative">
       <h2 id="case-study-heading" className="sr-only">
         {t("headline")}
       </h2>
-      <InkTransition triggerRef={triggerRef} />
       <StationContainer>
         <StationFrame spot="rose">
           <HookStation
