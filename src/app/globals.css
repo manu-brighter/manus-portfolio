@@ -347,4 +347,102 @@
       transform: none;
     }
   }
+
+  /* ------------------------------------------------------------
+   * About-rework primitives (Phase 11 polish-sprint)
+   * ------------------------------------------------------------ */
+
+  /* Per-block spot-color slot. Each AboutBlock sets `--block-spot`
+   * to one of `var(--color-spot-{rose,mint,amber,violet})`. The
+   * drop-cap, word-highlight, and stamp-divider all read this. */
+
+  .about-block {
+    --block-spot: var(--color-spot-rose);
+  }
+
+  /* Drop-Cap on the first paragraph's first letter inside an
+   * about-block's body-prose region. ~4x line-height, dropped 3
+   * lines tight, in the block's spot-color. The :first-letter
+   * pseudo applies on first inline content of the element. */
+
+  .about-block-body > p:first-of-type::first-letter {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 4.5em;
+    line-height: 0.85;
+    float: left;
+    margin: 0.05em 0.08em -0.15em 0;
+    color: var(--block-spot);
+  }
+
+  /* Word-highlight inside a pull-quote. The keyword span carries
+   * .pull-highlight + the parent block's --block-spot. */
+
+  .pull-highlight {
+    color: var(--block-spot);
+  }
+
+  /* Hover-misregistration: pseudo-element ghost layers around any
+   * inline element. Used by .misreg-hover wrapper around skill
+   * words. Pseudo-elements borrow the host's text content via
+   * `attr(data-text)`. Triggered by :hover and :focus-visible.
+   *
+   * Note: data-text attribute is required on the element for the
+   * pseudo-elements to render the same glyphs in offset position. */
+
+  .misreg-hover {
+    position: relative;
+    display: inline-block;
+  }
+
+  .misreg-hover::before,
+  .misreg-hover::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    mix-blend-mode: multiply;
+    transition:
+      opacity 150ms ease-out,
+      transform 150ms ease-out;
+  }
+
+  .misreg-hover::before {
+    color: var(--color-spot-mint);
+    transform: translate(0, 0);
+  }
+
+  .misreg-hover::after {
+    color: var(--color-spot-rose);
+    transform: translate(0, 0);
+  }
+
+  .misreg-hover:hover::before,
+  .misreg-hover:focus-visible::before {
+    opacity: 0.7;
+    transform: translate(-2px, -1px);
+  }
+
+  .misreg-hover:hover::after,
+  .misreg-hover:focus-visible:hover::after,
+  .misreg-hover:focus-visible::after {
+    opacity: 0.7;
+    transform: translate(2px, 1px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .misreg-hover::before,
+    .misreg-hover::after {
+      display: none;
+    }
+  }
+
+  /* Plate-corner marks — small `+` registration crosses at the four
+   * corners of a section/block. Container needs `position: relative`. */
+
+  .plate-corners {
+    position: relative;
+  }
 }
