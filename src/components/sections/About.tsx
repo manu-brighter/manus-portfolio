@@ -6,7 +6,6 @@ import { PlateCornerMarks } from "@/components/about/PlateCornerMarks";
 import { PullQuote } from "@/components/about/PullQuote";
 import { StampDivider } from "@/components/about/StampDivider";
 import { FadeIn } from "@/components/motion/FadeIn";
-import { AiPinselQuote } from "@/components/ui/AiPinselQuote";
 import { Portrait } from "@/components/ui/Portrait";
 
 /**
@@ -194,16 +193,15 @@ export function About() {
 
       <StampDivider />
 
-      {/* 04 AI-Workflow (loud-centered, wide container).
-          Closes with the embedded `<AiPinselQuote />` so the "AI is
-          like a brush" statement punctuates the workflow block in
-          the same logical context — instead of floating at the end
-          of About after Antrieb + Object-Grid where the reader has
-          already left the AI thread. */}
+      {/* 04 AI-Workflow (loud-centered, wide container). The
+          "AI ist wie ein Pinsel" closer was dropped (Phase 11
+          polish-rework) — the body-prose first paragraph already
+          says "Eine AI ist wie ein Pinsel: ein Werkzeug, das die
+          Kunst nicht alleine macht.", making the standalone quote
+          redundant. */}
       <AboutBlock id="ai-workflow" spot="amber" layout="loud-centered" wide>
         <PullQuote text={t("pullQuotes.aiWorkflow")} />
         <BodyProse paragraphs={bodyOf("ai-workflow")} />
-        <AiPinselQuote />
       </AboutBlock>
 
       <StampDivider />
