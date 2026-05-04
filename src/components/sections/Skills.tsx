@@ -69,21 +69,26 @@ export function Skills() {
       </header>
 
       {/* Hero-Skill: XXL feature block, Riso-stamped border. The
-          relative wrapper hosts the ambient `<HeroSkillPulse>` (C3)
-          which cycles through the 4 Riso spot-colors behind the text. */}
+          relative + isolate wrapper hosts the ambient `<HeroSkillPulse>`
+          (C3) which cycles through the 4 Riso spot-colors. `isolate`
+          establishes a stacking context so the halo (first DOM child)
+          paints behind subsequent siblings via document order, with
+          no negative z-index needed. */}
       <article
         aria-labelledby="skill-hero"
-        className="relative mb-20 border-ink border-t-2 border-b-2 py-10 md:mb-28 md:py-16"
+        className="relative mb-20 isolate border-ink border-t-2 border-b-2 py-10 md:mb-28 md:py-16"
       >
         <HeroSkillPulse />
-        <p className="mb-4 text-ink-muted type-label">{t("heroSkill.eyebrow")}</p>
+        <p className="relative mb-4 text-ink-muted type-label">{t("heroSkill.eyebrow")}</p>
         <h3
           id="skill-hero"
-          className="font-display italic text-ink text-[clamp(3rem,8vw,6rem)] leading-[0.95] tracking-[-0.03em]"
+          className="relative font-display italic text-ink text-[clamp(3rem,8vw,6rem)] leading-[0.95] tracking-[-0.03em]"
         >
           {t("heroSkill.name")}
         </h3>
-        <p className="type-body-lg mt-6 max-w-2xl text-ink-soft">{t("heroSkill.description")}</p>
+        <p className="relative type-body-lg mt-6 max-w-2xl text-ink-soft">
+          {t("heroSkill.description")}
+        </p>
       </article>
 
       {/* Secondary tiers — flow as a stack, each with its own mono label. */}

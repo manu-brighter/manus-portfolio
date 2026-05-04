@@ -372,10 +372,15 @@
 
   /* Drop-Cap on the first paragraph's first letter inside an
    * about-block's body-prose region. ~4x line-height, dropped 3
-   * lines tight. Outline-style: spot-color fill with a thin ink
-   * stroke for legibility against paper. `paint-order: stroke fill`
-   * draws stroke first so the fill sits cleanly inside without
-   * doubling line widths. */
+   * lines tight. Outline-style: spot-color fill + thin ink outline
+   * via 8-direction text-shadow.
+   *
+   * Implementation note: `-webkit-text-stroke` is NOT in the CSS
+   * spec's allowed property list for `::first-letter` (only the
+   * limited set: font-*, background-*, color, text-shadow, text-
+   * decoration, etc.). text-shadow IS allowed, and an 8-direction
+   * 2px shadow gives a clean ink outline that reads at 4.5em font
+   * size against the spot-color fill. */
 
   .about-block-body > p:first-of-type::first-letter {
     font-family: var(--font-display);
@@ -386,8 +391,15 @@
     float: left;
     margin: 0.05em 0.08em -0.15em 0;
     color: var(--block-spot);
-    -webkit-text-stroke: 1.5px var(--color-ink);
-    paint-order: stroke fill;
+    text-shadow:
+      2px 0 0 var(--color-ink),
+      -2px 0 0 var(--color-ink),
+      0 2px 0 var(--color-ink),
+      0 -2px 0 var(--color-ink),
+      1.5px 1.5px 0 var(--color-ink),
+      -1.5px -1.5px 0 var(--color-ink),
+      1.5px -1.5px 0 var(--color-ink),
+      -1.5px 1.5px 0 var(--color-ink);
   }
 
   /* Pull-quote primitive — editorial italic Instrument Serif sized

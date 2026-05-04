@@ -47,7 +47,7 @@ export function HeroSkillPulse() {
       halo.style.backgroundColor = COLORS[i % COLORS.length] ?? COLORS[0];
       i++;
       const tl = gsap.timeline({ onComplete: cycle });
-      tl.to(halo, { opacity: 0.4, duration: 1.4, ease: "sine.inOut" })
+      tl.to(halo, { opacity: 0.55, duration: 1.4, ease: "sine.inOut" })
         .to(halo, { opacity: 0, duration: 1.4, ease: "sine.inOut" })
         .to({}, { duration: 1.2 });
     };
@@ -61,18 +61,24 @@ export function HeroSkillPulse() {
 
   if (reducedMotion) return null;
 
+  // Inset 0 + behind-via-DOM-order: parent uses `relative isolate` so
+  // we form a stacking context and this halo (first DOM child) paints
+  // behind subsequent siblings naturally. Dropping mix-blend-mode +
+  // negative z-index (the previous version was invisible because the
+  // article wasn't a stacking context, sending the halo behind body
+  // paper) — direct opacity is more predictable and reads as a soft
+  // spot-color glow against the paper backdrop.
   return (
     <div
       ref={haloRef}
       aria-hidden="true"
-      className="pointer-events-none absolute -z-10"
+      className="pointer-events-none absolute"
       style={{
         top: "10%",
         left: "-10%",
         width: "120%",
         height: "80%",
-        filter: "blur(40px)",
-        mixBlendMode: "multiply",
+        filter: "blur(48px)",
         opacity: 0,
       }}
     />
