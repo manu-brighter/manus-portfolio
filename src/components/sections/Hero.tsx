@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import { FadeIn } from "@/components/motion/FadeIn";
 import { OverprintReveal } from "@/components/motion/OverprintReveal";
 
 /**
@@ -35,9 +36,12 @@ export function Hero() {
 
       <h1 id="hero-heading" className="type-display col-span-12 text-ink md:col-span-12">
         <OverprintReveal text={t("heading.family")} className="inline-block" waitForLoader />
-        <span aria-hidden="true" className="not-italic inline-block">
+        {/* Slash fades in alongside the reveal — mirroring delay 0.12s
+            puts it between the two halves so it reads as the bridge,
+            not pre-loaded furniture. */}
+        <FadeIn className="not-italic inline-block" delay={0.12} waitForLoader ariaHidden>
           &nbsp;/&nbsp;
-        </span>
+        </FadeIn>
         <OverprintReveal
           text={t("heading.given")}
           className="inline-block"

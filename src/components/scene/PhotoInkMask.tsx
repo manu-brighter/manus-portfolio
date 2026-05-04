@@ -217,6 +217,12 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
     // over it) so the read order matches the write order — earlier this
     // sat below `addEventListener` and worked only by closure-capture.
     let locked = false;
+    // Pre-reveal: cursor-driven ambient ink should still flow through
+    // the mask whenever the photo is visible (lets the user "preview"
+    // the photo through the cursor's wake before the centre-cross
+    // burst). Tracked via an IntersectionObserver below; ambient sim
+    // tick + pointer accept gate on this.
+    let inViewport = false;
 
     // Ambient splat queue (driven by global pointer-velocity)
     const ambientQueue: Splat[] = [];
@@ -246,10 +252,15 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
 
     // Pointer-velocity → ambient splats. Listens to the document so
     // the global cursor that drives the hero fluid also bleeds ink
-    // into the photo masks while the slot is in viewport. Threshold
-    // gates noise.
+    // into the photo masks while the slot is in viewport.
+    //
+    // Active whenever the photo is visible — pre-reveal the splats
+    // bleed transparency into the otherwise-opaque mask (cursor "peeks"
+    // at the photo through the ink wake), post-reveal they're already
+    // running into a near-transparent mask so they read as ambient
+    // residue. Stops at `locked = true`.
     const onPointer = (e: PointerEvent) => {
-      if (!revealRef.current || locked) return;
+      if (locked || !inViewport) return;
       const rect = canvas.getBoundingClientRect();
       if (
         e.clientX < rect.left ||
@@ -264,6 +275,21 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
       ambientQueue.push({ x, y, radius: 0.06, strength: 0.18 });
     };
     document.addEventListener("pointermove", onPointer, { passive: true });
+
+    // Viewport-visibility tracker. Threshold 0 fires on any single-pixel
+    // intersection — that's when ambient ink should start flowing. When
+    // the photo leaves the viewport we drop the queue so a long-distance
+    // cursor sweep doesn't dump a backlog the next time we scroll back.
+    const visIO = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          inViewport = entry.isIntersecting;
+          if (!entry.isIntersecting) ambientQueue.length = 0;
+        }
+      },
+      { threshold: 0 },
+    );
+    visIO.observe(canvas);
 
     const drawTo = (
       program: WebGLProgram,
@@ -341,8 +367,11 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
     const unsub = subscribe((deltaMs, elapsedMs) => {
       if (locked) return;
 
-      // Idle: no GPU work until the parent flips `reveal` true.
-      if (!revealRef.current && burstStart === null) return;
+      // Sim runs whenever the photo is visible (ambient cursor flow
+      // pre-reveal) OR the burst is in flight (reveal animation).
+      // Outside both branches the mask is just a static paper rectangle
+      // and we save GPU cycles.
+      if (!inViewport && burstStart === null) return;
 
       // First reveal-true frame: anchor the clock and fire one strong
       // centre splat — the "clean free splat in the middle" that the
@@ -353,20 +382,26 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
         lastReinjectAt = elapsedMs;
       }
 
-      // Reveal progress 0..1
+      // Reveal progress 0..1 (0 while we're in pre-reveal ambient).
       const t = burstStart === null ? 0 : elapsedMs - burstStart;
       const progress = Math.min(t / REVEAL_DURATION_MS, 1.0);
 
-      // Advect with current outward-velocity ramp
+      // Advect with current outward-velocity ramp. Outside the reveal
+      // burst the speed is 0 — the curl-noise term in the shader still
+      // swirls density gently, so cursor wakes drift instead of staying
+      // pinned in place.
       const dt = Math.min(deltaMs * 0.001, 0.033);
       runAdvect(dt, elapsedMs * 0.001, outwardSpeedAt(progress));
 
-      // Centre re-injection — radial advection drains the centre as
-      // density transports outward, so we drip small splats back in
-      // through the first ~85% of the reveal to keep d ≈ 1.0 there.
-      // After that the wavefront has reached the edges; further
-      // injection would just delay the final fade.
-      if (progress < 0.85 && elapsedMs - lastReinjectAt >= REINJECT_INTERVAL_MS) {
+      // Centre re-injection — only during the reveal burst window.
+      // Radial advection drains the centre as density transports
+      // outward; we drip small splats back in through the first ~85%
+      // of the reveal to keep d ≈ 1.0 there.
+      if (
+        burstStart !== null &&
+        progress < 0.85 &&
+        elapsedMs - lastReinjectAt >= REINJECT_INTERVAL_MS
+      ) {
         runSplat({ x: 0.5, y: 0.5, radius: 0.12, strength: 0.18 });
         lastReinjectAt = elapsedMs;
       }
@@ -388,7 +423,7 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
       // Reveal complete: snap to opacity 0 (the mask shader output is
       // already ~98% transparent everywhere by this point — the snap
       // is imperceptible and guards against compositor edge-cases).
-      if (progress >= 1.0) {
+      if (burstStart !== null && progress >= 1.0) {
         locked = true;
         canvas.style.opacity = "0";
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -397,8 +432,9 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
         // Detach the document pointermove listener now that we're done
         // — fast cursor sweeps after multiple photo reveals would
         // otherwise pay 5+ getBoundingClientRect()s per pointermove
-        // for the rest of the session.
+        // for the rest of the session. Same reason for the IO.
         document.removeEventListener("pointermove", onPointer);
+        visIO.disconnect();
         ambientQueue.length = 0;
         unsub();
       }
@@ -407,6 +443,7 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
     return () => {
       unsub();
       ro.disconnect();
+      visIO.disconnect();
       document.removeEventListener("pointermove", onPointer);
       gl.deleteProgram(advectProg);
       gl.deleteProgram(splatProg);
