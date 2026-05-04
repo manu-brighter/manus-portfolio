@@ -86,6 +86,40 @@ const TASKS = [
     jpgFallbackWidth: 1200,
     quality: { avif: 42, webp: 70 },
   },
+  // — Phase 12 · Work-Section Portfolio + Case Study Joggediballa screenshots —
+  {
+    group: "portfolio",
+    source: "public/projects/portfolio/source/homepage-landscape.png",
+    outDir: "public/projects/portfolio",
+    outName: "homepage",
+    widths: [480, 800, 1200],
+    codecs: ["avif", "webp"],
+    jpgFallbackWidth: 800,
+    resize: { width: 2400, height: 1350, fit: "cover" },
+  },
+  // Joggediballa landscape screenshots — all 16:9
+  ...["admin-lightmode-landscape", "goennerverwaltung-lightmode-landscape", "homepage-lightmode-landscape", "statistics-lightmode-landscape", "twitchoverlay-lightmode-landscape"].map((slug) => ({
+    group: "joggediballa",
+    source: `public/projects/joggediballa/source/${slug}.png`,
+    outDir: "public/projects/joggediballa",
+    outName: slug.replace("-lightmode-landscape", ""),
+    widths: [480, 800, 1200],
+    codecs: ["avif", "webp"],
+    jpgFallbackWidth: 800,
+    resize: { width: 2400, height: 1350, fit: "cover" },
+  })),
+  // Joggediballa phone screenshots — 9:16 portrait
+  ...["formular-lightmode-phone", "homepage-lightmode-phone"].map((slug) => ({
+    group: "joggediballa",
+    source: `public/projects/joggediballa/source/${slug}.png`,
+    outDir: "public/projects/joggediballa",
+    outName: slug.replace("-lightmode-phone", "-phone"),
+    widths: [360, 540, 720],
+    codecs: ["avif", "webp"],
+    jpgFallbackWidth: 540,
+    resize: { width: 1440, height: 2560, fit: "cover" },
+    quality: { avif: 55, webp: 78 },
+  })),
 ];
 
 const groupFilter = process.argv[2];
@@ -109,11 +143,12 @@ for (const task of tasks) {
   const q = { ...QUALITY, ...(task.quality ?? {}) };
 
   for (const w of task.widths) {
-    const base = sharp(src).resize({
-      width: w,
-      withoutEnlargement: true,
-      ...(task.resize ?? {}),
-    });
+    let base = sharp(src);
+    if (task.resize) {
+      base = base.resize(task.resize);
+    }
+    base = base.resize({ width: w, withoutEnlargement: true });
+
     if (codecs.includes("avif")) {
       await base.clone().avif({ quality: q.avif }).toFile(`${outDir}/${task.outName}-${w}w.avif`);
     }
@@ -122,8 +157,12 @@ for (const task of tasks) {
     }
   }
 
-  await sharp(src)
-    .resize({ width: fallbackW, withoutEnlargement: true, ...(task.resize ?? {}) })
+  let jpgBase = sharp(src);
+  if (task.resize) {
+    jpgBase = jpgBase.resize(task.resize);
+  }
+  await jpgBase
+    .resize({ width: fallbackW, withoutEnlargement: true })
     .jpeg({ quality: q.jpg })
     .toFile(`${outDir}/${task.outName}-${fallbackW}w.jpg`);
 
