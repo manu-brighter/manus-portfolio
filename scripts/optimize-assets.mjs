@@ -98,7 +98,13 @@ const TASKS = [
     resize: { width: 2400, height: 1350, fit: "cover" },
   },
   // Joggediballa landscape screenshots — all 16:9
-  ...["admin-lightmode-landscape", "goennerverwaltung-lightmode-landscape", "homepage-lightmode-landscape", "statistics-lightmode-landscape", "twitchoverlay-lightmode-landscape"].map((slug) => ({
+  ...[
+    "admin-lightmode-landscape",
+    "goennerverwaltung-lightmode-landscape",
+    "homepage-lightmode-landscape",
+    "statistics-lightmode-landscape",
+    "twitchoverlay-lightmode-landscape",
+  ].map((slug) => ({
     group: "joggediballa",
     source: `public/projects/joggediballa/source/${slug}.png`,
     outDir: "public/projects/joggediballa",
