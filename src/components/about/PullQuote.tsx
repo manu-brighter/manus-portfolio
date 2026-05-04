@@ -18,7 +18,9 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
  */
 
 type PullQuoteProps = {
-  /** Quote text with `{keyword}` markers around the highlighted span. */
+  /** Quote text with `[[keyword]]` markers around the highlighted span.
+   * `[[` / `]]` is used instead of `{...}` because next-intl interprets
+   * curly braces as ICU MessageFormat placeholders. */
   text: string;
   /** Threshold for the IO that triggers OverprintReveal + underline. */
   threshold?: number;
@@ -26,11 +28,11 @@ type PullQuoteProps = {
 
 const UNDERLINE_THRESHOLD_DEFAULT = 0.35;
 
-/** Parse `text` into segments. Tokens wrapped in `{...}` become highlight,
+/** Parse `text` into segments. Tokens wrapped in `[[...]]` become highlight,
  * everything else stays plain. Multiple highlight spans are supported but
  * only the first one gets the SVG underline (B9 spec). */
 function parseHighlight(text: string): { plain: string; highlight: string; tail: string } {
-  const match = text.match(/^([\s\S]*?)\{([^}]+)\}([\s\S]*)$/);
+  const match = text.match(/^([\s\S]*?)\[\[([\s\S]+?)\]\]([\s\S]*)$/);
   if (!match) return { plain: text, highlight: "", tail: "" };
   return { plain: match[1] ?? "", highlight: match[2] ?? "", tail: match[3] ?? "" };
 }
@@ -83,11 +85,7 @@ export function PullQuote({ text, threshold = UNDERLINE_THRESHOLD_DEFAULT }: Pul
   }, [reducedMotion, threshold]);
 
   return (
-    <blockquote
-      ref={containerRef}
-      className="type-display relative not-italic"
-      style={{ textAlign: "left" }}
-    >
+    <blockquote ref={containerRef} className="pull-quote relative">
       <OverprintReveal text={plain} className="inline" />
       {hasHighlight ? (
         <span className="relative inline-block">

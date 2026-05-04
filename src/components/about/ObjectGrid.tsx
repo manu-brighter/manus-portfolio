@@ -71,7 +71,7 @@ export function ObjectGrid() {
     <section
       id="about-objects"
       aria-labelledby="about-objects-heading"
-      className="plate-corners relative container-page my-20 md:my-28"
+      className="plate-corners relative container-page-wide my-20 md:my-28"
     >
       <PlateCornerMarks />
       <header className="mb-10 md:mb-14">

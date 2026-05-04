@@ -43,10 +43,21 @@ type AboutBlockProps = {
   spot: Spot;
   layout: AboutBlockLayout;
   marginalia?: ReactNode;
+  /** Use the wider 110rem container instead of the 96rem default.
+   * Set on loud-centered blocks (and equivalents) that should breathe
+   * on ultrawide displays. */
+  wide?: boolean;
   children: ReactNode;
 };
 
-export function AboutBlock({ id, spot, layout, marginalia, children }: AboutBlockProps) {
+export function AboutBlock({
+  id,
+  spot,
+  layout,
+  marginalia,
+  wide = false,
+  children,
+}: AboutBlockProps) {
   const cssVars = {
     "--block-spot": SPOT_VAR[spot],
   } as CSSProperties;
@@ -83,10 +94,12 @@ export function AboutBlock({ id, spot, layout, marginalia, children }: AboutBloc
               contentOrder: "",
             };
 
+  const containerClass = wide ? "container-page-wide" : "container-page";
+
   return (
     <article
       id={`about-${id}`}
-      className="about-block plate-corners relative grid-12 container-page my-16 gap-y-6 md:my-24"
+      className={`about-block plate-corners relative grid-12 ${containerClass} my-16 gap-y-6 md:my-24`}
       style={cssVars}
     >
       <PlateCornerMarks />

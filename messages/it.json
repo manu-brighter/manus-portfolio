@@ -110,13 +110,20 @@
     ],
     "portrait": {
       "alt": "Portraitfoto von Manuel Heller",
-      "caption": "Basel-Region · MMXXVI"
+      "caption": "Basel-Region · MMXXVI",
+      "plate": "Plate Nº 03",
+      "label": "Selbstporträt",
+      "stamps": [
+        { "label": "Location", "value": "Basel-Region" },
+        { "label": "Year", "value": "MMXXVI" },
+        { "label": "Signed", "value": "manu" }
+      ]
     },
     "pullQuotes": {
-      "werIchBin": "Die spannenden Sachen passieren genau {dazwischen}.",
-      "anfangen": "Ich will verstehen, {wie das alles unter der Haube} läuft.",
-      "aiWorkflow": "AI-generierte Websites sehen heute alle gleich aus, weil die meisten Leute der AI nur sagen was sie wollen, nicht {wie}.",
-      "antrieb": "Wer aufhört zu {lernen}, ist innerhalb von 12 Monaten abgehängt."
+      "werIchBin": "Die spannenden Sachen passieren genau [[dazwischen]].",
+      "anfangen": "Ich will verstehen, [[wie das alles unter der Haube]] läuft.",
+      "aiWorkflow": "AI-generierte Websites sehen heute alle gleich aus, weil die meisten Leute der AI nur sagen was sie wollen, nicht [[wie]].",
+      "antrieb": "Wer aufhört zu [[lernen]], ist innerhalb von 12 Monaten abgehängt."
     },
     "marginalia": {
       "werIchBin": {
@@ -144,7 +151,7 @@
     "objectGrid": {
       "sectionLabel": "Off the screen",
       "headline": "Wenn der Bildschirm aus ist.",
-      "currentlyBand": "Currently learning · React 19 · R3F 9 · WebGPU-Shader",
+      "currentlyBand": "Snapshot 2026 · Wildlife-Reise in Planung · Wintersaison · Paddle griffbereit",
       "tiles": {
         "camera": {
           "name": "Kamera",
@@ -155,7 +162,7 @@
           "caption": "driving · B8.5 · Tuning-Projekt"
         },
         "joggediballa": {
-          "name": "Joggediballa",
+          "name": "Jogge di Balla",
           "caption": "co-running · Verein · Vize-Präsident"
         },
         "schnee": {

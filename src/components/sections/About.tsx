@@ -1,20 +1,31 @@
 import { useTranslations } from "next-intl";
+import type { CSSProperties } from "react";
+import { AboutBlock } from "@/components/about/AboutBlock";
+import { ObjectGrid } from "@/components/about/ObjectGrid";
+import { PlateCornerMarks } from "@/components/about/PlateCornerMarks";
+import { PullQuote } from "@/components/about/PullQuote";
+import { StampDivider } from "@/components/about/StampDivider";
+import { FadeIn } from "@/components/motion/FadeIn";
+import { VibecodedStamp } from "@/components/skills/VibecodedStamp";
 import { AiPinselQuote } from "@/components/ui/AiPinselQuote";
 import { Portrait } from "@/components/ui/Portrait";
 
 /**
- * About — Section 01.
+ * About — Section 01 (Phase 11 visual rework).
  *
- * Briefing §2 content, DE source. Structure:
- *   1. Section header (mono stamp, headline, subhead)
- *   2. Two-column grid:
- *        left 7 cols — editorial long-read (5 parts)
- *        right 5 cols — Portrait + Currently block
- *   3. AiPinselQuote as section closer (briefing §2.3)
+ * Spine (see docs/superpowers/specs/2026-05-04-about-skills-visual-
+ * rework-design.md § 3):
  *
- * Translation deferred until later phase; EN/FR/IT message files
- * currently mirror DE content verbatim so next-intl renders something
- * in every locale. See CLAUDE.md Phase 6 deviations.
+ *   00 Header  → 01 Wer ich bin (rose)  → 02 Anfangen (mint)
+ *   → 03 Portrait  → 04 AI-Workflow (amber)  → 05 Antrieb (violet)
+ *   → 06 Object-Grid  → 07 AI-Pinsel-Closer
+ *
+ * Briefing § 2.2 prose stays verbatim — only structure + theatrics
+ * change. Pull-quotes are pulled FROM that prose, not new text.
+ *
+ * Currently-block (Briefing § 2.5) is dropped from About; the
+ * "Currently learning" residue lives as a sub-band under the
+ * Object-Grid header.
  */
 
 type AboutPart = {
@@ -23,28 +34,68 @@ type AboutPart = {
   body: string[];
 };
 
-type CurrentlyItem = {
-  verb: string;
-  value: string;
-};
+type StampMargItem = { label: string; year: string };
+
+type CurrentlyItem = { verb: string; value: string };
+
+/**
+ * BodyProse — wraps each paragraph in FadeIn (B2 in spec § 4) so the
+ * body-prose trickles in after the pull-quote lands. Stagger 120ms
+ * per paragraph, baseline delay 500ms, duration 1.1s (`dur.long`).
+ * Slow + buttery feel — paragraphs settle in well after the quote
+ * has finished its overprint reveal.
+ *
+ * Drop-cap (B4) is CSS via `.about-block-body > p:first-of-type::
+ * first-letter` and works through the FadeIn span because
+ * `:first-letter` styles the first formatted character inside the
+ * `<p>` regardless of intermediate inline elements.
+ */
+function BodyProse({ paragraphs }: { paragraphs: string[] }) {
+  return (
+    <div className="about-block-body mt-8 flex flex-col gap-4">
+      {paragraphs.map((p, i) => (
+        <p
+          key={`p-${
+            // biome-ignore lint/suspicious/noArrayIndexKey: paragraph order is stable
+            i
+          }`}
+          className="type-body text-ink"
+        >
+          <FadeIn delay={i * 0.12 + 0.5} duration={1.1}>
+            {p}
+          </FadeIn>
+        </p>
+      ))}
+    </div>
+  );
+}
 
 export function About() {
   const t = useTranslations("about");
+  // The vibecoded marker text lives in the `skills` namespace (single
+  // source for both Skills section + About loud-block stamp).
+  const tSkills = useTranslations("skills");
+  // Currently-list (5 verbs) is rendered next to the portrait as the
+  // editorial flank — refilled into the spine after originally being
+  // dropped in favour of the Object-Grid's "currently learning" band.
   const tCurrently = useTranslations("currently");
-
-  // next-intl exposes array/object message shapes via t.raw — safe here
-  // because the JSON shape is authored + reviewed in-repo, not
-  // user-supplied.
   const parts = t.raw("parts") as AboutPart[];
+  const partsById = Object.fromEntries(parts.map((p) => [p.id, p]));
   const currentlyItems = tCurrently.raw("items") as CurrentlyItem[];
+
+  // Helpers — body prose lookup (stays verbatim from briefing).
+  const bodyOf = (id: string) => partsById[id]?.body ?? [];
 
   return (
     <section
       id="about"
       aria-labelledby="about-heading"
-      className="container-page relative py-20 md:py-28"
+      className="plate-corners relative py-20 md:py-28"
     >
-      <header className="grid-12 mb-16 gap-y-4 md:mb-20">
+      <PlateCornerMarks />
+
+      {/* 00 Header */}
+      <header className="container-page grid-12 mb-12 gap-y-4 md:mb-20">
         <p className="col-span-12 text-ink-muted type-label md:col-span-4">{t("sectionLabel")}</p>
         <div className="col-span-12 md:col-span-8">
           <h2 id="about-heading" className="type-h1 text-ink">
@@ -54,49 +105,127 @@ export function About() {
         </div>
       </header>
 
-      <div className="grid-12 gap-y-12">
-        <div className="col-span-12 flex flex-col gap-10 md:col-span-7">
-          {parts.map((part) => (
-            <article key={part.id} aria-labelledby={`about-part-${part.id}`}>
-              <h3 id={`about-part-${part.id}`} className="type-label mb-3 text-ink-muted">
-                {part.heading}
-              </h3>
-              <div className="flex flex-col gap-4">
-                {part.body.map((paragraph, i) => (
-                  <p
-                    key={`${part.id}-p-${
-                      // biome-ignore lint/suspicious/noArrayIndexKey: paragraphs order is stable + content doesn't reorder
-                      i
-                    }`}
-                    className="type-body text-ink"
-                  >
-                    {paragraph}
-                  </p>
-                ))}
-              </div>
-            </article>
-          ))}
-        </div>
+      {/* 01 Wer ich bin */}
+      <AboutBlock
+        id="wer-ich-bin"
+        spot="rose"
+        layout="marg-left-content-right"
+        marginalia={
+          <div className="flex flex-col gap-2">
+            <span className="type-label-stamp">{t("marginalia.werIchBin.counter")}</span>
+            <span className="type-label text-ink-muted">{t("marginalia.werIchBin.label")}</span>
+            <span className="type-label text-ink-muted">{t("marginalia.werIchBin.year")}</span>
+          </div>
+        }
+      >
+        <PullQuote text={t("pullQuotes.werIchBin")} />
+        <BodyProse paragraphs={bodyOf("wer-ich-bin")} />
+      </AboutBlock>
 
-        <div className="col-span-12 flex flex-col gap-10 md:col-span-5 md:pl-8">
-          <Portrait alt={t("portrait.alt")} caption={t("portrait.caption")} />
+      <StampDivider />
 
-          <div className="border-ink border-t-2 pt-6">
-            <p className="mb-4 type-label text-ink">{tCurrently("label")}</p>
+      {/* 02 Anfangen */}
+      <AboutBlock
+        id="wie-angefangen"
+        spot="mint"
+        layout="content-left-marg-right"
+        marginalia={
+          <div className="flex flex-col gap-3">
+            <span className="type-label-stamp">{t("marginalia.anfangen.counter")}</span>
+            {(t.raw("marginalia.anfangen.stamps") as StampMargItem[]).map((s) => (
+              <span key={s.label} className="type-label-stamp">
+                {s.label} · {s.year}
+              </span>
+            ))}
+          </div>
+        }
+      >
+        <PullQuote text={t("pullQuotes.anfangen")} />
+        <BodyProse paragraphs={bodyOf("wie-angefangen")} />
+      </AboutBlock>
+
+      <StampDivider />
+
+      {/* 03 Portrait-Anchor — editorial composition: portrait left,
+          editorial-flank right (plate-stamp -> asterism -> label ->
+          Currently 5-item dl -> asterism -> signature). On mobile the
+          flank falls below the portrait. The Currently block (Briefing
+          §2.5) is reattached here as the data-rich flank — replaces
+          the empty single-portrait block. */}
+      <section
+        id="about-portrait"
+        aria-labelledby="about-portrait-heading"
+        className="about-block plate-corners container-page-wide relative my-16 md:my-24"
+        style={{ "--block-spot": "var(--color-spot-rose)" } as CSSProperties}
+      >
+        <PlateCornerMarks />
+        <div className="grid-12 gap-y-8">
+          <div className="col-span-12 md:col-span-5 md:col-start-2">
+            <Portrait alt={t("portrait.alt")} caption={t("portrait.caption")} />
+          </div>
+          <div className="col-span-12 flex flex-col gap-6 md:col-span-4 md:col-start-8 md:pt-6">
+            <span className="type-label-stamp self-start">{t("portrait.plate")}</span>
+            <div aria-hidden="true" className="flex items-center gap-2 text-ink-muted">
+              <span className="size-1 rounded-full bg-current" />
+              <span className="text-base" style={{ color: "var(--block-spot)" }}>
+                ✱
+              </span>
+              <span className="size-1 rounded-full bg-current" />
+            </div>
+            <h3 id="about-portrait-heading" className="type-h3 italic text-ink">
+              {tCurrently("label")}
+            </h3>
             <dl className="flex flex-col gap-2">
               {currentlyItems.map((item) => (
                 <div key={item.verb} className="flex items-baseline gap-3 font-mono text-sm">
-                  <dt className="w-28 shrink-0 text-ink-muted uppercase tracking-[0.18em] text-xs">
+                  <dt className="w-24 shrink-0 text-ink-muted uppercase tracking-[0.18em] text-xs">
                     {item.verb}
                   </dt>
                   <dd className="text-ink">{item.value}</dd>
                 </div>
               ))}
             </dl>
+            <div aria-hidden="true" className="flex items-center gap-2 text-ink-muted">
+              <span className="size-1 rounded-full bg-current" />
+              <span className="text-base" style={{ color: "var(--block-spot)" }}>
+                ✱
+              </span>
+              <span className="size-1 rounded-full bg-current" />
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
+      <StampDivider />
+
+      {/* 04 AI-Workflow (loud-centered, wide container) — B7:
+          VibecodedStamp as eyepoint above the pull-quote, animates
+          in on viewport-entry via the stamp's own IO. Wide container
+          so the loud block breathes on ultrawide displays. */}
+      <AboutBlock id="ai-workflow" spot="amber" layout="loud-centered" wide>
+        <div className="mb-4 flex justify-end">
+          <VibecodedStamp>{tSkills("vibecodedMarker")}</VibecodedStamp>
+        </div>
+        <PullQuote text={t("pullQuotes.aiWorkflow")} />
+        <BodyProse paragraphs={bodyOf("ai-workflow")} />
+      </AboutBlock>
+
+      <StampDivider />
+
+      {/* 05 Antrieb (short-centered) */}
+      <AboutBlock id="antrieb" spot="violet" layout="short-centered">
+        <PullQuote text={t("pullQuotes.antrieb")} />
+        <BodyProse paragraphs={bodyOf("antrieb")} />
+      </AboutBlock>
+
+      <StampDivider />
+
+      {/* 06 Object-Grid (replaces part 5 + Currently) */}
+      <ObjectGrid />
+
+      <StampDivider />
+
+      {/* 07 AI-Pinsel-Closer */}
       <AiPinselQuote />
     </section>
   );
