@@ -105,8 +105,14 @@ export function StationContainer({ children }: Props) {
       aria-labelledby="case-study-heading"
       className="relative h-screen overflow-hidden"
     >
-      <div ref={trackRef} className="flex h-full" style={{ width: "max-content" }}>
+      <div ref={trackRef} className="flex h-full items-center" style={{ width: "max-content" }}>
+        {/* Leading spacer — centers the first station (32vw hook) in the
+            viewport when track-x = 0. (100vw - 32vw)/2 = 34vw. */}
+        <div aria-hidden="true" className="shrink-0" style={{ width: "34vw" }} />
         {children}
+        {/* Trailing spacer — centers the last station (58vw public) when
+            track-x = -distance. (100vw - 58vw)/2 = 21vw. */}
+        <div aria-hidden="true" className="shrink-0" style={{ width: "21vw" }} />
       </div>
     </section>
   );

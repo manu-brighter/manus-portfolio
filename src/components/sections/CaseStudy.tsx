@@ -1,6 +1,10 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { CoffeeRing } from "@/components/case-study/cliparts/CoffeeRing";
+import { Lupe } from "@/components/case-study/cliparts/Lupe";
+import { TintenSpot } from "@/components/case-study/cliparts/TintenSpot";
+import { InkSplat } from "@/components/case-study/InkSplat";
 import { StationContainer } from "@/components/case-study/StationContainer";
 import { StationFrame } from "@/components/case-study/StationFrame";
 import { HighlightStation } from "@/components/case-study/stations/HighlightStation";
@@ -8,6 +12,7 @@ import { HookStation } from "@/components/case-study/stations/HookStation";
 import { PublicStation } from "@/components/case-study/stations/PublicStation";
 import { StackStation } from "@/components/case-study/stations/StackStation";
 import { WhatStation } from "@/components/case-study/stations/WhatStation";
+import { TrackDecor } from "@/components/case-study/TrackDecor";
 
 /**
  * Per-station layout (Phase-12 rework iteration 3). Tightened widths so
@@ -92,6 +97,11 @@ export function CaseStudy() {
             polaroidCaption={hookStation.polaroidCaption ?? ""}
           />
         </StationFrame>
+        {/* Decor between Hook and What — rose ink splat + tinten-spot pulse */}
+        <TrackDecor widthVw={6} offsetYVh={5}>
+          <InkSplat spot="rose" size={70} rotate={-18} opacity={0.6} />
+          <TintenSpot spot="amber" className="absolute right-0 top-1/3" />
+        </TrackDecor>
         <StationFrame
           spot="amber"
           widthVw={STATION_LAYOUT.what.widthVw}
@@ -100,6 +110,17 @@ export function CaseStudy() {
         >
           <WhatStation label={t("context.label")} facts={facts} storyParas={storyParas} />
         </StationFrame>
+        {/* Decor between What and Stack — coffee ring + small ink splat */}
+        <TrackDecor widthVw={5} offsetYVh={-8}>
+          <CoffeeRing className="absolute" />
+          <InkSplat
+            spot="mint"
+            size={48}
+            rotate={32}
+            opacity={0.5}
+            className="absolute -bottom-4"
+          />
+        </TrackDecor>
         <StationFrame
           spot="mint"
           widthVw={STATION_LAYOUT.stack.widthVw}
@@ -114,6 +135,17 @@ export function CaseStudy() {
             stack={stack}
           />
         </StationFrame>
+        {/* Decor between Stack and Admin highlight — bigger ink splat cluster */}
+        <TrackDecor widthVw={7} offsetYVh={6}>
+          <InkSplat spot="ink" size={80} rotate={-22} opacity={0.45} />
+          <InkSplat
+            spot="rose"
+            size={36}
+            rotate={50}
+            opacity={0.55}
+            className="absolute top-1/4 left-1/4"
+          />
+        </TrackDecor>
         {adminHighlight ? (
           <StationFrame
             spot="rose"
@@ -121,20 +153,36 @@ export function CaseStudy() {
             offsetYVh={STATION_LAYOUT.admin.offsetYVh}
             rotate={STATION_LAYOUT.admin.rotate}
           >
-            <HighlightStation
-              kicker={adminHighlight.kicker}
-              title={adminHighlight.title}
-              lede={adminHighlight.lede}
-              features={adminHighlight.features}
-              screenshotSlug="admin"
-              screenshotAlt={adminHighlight.screenshotAlt}
-              datestamp={highlightAdmin.datestamp}
-              polaroidCaption={highlightAdmin.polaroidCaption ?? ""}
-              spot="rose"
-              rotate={2}
-            />
+            <div className="relative h-full w-full">
+              <HighlightStation
+                kicker={adminHighlight.kicker}
+                title={adminHighlight.title}
+                lede={adminHighlight.lede}
+                features={adminHighlight.features}
+                screenshotSlug="admin"
+                screenshotAlt={adminHighlight.screenshotAlt}
+                datestamp={highlightAdmin.datestamp}
+                polaroidCaption={highlightAdmin.polaroidCaption ?? ""}
+                spot="rose"
+                rotate={2}
+              />
+              {/* Lupe hovering over admin polaroid — bobs gently per existing
+                  GSAP animation in the Lupe component itself. */}
+              <Lupe className="pointer-events-none absolute top-[20%] left-[28%] z-20" />
+            </div>
           </StationFrame>
         ) : null}
+        {/* Decor between Admin and Overlay — small splats cluster */}
+        <TrackDecor widthVw={5} offsetYVh={-4}>
+          <InkSplat spot="amber" size={52} rotate={12} opacity={0.55} />
+          <InkSplat
+            spot="violet"
+            size={28}
+            rotate={-40}
+            opacity={0.6}
+            className="absolute bottom-1/4 right-1/4"
+          />
+        </TrackDecor>
         {overlayHighlight ? (
           <StationFrame
             spot="amber"
@@ -156,6 +204,11 @@ export function CaseStudy() {
             />
           </StationFrame>
         ) : null}
+        {/* Decor between Overlay and Public — ink splash + tinten-spot */}
+        <TrackDecor widthVw={6} offsetYVh={3}>
+          <InkSplat spot="violet" size={64} rotate={-15} opacity={0.5} />
+          <TintenSpot spot="mint" className="absolute -top-6 right-0" />
+        </TrackDecor>
         <StationFrame
           spot="violet"
           widthVw={STATION_LAYOUT.public.widthVw}
