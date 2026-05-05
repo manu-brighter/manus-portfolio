@@ -11,7 +11,7 @@ import { DioramaCards } from "@/components/case-study/DioramaCards";
 import { DioramaIllustration } from "@/components/case-study/DioramaIllustration";
 import { DioramaLupe } from "@/components/case-study/DioramaLupe";
 import { DioramaTrack } from "@/components/case-study/DioramaTrack";
-import { InkColumnFluidSim } from "@/components/case-study/InkColumnFluidSim";
+import { InkColumnSVG } from "@/components/case-study/InkColumnSVG";
 
 type Fact = { key: string; value: string };
 type StackRow = { tech: string; use: string; why?: string };
@@ -160,7 +160,7 @@ export function CaseStudy() {
         ) : null}
         <DioramaLupe />
       </DioramaTrack>
-      <InkColumnFluidSim />
+      <InkColumnSVG />
     </>
   );
 }
