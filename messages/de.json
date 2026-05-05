@@ -34,6 +34,10 @@
       "skills": "Skills",
       "casestudy": "Case Study",
       "photography": "Fotografie"
+    },
+    "mobileMenu": {
+      "open": "Menü öffnen",
+      "close": "Menü schliessen"
     }
   },
   "localeSwitcher": {

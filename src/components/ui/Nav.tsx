@@ -1,6 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
+import { NavMobileMenu } from "@/components/ui/NavMobileMenu";
 import { Link, usePathname } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { routing } from "@/i18n/routing";
@@ -58,7 +59,7 @@ export function Nav() {
         </Link>
 
         <div className="flex items-center gap-6 md:gap-10">
-          {/* Mobile hamburger: see Task 11 (Launch Pass plan). NAV_ITEMS_MOBILE is consumed there. */}
+          <NavMobileMenu items={NAV_ITEMS_MOBILE} />
           <ul className="hidden items-center gap-5 md:flex md:gap-7">
             {NAV_ITEMS_DESKTOP.map((item) => (
               <li key={item.href}>
