@@ -68,18 +68,18 @@ type Props = {
 type CardKey = "hook" | "what" | "stack" | "admin" | "overlay" | "public";
 
 const CARD_LAYOUT: Record<CardKey, CSSProperties> = {
-  hook: { left: "42vh", top: "26vh", width: "28vh", height: "44vh", transform: "rotate(-4deg)" },
-  what: { left: "85vh", top: "40vh", width: "44vh", height: "44vh", transform: "rotate(2deg)" },
-  stack: { left: "128vh", top: "28vh", width: "24vh", height: "28vh", transform: "rotate(-7deg)" },
-  admin: { left: "158vh", top: "30vh", width: "64vh", height: "60vh", transform: "rotate(3deg)" },
+  hook: { left: "42vh", top: "20vh", width: "28vh", height: "55vh", transform: "rotate(-4deg)" },
+  what: { left: "80vh", top: "18vh", width: "42vh", height: "26vh", transform: "rotate(2deg)" },
+  stack: { left: "80vh", top: "48vh", width: "42vh", height: "26vh", transform: "rotate(-1.5deg)" },
+  admin: { left: "130vh", top: "20vh", width: "88vh", height: "55vh", transform: "rotate(3deg)" },
   overlay: {
-    left: "228vh",
-    top: "18vh",
-    width: "64vh",
-    height: "60vh",
+    left: "222vh",
+    top: "20vh",
+    width: "88vh",
+    height: "55vh",
     transform: "rotate(-3deg)",
   },
-  public: { left: "308vh", top: "28vh", width: "110vh", height: "60vh", transform: "rotate(2deg)" },
+  public: { left: "314vh", top: "20vh", width: "100vh", height: "55vh", transform: "rotate(2deg)" },
 };
 
 export function DioramaCards(props: Props) {

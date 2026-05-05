@@ -39,17 +39,21 @@ export function PublicCard({
   return (
     <div className="flex h-full flex-col gap-3">
       <div className="flex flex-1 items-start gap-2">
-        {shots.map((s) => {
+        {shots.map((s, i) => {
           const widths = s.aspect === "9/16" ? [360, 540, 720] : [480, 800, 1200];
           const fallbackW = s.aspect === "9/16" ? 540 : 800;
           const renderHeight = s.aspect === "9/16" ? 960 : 450;
           const renderWidth = s.aspect === "9/16" ? 540 : 800;
+          // Diagonal stagger: first polaroid lower (avoids coffee mug above-left),
+          // second at top, third halfway down — creates a fan-out cascade.
+          const offsetTopVh = [10, 0, 5][i] ?? 0;
           return (
             <div
               key={s.slug}
               className="flex-shrink-0"
               style={{
-                width: s.aspect === "9/16" ? "20%" : "37%",
+                width: s.aspect === "9/16" ? "22%" : "39%",
+                marginTop: `${offsetTopVh}vh`,
                 transform: `rotate(${s.rotate}deg)`,
               }}
             >

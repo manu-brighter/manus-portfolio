@@ -10,10 +10,10 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
  * DioramaIllustration so it can sit on top of cards in z-order rather
  * than behind them.
  *
- * Position: tracked to the Admin card area in the diorama track. The
- * wrapper is absolute-positioned in vh units so it scrolls horizontally
- * with the rest of the track. Animation is a small horizontal wobble
- * (±1px) on a 1.5s sine loop, gated on prefers-reduced-motion.
+ * Position: anchored ABOVE the Admin card so the lens overlaps the
+ * upper portion of the polaroid from outside the card. Animation is a
+ * generous horizontal sweep (±10 viewBox units, ~±1.2vh) on a 4s sine
+ * loop, gated on prefers-reduced-motion.
  */
 export function DioramaLupe() {
   const reducedMotion = useReducedMotion();
@@ -25,10 +25,10 @@ export function DioramaLupe() {
     if (!g) return;
     const tween = gsap.fromTo(
       g,
-      { x: -1 },
+      { x: -10 },
       {
-        x: 1,
-        duration: 1.5,
+        x: 10,
+        duration: 4,
         ease: "sine.inOut",
         yoyo: true,
         repeat: -1,
@@ -43,7 +43,7 @@ export function DioramaLupe() {
     <div
       aria-hidden="true"
       className="pointer-events-none absolute z-20"
-      style={{ left: "183vh", top: "36vh", width: "14vh", height: "14vh" }}
+      style={{ left: "145vh", top: "14vh", width: "18vh", height: "18vh" }}
     >
       <svg
         aria-hidden="true"
@@ -52,10 +52,10 @@ export function DioramaLupe() {
         className="h-full w-full"
       >
         <g ref={groupRef} transform="rotate(-12 72 72)">
-          <circle cx={45} cy={45} r={55} fill="none" stroke="var(--color-ink)" strokeWidth={4} />
+          <circle cx={60} cy={60} r={55} fill="none" stroke="var(--color-ink)" strokeWidth={4} />
           <circle
-            cx={45}
-            cy={45}
+            cx={60}
+            cy={60}
             r={44}
             fill="var(--color-paper-tint)"
             opacity={0.4}
@@ -63,10 +63,10 @@ export function DioramaLupe() {
             strokeWidth={1}
           />
           <line
-            x1={91}
-            y1={91}
-            x2={140}
-            y2={140}
+            x1={100}
+            y1={100}
+            x2={138}
+            y2={138}
             stroke="var(--color-ink)"
             strokeWidth={6}
             strokeLinecap="round"

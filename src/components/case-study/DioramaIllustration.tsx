@@ -25,14 +25,14 @@ export function DioramaIllustration() {
     >
       {/* Comic-style table-edge outlines (top + bottom) */}
       <path
-        d="M 110 80 Q 600 65, 1200 90 Q 1800 70, 2400 95 Q 3000 75, 3600 95 L 4090 95"
+        d="M 110 50 Q 600 35, 1200 60 Q 1800 40, 2400 65 Q 3000 45, 3600 65 L 4090 65"
         stroke="var(--color-ink)"
         strokeWidth={3}
         fill="none"
         strokeLinecap="round"
       />
       <path
-        d="M 110 920 Q 700 935, 1300 920 Q 1900 940, 2500 925 Q 3100 935, 3700 920 L 4090 920"
+        d="M 110 860 Q 700 875, 1300 860 Q 1900 880, 2500 865 Q 3100 875, 3700 860 L 4090 860"
         stroke="var(--color-ink)"
         strokeWidth={3}
         fill="none"
