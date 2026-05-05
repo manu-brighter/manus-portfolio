@@ -34,7 +34,7 @@
 
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { compileShader } from "@/lib/gl/compileShader";
 import { subscribe } from "@/lib/raf";
@@ -108,10 +108,22 @@ function makeFBO(gl: WebGL2RenderingContext, w: number, h: number): FBO | null {
 export function InkColumnFluidSim() {
   const reducedMotion = useReducedMotion();
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    if (reducedMotion) return;
+    const mq = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
+    setIsMobile(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  useEffect(() => {
+    if (reducedMotion || isMobile) return;
     if (typeof window === "undefined") return;
+    // Defensive: belt-and-suspenders against a render where the matchMedia
+    // listener hasn't flipped isMobile yet. Same breakpoint as the state
+    // initializer above.
     if (window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`).matches) return;
 
     const canvas = canvasRef.current;
@@ -268,6 +280,9 @@ export function InkColumnFluidSim() {
       composite();
     }, 30);
 
+    // Range invalidation when DioramaTrack's pin lands is handled by its
+    // ScrollTrigger.refresh() call after pin-init — global refresh
+    // recomputes start/end on every trigger in the registry.
     const st = ScrollTrigger.create({
       trigger: "#case-study",
       start: "top bottom",
@@ -307,9 +322,9 @@ export function InkColumnFluidSim() {
       }
       // No loseContext() — see PhotoInkMask cleanup comment (StrictMode trap).
     };
-  }, [reducedMotion]);
+  }, [reducedMotion, isMobile]);
 
-  if (reducedMotion) return null;
+  if (reducedMotion || isMobile) return null;
 
   return (
     <canvas
