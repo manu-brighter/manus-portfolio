@@ -13,7 +13,7 @@ import { DioramaLupe } from "@/components/case-study/DioramaLupe";
 import { DioramaTrack } from "@/components/case-study/DioramaTrack";
 
 type Fact = { key: string; value: string };
-type StackRow = { tech: string; use: string; why?: string };
+type StackRow = { tech: string; use: string };
 type Feature = { title: string; body: string };
 type Highlight = {
   id: string;
@@ -24,7 +24,7 @@ type Highlight = {
   screenshotAlt: string;
   features: Feature[];
 };
-type StationDateCaption = { datestamp: string; polaroidCaption?: string };
+type DateCaption = { datestamp: string; polaroidCaption?: string };
 type PublicShotI18n = { datestamp: string; caption: string };
 
 const PUBLIC_SHOT_CONFIG: {
@@ -45,10 +45,10 @@ export function CaseStudy() {
   const storyParas = t.raw("context.story") as string[];
   const stack = t.raw("platform.stack") as StackRow[];
   const highlights = t.raw("highlights.items") as Highlight[];
-  const hookStation = t.raw("stations.hook") as StationDateCaption;
-  const stackStation = t.raw("stations.stack") as { heading: string; rule: string };
-  const highlightAdmin = t.raw("stations.highlightAdmin") as StationDateCaption;
-  const highlightOverlay = t.raw("stations.highlightOverlay") as StationDateCaption;
+  const hookStation = t.raw("stations.hook") as DateCaption;
+  const stackStation = t.raw("stations.stack") as { heading: string };
+  const highlightAdmin = t.raw("stations.highlightAdmin") as DateCaption;
+  const highlightOverlay = t.raw("stations.highlightOverlay") as DateCaption;
   const publicShotsI18n = t.raw("stations.publicShots") as PublicShotI18n[];
 
   const adminHighlight = highlights.find((h) => h.id === "admin");

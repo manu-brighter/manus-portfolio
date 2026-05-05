@@ -114,9 +114,18 @@
       "plate": "Plate Nº 03",
       "label": "Selbstporträt",
       "stamps": [
-        { "label": "Location", "value": "Basel-Region" },
-        { "label": "Year", "value": "MMXXVI" },
-        { "label": "Signed", "value": "manu" }
+        {
+          "label": "Location",
+          "value": "Basel-Region"
+        },
+        {
+          "label": "Year",
+          "value": "MMXXVI"
+        },
+        {
+          "label": "Signed",
+          "value": "manu"
+        }
       ]
     },
     "pullQuotes": {
@@ -134,9 +143,18 @@
       "anfangen": {
         "counter": "02 / 04",
         "stamps": [
-          { "label": "Minecraft", "year": "2014" },
-          { "label": "Novartis EFZ", "year": "2017–2021" },
-          { "label": "zvoove", "year": "2021—" }
+          {
+            "label": "Minecraft",
+            "year": "2014"
+          },
+          {
+            "label": "Novartis EFZ",
+            "year": "2017–2021"
+          },
+          {
+            "label": "zvoove",
+            "year": "2021—"
+          }
         ]
       },
       "aiWorkflow": {
@@ -183,11 +201,26 @@
   "currently": {
     "label": "Currently",
     "items": [
-      { "verb": "working on", "value": "diese Seite hier" },
-      { "verb": "learning", "value": "React 19 · R3F 9 · WebGPU-Shader" },
-      { "verb": "shooting", "value": "Wildlife in Costa Rica & Thailand" },
-      { "verb": "driving", "value": "Audi S5 B8.5 (Tuning-Projekt)" },
-      { "verb": "chasing", "value": "den zvoove Ping-Pong-Champion-Titel" }
+      {
+        "verb": "working on",
+        "value": "diese Seite hier"
+      },
+      {
+        "verb": "learning",
+        "value": "React 19 · R3F 9 · WebGPU-Shader"
+      },
+      {
+        "verb": "shooting",
+        "value": "Wildlife in Costa Rica & Thailand"
+      },
+      {
+        "verb": "driving",
+        "value": "Audi S5 B8.5 (Tuning-Projekt)"
+      },
+      {
+        "verb": "chasing",
+        "value": "den zvoove Ping-Pong-Champion-Titel"
+      }
     ]
   },
   "skills": {
@@ -206,10 +239,18 @@
         "label": "Daily Driver · Production",
         "weight": "xl",
         "items": [
-          { "name": "PHP" },
-          { "name": "Vue" },
-          { "name": "MariaDB · MySQL" },
-          { "name": "HTML · CSS · Webdesign-Eye" }
+          {
+            "name": "PHP"
+          },
+          {
+            "name": "Vue"
+          },
+          {
+            "name": "MariaDB · MySQL"
+          },
+          {
+            "name": "HTML · CSS · Webdesign-Eye"
+          }
         ]
       },
       {
@@ -217,13 +258,27 @@
         "label": "Production · Operations",
         "weight": "l",
         "items": [
-          { "name": "Cypress" },
-          { "name": "Docker" },
-          { "name": "GitLab" },
-          { "name": "Yii" },
-          { "name": "OpenAPI · Swagger" },
-          { "name": "nginx · Linux-Server-Admin" },
-          { "name": "Vite" }
+          {
+            "name": "Cypress"
+          },
+          {
+            "name": "Docker"
+          },
+          {
+            "name": "GitLab"
+          },
+          {
+            "name": "Yii"
+          },
+          {
+            "name": "OpenAPI · Swagger"
+          },
+          {
+            "name": "nginx · Linux-Server-Admin"
+          },
+          {
+            "name": "Vite"
+          }
         ]
       },
       {
@@ -232,16 +287,46 @@
         "description": "Was ich mit AI-Workflow baue, nicht spontan ohne.",
         "weight": "l",
         "items": [
-          { "name": "TypeScript", "vibecoded": true },
-          { "name": "React", "vibecoded": true },
-          { "name": "Next.js", "vibecoded": true },
-          { "name": "Tailwind CSS", "vibecoded": true },
-          { "name": "tRPC", "vibecoded": true },
-          { "name": "Drizzle ORM", "vibecoded": true },
-          { "name": "shadcn/ui", "vibecoded": true },
-          { "name": "GSAP", "vibecoded": true },
-          { "name": "Three.js · React Three Fiber", "vibecoded": true },
-          { "name": "Lenis", "vibecoded": true }
+          {
+            "name": "TypeScript",
+            "vibecoded": true
+          },
+          {
+            "name": "React",
+            "vibecoded": true
+          },
+          {
+            "name": "Next.js",
+            "vibecoded": true
+          },
+          {
+            "name": "Tailwind CSS",
+            "vibecoded": true
+          },
+          {
+            "name": "tRPC",
+            "vibecoded": true
+          },
+          {
+            "name": "Drizzle ORM",
+            "vibecoded": true
+          },
+          {
+            "name": "shadcn/ui",
+            "vibecoded": true
+          },
+          {
+            "name": "GSAP",
+            "vibecoded": true
+          },
+          {
+            "name": "Three.js · React Three Fiber",
+            "vibecoded": true
+          },
+          {
+            "name": "Lenis",
+            "vibecoded": true
+          }
         ]
       },
       {
@@ -250,14 +335,30 @@
         "description": "Kenne ich, nutze ich nicht täglich.",
         "weight": "m",
         "items": [
-          { "name": "Java" },
-          { "name": "Python" },
-          { "name": "PowerShell" },
-          { "name": "Bash" },
-          { "name": "Git" },
-          { "name": "Lightroom" },
-          { "name": "Photoshop" },
-          { "name": "DaVinci Resolve" }
+          {
+            "name": "Java"
+          },
+          {
+            "name": "Python"
+          },
+          {
+            "name": "PowerShell"
+          },
+          {
+            "name": "Bash"
+          },
+          {
+            "name": "Git"
+          },
+          {
+            "name": "Lightroom"
+          },
+          {
+            "name": "Photoshop"
+          },
+          {
+            "name": "DaVinci Resolve"
+          }
         ]
       },
       {
@@ -265,11 +366,21 @@
         "label": "Craft · Eye",
         "weight": "m",
         "items": [
-          { "name": "Fotografie" },
-          { "name": "Videoschnitt" },
-          { "name": "Grafikdesign" },
-          { "name": "Live Web Fluid Simulations" },
-          { "name": "Shader-Spielereien" }
+          {
+            "name": "Fotografie"
+          },
+          {
+            "name": "Videoschnitt"
+          },
+          {
+            "name": "Grafikdesign"
+          },
+          {
+            "name": "Live Web Fluid Simulations"
+          },
+          {
+            "name": "Shader-Spielereien"
+          }
         ]
       }
     ]
@@ -336,19 +447,31 @@
     ]
   },
   "caseStudy": {
-    "sectionLabel": "Section 04 · Case Study",
-    "eyebrow": "Deep-Dive · Joggediballa",
     "headline": "Vom Vereins-Chaos zur eigenen Plattform.",
-    "subhead": "Excel-Listen raus, tRPC rein. Eine massgeschneiderte Webapp für einen 9-Mitglieder-Verein, weil's ging.",
     "hook": "Vereine kämpfen alle mit demselben Mist: Excel-Listen, statische Websites, isolierte Tools. Für Jogge di Balla habe ich das aufgeräumt — eine massgeschneiderte Plattform, die von Mitgliederverwaltung bis Twitch-Overlay alles abdeckt. Vibecoded, selbst gehostet, übertrieben.",
     "context": {
       "label": "Was ist Jogge di Balla?",
       "facts": [
-        { "key": "Gegründet", "value": "05.08.2022 in Brislach" },
-        { "key": "Aktive Mitglieder", "value": "9" },
-        { "key": "Gönner verwaltet", "value": "68" },
-        { "key": "Events / Jahr", "value": "4–8" },
-        { "key": "Instagram-Reichweite", "value": "1067+ Follower · ~100k Views / 30 Tage" }
+        {
+          "key": "Gegründet",
+          "value": "05.08.2022 in Brislach"
+        },
+        {
+          "key": "Aktive Mitglieder",
+          "value": "9"
+        },
+        {
+          "key": "Gönner verwaltet",
+          "value": "68"
+        },
+        {
+          "key": "Events / Jahr",
+          "value": "4–8"
+        },
+        {
+          "key": "Instagram-Reichweite",
+          "value": "1067+ Follower · ~100k Views / 30 Tage"
+        }
       ],
       "story": [
         "Idee zur Coronazeit: drei Freunde, nichts ging, also haben wir ausgefallene Events organisiert. Schlag den Kassier (an «Schlag den Raab» angelehnt, jeder kann sich gegen unseren Vereinskassier bewerben). Silvester 2.0 (im Frühling, für alle, die scheisse ins neue Jahr gestartet sind). Apres Ski Party (gab's so in der Region noch nicht).",
@@ -356,39 +479,30 @@
       ]
     },
     "platform": {
-      "label": "Die Plattform",
-      "intro": "Stark typisierter Stack, End-to-End TypeScript, von der DB bis ins UI. Selbst gehostet auf einem Linux-Root-Server.",
       "stack": [
         {
           "tech": "React 19 · Vite",
-          "use": "Frontend & Build",
-          "why": "Reaktiv, schnell, top DX."
+          "use": "Frontend & Build"
         },
         {
           "tech": "TypeScript",
-          "use": "Sprache (Fullstack)",
-          "why": "End-to-End-Typensicherheit, Bugs sterben vor dem Commit."
+          "use": "Sprache (Fullstack)"
         },
         {
           "tech": "tRPC",
-          "use": "API-Layer",
-          "why": "Frontend ↔ Backend ohne Schema-Doppelarbeit."
+          "use": "API-Layer"
         },
         {
           "tech": "Drizzle ORM · MySQL",
-          "use": "Datenbank",
-          "why": "Leichtgewichtig, schnell, volle TS-Inferenz auf SQL-Queries."
+          "use": "Datenbank"
         },
         {
           "tech": "Tailwind · shadcn/ui",
-          "use": "Styling & Komponenten",
-          "why": "Konsistent, accessible, ohne Custom-Design-System-Aufbau."
+          "use": "Styling & Komponenten"
         }
-      ],
-      "modules": "Module: Mitglieder- + Anwesenheitsverwaltung · Gönnerverwaltung · Event-Management mit Smart-Thumbnail-Logic · Finanzen · Live-Twitch-Overlay-Tooling · Harassenlauf-Anmeldung."
+      ]
     },
     "highlights": {
-      "label": "Highlights",
       "items": [
         {
           "id": "admin",
@@ -437,34 +551,7 @@
       ]
     },
     "publicLayer": {
-      "label": "Öffentliche Schicht",
-      "screenshots": [
-        {
-          "slug": "home",
-          "alt": "Öffentliche Startseite von joggediballa.ch",
-          "caption": "Startseite — alle Inhalte aus dem Dashboard befüllbar"
-        },
-        {
-          "slug": "events",
-          "alt": "Events-Übersicht mit dynamischen Event-Cards",
-          "caption": "Events — inkl. Smart-Thumbnail-Logic für Hochkant-Flyer"
-        },
-        {
-          "slug": "team",
-          "alt": "Team-Seite mit Mitgliederprofilen",
-          "caption": "Team — Profile direkt aus dem Mitglieder-Modul"
-        },
-        {
-          "slug": "shotcounter",
-          "alt": "Shotcounter-Public-Seite",
-          "caption": "Shotcounter — laufender Vereins-Gag mit Live-Daten"
-        },
-        {
-          "slug": "statistic",
-          "alt": "Anwesenheitsstatistik mit Balkendiagrammen",
-          "caption": "Anwesenheits-Statistik — visuell aufbereitet aus dem Anwesenheitssystem"
-        }
-      ]
+      "label": "Öffentliche Schicht"
     },
     "reflection": {
       "label": "Was ich heute anders machen würde",
@@ -481,13 +568,8 @@
         "datestamp": "2022.05",
         "polaroidCaption": "Joggediballa · Mobile · Live"
       },
-      "what": {
-        "datestamp": "2022 →",
-        "polaroidCaption": "Verein · gegründet 2022"
-      },
       "stack": {
-        "heading": "Stack-Notiz",
-        "rule": "Was ich nehme, warum"
+        "heading": "Stack-Notiz"
       },
       "highlightAdmin": {
         "datestamp": "Admin · v3",
@@ -498,9 +580,18 @@
         "polaroidCaption": "Schlag-den-Kassier · Live-Stream"
       },
       "publicShots": [
-        { "datestamp": "Stats", "caption": "Statistik · Mitglieder & Saisons" },
-        { "datestamp": "Members", "caption": "Gönnerverwaltung · CRM-Light" },
-        { "datestamp": "Form", "caption": "Anmeldeformular · Mobile" }
+        {
+          "datestamp": "Stats",
+          "caption": "Statistik · Mitglieder & Saisons"
+        },
+        {
+          "datestamp": "Members",
+          "caption": "Gönnerverwaltung · CRM-Light"
+        },
+        {
+          "datestamp": "Form",
+          "caption": "Anmeldeformular · Mobile"
+        }
       ]
     }
   },

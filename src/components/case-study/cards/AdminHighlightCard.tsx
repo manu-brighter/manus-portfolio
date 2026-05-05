@@ -13,9 +13,8 @@ type Props = {
 };
 
 /**
- * AdminHighlightCard — Card 4 of the Diorama. 16:9 polaroid (admin-
- * dashboard screenshot) + features list. Sized 500×350. Lupe drawn
- * over this card by DioramaIllustration.
+ * AdminHighlightCard — Card 4 of the diorama. Polaroid above features
+ * list. The Lupe overlay is drawn separately by DioramaLupe.
  */
 export function AdminHighlightCard({
   kicker,

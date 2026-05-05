@@ -13,9 +13,8 @@ type Props = {
 };
 
 /**
- * OverlayHighlightCard — Card 5 of the Diorama. Same shape as
- * AdminHighlightCard but for the twitchoverlay screenshot, amber spot.
- * Sized 500×340.
+ * OverlayHighlightCard — Card 5 of the diorama. Same shape as
+ * AdminHighlightCard but for the twitch-overlay screenshot, amber spot.
  */
 export function OverlayHighlightCard({
   kicker,

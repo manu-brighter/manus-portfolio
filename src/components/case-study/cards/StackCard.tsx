@@ -1,6 +1,6 @@
 import { StackNotebook } from "@/components/case-study/StackNotebook";
 
-type StackRow = { tech: string; use: string; why?: string };
+type StackRow = { tech: string; use: string };
 
 type Props = {
   heading: string;

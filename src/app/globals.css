@@ -494,15 +494,4 @@
   .plate-corners {
     position: relative;
   }
-
-  /* Case Study — ink-spot pulse for the TintenSpot clipart. */
-  @keyframes ink-spot-pulse {
-    0%,
-    100% {
-      opacity: 0.6;
-    }
-    50% {
-      opacity: 0.9;
-    }
-  }
 }

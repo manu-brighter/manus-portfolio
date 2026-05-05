@@ -7,9 +7,9 @@ import { StackCard } from "@/components/case-study/cards/StackCard";
 import { WhatCard } from "@/components/case-study/cards/WhatCard";
 
 type Fact = { key: string; value: string };
-type StackRow = { tech: string; use: string; why?: string };
+type StackRow = { tech: string; use: string };
 type Feature = { title: string; body: string };
-type StationDateCaption = { datestamp: string; polaroidCaption?: string };
+type DateCaption = { datestamp: string; polaroidCaption?: string };
 
 type PublicShot = {
   slug: string;
@@ -23,7 +23,7 @@ type PublicShot = {
 
 type Props = {
   hookText: string;
-  hookStation: StationDateCaption;
+  hookStation: DateCaption;
   storyParas: string[];
   whatLabel: string;
   facts: Fact[];
@@ -34,13 +34,13 @@ type Props = {
   adminLede: string;
   adminFeatures: Feature[];
   adminScreenshotAlt: string;
-  adminStation: StationDateCaption;
+  adminStation: DateCaption;
   overlayKicker: string;
   overlayTitle: string;
   overlayLede: string;
   overlayFeatures: Feature[];
   overlayScreenshotAlt: string;
-  overlayStation: StationDateCaption;
+  overlayStation: DateCaption;
   publicShots: PublicShot[];
   reflectionLabel: string;
   reflectionBody: string;
@@ -56,13 +56,7 @@ type Props = {
  * Coordinates in vh units (top, left, width, height) so the layout
  * scales consistently across normal and ultrawide displays. The track
  * is 420vh wide; each card's left/top is defined relative to that.
- *
- * Layout (2026-05-05, post-text-mapping fix):
- *   - Hook 60×54 (polaroid + hookText pull-quote side-by-side)
- *   - WhatCard 44×52 (label + dl + storyParas; tall to fit prose)
- *   - StackCard 44×18 long+flat note positioned BELOW WhatCard
- *   - Admin/Overlay 72×64 (taller for text overflow fix)
- *   - Admin top 18; Overlay top 14
+ * `CARD_LAYOUT` is the source of truth for per-card position and size.
  */
 
 type CardKey = "hook" | "what" | "stack" | "admin" | "overlay" | "public";

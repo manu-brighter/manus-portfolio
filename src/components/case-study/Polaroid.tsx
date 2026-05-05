@@ -5,7 +5,7 @@ import { PlateCornerMarks } from "@/components/about/PlateCornerMarks";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 /**
- * Polaroid — editorial photo-frame primitive used by Case Study stations 1, 2, 4, 5, 6.
+ * Polaroid — editorial photo-frame primitive used by the Case Study cards.
  *
  * Layers: paper-tint frame with 2px ink border, slight rotation (±3°), spot-color
  * offset shadow, optional caption strip below the photo, optional plate-corner-marks

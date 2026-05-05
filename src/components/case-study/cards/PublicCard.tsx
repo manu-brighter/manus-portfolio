@@ -21,11 +21,9 @@ type Props = {
 };
 
 /**
- * PublicCard — Card 6 of the Diorama. 3 sub-polaroids (Stats /
- * Members / Form-Phone) + reflection + live link. The 3 polaroids are
- * positioned absolutely WITHIN the card by the parent DioramaCards
- * (each polaroid has its own offset). This component renders them as
- * a horizontal row plus the reflection + link.
+ * PublicCard — Card 6 of the diorama. 3 polaroids in a flex row with
+ * diagonal-stagger marginTop offsets, plus reflection block and footer
+ * link below.
  */
 export function PublicCard({
   shots,

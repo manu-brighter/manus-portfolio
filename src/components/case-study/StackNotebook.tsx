@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 /**
- * StackNotebook — handwritten notebook page primitive for Station 3 (Tech Stack).
+ * StackNotebook — handwritten notebook page primitive used by StackCard.
  *
  * Visual: paper-tint background with subtle ruled lines (SVG pattern), slight rotation,
  * page-curl corner (CSS clip-path), spot-color note-corner.
