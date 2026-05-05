@@ -3,9 +3,11 @@
 // Section-scoped dedicated WebGL2 fluid sim for the case-study diorama.
 //
 // Renders dark-ink "columns" at the left + right viewport edges via
-// continuous edge-splat injection. The mask shader composites dark ink
-// (INK_RGB) on transparent so only the column densities are visible —
-// the rest of the page shows through.
+// continuous edge-splat injection. Uses a dedicated column-mask shader
+// (case-study-ink/column-mask.frag) that draws dark ink (INK_RGB) with
+// alpha proportional to density — the inverse of ink-mask/mask.frag's
+// paper-reveal contract. Result: dark ink visible only where the
+// columns are, transparent elsewhere; the rest of the page shows through.
 //
 // Architectural sibling of `src/components/scene/PhotoInkMask.tsx`:
 // same FBO ping-pong, splat/advect/composite pipeline, shared shader
@@ -36,9 +38,9 @@ import { useEffect, useRef } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { compileShader } from "@/lib/gl/compileShader";
 import { subscribe } from "@/lib/raf";
+import maskFragSrc from "@/shaders/case-study-ink/column-mask.frag.glsl";
 import quadVertSrc from "@/shaders/common/quad.vert.glsl";
 import advectFragSrc from "@/shaders/ink-mask/advect.frag.glsl";
-import maskFragSrc from "@/shaders/ink-mask/mask.frag.glsl";
 import splatFragSrc from "@/shaders/ink-mask/splat.frag.glsl";
 
 if (typeof window !== "undefined") {
@@ -51,8 +53,8 @@ const FBO_SIZE = 256;
 // dark bands at the edges, fading out toward the middle of the screen.
 const DYE_DISSIPATION = 0.95;
 const SPLAT_INTERVAL_MS = 140;
-// Dark ink against the page background. Picked low enough that the mask
-// shader's halftone fringe + paper-grain reads as a Riso ink-bleed.
+// Dark ink against the page background. The column-mask shader draws
+// this colour with alpha proportional to density.
 const INK_RGB: readonly [number, number, number] = [0.04, 0.02, 0.03];
 const MOBILE_BREAKPOINT = 768;
 
@@ -172,10 +174,7 @@ export function InkColumnFluidSim() {
     };
     const maskU = {
       density: gl.getUniformLocation(maskProg, "uDensity"),
-      resolution: gl.getUniformLocation(maskProg, "uResolution"),
-      paper: gl.getUniformLocation(maskProg, "uPaperColor"),
-      spot: gl.getUniformLocation(maskProg, "uSpotColor"),
-      time: gl.getUniformLocation(maskProg, "uTime"),
+      ink: gl.getUniformLocation(maskProg, "uInkColor"),
     };
 
     const drawTo = (
@@ -227,7 +226,7 @@ export function InkColumnFluidSim() {
       write = tmp;
     };
 
-    const composite = (time: number) => {
+    const composite = () => {
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
       gl.viewport(0, 0, canvas.width, canvas.height);
       gl.clearColor(0, 0, 0, 0);
@@ -239,28 +238,7 @@ export function InkColumnFluidSim() {
       // biome-ignore lint/correctness/useHookAtTopLevel: WebGL useProgram
       gl.useProgram(maskProg);
       gl.uniform1i(maskU.density, 0);
-      gl.uniform2f(maskU.resolution, canvas.width, canvas.height);
-      // The mask shader composites uPaperColor (mixed with uSpotColor at
-      // the halftone fringe) at alpha proportional to (1 - density). Here
-      // we want dark ink to *appear* where density is high — invert the
-      // mental model: pass INK_RGB as both paper + spot, so the only
-      // visible output is dark ink at the column densities. Everywhere
-      // else density ≈ 0 → maskAlpha ≈ 1 — but that would paint the whole
-      // viewport dark.
-      //
-      // Trick: use INK_RGB for paper + spot, but the mask shader's
-      // smoothstep cutoff (0.05..0.85 density → 1..0 alpha) means
-      // *zero-density pixels are fully opaque*. We don't want that here.
-      //
-      // Workaround for V1: render with INK_RGB and accept that the whole
-      // viewport tints slightly dark. The continuous edge-splats keep the
-      // edges saturated (visible columns), middle decays via dissipation
-      // to near-zero (~5% paper alpha). With INK_RGB at (0.04,0.02,0.03)
-      // a 5% overlay is visually negligible. Re-evaluate if visual review
-      // demands sharper contrast.
-      gl.uniform3f(maskU.paper, ...INK_RGB);
-      gl.uniform3f(maskU.spot, ...INK_RGB);
-      gl.uniform1f(maskU.time, time);
+      gl.uniform3f(maskU.ink, ...INK_RGB);
       gl.bindVertexArray(vao);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       gl.disable(gl.BLEND);
@@ -287,7 +265,7 @@ export function InkColumnFluidSim() {
       }
 
       advect(dt, elapsedMs * 0.001);
-      composite(elapsedMs * 0.001);
+      composite();
     }, 30);
 
     const st = ScrollTrigger.create({
