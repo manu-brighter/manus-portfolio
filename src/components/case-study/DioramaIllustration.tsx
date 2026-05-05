@@ -169,7 +169,7 @@ export function DioramaIllustration() {
       </g>
 
       {/* Coffee mug top-down */}
-      <g transform="translate(3000, 130)">
+      <g transform="translate(3000, 170)">
         <circle
           cx={80}
           cy={80}
