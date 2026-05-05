@@ -1,7 +1,6 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { InkColumns } from "@/components/case-study/InkColumns";
 import { StationContainer } from "@/components/case-study/StationContainer";
 import { StationFrame } from "@/components/case-study/StationFrame";
 import { HighlightStation } from "@/components/case-study/stations/HighlightStation";
@@ -77,7 +76,9 @@ export function CaseStudy() {
       <h2 id="case-study-heading" className="sr-only">
         {t("headline")}
       </h2>
-      <InkColumns />
+      {/* Ink-edge fluid effect deferred — needs proper WebGL fluid-sim
+          with DOM-card alpha compositing (cards visually emerging from
+          fluid). Tracked as Phase 12 follow-up. */}
       <StationContainer>
         <StationFrame
           spot="rose"
