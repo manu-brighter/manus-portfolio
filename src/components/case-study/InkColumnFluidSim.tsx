@@ -14,9 +14,10 @@
 // helpers. The two divergences are:
 //   1. Continuous edge-splat injection (left + right, jittered y) every
 //      SPLAT_INTERVAL_MS — vs. PhotoInkMask's centre burst + reinject.
-//   2. ScrollTrigger lifecycle — sim only ticks while #case-study is in
-//      viewport (active flag flips on enter/leave). No reveal-completion
-//      lock; the sim runs as long as the section is on screen.
+//   2. ScrollTrigger lifecycle — WebGL resources are LAZY-allocated on
+//      first onEnter and torn down on every onLeave (matches plan §5.1).
+//      Eliminates GPU context pressure when the section is offscreen
+//      and avoids test-suite contention with parallel browser contexts.
 //
 // Reduced-motion + mobile (<768px): renders null entirely. The diorama
 // scroll-translate is itself motion-heavy, so RM users skip the
@@ -28,7 +29,7 @@
 // every shader compile).
 //
 // V1 simplification: no window-resize listener. canvas.width/height are
-// pinned at mount; if the user resizes mid-session the column rendering
+// pinned at GL-init; if the user resizes mid-session the column rendering
 // will look stretched but the sim won't crash. Resize handling can be
 // added later if visual review demands it.
 
@@ -105,6 +106,135 @@ function makeFBO(gl: WebGL2RenderingContext, w: number, h: number): FBO | null {
   return { tex, fb };
 }
 
+type GLState = {
+  gl: WebGL2RenderingContext;
+  vert: WebGLShader;
+  advectFrag: WebGLShader;
+  splatFrag: WebGLShader;
+  maskFrag: WebGLShader;
+  advectProg: WebGLProgram;
+  splatProg: WebGLProgram;
+  maskProg: WebGLProgram;
+  vao: WebGLVertexArrayObject;
+  read: FBO;
+  write: FBO;
+  advectU: {
+    density: WebGLUniformLocation | null;
+    texelSize: WebGLUniformLocation | null;
+    dt: WebGLUniformLocation | null;
+    time: WebGLUniformLocation | null;
+    dissipation: WebGLUniformLocation | null;
+    outwardSpeed: WebGLUniformLocation | null;
+  };
+  splatU: {
+    density: WebGLUniformLocation | null;
+    point: WebGLUniformLocation | null;
+    radius: WebGLUniformLocation | null;
+    strength: WebGLUniformLocation | null;
+  };
+  maskU: {
+    density: WebGLUniformLocation | null;
+    ink: WebGLUniformLocation | null;
+  };
+  canvasWidth: number;
+  canvasHeight: number;
+};
+
+function initGL(canvas: HTMLCanvasElement): GLState | null {
+  // Pin canvas to viewport size at init (V1: no resize listener).
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = Math.floor(window.innerWidth * dpr);
+  canvas.height = Math.floor(window.innerHeight * dpr);
+
+  const gl = canvas.getContext("webgl2", {
+    antialias: false,
+    alpha: true,
+    premultipliedAlpha: false,
+    preserveDrawingBuffer: false,
+    powerPreference: "high-performance",
+  }) as WebGL2RenderingContext | null;
+  if (!gl) return null;
+
+  const vert = compile(gl, gl.VERTEX_SHADER, quadVertSrc);
+  if (!vert) return null;
+  const advectFrag = compile(gl, gl.FRAGMENT_SHADER, advectFragSrc);
+  const splatFrag = compile(gl, gl.FRAGMENT_SHADER, splatFragSrc);
+  const maskFrag = compile(gl, gl.FRAGMENT_SHADER, maskFragSrc);
+  if (!advectFrag || !splatFrag || !maskFrag) return null;
+
+  const advectProg = link(gl, vert, advectFrag);
+  const splatProg = link(gl, vert, splatFrag);
+  const maskProg = link(gl, vert, maskFrag);
+  if (!advectProg || !splatProg || !maskProg) return null;
+
+  // Empty VAO — quad.vert builds the fullscreen triangle from gl_VertexID.
+  const vao = gl.createVertexArray();
+  if (!vao) return null;
+  gl.bindVertexArray(vao);
+
+  const read = makeFBO(gl, FBO_SIZE, FBO_SIZE);
+  const write = makeFBO(gl, FBO_SIZE, FBO_SIZE);
+  if (!read || !write) return null;
+  // Initialise both to zero (the FBO factory leaves them undefined).
+  gl.bindFramebuffer(gl.FRAMEBUFFER, read.fb);
+  gl.clearColor(0, 0, 0, 0);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, write.fb);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+  return {
+    gl,
+    vert,
+    advectFrag,
+    splatFrag,
+    maskFrag,
+    advectProg,
+    splatProg,
+    maskProg,
+    vao,
+    read,
+    write,
+    advectU: {
+      density: gl.getUniformLocation(advectProg, "uDensity"),
+      texelSize: gl.getUniformLocation(advectProg, "uTexelSize"),
+      dt: gl.getUniformLocation(advectProg, "uDt"),
+      time: gl.getUniformLocation(advectProg, "uTime"),
+      dissipation: gl.getUniformLocation(advectProg, "uDissipation"),
+      outwardSpeed: gl.getUniformLocation(advectProg, "uOutwardSpeed"),
+    },
+    splatU: {
+      density: gl.getUniformLocation(splatProg, "uDensity"),
+      point: gl.getUniformLocation(splatProg, "uPoint"),
+      radius: gl.getUniformLocation(splatProg, "uRadius"),
+      strength: gl.getUniformLocation(splatProg, "uStrength"),
+    },
+    maskU: {
+      density: gl.getUniformLocation(maskProg, "uDensity"),
+      ink: gl.getUniformLocation(maskProg, "uInkColor"),
+    },
+    canvasWidth: canvas.width,
+    canvasHeight: canvas.height,
+  };
+}
+
+function disposeGL(state: GLState) {
+  const { gl } = state;
+  gl.deleteProgram(state.advectProg);
+  gl.deleteProgram(state.splatProg);
+  gl.deleteProgram(state.maskProg);
+  gl.deleteShader(state.vert);
+  gl.deleteShader(state.advectFrag);
+  gl.deleteShader(state.splatFrag);
+  gl.deleteShader(state.maskFrag);
+  gl.deleteVertexArray(state.vao);
+  gl.deleteTexture(state.read.tex);
+  gl.deleteFramebuffer(state.read.fb);
+  gl.deleteTexture(state.write.tex);
+  gl.deleteFramebuffer(state.write.fb);
+  // No loseContext() — see PhotoInkMask cleanup comment (StrictMode trap).
+}
+
 export function InkColumnFluidSim() {
   const reducedMotion = useReducedMotion();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -129,138 +259,104 @@ export function InkColumnFluidSim() {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Pin canvas to viewport size at mount (V1: no resize listener).
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = Math.floor(window.innerWidth * dpr);
-    canvas.height = Math.floor(window.innerHeight * dpr);
+    // GL resources are lazy-allocated on first ScrollTrigger onEnter and
+    // torn down on every onLeave. Plan §5.1 contract; eliminates GPU
+    // context pressure while the user is on hero/about/work.
+    let glState: GLState | null = null;
+    let active = false;
+    let lastSplatTs = 0;
 
-    const gl = canvas.getContext("webgl2", {
-      antialias: false,
-      alpha: true,
-      premultipliedAlpha: false,
-      preserveDrawingBuffer: false,
-      powerPreference: "high-performance",
-    }) as WebGL2RenderingContext | null;
-    if (!gl) return;
-
-    const vert = compile(gl, gl.VERTEX_SHADER, quadVertSrc);
-    if (!vert) return;
-    const advectFrag = compile(gl, gl.FRAGMENT_SHADER, advectFragSrc);
-    const splatFrag = compile(gl, gl.FRAGMENT_SHADER, splatFragSrc);
-    const maskFrag = compile(gl, gl.FRAGMENT_SHADER, maskFragSrc);
-    if (!advectFrag || !splatFrag || !maskFrag) return;
-
-    const advectProg = link(gl, vert, advectFrag);
-    const splatProg = link(gl, vert, splatFrag);
-    const maskProg = link(gl, vert, maskFrag);
-    if (!advectProg || !splatProg || !maskProg) return;
-
-    // Empty VAO — quad.vert builds the fullscreen triangle from gl_VertexID.
-    const vao = gl.createVertexArray();
-    gl.bindVertexArray(vao);
-
-    let read = makeFBO(gl, FBO_SIZE, FBO_SIZE);
-    let write = makeFBO(gl, FBO_SIZE, FBO_SIZE);
-    if (!read || !write) return;
-    // Initialise both to zero (the FBO factory leaves them undefined).
-    gl.bindFramebuffer(gl.FRAMEBUFFER, read.fb);
-    gl.clearColor(0, 0, 0, 0);
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, write.fb);
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-
-    const advectU = {
-      density: gl.getUniformLocation(advectProg, "uDensity"),
-      texelSize: gl.getUniformLocation(advectProg, "uTexelSize"),
-      dt: gl.getUniformLocation(advectProg, "uDt"),
-      time: gl.getUniformLocation(advectProg, "uTime"),
-      dissipation: gl.getUniformLocation(advectProg, "uDissipation"),
-      outwardSpeed: gl.getUniformLocation(advectProg, "uOutwardSpeed"),
+    const ensureGL = () => {
+      if (glState) return;
+      glState = initGL(canvas);
     };
-    const splatU = {
-      density: gl.getUniformLocation(splatProg, "uDensity"),
-      point: gl.getUniformLocation(splatProg, "uPoint"),
-      radius: gl.getUniformLocation(splatProg, "uRadius"),
-      strength: gl.getUniformLocation(splatProg, "uStrength"),
-    };
-    const maskU = {
-      density: gl.getUniformLocation(maskProg, "uDensity"),
-      ink: gl.getUniformLocation(maskProg, "uInkColor"),
+
+    const teardownGL = () => {
+      if (!glState) return;
+      disposeGL(glState);
+      glState = null;
     };
 
     const drawTo = (
+      state: GLState,
       program: WebGLProgram,
       target: WebGLFramebuffer | null,
       w: number,
       h: number,
     ) => {
+      const { gl } = state;
       gl.bindFramebuffer(gl.FRAMEBUFFER, target);
       gl.viewport(0, 0, w, h);
       // biome-ignore lint/correctness/useHookAtTopLevel: WebGL gl.useProgram (false-positive on use* names)
       gl.useProgram(program);
-      gl.bindVertexArray(vao);
+      gl.bindVertexArray(state.vao);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     };
 
-    const injectSplat = (x: number, y: number, radius: number, strength: number) => {
+    const injectSplat = (
+      state: GLState,
+      x: number,
+      y: number,
+      radius: number,
+      strength: number,
+    ) => {
+      const { gl } = state;
       gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, read?.tex ?? null);
+      gl.bindTexture(gl.TEXTURE_2D, state.read.tex);
       // biome-ignore lint/correctness/useHookAtTopLevel: WebGL useProgram
-      gl.useProgram(splatProg);
-      gl.uniform1i(splatU.density, 0);
-      gl.uniform2f(splatU.point, x, y);
-      gl.uniform1f(splatU.radius, radius);
-      gl.uniform1f(splatU.strength, strength);
-      drawTo(splatProg, write?.fb ?? null, FBO_SIZE, FBO_SIZE);
-      const tmp = read;
-      read = write;
-      write = tmp;
+      gl.useProgram(state.splatProg);
+      gl.uniform1i(state.splatU.density, 0);
+      gl.uniform2f(state.splatU.point, x, y);
+      gl.uniform1f(state.splatU.radius, radius);
+      gl.uniform1f(state.splatU.strength, strength);
+      drawTo(state, state.splatProg, state.write.fb, FBO_SIZE, FBO_SIZE);
+      const tmp = state.read;
+      state.read = state.write;
+      state.write = tmp;
     };
 
-    const advect = (dt: number, time: number) => {
+    const advect = (state: GLState, dt: number, time: number) => {
+      const { gl } = state;
       gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, read?.tex ?? null);
+      gl.bindTexture(gl.TEXTURE_2D, state.read.tex);
       // biome-ignore lint/correctness/useHookAtTopLevel: WebGL useProgram
-      gl.useProgram(advectProg);
-      gl.uniform1i(advectU.density, 0);
-      gl.uniform2f(advectU.texelSize, 1 / FBO_SIZE, 1 / FBO_SIZE);
-      gl.uniform1f(advectU.dt, dt);
-      gl.uniform1f(advectU.time, time);
-      gl.uniform1f(advectU.dissipation, DYE_DISSIPATION);
+      gl.useProgram(state.advectProg);
+      gl.uniform1i(state.advectU.density, 0);
+      gl.uniform2f(state.advectU.texelSize, 1 / FBO_SIZE, 1 / FBO_SIZE);
+      gl.uniform1f(state.advectU.dt, dt);
+      gl.uniform1f(state.advectU.time, time);
+      gl.uniform1f(state.advectU.dissipation, DYE_DISSIPATION);
       // No radial outward velocity — the columns should stay pinned to the
       // edges, only the curl-noise term in the shader gently swirls them
       // for organic edge character.
-      gl.uniform1f(advectU.outwardSpeed, 0);
-      drawTo(advectProg, write?.fb ?? null, FBO_SIZE, FBO_SIZE);
-      const tmp = read;
-      read = write;
-      write = tmp;
+      gl.uniform1f(state.advectU.outwardSpeed, 0);
+      drawTo(state, state.advectProg, state.write.fb, FBO_SIZE, FBO_SIZE);
+      const tmp = state.read;
+      state.read = state.write;
+      state.write = tmp;
     };
 
-    const composite = () => {
+    const composite = (state: GLState) => {
+      const { gl } = state;
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-      gl.viewport(0, 0, canvas.width, canvas.height);
+      gl.viewport(0, 0, state.canvasWidth, state.canvasHeight);
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.enable(gl.BLEND);
       gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
       gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, read?.tex ?? null);
+      gl.bindTexture(gl.TEXTURE_2D, state.read.tex);
       // biome-ignore lint/correctness/useHookAtTopLevel: WebGL useProgram
-      gl.useProgram(maskProg);
-      gl.uniform1i(maskU.density, 0);
-      gl.uniform3f(maskU.ink, ...INK_RGB);
-      gl.bindVertexArray(vao);
+      gl.useProgram(state.maskProg);
+      gl.uniform1i(state.maskU.density, 0);
+      gl.uniform3f(state.maskU.ink, ...INK_RGB);
+      gl.bindVertexArray(state.vao);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       gl.disable(gl.BLEND);
     };
 
-    let active = false;
-    let lastSplatTs = 0;
-
     const unsub = subscribe((deltaMs, elapsedMs) => {
-      if (!active) return;
+      if (!active || !glState) return;
       const dt = Math.min(deltaMs * 0.001, 0.033);
 
       const now = performance.now();
@@ -272,12 +368,12 @@ export function InkColumnFluidSim() {
         // page rather than columns).
         const yL = 0.1 + Math.random() * 0.8;
         const yR = 0.1 + Math.random() * 0.8;
-        injectSplat(0.02, yL, 0.18, 0.7);
-        injectSplat(0.98, yR, 0.18, 0.7);
+        injectSplat(glState, 0.02, yL, 0.18, 0.7);
+        injectSplat(glState, 0.98, yR, 0.18, 0.7);
       }
 
-      advect(dt, elapsedMs * 0.001);
-      composite();
+      advect(glState, dt, elapsedMs * 0.001);
+      composite(glState);
     }, 30);
 
     // Range invalidation when DioramaTrack's pin lands is handled by its
@@ -288,39 +384,27 @@ export function InkColumnFluidSim() {
       start: "top bottom",
       end: "bottom top",
       onEnter: () => {
+        ensureGL();
         active = true;
       },
       onEnterBack: () => {
+        ensureGL();
         active = true;
       },
       onLeave: () => {
         active = false;
+        teardownGL();
       },
       onLeaveBack: () => {
         active = false;
+        teardownGL();
       },
     });
 
     return () => {
       unsub();
       st.kill();
-      gl.deleteProgram(advectProg);
-      gl.deleteProgram(splatProg);
-      gl.deleteProgram(maskProg);
-      gl.deleteShader(vert);
-      gl.deleteShader(advectFrag);
-      gl.deleteShader(splatFrag);
-      gl.deleteShader(maskFrag);
-      gl.deleteVertexArray(vao);
-      if (read) {
-        gl.deleteTexture(read.tex);
-        gl.deleteFramebuffer(read.fb);
-      }
-      if (write) {
-        gl.deleteTexture(write.tex);
-        gl.deleteFramebuffer(write.fb);
-      }
-      // No loseContext() — see PhotoInkMask cleanup comment (StrictMode trap).
+      teardownGL();
     };
   }, [reducedMotion, isMobile]);
 
