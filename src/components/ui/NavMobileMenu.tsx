@@ -15,7 +15,12 @@ import { useEffect, useState } from "react";
 
 type NavItem = { href: string; key: string };
 
-export function NavMobileMenu({ items }: { items: readonly NavItem[] }) {
+type Props = {
+  items: readonly NavItem[];
+  activeSection: string | null;
+};
+
+export function NavMobileMenu({ items, activeSection }: Props) {
   const t = useTranslations();
   const [open, setOpen] = useState(false);
 
@@ -73,17 +78,24 @@ export function NavMobileMenu({ items }: { items: readonly NavItem[] }) {
           id="mobile-nav-list"
           className="absolute top-full right-0 left-0 flex flex-col gap-3 border-paper-line border-b bg-paper px-6 py-6 shadow-lg"
         >
-          {items.map((item) => (
-            <li key={item.href}>
-              <a
-                href={item.href}
-                onClick={onItemClick}
-                className="block py-2 text-ink type-label transition-colors hover:text-ink-soft"
-              >
-                {t(`nav.items.${item.key}`)}
-              </a>
-            </li>
-          ))}
+          {items.map((item) => {
+            const sectionId = item.href.replace("#", "");
+            const isActive = activeSection === sectionId;
+            return (
+              <li key={item.href}>
+                <a
+                  href={item.href}
+                  onClick={onItemClick}
+                  aria-current={isActive ? "true" : undefined}
+                  className={`block py-2 type-label transition-colors ${
+                    isActive ? "text-ink" : "text-ink-soft hover:text-ink"
+                  }`}
+                >
+                  {t(`nav.items.${item.key}`)}
+                </a>
+              </li>
+            );
+          })}
         </ul>
       ) : null}
     </div>

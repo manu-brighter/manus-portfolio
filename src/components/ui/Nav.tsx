@@ -1,6 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 import { NavMobileMenu } from "@/components/ui/NavMobileMenu";
 import { Link, usePathname } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
@@ -43,10 +44,46 @@ export const NAV_ITEMS_MOBILE = [
   { href: "#contact", key: "contact" },
 ] as const;
 
+const SECTION_IDS = [
+  "about",
+  "skills",
+  "work",
+  "case-study",
+  "photography",
+  "playground",
+  "contact",
+];
+
 export function Nav() {
   const t = useTranslations();
   const currentLocale = useLocale();
   const pathname = usePathname();
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+
+  // Scroll-spy: tracks which page section currently sits in the central
+  // viewport band. rootMargin "-20% 0px -70% 0px" treats a section as
+  // active only once its top crosses into the 20%–30% viewport strip,
+  // which avoids the active-state flicker when a section is just
+  // peeking in from below.
+  useEffect(() => {
+    const targets = SECTION_IDS.map((id) => document.getElementById(id)).filter(
+      (el): el is HTMLElement => el !== null,
+    );
+    if (targets.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (visible[0]) setActiveSection(visible[0].target.id);
+      },
+      { rootMargin: "-20% 0px -70% 0px", threshold: 0 },
+    );
+
+    for (const el of targets) observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <nav
@@ -59,18 +96,25 @@ export function Nav() {
         </Link>
 
         <div className="flex items-center gap-6 md:gap-10">
-          <NavMobileMenu items={NAV_ITEMS_MOBILE} />
+          <NavMobileMenu items={NAV_ITEMS_MOBILE} activeSection={activeSection} />
           <ul className="hidden items-center gap-5 md:flex md:gap-7">
-            {NAV_ITEMS_DESKTOP.map((item) => (
-              <li key={item.href}>
-                <a
-                  href={item.href}
-                  className="type-label text-ink transition-colors hover:text-ink-soft"
-                >
-                  {t(`nav.items.${item.key}`)}
-                </a>
-              </li>
-            ))}
+            {NAV_ITEMS_DESKTOP.map((item) => {
+              const sectionId = item.href.replace("#", "");
+              const isActive = activeSection === sectionId;
+              return (
+                <li key={item.href}>
+                  <a
+                    href={item.href}
+                    aria-current={isActive ? "true" : undefined}
+                    className={`type-label transition-colors ${
+                      isActive ? "text-ink" : "text-ink-soft hover:text-ink"
+                    }`}
+                  >
+                    {t(`nav.items.${item.key}`)}
+                  </a>
+                </li>
+              );
+            })}
           </ul>
 
           {/* TODO(phase 3): `usePathname` strips query + hash. Once real
