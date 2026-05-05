@@ -46,8 +46,6 @@ export function DioramaIllustration() {
       preserveAspectRatio="xMidYMid meet"
       className="absolute inset-0 h-full w-full"
     >
-      <title>Case Study Foto-Workplace illustration</title>
-
       {/* Comic-style table-edge outlines (top + bottom) */}
       <path
         d="M 110 80 Q 600 65, 1200 90 Q 1800 70, 2400 95 Q 3000 75, 3600 95 L 4090 95"
