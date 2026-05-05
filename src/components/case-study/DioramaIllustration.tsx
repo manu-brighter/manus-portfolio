@@ -12,10 +12,10 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
  *     coffee mug top-down
  *   - Decorative ink splats (Riso spot colors, scattered)
  *
- * ViewBox 4200x1000, preserveAspectRatio xMidYMid meet. Rendered at
+ * ViewBox 4200×1000, preserveAspectRatio xMidYMid meet. Rendered at
  * h-full inside DioramaTrack (track is 420vh wide, so SVG fills track).
  *
- * The Lupe element bobs +/-2px y in a 3s sine loop (preserves the prior
+ * The Lupe element bobs ±2px y in a 3s sine loop (preserves the prior
  * Lupe.tsx animation behaviour). Other tools are static.
  */
 
@@ -64,7 +64,7 @@ export function DioramaIllustration() {
         strokeLinecap="round"
       />
 
-      {/* Camera (Sony alpha7-style top-down, enlarged ~30% from prior iteration) */}
+      {/* Camera (Sony α7-style top-down, enlarged ~30% from prior iteration) */}
       <g transform="translate(240, 130)">
         <rect
           x={0}
