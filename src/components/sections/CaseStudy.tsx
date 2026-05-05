@@ -11,7 +11,6 @@ import { DioramaCards } from "@/components/case-study/DioramaCards";
 import { DioramaIllustration } from "@/components/case-study/DioramaIllustration";
 import { DioramaLupe } from "@/components/case-study/DioramaLupe";
 import { DioramaTrack } from "@/components/case-study/DioramaTrack";
-import { InkColumnSVG } from "@/components/case-study/InkColumnSVG";
 
 type Fact = { key: string; value: string };
 type StackRow = { tech: string; use: string; why?: string };
@@ -116,51 +115,47 @@ export function CaseStudy() {
     </div>
   );
 
-  // Desktop: full diorama with sticky-pin + horizontal scroll +
-  // dark-ink fluid columns at viewport edges.
+  // Desktop: full diorama with sticky-pin + horizontal scroll.
   return (
-    <>
-      <DioramaTrack mobileFallback={mobileFallback}>
-        <h2 id="case-study-heading" className="sr-only">
-          {t("headline")}
-        </h2>
-        <DioramaIllustration />
-        {adminHighlight && overlayHighlight ? (
-          <DioramaCards
-            hookText={t("hook")}
-            hookStation={hookStation}
-            whatLabel={t("context.label")}
-            facts={facts}
-            storyParas={storyParas}
-            stackHeading={stackStation.heading}
-            stackRule={stackStation.rule}
-            platformIntro={t("platform.intro")}
-            platformModules={t("platform.modules")}
-            stack={stack}
-            adminKicker={adminHighlight.kicker}
-            adminTitle={adminHighlight.title}
-            adminLede={adminHighlight.lede}
-            adminFeatures={adminHighlight.features}
-            adminScreenshotAlt={adminHighlight.screenshotAlt}
-            adminStation={highlightAdmin}
-            overlayKicker={overlayHighlight.kicker}
-            overlayTitle={overlayHighlight.title}
-            overlayLede={overlayHighlight.lede}
-            overlayFeatures={overlayHighlight.features}
-            overlayScreenshotAlt={overlayHighlight.screenshotAlt}
-            overlayStation={highlightOverlay}
-            publicShots={publicShots}
-            reflectionLabel={t("reflection.label")}
-            reflectionBody={t("reflection.body")}
-            footerLabel={t("footerLink.label")}
-            footerDomain={t("footerLink.domain")}
-            footerUrl={t("footerLink.url")}
-            footerExternal={t("footerLink.external")}
-          />
-        ) : null}
-        <DioramaLupe />
-      </DioramaTrack>
-      <InkColumnSVG />
-    </>
+    <DioramaTrack mobileFallback={mobileFallback}>
+      <h2 id="case-study-heading" className="sr-only">
+        {t("headline")}
+      </h2>
+      <DioramaIllustration />
+      {adminHighlight && overlayHighlight ? (
+        <DioramaCards
+          hookText={t("hook")}
+          hookStation={hookStation}
+          whatLabel={t("context.label")}
+          facts={facts}
+          storyParas={storyParas}
+          stackHeading={stackStation.heading}
+          stackRule={stackStation.rule}
+          platformIntro={t("platform.intro")}
+          platformModules={t("platform.modules")}
+          stack={stack}
+          adminKicker={adminHighlight.kicker}
+          adminTitle={adminHighlight.title}
+          adminLede={adminHighlight.lede}
+          adminFeatures={adminHighlight.features}
+          adminScreenshotAlt={adminHighlight.screenshotAlt}
+          adminStation={highlightAdmin}
+          overlayKicker={overlayHighlight.kicker}
+          overlayTitle={overlayHighlight.title}
+          overlayLede={overlayHighlight.lede}
+          overlayFeatures={overlayHighlight.features}
+          overlayScreenshotAlt={overlayHighlight.screenshotAlt}
+          overlayStation={highlightOverlay}
+          publicShots={publicShots}
+          reflectionLabel={t("reflection.label")}
+          reflectionBody={t("reflection.body")}
+          footerLabel={t("footerLink.label")}
+          footerDomain={t("footerLink.domain")}
+          footerUrl={t("footerLink.url")}
+          footerExternal={t("footerLink.external")}
+        />
+      ) : null}
+      <DioramaLupe />
+    </DioramaTrack>
   );
 }
