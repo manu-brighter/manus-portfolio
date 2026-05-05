@@ -67,12 +67,14 @@ test.describe("overprint — default (ghosts rendered)", () => {
     const rose = page.locator("#hero-heading [data-layer='rose']").first();
     await expect(rose).toBeVisible();
     // IO fires near-immediately on mount because the hero is in view.
-    // Poll the computed opacity — it climbs from 0 to ~0.85 over ~0.56s.
+    // The hero has waitForLoader=true, so the timeline is gated on
+    // loader-complete + 350ms settle + ~560ms GSAP medium duration.
+    // CI cold-start (1 worker, no cache) needs a generous timeout.
     await expect
       .poll(
         async () =>
           Number(await rose.evaluate((el) => getComputedStyle(el as HTMLElement).opacity)),
-        { timeout: 3000 },
+        { timeout: 8000 },
       )
       .toBeGreaterThan(0.1);
   });
@@ -86,9 +88,14 @@ test.describe("overprint — reducedMotion: reduce", () => {
     const h1 = page.locator("#hero-heading");
     await expect(h1).toBeVisible();
 
-    expect(await h1.locator("[data-layer='rose']").count()).toBe(0);
-    expect(await h1.locator("[data-layer='mint']").count()).toBe(0);
-    expect(await h1.locator("[data-layer='ink']").count()).toBe(0);
+    // useReducedMotion's getServerSnapshot returns false (server can't
+    // know the user's preference), so SSR markup includes the ghost
+    // layers and they live in the DOM during the brief window between
+    // hydration and the post-mount RM flip. Use auto-retrying matchers
+    // so the assertion waits for the client to drop the ghosts.
+    await expect(h1.locator("[data-layer='rose']")).toHaveCount(0);
+    await expect(h1.locator("[data-layer='mint']")).toHaveCount(0);
+    await expect(h1.locator("[data-layer='ink']")).toHaveCount(0);
   });
 
   test("heading text is still accessible and fully visible", async ({ page }) => {

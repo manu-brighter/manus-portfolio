@@ -15,8 +15,9 @@ test.describe("home playground section", () => {
 
     const inkDropLink = section.getByRole("link", { name: /Ink Drop Studio/i });
     const typeAsFluidLink = section.getByRole("link", { name: /Type-as-Fluid/i });
-    await expect(inkDropLink).toHaveAttribute("href", /\/de\/playground\/ink-drop-studio$/);
-    await expect(typeAsFluidLink).toHaveAttribute("href", /\/de\/playground\/type-as-fluid$/);
+    // Static export adds a trailing slash to route hrefs; allow either form.
+    await expect(inkDropLink).toHaveAttribute("href", /\/de\/playground\/ink-drop-studio\/?$/);
+    await expect(typeAsFluidLink).toHaveAttribute("href", /\/de\/playground\/type-as-fluid\/?$/);
   });
 
   test("ink-wipe transition overlay is mounted in locale layout", async ({ page }) => {

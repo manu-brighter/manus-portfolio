@@ -338,7 +338,7 @@ export function WorkCard(props: WorkCardProps) {
           {/* Media frame — screenshot or generative visual. */}
           <div
             ref={mediaRef}
-            className="relative aspect-[4/5] overflow-hidden border-2 border-ink bg-paper-shade will-change-transform"
+            className="relative aspect-[16/9] overflow-hidden border-2 border-ink bg-paper-shade will-change-transform"
           >
             {media}
 

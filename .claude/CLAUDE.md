@@ -60,8 +60,17 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 - 5 quality tiers: High 512² / Medium 256² / Low 128² / Minimal 96² / Static-WebP
 - **Iris Xe is a supported target** (Manuel's work laptop) — no regression that
   drops Low tier below 40fps
-- Budget §8: Lighthouse perf ≥ 95, a11y 100, LCP < 1.8s, CLS < 0.05,
+- Plan §8 budget: Lighthouse perf ≥ 95, a11y 100, LCP < 1.8s, CLS < 0.05,
   initial JS (gz) < 130kB
+- **CI-asserted reality** (`.lighthouserc.json`): perf ≥ 0.55 (warn),
+  a11y ≥ 0.95 (error), CLS ≤ 0.1 (error), LCP/TBT/script-size warn
+  with relaxed thresholds. The animation-heavy hero (continuous
+  FluidSim + GSAP RAF) caps perf score around 0.6 because Lighthouse
+  measures TBT over the entire FCP-to-timeout window — every 50ms+
+  RAF frame counts as a long task. Plan §8 was the aspirational
+  pre-implementation target; the lhci config is what we actually gate
+  CI on. CLS + a11y stay strict because those are real user problems,
+  not measurement artefacts of always-on motion.
 
 ## i18n rules
 
@@ -807,3 +816,103 @@ rework-design.md`. Implementation plan at
      first effect's deps include `config` and dispose+reinit happen
      in cleanup+mount of that effect already. Deleted; behaviour
      unchanged.
+
+## Phase 12 deviations
+
+### Phase 12 — Case Study diorama redesign (post-T18 rework)
+
+The original Phase 12 plan's Case Study section (slideshow-style flex
+track of discrete `StationFrame` items) failed 5 visual-review
+iterations. The replacement design pivots to a **diorama**: one wide
+SVG illustration of a photographer's table that the user pans across
+horizontally. Spec at
+`docs/superpowers/specs/2026-05-05-case-study-diorama-redesign.md`,
+plan at
+`docs/superpowers/plans/2026-05-05-case-study-diorama-redesign.md`.
+The final shipped state diverged substantially from the plan after
+~35 visual-review polish iterations; this section reflects what
+actually shipped.
+
+- **vh-based coordinate system** (4200×1000 viewBox at 100vh tall →
+  420vh wide track). Consistent across normal desktop and ultrawide
+  displays — fixed-px decorations on the prior slideshow looked tiny
+  on 3840×1600 viewports.
+- **Single SVG illustration component** (`<DioramaIllustration />`)
+  draws comic-style table-edge outlines plus 5 embedded tools
+  (camera, hot-shoe flash, pencil, ruler, coffee mug top-down) and
+  scattered Riso-color ink splats. Tools are drawn into the
+  illustration rather than sprinkled as separate components —
+  coherence over modularity. The component is a pure server component
+  (no hooks); the SVG is `aria-hidden="true"` and carries no `<title>`
+  (a `<title>` under aria-hidden is dead — the AT tree ignores it).
+- **Lupe extracted to `<DioramaLupe />` foreground overlay** at
+  z-20 (above DioramaCards, below any future fixed UI). It's a small
+  client component with a single GSAP tween that translates the
+  wrapper `<div>` from `x: -25vh` to `x: +25vh` over 5.5s
+  (sine.inOut, yoyo, repeat). The wrapper sits at left=167vh /
+  top=12vh / 18vh×18vh, positioned to drift over the Admin
+  polaroid. Animating the wrapper (not the inner SVG group) was
+  required because viewBox-units gave too small a real-world sweep.
+- **Cards as absolute-positioned HTML divs** (`<DioramaCards />`)
+  layered above the SVG illustration, in vh-unit coordinates. Six
+  cards: Hook, What, Stack, Admin, Overlay, Public. Cards overlap
+  deliberately (admin + overlay) and are slightly rotated for the
+  hand-laid feel. `CARD_LAYOUT` is typed
+  `Record<CardKey, CSSProperties>` with `CardKey` a literal union of
+  the six card slugs — adding/renaming a card becomes a TS error
+  rather than a silent `undefined` spread. Dimensions live in the
+  const, not in JSDoc — JSDoc references to dimensions rot fast.
+- **Highlight cards (Admin + Overlay) use vertical layout**: polaroid
+  at the top of the card spanning full width, kicker / title / lede /
+  features list below. The bigger polaroid trades off against text
+  density but visually wins — the screenshot is the hero of those
+  cards. The two cards are 95% byte-identical (only spot color +
+  screenshot slug + kicker dot color differ); kept as duplicates
+  pending a third highlight card that would justify extracting a
+  shared primitive.
+- **HookCard is horizontal**: phone-screenshot polaroid (44%) on the
+  left, the `t("hook")` text ("Vereine kämpfen alle...") as a
+  blockquote with «...» chevron decoration on the right (56%). The
+  storyParas (`t.raw("context.story")` — origin story + role) live on
+  WhatCard, NOT HookCard. (One pivotal Polish round inverted these
+  texts; final assignment is hookText→HookCard, storyParas→WhatCard.)
+- **PublicCard's 3 polaroids use diagonal staggering**: the first
+  polaroid (statistics) gets `marginTop: 18vh` to clear the coffee
+  mug above-left in the illustration; second sits at top, third at
+  marginTop 5vh — creates a fan-out cascade.
+- **Mobile + reduced-motion fallback**: vertical stack of card
+  content, no diorama, no horizontal pin. Same content via the cards
+  themselves; the illustration + tools are decorative-only and don't
+  translate to vertical layout. The duplicate-id risk between mobile
+  visible h2 and desktop sr-only h2 is eliminated by placing the
+  sr-only h2 INSIDE `<DioramaTrack>` children — DioramaTrack picks
+  one branch (mobileFallback or children) at runtime, mutually
+  exclusive.
+- **DioramaTrack ScrollTrigger uses `kill(true)` on cleanup** to
+  revert pin spacers + body inline styles (overflow,
+  scrollbar-padding) when reduced-motion / viewport-resize toggles
+  the desktop branch off mid-session.
+- **bg-paper on DioramaTrack section** isolates the diorama from the
+  persistent root-layout `<FluidSim>` Riso canvas (which would
+  otherwise bleed colored splats through the case-study). Without
+  this, the Diorama looks like the hero ink is floating between the
+  cards.
+- **Ink columns: tried, dropped.** Three implementations attempted —
+  raw WebGL2 fluid sim (advect/splat/composite), dedicated
+  column-mask shader, then an SVG-paths-with-staggered-tweens
+  variant — none satisfied the visual brief of "thick sharp ink
+  columns pinned to the viewport edges." The diorama reads cleaner
+  without them. Card-fluid interaction (cards spawning from the
+  columns) was always plan §11 out-of-scope; remains so.
+- **Massive cleanup**: 15 files deleted from prior slideshow attempt
+  (StationContainer, StationFrame, TrackDecor, InkSplat,
+  PaperWorkplace, InkTransition, 5 station components, 4 cliparts).
+  Polaroid and StackNotebook primitives kept (consumed by cards).
+- **`StackRow.why?: string` was optional** in card and consumer types
+  during sprint — and was DROPPED in the post-PR cleanup pass when
+  it was confirmed no card renders it.
+- **Translation deferred** (DE source mirrored across EN/FR/IT) for
+  card content; matches Phase 6/7/8/9/11 pattern. Orphan i18n keys
+  from intermediate iterations (`platform.intro`, `platform.modules`,
+  `stations.stack.rule`, `publicLayer.screenshots`, `subhead`, etc.)
+  were stripped in the post-PR cleanup pass.

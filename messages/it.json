@@ -114,9 +114,18 @@
       "plate": "Plate Nº 03",
       "label": "Selbstporträt",
       "stamps": [
-        { "label": "Location", "value": "Basel-Region" },
-        { "label": "Year", "value": "MMXXVI" },
-        { "label": "Signed", "value": "manu" }
+        {
+          "label": "Location",
+          "value": "Basel-Region"
+        },
+        {
+          "label": "Year",
+          "value": "MMXXVI"
+        },
+        {
+          "label": "Signed",
+          "value": "manu"
+        }
       ]
     },
     "pullQuotes": {
@@ -134,9 +143,18 @@
       "anfangen": {
         "counter": "02 / 04",
         "stamps": [
-          { "label": "Minecraft", "year": "2014" },
-          { "label": "Novartis EFZ", "year": "2017–2021" },
-          { "label": "zvoove", "year": "2021—" }
+          {
+            "label": "Minecraft",
+            "year": "2014"
+          },
+          {
+            "label": "Novartis EFZ",
+            "year": "2017–2021"
+          },
+          {
+            "label": "zvoove",
+            "year": "2021—"
+          }
         ]
       },
       "aiWorkflow": {
@@ -392,7 +410,16 @@
         ],
         "description": "Diese Seite. Fullscreen GPU-Fluid-Simulation als Hero, Risograph-inspirierte Editorial-Ästhetik, vibecoded in mehrwöchigen Sessions mit Claude Code.",
         "metaNote": "Du surfst gerade auf einer GPU-Fluid-Simulation. Kein Iframe, kein Video-Loop, keine Lottie-Datei. Echte Frames.",
-        "ctaLabel": "Du bist schon hier"
+        "ctaLabel": "Du bist schon hier",
+        "screenshot": {
+          "alt": "Screenshot der Hero-Section von manuelheller.dev",
+          "caption": "manuelheller.dev · hero"
+        },
+        "reveal": {
+          "surname": "Heller,",
+          "given": "Manuel.",
+          "ariaAnnouncement": "Vorschau-Animation der Hero-Section"
+        }
       },
       {
         "id": "joggediballa",
@@ -420,10 +447,7 @@
     ]
   },
   "caseStudy": {
-    "sectionLabel": "Section 04 · Case Study",
-    "eyebrow": "Deep-Dive · Joggediballa",
     "headline": "Vom Vereins-Chaos zur eigenen Plattform.",
-    "subhead": "Excel-Listen raus, tRPC rein. Eine massgeschneiderte Webapp für einen 9-Mitglieder-Verein, weil's ging.",
     "hook": "Vereine kämpfen alle mit demselben Mist: Excel-Listen, statische Websites, isolierte Tools. Für Jogge di Balla habe ich das aufgeräumt — eine massgeschneiderte Plattform, die von Mitgliederverwaltung bis Twitch-Overlay alles abdeckt. Vibecoded, selbst gehostet, übertrieben.",
     "context": {
       "label": "Was ist Jogge di Balla?",
@@ -455,39 +479,30 @@
       ]
     },
     "platform": {
-      "label": "Die Plattform",
-      "intro": "Stark typisierter Stack, End-to-End TypeScript, von der DB bis ins UI. Selbst gehostet auf einem Linux-Root-Server.",
       "stack": [
         {
           "tech": "React 19 · Vite",
-          "use": "Frontend & Build",
-          "why": "Reaktiv, schnell, top DX."
+          "use": "Frontend & Build"
         },
         {
           "tech": "TypeScript",
-          "use": "Sprache (Fullstack)",
-          "why": "End-to-End-Typensicherheit, Bugs sterben vor dem Commit."
+          "use": "Sprache (Fullstack)"
         },
         {
           "tech": "tRPC",
-          "use": "API-Layer",
-          "why": "Frontend ↔ Backend ohne Schema-Doppelarbeit."
+          "use": "API-Layer"
         },
         {
           "tech": "Drizzle ORM · MySQL",
-          "use": "Datenbank",
-          "why": "Leichtgewichtig, schnell, volle TS-Inferenz auf SQL-Queries."
+          "use": "Datenbank"
         },
         {
           "tech": "Tailwind · shadcn/ui",
-          "use": "Styling & Komponenten",
-          "why": "Konsistent, accessible, ohne Custom-Design-System-Aufbau."
+          "use": "Styling & Komponenten"
         }
-      ],
-      "modules": "Module: Mitglieder- + Anwesenheitsverwaltung · Gönnerverwaltung · Event-Management mit Smart-Thumbnail-Logic · Finanzen · Live-Twitch-Overlay-Tooling · Harassenlauf-Anmeldung."
+      ]
     },
     "highlights": {
-      "label": "Highlights",
       "items": [
         {
           "id": "admin",
@@ -536,34 +551,7 @@
       ]
     },
     "publicLayer": {
-      "label": "Öffentliche Schicht",
-      "screenshots": [
-        {
-          "slug": "home",
-          "alt": "Öffentliche Startseite von joggediballa.ch",
-          "caption": "Startseite — alle Inhalte aus dem Dashboard befüllbar"
-        },
-        {
-          "slug": "events",
-          "alt": "Events-Übersicht mit dynamischen Event-Cards",
-          "caption": "Events — inkl. Smart-Thumbnail-Logic für Hochkant-Flyer"
-        },
-        {
-          "slug": "team",
-          "alt": "Team-Seite mit Mitgliederprofilen",
-          "caption": "Team — Profile direkt aus dem Mitglieder-Modul"
-        },
-        {
-          "slug": "shotcounter",
-          "alt": "Shotcounter-Public-Seite",
-          "caption": "Shotcounter — laufender Vereins-Gag mit Live-Daten"
-        },
-        {
-          "slug": "statistic",
-          "alt": "Anwesenheitsstatistik mit Balkendiagrammen",
-          "caption": "Anwesenheits-Statistik — visuell aufbereitet aus dem Anwesenheitssystem"
-        }
-      ]
+      "label": "Öffentliche Schicht"
     },
     "reflection": {
       "label": "Was ich heute anders machen würde",
@@ -574,6 +562,37 @@
       "url": "https://joggediballa.ch",
       "domain": "joggediballa.ch",
       "external": "öffnet in neuem Tab"
+    },
+    "stations": {
+      "hook": {
+        "datestamp": "2022.05",
+        "polaroidCaption": "Joggediballa · Mobile · Live"
+      },
+      "stack": {
+        "heading": "Stack-Notiz"
+      },
+      "highlightAdmin": {
+        "datestamp": "Admin · v3",
+        "polaroidCaption": "Admin-Dashboard · Daily Driver"
+      },
+      "highlightOverlay": {
+        "datestamp": "Twitch-Overlay",
+        "polaroidCaption": "Schlag-den-Kassier · Live-Stream"
+      },
+      "publicShots": [
+        {
+          "datestamp": "Stats",
+          "caption": "Statistik · Mitglieder & Saisons"
+        },
+        {
+          "datestamp": "Members",
+          "caption": "Gönnerverwaltung · CRM-Light"
+        },
+        {
+          "datestamp": "Form",
+          "caption": "Anmeldeformular · Mobile"
+        }
+      ]
     }
   },
   "photography": {
