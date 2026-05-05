@@ -89,10 +89,10 @@ export function PublicCard({
         })}
       </div>
       <div className="border-l-2 border-spot-amber pl-2">
-        <p className="font-mono text-[clamp(0.5rem,0.7vh,0.7rem)] uppercase tracking-[0.18em] text-ink-muted">
+        <p className="font-mono text-[clamp(0.625rem,0.9vh,0.875rem)] uppercase tracking-[0.18em] text-ink-muted">
           {reflectionLabel}
         </p>
-        <p className="mt-1 font-display italic text-ink text-[clamp(0.75rem,1.1vh,1.1rem)] leading-snug">
+        <p className="mt-1 font-display italic text-ink text-[clamp(0.95rem,1.4vh,1.4rem)] leading-snug">
           {reflectionBody}
         </p>
       </div>
@@ -100,9 +100,9 @@ export function PublicCard({
         href={footerUrl}
         target="_blank"
         rel="noreferrer noopener external"
-        className="inline-flex items-baseline gap-2 border-b-2 border-ink font-display italic text-ink text-[clamp(0.85rem,1.2vh,1.2rem)] leading-none w-fit hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint"
+        className="inline-flex items-baseline gap-2 border-b-2 border-ink font-display italic text-ink text-[clamp(1.1rem,1.5vh,1.5rem)] leading-none w-fit hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint"
       >
-        <span className="font-mono text-[clamp(0.5rem,0.7vh,0.7rem)] uppercase tracking-[0.2em] text-ink-muted">
+        <span className="font-mono text-[clamp(0.625rem,0.9vh,0.875rem)] uppercase tracking-[0.2em] text-ink-muted">
           {footerLabel}
         </span>
         {footerDomain}

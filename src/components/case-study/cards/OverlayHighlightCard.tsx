@@ -58,21 +58,21 @@ export function OverlayHighlightCard({
         </Polaroid>
       </div>
       <div className="flex flex-1 flex-col gap-2 min-h-0">
-        <p className="font-mono text-[clamp(0.55rem,0.8vh,0.75rem)] uppercase tracking-[0.16em] text-ink inline-flex items-center gap-1.5">
+        <p className="font-mono text-[clamp(0.7rem,1vh,0.95rem)] uppercase tracking-[0.16em] text-ink inline-flex items-center gap-1.5">
           <span aria-hidden="true" className="inline-block size-1.5 bg-spot-amber" />
           {kicker}
         </p>
-        <h3 className="font-display italic text-ink text-[clamp(0.95rem,1.4vh,1.4rem)] leading-tight">
+        <h3 className="font-display italic text-ink text-[clamp(1.2rem,1.75vh,1.75rem)] leading-tight">
           {title}
         </h3>
-        <p className="text-[clamp(0.6rem,0.85vh,0.8rem)] leading-snug text-ink-soft">{lede}</p>
+        <p className="text-[clamp(0.75rem,1.05vh,1rem)] leading-snug text-ink-soft">{lede}</p>
         <ul className="space-y-1">
           {features.map((f) => (
             <li key={f.title} className="border-l border-ink pl-2">
-              <p className="font-mono text-[clamp(0.5rem,0.7vh,0.7rem)] uppercase tracking-[0.14em] text-ink">
+              <p className="font-mono text-[clamp(0.625rem,0.9vh,0.875rem)] uppercase tracking-[0.14em] text-ink">
                 {f.title}
               </p>
-              <p className="mt-0.5 text-[clamp(0.55rem,0.78vh,0.75rem)] leading-snug text-ink-soft">
+              <p className="mt-0.5 text-[clamp(0.7rem,1vh,0.95rem)] leading-snug text-ink-soft">
                 {f.body}
               </p>
             </li>

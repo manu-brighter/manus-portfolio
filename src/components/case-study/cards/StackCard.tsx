@@ -17,7 +17,7 @@ type Props = {
 export function StackCard({ heading, rule, intro, modules, stack }: Props) {
   return (
     <div className="flex h-full flex-col gap-2">
-      <p className="text-[clamp(0.65rem,0.9vh,0.85rem)] leading-snug text-ink-soft">{intro}</p>
+      <p className="text-[clamp(0.8rem,1.1vh,1.05rem)] leading-snug text-ink-soft">{intro}</p>
       <StackNotebook
         heading={heading}
         items={
@@ -32,8 +32,8 @@ export function StackCard({ heading, rule, intro, modules, stack }: Props) {
           </ul>
         }
       />
-      <p className="text-[clamp(0.55rem,0.8vh,0.75rem)] text-ink-muted italic">{modules}</p>
-      <p className="font-mono text-[clamp(0.5rem,0.7vh,0.7rem)] tracking-[0.2em] text-ink-muted uppercase">
+      <p className="text-[clamp(0.7rem,1vh,0.95rem)] text-ink-muted italic">{modules}</p>
+      <p className="font-mono text-[clamp(0.625rem,0.9vh,0.875rem)] tracking-[0.2em] text-ink-muted uppercase">
         {rule}
       </p>
     </div>

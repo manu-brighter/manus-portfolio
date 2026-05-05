@@ -41,7 +41,7 @@ export function HookCard({ hookText, datestamp, polaroidCaption }: Props) {
           />
         </picture>
       </Polaroid>
-      <blockquote className="font-display italic text-ink text-[clamp(1rem,1.6vh,1.4rem)] leading-[1.2] tracking-[-0.01em]">
+      <blockquote className="font-display italic text-ink text-[clamp(1.25rem,2vh,1.75rem)] leading-[1.2] tracking-[-0.01em]">
         <span aria-hidden="true" className="mr-1 text-spot-amber">
           «
         </span>
