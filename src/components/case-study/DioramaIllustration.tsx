@@ -144,7 +144,7 @@ export function DioramaIllustration() {
       </g>
 
       {/* Ruler — placed below WhatCard */}
-      <g transform="translate(880, 460) rotate(8)">
+      <g transform="translate(880, 540) rotate(8)">
         <rect
           x={0}
           y={0}
