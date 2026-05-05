@@ -71,7 +71,7 @@ const CARD_LAYOUT: Record<CardKey, CSSProperties> = {
   hook: { left: "22vh", top: "30vh", width: "60vh", height: "54vh", transform: "rotate(-3deg)" },
   what: { left: "88vh", top: "18vh", width: "44vh", height: "34vh", transform: "rotate(2deg)" },
   stack: { left: "88vh", top: "62vh", width: "44vh", height: "28vh", transform: "rotate(-2deg)" },
-  admin: { left: "140vh", top: "18vh", width: "72vh", height: "64vh", transform: "rotate(3deg)" },
+  admin: { left: "140vh", top: "18vh", width: "72vh", height: "68vh", transform: "rotate(3deg)" },
   overlay: {
     left: "218vh",
     top: "14vh",
