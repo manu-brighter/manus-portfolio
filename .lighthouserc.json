@@ -5,7 +5,10 @@
       "numberOfRuns": 3,
       "settings": {
         "preset": "desktop",
-        "chromeFlags": "--no-sandbox --headless"
+        "chromeFlags": "--no-sandbox --headless",
+        "disableFullPageScreenshot": true,
+        "maxWaitForLoad": 30000,
+        "skipAudits": ["screenshot-thumbnails", "final-screenshot"]
       }
     },
     "assert": {
