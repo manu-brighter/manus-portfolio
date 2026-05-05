@@ -71,15 +71,15 @@ const CARD_LAYOUT: Record<CardKey, CSSProperties> = {
   hook: { left: "42vh", top: "29vh", width: "24vh", height: "38vh", transform: "rotate(-4deg)" },
   what: { left: "82vh", top: "48vh", width: "38vh", height: "22vh", transform: "rotate(2deg)" },
   stack: { left: "128vh", top: "28vh", width: "24vh", height: "28vh", transform: "rotate(-7deg)" },
-  admin: { left: "162vh", top: "38vh", width: "50vh", height: "35vh", transform: "rotate(3deg)" },
+  admin: { left: "158vh", top: "30vh", width: "64vh", height: "60vh", transform: "rotate(3deg)" },
   overlay: {
-    left: "230vh",
-    top: "24vh",
-    width: "50vh",
-    height: "34vh",
+    left: "228vh",
+    top: "18vh",
+    width: "64vh",
+    height: "60vh",
     transform: "rotate(-3deg)",
   },
-  public: { left: "320vh", top: "38vh", width: "85vh", height: "44vh", transform: "rotate(2deg)" },
+  public: { left: "308vh", top: "28vh", width: "110vh", height: "60vh", transform: "rotate(2deg)" },
 };
 
 export function DioramaCards(props: Props) {

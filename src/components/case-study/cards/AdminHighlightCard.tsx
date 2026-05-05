@@ -27,8 +27,8 @@ export function AdminHighlightCard({
   polaroidCaption,
 }: Props) {
   return (
-    <div className="flex h-full gap-3 bg-paper-tint p-3">
-      <div className="flex-shrink-0" style={{ width: "55%" }}>
+    <div className="flex h-full flex-col gap-3 bg-paper-tint p-4">
+      <div className="flex-shrink-0">
         <Polaroid
           aspect="16/9"
           rotate={0}
@@ -57,7 +57,7 @@ export function AdminHighlightCard({
           </picture>
         </Polaroid>
       </div>
-      <div className="flex flex-1 flex-col gap-2">
+      <div className="flex flex-1 flex-col gap-2 min-h-0">
         <p className="font-mono text-[clamp(0.55rem,0.8vh,0.75rem)] uppercase tracking-[0.16em] text-ink inline-flex items-center gap-1.5">
           <span aria-hidden="true" className="inline-block size-1.5 bg-spot-rose" />
           {kicker}
