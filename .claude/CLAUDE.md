@@ -807,3 +807,133 @@ rework-design.md`. Implementation plan at
      first effect's deps include `config` and dispose+reinit happen
      in cleanup+mount of that effect already. Deleted; behaviour
      unchanged.
+
+## Phase 12 deviations
+
+### Phase 12 — Case Study diorama redesign (post-T18 rework)
+
+The original Phase 12 plan's Case Study section (slideshow-style flex
+track of discrete `StationFrame` items) failed 5 visual-review
+iterations. The replacement design pivots to a **diorama**: one wide
+SVG illustration of a photographer's table that the user pans across
+horizontally. Spec at
+`docs/superpowers/specs/2026-05-05-case-study-diorama-redesign.md`,
+plan at
+`docs/superpowers/plans/2026-05-05-case-study-diorama-redesign.md`.
+
+- **vh-based coordinate system** (4200×1000 viewBox at 100vh tall →
+  420vh wide track). Consistent across normal desktop and ultrawide
+  displays — fixed-px decorations on the prior slideshow looked tiny
+  on 3840×1600 viewports.
+- **Single SVG illustration component** (`<DioramaIllustration />`)
+  draws all background elements: comic-style table-edge outlines,
+  embedded tools (camera, hot-shoe flash, pencil, ruler, lupe, coffee
+  mug top-down), and scattered Riso-color ink splats. Tools are
+  drawn INTO the illustration rather than sprinkled as separate
+  components — coherence over modularity. The Lupe element retains
+  its prior bob animation (±2px y, 3s sine loop) via a single GSAP
+  tween in the illustration component itself. The decorative `<svg>`
+  is `aria-hidden="true"` and carries no `<title>` (a `<title>`
+  under aria-hidden is dead — the AT tree ignores it; either drop
+  the `<title>` or commit to a labeled-image posture).
+- **Cards as absolute-positioned HTML divs** (`<DioramaCards />`) layered
+  above the SVG illustration, in vh-unit coordinates. Six cards: Hook,
+  What, Stack, Admin, Overlay, Public. Cards overlap deliberately
+  (admin + overlay) and are slightly rotated for the hand-laid feel.
+  Hook polaroid enlarged 20% from prior iteration as eye-catcher.
+  `CARD_LAYOUT` is typed `Record<CardKey, CSSProperties>` with
+  `CardKey` a literal union of the six card slugs — adding/renaming
+  a card becomes a TS error rather than a silent `undefined` spread.
+- **Dedicated WebGL2 fluid-sim for ink columns** (`<InkColumnFluidSim />`)
+  — NOT the Hero-FluidSim. The hero-sim is colored Riso ambient; mixing
+  dark-ink dispatches into it produced muddy color noise. A separate
+  256² FBO ping-pong fluid sim runs at viewport scale, with continuous
+  edge-splat injection (every 140ms, 2 splats — left edge + right
+  edge with slight inward velocity) keeping dark-ink density "wet" at
+  the columns. WebGL context budget: 1 (hero-sim) + 5
+  (photo-ink-mask) + 2 (playground card mini-sims) + 1 (case-study) =
+  9, comfortably within browser's ~16 soft-limit.
+- **Dedicated `column-mask.frag.glsl` shader** at
+  `src/shaders/case-study-ink/column-mask.frag.glsl`. Plan §6 allowed
+  reusing `src/shaders/ink-mask/mask.frag.glsl` "if possible". It
+  isn't possible: `ink-mask/mask.frag` is a *paper-reveal* shader
+  (`alpha = 1 - smoothstep(d)` — opaque paper at d=0, transparent at
+  high d, so the photo behind shows through where splats land). For
+  the column-sim we want the *inverse contract* — dark ink visible
+  where density is, transparent everywhere else. The new shader is
+  ~24 LOC, takes `uDensity` + `uInkColor` only (no halftone fringe,
+  no paper grain — the column visual is velocity/density driven).
+  ASCII-only per the Phase 9 shader rule.
+- **Lazy WebGL setup on ScrollTrigger enter/leave** (post-Task-8
+  regression fix). First pass mounted the canvas + created the GL
+  context + compiled programs + allocated FBOs immediately, gating
+  only the RAF draw loop on an `active` flag. The always-on context
+  produced GPU contention under suite-level Playwright runs (the
+  hero-section overprint test went flaky because parallel test
+  workers stressed available WebGL resources). Refactored to allocate
+  via `initGL(canvas)` on first `onEnter` and tear down via
+  `disposeGL(state)` on every `onLeave`. The canvas DOM element still
+  mounts unconditionally (when not RM/mobile) to avoid layout flicker
+  on enter; only the GL context creation is lazy. Matches plan §5.1's
+  original spec ("Mounted on `ScrollTrigger.onEnter`, unmounted on
+  `onLeave`"); the always-on shape was an implementer optimization
+  that didn't pencil out.
+- **`pathTween.ts` kept but unused** — primitive remains in the codebase
+  for future fluid-effect work; current redesign uses static SVG paths
+  for tools + decorations and per-frame WebGL render for ink columns,
+  neither requiring path interpolation.
+- **Mobile + reduced-motion fallback**: vertical stack of card content,
+  no diorama, no fluid sim. Same content via the cards themselves; the
+  illustration + tools are decorative-only and don't translate to
+  vertical layout. Mobile detection in `InkColumnFluidSim` mirrors
+  the `DioramaTrack` matchMedia pattern (`useState(false)` lazy-init,
+  subscribe to `(max-width: 767px)` `change`, gate JSX + WebGL effect
+  re-runs on flip). Belt-and-suspenders: the WebGL effect ALSO
+  early-returns on `<768px` matchMedia for the case where state
+  hasn't propagated yet on first paint.
+- **Sr-only h2 inside DioramaTrack children, not outside.** Original
+  composition put the sr-only `<h2 id="case-study-heading">` outside
+  `<DioramaTrack>` and the visible h2 inside `mobileFallback`. When
+  DioramaTrack picked its mobile branch, both h2s rendered with the
+  same id → axe `duplicate-id`. Fix: move the sr-only h2 to be the
+  first child INSIDE `<DioramaTrack>`. Desktop branch renders
+  `{children}` so the sr-only h2 lands on desktop only; mobile branch
+  renders `mobileFallback` exclusively where the visible h2 owns the
+  id. Mutually exclusive at runtime.
+- **DioramaTrack ScrollTrigger uses `kill(true)` on cleanup** to
+  revert pin spacers + body inline styles (overflow, padding-right
+  for scrollbar comp). Without `true`, a previously-pinned section
+  can leave phantom body padding when the user toggles reduced-motion
+  or resizes below the mobile breakpoint mid-session.
+- **InkColumnFluidSim ScrollTrigger range invalidation handled by
+  DioramaTrack's global `ScrollTrigger.refresh()`** after pin-init.
+  The column-sim's `start: "top bottom"` / `end: "bottom top"` ranges
+  depend on the section's natural height, but pinning changes the
+  scroll-extent dramatically. ScrollTrigger.refresh() is a global
+  call that recomputes every trigger in the registry — DioramaTrack's
+  refresh after pin-init re-derives the column-sim's ranges
+  automatically, regardless of mount order. Documented inline at the
+  ScrollTrigger.create call so future readers know it's not an
+  oversight.
+- **Massive cleanup**: 15 files deleted from prior slideshow attempt
+  (StationContainer, StationFrame, TrackDecor, InkSplat,
+  PaperWorkplace, InkTransition, 5 station components, 4 cliparts).
+  Polaroid and StackNotebook primitives kept (consumed by cards).
+  Orphaned `ink-spot-pulse` CSS keyframes from `TintenSpot.tsx` left
+  in `globals.css` for now — flagged for future hygiene pass.
+- **`StackRow.why?: string` optional** in card and consumer types.
+  The plan's i18n shape includes `why` (each row has tech / use /
+  why) but `StackCard` only renders tech + use. Marking it optional
+  keeps the i18n raw cast type-safe without forcing call sites to
+  fill an unused field. Render-or-drop is a follow-up decision.
+- **`AdminHighlightCard` and `OverlayHighlightCard` are 95%
+  duplicate** (only image slug + spot color + kicker dot class
+  differ). Acceptable for the diorama sprint per Manuel's
+  "konsistenz / nicht über-abstrahieren" — the third highlight
+  card, if/when it exists, is the trigger for a `HighlightCard`
+  primitive extraction. Until then live with the duplication; do
+  not add a fourth.
+- **Translation deferred**: existing `caseStudy.*` and
+  `caseStudy.stations.*` keys remain valid (cards consume same data
+  in different layout). DE-mirrored across EN/FR/IT, matches prior
+  pattern.
