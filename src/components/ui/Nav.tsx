@@ -20,11 +20,24 @@ import { routing } from "@/i18n/routing";
 
 // Order matches the on-page section flow in [locale]/page.tsx:
 //   Hero → About → Skills → Work → CaseStudy → Photography → Playground → Contact
-// Skills/CaseStudy/Photography are intentionally absent from the nav
-// (they read as part of the Work / About story, not standalone stops).
-const NAV_ITEMS = [
+// Hero is meta (not anchored). CaseStudy is reachable from the Work card,
+// kept out of the desktop bar to avoid 7+ items but surfaced in the mobile
+// menu for completeness.
+const NAV_ITEMS_DESKTOP = [
   { href: "#about", key: "about" },
+  { href: "#skills", key: "skills" },
   { href: "#work", key: "work" },
+  { href: "#photography", key: "photography" },
+  { href: "#playground", key: "playground" },
+  { href: "#contact", key: "contact" },
+] as const;
+
+export const NAV_ITEMS_MOBILE = [
+  { href: "#about", key: "about" },
+  { href: "#skills", key: "skills" },
+  { href: "#work", key: "work" },
+  { href: "#case-study", key: "casestudy" },
+  { href: "#photography", key: "photography" },
   { href: "#playground", key: "playground" },
   { href: "#contact", key: "contact" },
 ] as const;
@@ -45,8 +58,9 @@ export function Nav() {
         </Link>
 
         <div className="flex items-center gap-6 md:gap-10">
+          {/* Mobile hamburger: see Task 11 (Launch Pass plan). NAV_ITEMS_MOBILE is consumed there. */}
           <ul className="hidden items-center gap-5 md:flex md:gap-7">
-            {NAV_ITEMS.map((item) => (
+            {NAV_ITEMS_DESKTOP.map((item) => (
               <li key={item.href}>
                 <a
                   href={item.href}

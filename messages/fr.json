@@ -14,7 +14,10 @@
       "playground": "Playground",
       "contact": "Contact",
       "impressum": "Mentions légales",
-      "datenschutz": "Confidentialité"
+      "datenschutz": "Confidentialité",
+      "skills": "Skills",
+      "casestudy": "Étude de cas",
+      "photography": "Photographie"
     }
   },
   "localeSwitcher": {
@@ -326,6 +329,18 @@
           {
             "name": "Lenis",
             "vibecoded": true
+          },
+          {
+            "name": "next-intl",
+            "vibecoded": true
+          },
+          {
+            "name": "zustand",
+            "vibecoded": true
+          },
+          {
+            "name": "GLSL · WebGL Shader",
+            "vibecoded": true
           }
         ]
       },
@@ -402,11 +417,12 @@
           "React 19",
           "TypeScript",
           "Tailwind v4",
-          "GSAP",
+          "GSAP · ScrollTrigger",
           "Lenis",
           "R3F",
           "WebGL Shader",
-          "next-intl"
+          "next-intl",
+          "zustand"
         ],
         "description": "Diese Seite. Fullscreen GPU-Fluid-Simulation als Hero, Risograph-inspirierte Editorial-Ästhetik, vibecoded in mehrwöchigen Sessions mit Claude Code.",
         "metaNote": "Du surfst gerade auf einer GPU-Fluid-Simulation. Kein Iframe, kein Video-Loop, keine Lottie-Datei. Echte Frames.",
