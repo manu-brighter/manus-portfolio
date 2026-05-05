@@ -87,7 +87,7 @@ export function DioramaTrack({ children, mobileFallback }: Props) {
     return () => {
       cancelAnimationFrame(raf1);
       cancelAnimationFrame(raf2);
-      trigger?.kill();
+      trigger?.kill(true);
       gsap.set(track, { x: 0 });
     };
   }, [reducedMotion, isMobile]);
