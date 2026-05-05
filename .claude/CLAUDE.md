@@ -60,8 +60,17 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 - 5 quality tiers: High 512² / Medium 256² / Low 128² / Minimal 96² / Static-WebP
 - **Iris Xe is a supported target** (Manuel's work laptop) — no regression that
   drops Low tier below 40fps
-- Budget §8: Lighthouse perf ≥ 95, a11y 100, LCP < 1.8s, CLS < 0.05,
+- Plan §8 budget: Lighthouse perf ≥ 95, a11y 100, LCP < 1.8s, CLS < 0.05,
   initial JS (gz) < 130kB
+- **CI-asserted reality** (`.lighthouserc.json`): perf ≥ 0.55 (warn),
+  a11y ≥ 0.95 (error), CLS ≤ 0.1 (error), LCP/TBT/script-size warn
+  with relaxed thresholds. The animation-heavy hero (continuous
+  FluidSim + GSAP RAF) caps perf score around 0.6 because Lighthouse
+  measures TBT over the entire FCP-to-timeout window — every 50ms+
+  RAF frame counts as a long task. Plan §8 was the aspirational
+  pre-implementation target; the lhci config is what we actually gate
+  CI on. CLS + a11y stay strict because those are real user problems,
+  not measurement artefacts of always-on motion.
 
 ## i18n rules
 
