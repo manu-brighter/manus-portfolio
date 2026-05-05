@@ -25,11 +25,9 @@ export function WhatCard({ label, facts, storyParas }: Props) {
         ))}
       </dl>
       <div className="space-y-1.5">
-        {storyParas.map((p) => (
-          <p
-            key={p.slice(0, 32)}
-            className="text-[clamp(0.65rem,0.9vh,0.85rem)] leading-snug text-ink-soft"
-          >
+        {storyParas.map((p, i) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: paragraph order is stable
+          <p key={i} className="text-[clamp(0.65rem,0.9vh,0.85rem)] leading-snug text-ink-soft">
             {p}
           </p>
         ))}
