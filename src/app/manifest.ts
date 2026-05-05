@@ -3,15 +3,14 @@ import { SITE } from "@/lib/site";
 
 /**
  * Web app manifest — PWA-light. Enables Add-to-Homescreen on Android +
- * Chrome desktop. iOS uses apple-icon.tsx + meta tags rendered by the
- * App Router metadata API instead.
+ * Chrome desktop. iOS uses src/app/apple-icon.png (file-based metadata)
+ * via the App Router instead.
  *
  * The maskable icons let Android render the icon inside its theme's
  * mask shape (circle, squircle, etc.) without clipping the artwork.
  */
 // `output: 'export'` requires a static dynamic mode — Turbopack can't
 // pre-render the manifest route without an explicit force-static.
-// (Same pattern as `icon.tsx` / `apple-icon.tsx`.)
 export const dynamic = "force-static";
 
 export default function manifest(): MetadataRoute.Manifest {

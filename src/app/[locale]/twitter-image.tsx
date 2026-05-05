@@ -1,18 +1,19 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { notFound } from "next/navigation";
 import { ImageResponse } from "next/og";
 import { hasLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 
-// Dynamic Twitter card image — 1200x600 paper-bg with the brand
-// ink-splat upper-left and the localised title + tagline right-aligned.
+// Dynamic Twitter card image — 1200x600 paper-bg with Manuel's brand
+// PNG upper-left and the localised title + tagline right-aligned.
 // Twitter card aspect (2:1) is slightly squarer than OG (1.91:1).
 // Pre-rendered at build-time per locale by Next.js metadata API.
 //
-// Note: Satori (the renderer behind next/og's ImageResponse) does NOT
-// support SVG <text> nodes — the wordmark therefore lives in a real
-// flex div stacked above the SVG via absolute positioning. Same gotcha
-// as src/app/icon.tsx + src/app/apple-icon.tsx.
+// Note: Satori (the renderer behind next/og's ImageResponse) supports
+// <img> with data URLs but NOT arbitrary filesystem paths — we read
+// the brand PNG and inline it as base64 at request time.
 
 // Required for `output: "export"` static-export mode — Next 16 won't
 // pre-render dynamic Twitter card routes without an explicit force-static.
@@ -25,10 +26,17 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
+async function getBrandImageDataUrl() {
+  const filePath = path.join(process.cwd(), "public", "brand", "icon-source.png");
+  const buffer = await readFile(filePath);
+  return `data:image/png;base64,${buffer.toString("base64")}`;
+}
+
 export default async function TwitterImage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   const t = await getTranslations({ locale, namespace: "meta" });
+  const brandSrc = await getBrandImageDataUrl();
 
   return new ImageResponse(
     <div
@@ -43,7 +51,7 @@ export default async function TwitterImage({ params }: { params: Promise<{ local
         color: "#0A0608",
       }}
     >
-      {/* Brand mark — left column */}
+      {/* Brand mark — Manuel's PNG, left column */}
       <div
         style={{
           width: 320,
@@ -52,72 +60,14 @@ export default async function TwitterImage({ params }: { params: Promise<{ local
           justifyContent: "center",
         }}
       >
-        <svg
-          role="img"
-          aria-label="MH"
-          viewBox="0 0 64 64"
-          width="280"
-          height="280"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <g style={{ mixBlendMode: "multiply" }}>
-            <ellipse
-              cx="22"
-              cy="22"
-              rx="20"
-              ry="18"
-              fill="#FF6BA0"
-              opacity="0.85"
-              transform="rotate(-12 22 22)"
-            />
-            <ellipse
-              cx="42"
-              cy="22"
-              rx="18"
-              ry="20"
-              fill="#FFC474"
-              opacity="0.85"
-              transform="rotate(8 42 22)"
-            />
-            <ellipse
-              cx="22"
-              cy="42"
-              rx="19"
-              ry="18"
-              fill="#7CE8C4"
-              opacity="0.85"
-              transform="rotate(15 22 42)"
-            />
-            <ellipse
-              cx="42"
-              cy="42"
-              rx="20"
-              ry="19"
-              fill="#B89AFF"
-              opacity="0.85"
-              transform="rotate(-8 42 42)"
-            />
-          </g>
-        </svg>
-        {/* Wordmark via flex div — Satori does not support SVG <text> */}
-        <div
-          style={{
-            position: "absolute",
-            left: 80,
-            top: 80,
-            width: 320,
-            height: 280,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontFamily: "serif",
-            fontStyle: "italic",
-            fontSize: 160,
-            color: "#0A0608",
-          }}
-        >
-          MH
-        </div>
+        {/* biome-ignore lint/performance/noImgElement: Satori-rendered, no Next/Image */}
+        <img
+          src={brandSrc}
+          alt="Manuel Heller brand"
+          width={320}
+          height={320}
+          style={{ width: 320, height: 320, objectFit: "contain" }}
+        />
       </div>
 
       {/* Title + tagline — right column */}
