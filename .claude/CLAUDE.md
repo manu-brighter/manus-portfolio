@@ -916,3 +916,117 @@ actually shipped.
   from intermediate iterations (`platform.intro`, `platform.modules`,
   `stations.stack.rule`, `publicLayer.screenshots`, `subhead`, etc.)
   were stripped in the post-PR cleanup pass.
+
+## Phase 13 deviations
+
+### Phase 13 — Launch Pass (SEO + Meta + Favicon + Pre-Deployment)
+
+Brought the site to launch-ready state with full SEO/meta layer,
+branded favicon pipeline, mobile nav, View Transitions on locale-
+switch, custom 404 visual, and a server-side handoff prompt
+checked in for the deploy step. Plan at
+`docs/superpowers/plans/2026-05-06-launch-pass.md`. Server handoff
+at `docs/superpowers/server-handoff/2026-05-06-deploy-manusportfolio.md`.
+
+- **Favicon source is one SVG, multiple variants per use case.**
+  `public/brand/icon-source.svg` is the master. Browser-tab favicon
+  (`src/app/icon.tsx`) ships with TRANSPARENT bg because tab chrome
+  has its own theme-aware bg; iOS home-screen icon
+  (`src/app/apple-icon.tsx`) ships with `--color-paper` bg because
+  iOS clips icons to a rounded-rect with no transparency support.
+  Android variants (`public/icon-{192,512}.png`) and maskable
+  variants (`public/icon-maskable-{192,512}.png`) are pre-rendered
+  PNG via `scripts/generate-favicons.mjs` (sharp pipeline). Maskable
+  variants use 80% safe-area padding so Android adaptive icon
+  shapes (circle/squircle/etc) don't clip the artwork.
+- **Source-SVG vs .tsx-route MH wordmark renders differently.**
+  The source SVG (`icon-source.svg`) renders "MH" via SVG `<text>`
+  with rose+mint misregistration ghost layers — the full Riso
+  signature. The Next.js dynamic icon routes (`icon.tsx`,
+  `apple-icon.tsx`, `[locale]/opengraph-image.tsx`,
+  `[locale]/twitter-image.tsx`) cannot use SVG `<text>` because
+  Satori (next/og's renderer) doesn't support it. Wordmark in those
+  files renders via flex `<div>` with `fontFamily: serif`, no
+  ghost layers. Result: the 192/512 PNGs (sharp-generated from
+  source SVG) have ghosts; the dynamic 32×32/180×180/1200×630/1200×600
+  outputs do not. At icon-favicon scale ghosts wouldn't show
+  anyway, so visually equivalent at small sizes; OG image at
+  larger size renders cleaner without ghosts. Consequence: when
+  the source SVG changes, both the script-driven PNGs and the
+  inline geometry in 4 .tsx files need manual update. **Run
+  `node scripts/generate-favicons.mjs` after editing the source SVG;
+  also hand-update the 4 .tsx files' inline ellipse coords.**
+  Considered extracting a shared `<RisoIcon>` component but skipped
+  per Manuel's "konsistenz / nicht über-abstrahieren" — the geometry
+  is unlikely to change frequently.
+- **OG/Twitter images live under `[locale]`, not at the root.**
+  `src/app/[locale]/opengraph-image.tsx` + `twitter-image.tsx`
+  generate per-locale 1200×630/1200×600 PNGs at request-time via
+  `next/og`. The metadata in `src/lib/seo/metadata.ts` references
+  them by absolute URL (`${SITE.url}/${locale}/opengraph-image`)
+  so social-share previews respect the active locale.
+- **`metadataBase` set in both root layout and per-locale.** Required
+  by `next/og` for relative URL resolution; without it the build
+  warns and OG images don't get absolute URLs in social previews.
+- **JSON-LD inlined in body, not head.** Strictly the LD-JSON spec
+  prefers `<head>`, but Next 16 App Router doesn't expose a clean
+  way to inject custom `<script>` tags into `<head>` from a layout
+  without using the `metadata` API (which doesn't support arbitrary
+  scripts). Putting LD-JSON as the first child of `<body>` is the
+  documented Next.js workaround and works for all known crawlers.
+- **`export const dynamic = "force-static"` on every metadata route.**
+  Next 16 with `output: "export"` requires this on `icon.tsx`,
+  `apple-icon.tsx`, `manifest.ts`, `sitemap.ts`, `robots.ts`,
+  `opengraph-image.tsx`, `twitter-image.tsx` — without it the build
+  errors with "dynamic = "force-static"/revalidate not configured
+  on route". Same line in all 7 files.
+- **`next-env.d.ts` now gitignored.** Was previously tracked but
+  auto-unstaged by a pre-commit hook because content varies between
+  `next dev` and `next build`. Properly ignored now; the hook
+  remains as belt-and-suspenders for any contributor whose Git
+  client honours `.gitignore` differently.
+- **Mobile hamburger menu uses `useState` + custom toggle, not
+  `<details>`.** Initial sketch used `<details>`/`<summary>` for
+  free keyboard-a11y; replaced with managed state for two reasons:
+  (a) mq-resize-close behaviour requires JS anyway, and (b) the
+  animation needs the open state to drive className transitions.
+  Esc-to-close is added explicitly via keyboard event.
+- **View Transitions API is used directly via `document.startView
+  Transition()`, not via Next.js's experimental `unstable_view
+  Transition`.** The Next.js wrapper is opinionated (App Router
+  only, certain transition types) and the API is mature enough
+  in Chromium to call directly. Falls back gracefully when the
+  API isn't available.
+- **`hrefLang` on `<button>` via JSX spread.** TypeScript's
+  `ButtonHTMLAttributes` doesn't include `hrefLang` (it's an
+  `<a>`/`<link>` attribute), but the runtime DOM accepts it and
+  it's semantically valid for the locale-switcher buttons after
+  switching from `<Link>` to `<button onClick>` for the View
+  Transition wrap. Applied via JSX spread `{...{ hrefLang: locale }}`
+  to bypass the TS error without `@ts-ignore`.
+- **`next/og` does not support `@fontsource/instrument-serif`
+  imports.** Tried, font loads at runtime fail (the font files
+  are bundle-imports, not URL-fetchable). The OG/Twitter images
+  fall back to the OS default serif (`fontFamily="serif"`) which
+  is close enough to Instrument Serif at preview-image scales —
+  not pixel-perfect but readable. If pixel-perfect matters, host
+  the .woff2 at `/fonts/instrument-serif.woff2` and reference it
+  via the `fonts` field in `ImageResponse`.
+- **`robots: { index: true }` shipped from this sprint.** The
+  per-locale metadata builder hard-sets `index: true, follow: true`.
+  Pre-deploy verification step in the handoff prompt is to confirm
+  the deployed `/robots.txt` and the rendered `<meta name="robots">`
+  match expectations before announcing the site publicly.
+- **Lighthouse assertions stayed at sprint-12 relaxed levels.** Did
+  not retighten — the hero FluidSim still caps perf around 0.6 in
+  Lighthouse's measurement window. Tightening is a follow-up after
+  the perf-optimisation sprint (memory: `project_open_todos.md`).
+- **Keyword sets per locale are intentional.** `messages/{de,en,fr,it}
+  .json` `meta.keywords` arrays are localised (Schweiz/Switzerland/
+  Suisse/Svizzera, Bâle/Basel/Basilea/Basel). Modern crawlers
+  largely ignore the `keywords` meta tag, but Bing + DuckDuckGo
+  still consume it; cost is ~80 bytes per locale.
+- **Root layout `metadata` simplified.** Dropped `robots: index:
+  false` (now controlled per-locale where it's `index: true`).
+  Root metadata still has `metadataBase` for OG URL resolution
+  in case the redirect index.html is somehow served directly.
