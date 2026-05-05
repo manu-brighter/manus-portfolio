@@ -72,9 +72,8 @@ export function CaseStudy() {
         hookText={t("hook")}
         datestamp={hookStation.datestamp}
         polaroidCaption={hookStation.polaroidCaption ?? ""}
-        storyParas={storyParas}
       />
-      <WhatCard label={t("context.label")} facts={facts} />
+      <WhatCard label={t("context.label")} facts={facts} storyParas={storyParas} />
       <StackCard heading={stackStation.heading} stack={stack} />
       {adminHighlight ? (
         <AdminHighlightCard

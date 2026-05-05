@@ -57,20 +57,20 @@ type Props = {
  * scales consistently across normal and ultrawide displays. The track
  * is 420vh wide; each card's left/top is defined relative to that.
  *
- * Polish-J layout (2026-05-05):
- *   - Hook enlarged to 60×54 (polaroid + storyParas side-by-side)
- *   - WhatCard shrunk to 42×22 (label + dl only, story moved to Hook)
- *   - StackCard widened to 42×26 + repositioned under WhatCard
- *   - Admin/Overlay enlarged to 72×64 (taller for text overflow fix)
- *   - Admin moved up (top 24→18); Overlay moved up (top 16→14)
+ * Layout (2026-05-05, post-text-mapping fix):
+ *   - Hook 60×54 (polaroid + hookText pull-quote side-by-side)
+ *   - WhatCard 44×52 (label + dl + storyParas; tall to fit prose)
+ *   - StackCard 44×18 long+flat note positioned BELOW WhatCard
+ *   - Admin/Overlay 72×64 (taller for text overflow fix)
+ *   - Admin top 18; Overlay top 14
  */
 
 type CardKey = "hook" | "what" | "stack" | "admin" | "overlay" | "public";
 
 const CARD_LAYOUT: Record<CardKey, CSSProperties> = {
   hook: { left: "22vh", top: "22vh", width: "60vh", height: "54vh", transform: "rotate(-3deg)" },
-  what: { left: "90vh", top: "22vh", width: "42vh", height: "22vh", transform: "rotate(2deg)" },
-  stack: { left: "90vh", top: "50vh", width: "42vh", height: "26vh", transform: "rotate(-7deg)" },
+  what: { left: "88vh", top: "18vh", width: "44vh", height: "52vh", transform: "rotate(2deg)" },
+  stack: { left: "88vh", top: "72vh", width: "44vh", height: "18vh", transform: "rotate(-2deg)" },
   admin: { left: "140vh", top: "18vh", width: "72vh", height: "64vh", transform: "rotate(3deg)" },
   overlay: {
     left: "218vh",
@@ -90,11 +90,10 @@ export function DioramaCards(props: Props) {
           hookText={props.hookText}
           datestamp={props.hookStation.datestamp}
           polaroidCaption={props.hookStation.polaroidCaption ?? ""}
-          storyParas={props.storyParas}
         />
       </article>
       <article style={{ position: "absolute", ...CARD_LAYOUT.what }}>
-        <WhatCard label={props.whatLabel} facts={props.facts} />
+        <WhatCard label={props.whatLabel} facts={props.facts} storyParas={props.storyParas} />
       </article>
       <article style={{ position: "absolute", ...CARD_LAYOUT.stack }}>
         <StackCard heading={props.stackHeading} stack={props.stack} />
