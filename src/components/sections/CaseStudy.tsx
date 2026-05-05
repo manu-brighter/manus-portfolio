@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { InkSweep } from "@/components/case-study/InkSweep";
+import { CaseStudyInkFlow } from "@/components/case-study/CaseStudyInkFlow";
 import { StationContainer } from "@/components/case-study/StationContainer";
 import { StationFrame } from "@/components/case-study/StationFrame";
 import { HighlightStation } from "@/components/case-study/stations/HighlightStation";
@@ -11,18 +11,21 @@ import { StackStation } from "@/components/case-study/stations/StackStation";
 import { WhatStation } from "@/components/case-study/stations/WhatStation";
 
 /**
- * Per-station scatter (Phase-12 rework). Hand-tuned vertical offsets +
- * rotations give the horizontal track a "hand-laid notes on a table"
- * feel rather than a dead-center grid. Reduced-motion clamps both to 0
- * (handled inside StationFrame).
+ * Per-station layout (Phase-12 rework iteration 2). Hand-tuned widths +
+ * vertical offsets + rotations give the horizontal track a "hand-laid
+ * notes on a table" feel rather than a dead-center grid. `widthVw` is
+ * tuned per-station so content fits naturally — text-only stations are
+ * narrower (denser packing), polaroid+text Highlight stations are wider
+ * (need room for the side-by-side composition). Reduced-motion clamps
+ * offset+rotate to 0 (handled inside StationFrame).
  */
 const STATION_LAYOUT = {
-  hook: { offsetYVh: -6, rotate: -2 },
-  what: { offsetYVh: 4, rotate: 1.5 },
-  stack: { offsetYVh: -3, rotate: -1 },
-  admin: { offsetYVh: 6, rotate: 2 },
-  overlay: { offsetYVh: -5, rotate: -1.5 },
-  public: { offsetYVh: 3, rotate: 1 },
+  hook: { widthVw: 42, offsetYVh: -6, rotate: -2 },
+  what: { widthVw: 50, offsetYVh: 4, rotate: 1.5 },
+  stack: { widthVw: 42, offsetYVh: -3, rotate: -1 },
+  admin: { widthVw: 65, offsetYVh: 6, rotate: 2 },
+  overlay: { widthVw: 65, offsetYVh: -5, rotate: -1.5 },
+  public: { widthVw: 78, offsetYVh: 3, rotate: 1 },
 } as const;
 
 type Fact = { key: string; value: string };
@@ -72,10 +75,11 @@ export function CaseStudy() {
       <h2 id="case-study-heading" className="sr-only">
         {t("headline")}
       </h2>
-      <InkSweep />
+      <CaseStudyInkFlow />
       <StationContainer>
         <StationFrame
           spot="rose"
+          widthVw={STATION_LAYOUT.hook.widthVw}
           offsetYVh={STATION_LAYOUT.hook.offsetYVh}
           rotate={STATION_LAYOUT.hook.rotate}
         >
@@ -87,6 +91,7 @@ export function CaseStudy() {
         </StationFrame>
         <StationFrame
           spot="amber"
+          widthVw={STATION_LAYOUT.what.widthVw}
           offsetYVh={STATION_LAYOUT.what.offsetYVh}
           rotate={STATION_LAYOUT.what.rotate}
         >
@@ -94,6 +99,7 @@ export function CaseStudy() {
         </StationFrame>
         <StationFrame
           spot="mint"
+          widthVw={STATION_LAYOUT.stack.widthVw}
           offsetYVh={STATION_LAYOUT.stack.offsetYVh}
           rotate={STATION_LAYOUT.stack.rotate}
         >
@@ -108,6 +114,7 @@ export function CaseStudy() {
         {adminHighlight ? (
           <StationFrame
             spot="rose"
+            widthVw={STATION_LAYOUT.admin.widthVw}
             offsetYVh={STATION_LAYOUT.admin.offsetYVh}
             rotate={STATION_LAYOUT.admin.rotate}
           >
@@ -128,6 +135,7 @@ export function CaseStudy() {
         {overlayHighlight ? (
           <StationFrame
             spot="amber"
+            widthVw={STATION_LAYOUT.overlay.widthVw}
             offsetYVh={STATION_LAYOUT.overlay.offsetYVh}
             rotate={STATION_LAYOUT.overlay.rotate}
           >
@@ -147,6 +155,7 @@ export function CaseStudy() {
         ) : null}
         <StationFrame
           spot="violet"
+          widthVw={STATION_LAYOUT.public.widthVw}
           offsetYVh={STATION_LAYOUT.public.offsetYVh}
           rotate={STATION_LAYOUT.public.rotate}
         >
