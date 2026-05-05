@@ -12,23 +12,23 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
  *
  * Position: anchored ABOVE the Admin card so the lens overlaps the
  * upper portion of the polaroid from outside the card. Animation is a
- * generous horizontal sweep (±10 viewBox units, ~±1.2vh) on a 4s sine
- * loop, gated on prefers-reduced-motion.
+ * generous horizontal sweep on the wrapper itself (~+/-20vh real-world
+ * movement) on a 5s sine loop, gated on prefers-reduced-motion.
  */
 export function DioramaLupe() {
   const reducedMotion = useReducedMotion();
-  const groupRef = useRef<SVGGElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (reducedMotion) return;
-    const g = groupRef.current;
-    if (!g) return;
+    const w = wrapperRef.current;
+    if (!w) return;
     const tween = gsap.fromTo(
-      g,
-      { x: -10 },
+      w,
+      { x: "-20vh" },
       {
-        x: 10,
-        duration: 4,
+        x: "20vh",
+        duration: 5,
         ease: "sine.inOut",
         yoyo: true,
         repeat: -1,
@@ -41,9 +41,10 @@ export function DioramaLupe() {
 
   return (
     <div
+      ref={wrapperRef}
       aria-hidden="true"
       className="pointer-events-none absolute z-20"
-      style={{ left: "145vh", top: "14vh", width: "18vh", height: "18vh" }}
+      style={{ left: "186vh", top: "14vh", width: "18vh", height: "18vh" }}
     >
       <svg
         aria-hidden="true"
@@ -51,7 +52,7 @@ export function DioramaLupe() {
         preserveAspectRatio="xMidYMid meet"
         className="h-full w-full"
       >
-        <g ref={groupRef} transform="rotate(-12 72 72)">
+        <g transform="rotate(-12 72 72)">
           <circle cx={60} cy={60} r={55} fill="none" stroke="var(--color-ink)" strokeWidth={4} />
           <circle
             cx={60}
