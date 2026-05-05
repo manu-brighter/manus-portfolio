@@ -48,12 +48,16 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-const FBO_SIZE = 256;
-// Slightly more aggressive dissipation than PhotoInkMask (0.998) so the
-// columns don't drift inward and saturate the centre — we want clear
-// dark bands at the edges, fading out toward the middle of the screen.
-const DYE_DISSIPATION = 0.95;
-const SPLAT_INTERVAL_MS = 140;
+// FBO short-edge fixed; the long edge scales to match canvas aspect
+// ratio so splats produced as circles in FBO uv-space render as
+// circles (not stretched ovals) when composited back to the canvas.
+const FBO_SHORT_EDGE = 256;
+// Slow per-frame dissipation so columns can build up and persist for
+// continuous "wet ink" appearance. PhotoInkMask uses 0.998; we go
+// slightly more aggressive here because the splats are continuous
+// rather than a one-shot reveal.
+const DYE_DISSIPATION = 0.992;
+const SPLAT_INTERVAL_MS = 80;
 // Dark ink against the page background. The column-mask shader draws
 // this colour with alpha proportional to density.
 const INK_RGB: readonly [number, number, number] = [0.04, 0.02, 0.03];
@@ -138,6 +142,8 @@ type GLState = {
   };
   canvasWidth: number;
   canvasHeight: number;
+  fboW: number;
+  fboH: number;
 };
 
 function initGL(canvas: HTMLCanvasElement): GLState | null {
@@ -172,8 +178,12 @@ function initGL(canvas: HTMLCanvasElement): GLState | null {
   if (!vao) return null;
   gl.bindVertexArray(vao);
 
-  const read = makeFBO(gl, FBO_SIZE, FBO_SIZE);
-  const write = makeFBO(gl, FBO_SIZE, FBO_SIZE);
+  const aspect = canvas.width / canvas.height;
+  const fboW = aspect >= 1 ? Math.round(FBO_SHORT_EDGE * aspect) : FBO_SHORT_EDGE;
+  const fboH = aspect >= 1 ? FBO_SHORT_EDGE : Math.round(FBO_SHORT_EDGE / aspect);
+
+  const read = makeFBO(gl, fboW, fboH);
+  const write = makeFBO(gl, fboW, fboH);
   if (!read || !write) return null;
   // Initialise both to zero (the FBO factory leaves them undefined).
   gl.bindFramebuffer(gl.FRAMEBUFFER, read.fb);
@@ -215,6 +225,8 @@ function initGL(canvas: HTMLCanvasElement): GLState | null {
     },
     canvasWidth: canvas.width,
     canvasHeight: canvas.height,
+    fboW,
+    fboH,
   };
 }
 
@@ -309,7 +321,7 @@ export function InkColumnFluidSim() {
       gl.uniform2f(state.splatU.point, x, y);
       gl.uniform1f(state.splatU.radius, radius);
       gl.uniform1f(state.splatU.strength, strength);
-      drawTo(state, state.splatProg, state.write.fb, FBO_SIZE, FBO_SIZE);
+      drawTo(state, state.splatProg, state.write.fb, state.fboW, state.fboH);
       const tmp = state.read;
       state.read = state.write;
       state.write = tmp;
@@ -322,7 +334,7 @@ export function InkColumnFluidSim() {
       // biome-ignore lint/correctness/useHookAtTopLevel: WebGL useProgram
       gl.useProgram(state.advectProg);
       gl.uniform1i(state.advectU.density, 0);
-      gl.uniform2f(state.advectU.texelSize, 1 / FBO_SIZE, 1 / FBO_SIZE);
+      gl.uniform2f(state.advectU.texelSize, 1 / state.fboW, 1 / state.fboH);
       gl.uniform1f(state.advectU.dt, dt);
       gl.uniform1f(state.advectU.time, time);
       gl.uniform1f(state.advectU.dissipation, DYE_DISSIPATION);
@@ -330,7 +342,7 @@ export function InkColumnFluidSim() {
       // edges, only the curl-noise term in the shader gently swirls them
       // for organic edge character.
       gl.uniform1f(state.advectU.outwardSpeed, 0);
-      drawTo(state, state.advectProg, state.write.fb, FBO_SIZE, FBO_SIZE);
+      drawTo(state, state.advectProg, state.write.fb, state.fboW, state.fboH);
       const tmp = state.read;
       state.read = state.write;
       state.write = tmp;
@@ -368,8 +380,8 @@ export function InkColumnFluidSim() {
         // page rather than columns).
         const yL = 0.1 + Math.random() * 0.8;
         const yR = 0.1 + Math.random() * 0.8;
-        injectSplat(glState, 0.02, yL, 0.18, 0.7);
-        injectSplat(glState, 0.98, yR, 0.18, 0.7);
+        injectSplat(glState, 0.02, yL, 0.12, 0.6);
+        injectSplat(glState, 0.98, yR, 0.12, 0.6);
       }
 
       advect(glState, dt, elapsedMs * 0.001);
