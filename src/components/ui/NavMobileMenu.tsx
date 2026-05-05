@@ -18,9 +18,11 @@ type NavItem = { href: string; key: string };
 type Props = {
   items: readonly NavItem[];
   activeSection: string | null;
+  /** Builds the final href for a hash-anchor; on sub-routes prefixes the locale path. */
+  buildHref: (hash: string) => string;
 };
 
-export function NavMobileMenu({ items, activeSection }: Props) {
+export function NavMobileMenu({ items, activeSection, buildHref }: Props) {
   const t = useTranslations();
   const [open, setOpen] = useState(false);
 
@@ -84,7 +86,7 @@ export function NavMobileMenu({ items, activeSection }: Props) {
             return (
               <li key={item.href}>
                 <a
-                  href={item.href}
+                  href={buildHref(item.href)}
                   onClick={onItemClick}
                   aria-current={isActive ? "true" : undefined}
                   className={`block py-2 type-label transition-colors ${

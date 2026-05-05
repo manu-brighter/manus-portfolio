@@ -63,6 +63,14 @@ export function Nav() {
   const startTransition = useViewTransition();
   const [activeSection, setActiveSection] = useState<string | null>(null);
 
+  // Hash-anchors only resolve on the home route, since the sections live
+  // there. On sub-routes (/playground/[slug], /impressum, /datenschutz)
+  // we emit absolute paths so the browser navigates home + scrolls to
+  // the anchor in one click. `usePathname()` returns the locale-stripped
+  // path, so "/" === home.
+  const onHome = pathname === "/";
+  const buildHref = (hash: string) => (onHome ? hash : `/${currentLocale}/${hash}`);
+
   // Scroll-spy: tracks which page section currently sits in the central
   // viewport band. rootMargin "-20% 0px -70% 0px" treats a section as
   // active only once its top crosses into the 20%–30% viewport strip,
@@ -99,7 +107,11 @@ export function Nav() {
         </Link>
 
         <div className="flex items-center gap-6 md:gap-10">
-          <NavMobileMenu items={NAV_ITEMS_MOBILE} activeSection={activeSection} />
+          <NavMobileMenu
+            items={NAV_ITEMS_MOBILE}
+            activeSection={activeSection}
+            buildHref={buildHref}
+          />
           <ul className="hidden items-center gap-5 md:flex md:gap-7">
             {NAV_ITEMS_DESKTOP.map((item) => {
               const sectionId = item.href.replace("#", "");
@@ -107,7 +119,7 @@ export function Nav() {
               return (
                 <li key={item.href}>
                   <a
-                    href={item.href}
+                    href={buildHref(item.href)}
                     aria-current={isActive ? "true" : undefined}
                     className={`type-label transition-colors ${
                       isActive ? "text-ink" : "text-ink-soft hover:text-ink"
