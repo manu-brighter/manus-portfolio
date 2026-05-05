@@ -28,14 +28,14 @@ export function HighlightStation({
   rotate = 2,
 }: Props) {
   return (
-    <div className="flex h-full flex-col items-start justify-center gap-8 px-12 md:flex-row md:items-center md:gap-12">
+    <div className="flex h-full flex-col items-start justify-center gap-6 px-6 md:flex-row md:items-center md:gap-8 md:px-8">
       <Polaroid
         aspect="16/9"
         rotate={rotate}
         spot={spot}
         datestamp={datestamp}
         caption={polaroidCaption}
-        className="w-full shrink-0 md:w-[460px]"
+        className="w-full shrink-0 md:w-[340px]"
       >
         <picture className="block h-full w-full">
           <source
@@ -56,7 +56,7 @@ export function HighlightStation({
           />
         </picture>
       </Polaroid>
-      <div className="max-w-md space-y-5">
+      <div className="max-w-xs space-y-4">
         <p className="type-label inline-flex items-center gap-2 text-ink">
           <span
             aria-hidden="true"

@@ -87,7 +87,7 @@ export function StationFrame({ spot, children, widthVw, offsetYVh, rotate }: Pro
   return (
     <div
       ref={containerRef}
-      className="relative h-screen flex-shrink-0"
+      className="relative mr-[6vw] h-screen flex-shrink-0 last:mr-0"
       style={{
         width: `${widthVw ?? 65}vw`,
         transform: `translateY(${effectiveOffsetY}vh) rotate(${effectiveRotate}deg)`,

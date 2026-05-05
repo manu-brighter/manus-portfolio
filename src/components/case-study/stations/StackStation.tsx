@@ -13,7 +13,7 @@ type Props = {
 
 export function StackStation({ heading, rule, intro, modules, stack }: Props) {
   return (
-    <div className="relative flex h-full max-w-2xl flex-col justify-center gap-6 px-12">
+    <div className="relative flex h-full max-w-sm flex-col justify-center gap-5 px-6 md:px-8">
       <p className="type-body text-ink-soft">{intro}</p>
       <StackNotebook
         heading={heading}
@@ -31,7 +31,7 @@ export function StackStation({ heading, rule, intro, modules, stack }: Props) {
       />
       <p className="type-body-sm text-ink-muted italic">{modules}</p>
       <PenScribble className="absolute -top-4 right-4 hidden md:block" />
-      <span className="absolute right-12 bottom-4 hidden font-mono text-[0.65rem] tracking-[0.2em] text-ink-muted md:block">
+      <span className="absolute right-6 bottom-4 hidden font-mono text-[0.65rem] tracking-[0.2em] text-ink-muted md:block">
         {rule}
       </span>
     </div>

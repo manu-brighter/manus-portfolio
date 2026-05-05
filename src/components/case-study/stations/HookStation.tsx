@@ -8,14 +8,14 @@ type Props = {
 
 export function HookStation({ hookText, datestamp, polaroidCaption }: Props) {
   return (
-    <div className="flex h-full flex-col items-start justify-center gap-8 px-12 md:flex-row md:items-center md:gap-16">
+    <div className="flex h-full flex-col items-start justify-center gap-6 px-6 md:gap-8 md:px-8">
       <Polaroid
         aspect="9/16"
         rotate={-3}
         spot="rose"
         datestamp={datestamp}
         caption={polaroidCaption}
-        className="w-[260px] shrink-0 md:w-[320px]"
+        className="w-[200px] shrink-0 md:w-[240px]"
       >
         <picture className="block h-full w-full">
           <source
@@ -36,7 +36,7 @@ export function HookStation({ hookText, datestamp, polaroidCaption }: Props) {
           />
         </picture>
       </Polaroid>
-      <blockquote className="max-w-md font-display italic text-ink text-[clamp(1.5rem,3vw,2.5rem)] leading-[1.2] tracking-[-0.01em]">
+      <blockquote className="max-w-sm font-display italic text-ink text-[clamp(1.25rem,2.4vw,2rem)] leading-[1.2] tracking-[-0.01em]">
         <span aria-hidden="true" className="mr-1 text-spot-amber">
           «
         </span>

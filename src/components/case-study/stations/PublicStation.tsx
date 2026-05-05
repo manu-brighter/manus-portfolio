@@ -30,8 +30,8 @@ export function PublicStation({
   footerExternal,
 }: Props) {
   return (
-    <div className="flex h-full max-w-5xl flex-col justify-center gap-12 px-12">
-      <div className="flex flex-wrap items-center gap-8">
+    <div className="flex h-full max-w-3xl flex-col justify-center gap-8 px-6 md:px-8">
+      <div className="flex flex-wrap items-center gap-6">
         {publicShots.map((s) => {
           const widths = s.aspect === "9/16" ? [360, 540, 720] : [480, 800, 1200];
           const fallbackW = s.aspect === "9/16" ? 540 : 800;
@@ -45,7 +45,7 @@ export function PublicStation({
               spot={s.spot}
               datestamp={s.datestamp}
               caption={s.caption}
-              className={s.aspect === "9/16" ? "w-[180px]" : "w-[300px]"}
+              className={s.aspect === "9/16" ? "w-[140px]" : "w-[240px]"}
             >
               <picture className="block h-full w-full">
                 <source

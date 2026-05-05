@@ -8,7 +8,7 @@ type Props = {
 
 export function WhatStation({ label, facts, storyParas }: Props) {
   return (
-    <div className="flex h-full max-w-3xl flex-col items-start justify-center gap-8 px-12">
+    <div className="flex h-full max-w-md flex-col items-start justify-center gap-6 px-6 md:px-8">
       <h3 className="type-h3 text-ink">{label}</h3>
       <dl className="grid grid-cols-[max-content_1fr] gap-x-6 gap-y-3">
         {facts.map((f) => (
