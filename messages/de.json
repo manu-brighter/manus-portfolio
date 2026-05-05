@@ -355,7 +355,7 @@
             "vibecoded": true
           },
           {
-            "name": "zustand",
+            "name": "zustand · State",
             "vibecoded": true
           },
           {
@@ -442,7 +442,7 @@
           "R3F",
           "WebGL Shader",
           "next-intl",
-          "zustand"
+          "zustand · State"
         ],
         "description": "Diese Seite. Fullscreen GPU-Fluid-Simulation als Hero, Risograph-inspirierte Editorial-Ästhetik, vibecoded in mehrwöchigen Sessions mit Claude Code.",
         "metaNote": "Du surfst gerade auf einer GPU-Fluid-Simulation. Kein Iframe, kein Video-Loop, keine Lottie-Datei. Echte Frames.",
