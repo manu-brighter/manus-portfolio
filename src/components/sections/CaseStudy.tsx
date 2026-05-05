@@ -119,10 +119,10 @@ export function CaseStudy() {
   // dark-ink fluid columns at viewport edges.
   return (
     <>
-      <h2 id="case-study-heading" className="sr-only">
-        {t("headline")}
-      </h2>
       <DioramaTrack mobileFallback={mobileFallback}>
+        <h2 id="case-study-heading" className="sr-only">
+          {t("headline")}
+        </h2>
         <DioramaIllustration />
         {adminHighlight && overlayHighlight ? (
           <DioramaCards
