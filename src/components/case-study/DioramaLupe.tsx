@@ -43,7 +43,7 @@ export function DioramaLupe() {
     <div
       aria-hidden="true"
       className="pointer-events-none absolute z-20"
-      style={{ left: "205vh", top: "38vh", width: "14vh", height: "14vh" }}
+      style={{ left: "183vh", top: "36vh", width: "14vh", height: "14vh" }}
     >
       <svg
         aria-hidden="true"

@@ -52,12 +52,14 @@ if (typeof window !== "undefined") {
 // ratio so splats produced as circles in FBO uv-space render as
 // circles (not stretched ovals) when composited back to the canvas.
 const FBO_SHORT_EDGE = 256;
-// Slow per-frame dissipation so columns can build up and persist for
-// continuous "wet ink" appearance. PhotoInkMask uses 0.998; we go
-// slightly more aggressive here because the splats are continuous
-// rather than a one-shot reveal.
-const DYE_DISSIPATION = 0.992;
-const SPLAT_INTERVAL_MS = 80;
+// Aggressive per-frame dissipation keeps the columns visually pinned
+// to the edges — without fast decay the curl-noise advection drifts
+// dye toward the centre and the columns read as a thick black blob
+// bleeding into the diorama. Compensated by tighter splat radius +
+// higher strength + denser SPLAT_INTERVAL_MS so the columns still
+// look continuous despite the rapid decay.
+const DYE_DISSIPATION = 0.94;
+const SPLAT_INTERVAL_MS = 45;
 // Dark ink against the page background. The column-mask shader draws
 // this colour with alpha proportional to density.
 const INK_RGB: readonly [number, number, number] = [0.04, 0.02, 0.03];
@@ -380,8 +382,8 @@ export function InkColumnFluidSim() {
         // page rather than columns).
         const yL = 0.1 + Math.random() * 0.8;
         const yR = 0.1 + Math.random() * 0.8;
-        injectSplat(glState, 0.02, yL, 0.12, 0.6);
-        injectSplat(glState, 0.98, yR, 0.12, 0.6);
+        injectSplat(glState, 0.02, yL, 0.05, 0.85);
+        injectSplat(glState, 0.98, yR, 0.05, 0.85);
       }
 
       advect(glState, dt, elapsedMs * 0.001);

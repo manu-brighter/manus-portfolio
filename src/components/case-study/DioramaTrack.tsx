@@ -94,7 +94,11 @@ export function DioramaTrack({ children, mobileFallback }: Props) {
 
   if (isMobile || reducedMotion) {
     return (
-      <section id="case-study" aria-labelledby="case-study-heading" className="relative py-20">
+      <section
+        id="case-study"
+        aria-labelledby="case-study-heading"
+        className="relative bg-paper py-20"
+      >
         {mobileFallback}
       </section>
     );
@@ -105,7 +109,7 @@ export function DioramaTrack({ children, mobileFallback }: Props) {
       ref={sectionRef}
       id="case-study"
       aria-labelledby="case-study-heading"
-      className="relative h-screen overflow-hidden"
+      className="relative h-screen overflow-hidden bg-paper"
     >
       <div ref={trackRef} className="relative h-full" style={{ width: `${TRACK_WIDTH_VH}vh` }}>
         {children}

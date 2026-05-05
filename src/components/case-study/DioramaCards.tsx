@@ -68,8 +68,8 @@ type Props = {
 type CardKey = "hook" | "what" | "stack" | "admin" | "overlay" | "public";
 
 const CARD_LAYOUT: Record<CardKey, CSSProperties> = {
-  hook: { left: "42vh", top: "29vh", width: "24vh", height: "38vh", transform: "rotate(-4deg)" },
-  what: { left: "82vh", top: "48vh", width: "38vh", height: "22vh", transform: "rotate(2deg)" },
+  hook: { left: "42vh", top: "26vh", width: "28vh", height: "44vh", transform: "rotate(-4deg)" },
+  what: { left: "85vh", top: "44vh", width: "44vh", height: "32vh", transform: "rotate(2deg)" },
   stack: { left: "128vh", top: "28vh", width: "24vh", height: "28vh", transform: "rotate(-7deg)" },
   admin: { left: "158vh", top: "30vh", width: "64vh", height: "60vh", transform: "rotate(3deg)" },
   overlay: {
