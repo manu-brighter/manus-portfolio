@@ -1,4 +1,20 @@
 {
+  "meta": {
+    "title": "Manuel Heller — Craft Portfolio",
+    "titleTemplate": "%s · Manuel Heller",
+    "description": "Portfolio of Manuel Heller, full-stack developer (PHP/Vue) at zvoove Switzerland with an eye for web design, photography, and shaders. Vibecoded with Claude Code.",
+    "keywords": [
+      "Manuel Heller",
+      "Portfolio",
+      "Full-Stack Developer",
+      "WebGL",
+      "Shader",
+      "Vibecoding",
+      "Riso Design",
+      "Switzerland",
+      "Basel"
+    ]
+  },
   "skipLink": {
     "label": "Skip to content"
   },

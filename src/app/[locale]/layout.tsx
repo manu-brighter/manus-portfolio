@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
@@ -9,10 +10,23 @@ import { Footer } from "@/components/ui/Footer";
 import { Loader } from "@/components/ui/Loader";
 import { Nav } from "@/components/ui/Nav";
 import { ScrollProgress } from "@/components/ui/ScrollProgress";
-import { routing } from "@/i18n/routing";
+import { type Locale, routing } from "@/i18n/routing";
+import { buildLocaleMetadata } from "@/lib/seo/metadata";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  if (!hasLocale(routing.locales, locale)) {
+    notFound();
+  }
+  return buildLocaleMetadata({ locale: locale as Locale, pathname: "" });
 }
 
 type LocaleLayoutProps = {
