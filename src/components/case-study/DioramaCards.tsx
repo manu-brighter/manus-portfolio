@@ -24,13 +24,10 @@ type PublicShot = {
 type Props = {
   hookText: string;
   hookStation: StationDateCaption;
+  storyParas: string[];
   whatLabel: string;
   facts: Fact[];
-  storyParas: string[];
   stackHeading: string;
-  stackRule: string;
-  platformIntro: string;
-  platformModules: string;
   stack: StackRow[];
   adminKicker: string;
   adminTitle: string;
@@ -60,26 +57,29 @@ type Props = {
  * scales consistently across normal and ultrawide displays. The track
  * is 420vh wide; each card's left/top is defined relative to that.
  *
- * Positions match the v3 mockup approved during brainstorming
- * (2026-05-05). Hook polaroid enlarged 20% from prior iteration as
- * eye-catcher.
+ * Polish-J layout (2026-05-05):
+ *   - Hook enlarged to 60×54 (polaroid + storyParas side-by-side)
+ *   - WhatCard shrunk to 42×22 (label + dl only, story moved to Hook)
+ *   - StackCard widened to 42×26 + repositioned under WhatCard
+ *   - Admin/Overlay enlarged to 72×64 (taller for text overflow fix)
+ *   - Admin moved up (top 24→18); Overlay moved up (top 16→14)
  */
 
 type CardKey = "hook" | "what" | "stack" | "admin" | "overlay" | "public";
 
 const CARD_LAYOUT: Record<CardKey, CSSProperties> = {
-  hook: { left: "42vh", top: "22vh", width: "28vh", height: "54vh", transform: "rotate(-4deg)" },
-  what: { left: "85vh", top: "22vh", width: "44vh", height: "44vh", transform: "rotate(2deg)" },
-  stack: { left: "134vh", top: "22vh", width: "24vh", height: "44vh", transform: "rotate(-7deg)" },
-  admin: { left: "163vh", top: "24vh", width: "64vh", height: "58vh", transform: "rotate(3deg)" },
+  hook: { left: "22vh", top: "22vh", width: "60vh", height: "54vh", transform: "rotate(-3deg)" },
+  what: { left: "90vh", top: "22vh", width: "42vh", height: "22vh", transform: "rotate(2deg)" },
+  stack: { left: "90vh", top: "50vh", width: "42vh", height: "26vh", transform: "rotate(-7deg)" },
+  admin: { left: "140vh", top: "18vh", width: "72vh", height: "64vh", transform: "rotate(3deg)" },
   overlay: {
-    left: "232vh",
-    top: "16vh",
-    width: "64vh",
-    height: "58vh",
+    left: "218vh",
+    top: "14vh",
+    width: "72vh",
+    height: "64vh",
     transform: "rotate(-3deg)",
   },
-  public: { left: "301vh", top: "22vh", width: "110vh", height: "58vh", transform: "rotate(2deg)" },
+  public: { left: "296vh", top: "22vh", width: "110vh", height: "58vh", transform: "rotate(2deg)" },
 };
 
 export function DioramaCards(props: Props) {
@@ -90,19 +90,14 @@ export function DioramaCards(props: Props) {
           hookText={props.hookText}
           datestamp={props.hookStation.datestamp}
           polaroidCaption={props.hookStation.polaroidCaption ?? ""}
+          storyParas={props.storyParas}
         />
       </article>
       <article style={{ position: "absolute", ...CARD_LAYOUT.what }}>
-        <WhatCard label={props.whatLabel} facts={props.facts} storyParas={props.storyParas} />
+        <WhatCard label={props.whatLabel} facts={props.facts} />
       </article>
       <article style={{ position: "absolute", ...CARD_LAYOUT.stack }}>
-        <StackCard
-          heading={props.stackHeading}
-          rule={props.stackRule}
-          intro={props.platformIntro}
-          modules={props.platformModules}
-          stack={props.stack}
-        />
+        <StackCard heading={props.stackHeading} stack={props.stack} />
       </article>
       <article style={{ position: "absolute", ...CARD_LAYOUT.admin }}>
         <AdminHighlightCard

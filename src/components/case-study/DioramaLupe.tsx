@@ -10,10 +10,10 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
  * DioramaIllustration so it can sit on top of cards in z-order rather
  * than behind them.
  *
- * Position: anchored ABOVE the Admin card so the lens overlaps the
- * upper portion of the polaroid from outside the card. Animation is a
- * generous horizontal sweep on the wrapper itself (~+/-20vh real-world
- * movement) on a 5s sine loop, gated on prefers-reduced-motion.
+ * Position: anchored ABOVE the Admin card (which now sits at left=140,
+ * width=72 → horizontal center 176vh; wrapper width 18vh → left 167vh).
+ * Animation is a generous horizontal sweep on the wrapper (±25vh) on a
+ * 5.5s sine loop, gated on prefers-reduced-motion.
  */
 export function DioramaLupe() {
   const reducedMotion = useReducedMotion();
@@ -25,10 +25,10 @@ export function DioramaLupe() {
     if (!w) return;
     const tween = gsap.fromTo(
       w,
-      { x: "-20vh" },
+      { x: "-25vh" },
       {
-        x: "20vh",
-        duration: 5,
+        x: "25vh",
+        duration: 5.5,
         ease: "sine.inOut",
         yoyo: true,
         repeat: -1,
@@ -44,11 +44,11 @@ export function DioramaLupe() {
       ref={wrapperRef}
       aria-hidden="true"
       className="pointer-events-none absolute z-20"
-      style={{ left: "186vh", top: "14vh", width: "18vh", height: "18vh" }}
+      style={{ left: "167vh", top: "8vh", width: "18vh", height: "18vh" }}
     >
       <svg
         aria-hidden="true"
-        viewBox="0 0 145 145"
+        viewBox="0 0 155 155"
         preserveAspectRatio="xMidYMid meet"
         className="h-full w-full"
       >
@@ -66,12 +66,13 @@ export function DioramaLupe() {
           <line
             x1={100}
             y1={100}
-            x2={138}
-            y2={138}
+            x2={142}
+            y2={142}
             stroke="var(--color-ink)"
-            strokeWidth={6}
+            strokeWidth={7}
             strokeLinecap="round"
           />
+          <circle cx={146} cy={146} r={5} fill="var(--color-ink)" />
         </g>
       </svg>
     </div>

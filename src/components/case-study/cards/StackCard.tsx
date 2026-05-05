@@ -4,20 +4,17 @@ type StackRow = { tech: string; use: string; why?: string };
 
 type Props = {
   heading: string;
-  rule: string;
-  intro: string;
-  modules: string;
   stack: StackRow[];
 };
 
 /**
- * StackCard — Card 3 of the Diorama. Notebook-style with tech-stack
- * list. Rotated -7° via parent. Sized 240×280.
+ * StackCard — Card 3 of the Diorama. Just a notebook-style stack list.
+ * Intro/modules/rule were dropped after visual review — Stack-Notiz
+ * alone is enough; the surrounding props introduced visual noise.
  */
-export function StackCard({ heading, rule, intro, modules, stack }: Props) {
+export function StackCard({ heading, stack }: Props) {
   return (
     <div className="flex h-full flex-col gap-2">
-      <p className="text-[clamp(0.8rem,1.1vh,1.05rem)] leading-snug text-ink-soft">{intro}</p>
       <StackNotebook
         heading={heading}
         items={
@@ -32,10 +29,6 @@ export function StackCard({ heading, rule, intro, modules, stack }: Props) {
           </ul>
         }
       />
-      <p className="text-[clamp(0.7rem,1vh,0.95rem)] text-ink-muted italic">{modules}</p>
-      <p className="font-mono text-[clamp(0.625rem,0.9vh,0.875rem)] tracking-[0.2em] text-ink-muted uppercase">
-        {rule}
-      </p>
     </div>
   );
 }

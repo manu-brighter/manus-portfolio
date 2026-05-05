@@ -44,9 +44,10 @@ export function PublicCard({
           const fallbackW = s.aspect === "9/16" ? 540 : 800;
           const renderHeight = s.aspect === "9/16" ? 960 : 450;
           const renderWidth = s.aspect === "9/16" ? 540 : 800;
-          // Diagonal stagger: first polaroid lower (avoids coffee mug above-left),
-          // second at top, third halfway down — creates a fan-out cascade.
-          const offsetTopVh = [10, 0, 5][i] ?? 0;
+          // Diagonal stagger: first polaroid pushed further down to clear
+          // the coffee mug above-left; second at top, third halfway down —
+          // creates a fan-out cascade.
+          const offsetTopVh = [18, 0, 5][i] ?? 0;
           return (
             <div
               key={s.slug}

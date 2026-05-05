@@ -25,14 +25,14 @@ export function DioramaIllustration() {
     >
       {/* Comic-style table-edge outlines (top + bottom) */}
       <path
-        d="M 110 50 Q 600 35, 1200 60 Q 1800 40, 2400 65 Q 3000 45, 3600 65 L 4090 65"
+        d="M 110 120 Q 600 105, 1200 130 Q 1800 110, 2400 135 Q 3000 115, 3600 135 L 4090 135"
         stroke="var(--color-ink)"
         strokeWidth={3}
         fill="none"
         strokeLinecap="round"
       />
       <path
-        d="M 110 860 Q 700 875, 1300 860 Q 1900 880, 2500 865 Q 3100 875, 3700 860 L 4090 860"
+        d="M 110 960 Q 700 975, 1300 960 Q 1900 980, 2500 965 Q 3100 975, 3700 960 L 4090 960"
         stroke="var(--color-ink)"
         strokeWidth={3}
         fill="none"
@@ -143,8 +143,8 @@ export function DioramaIllustration() {
         <rect x={-15} y={0} width={15} height={14} fill="var(--color-ink)" />
       </g>
 
-      {/* Ruler */}
-      <g transform="translate(1900, 760) rotate(15)">
+      {/* Ruler — placed below WhatCard */}
+      <g transform="translate(880, 460) rotate(8)">
         <rect
           x={0}
           y={0}

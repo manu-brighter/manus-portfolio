@@ -72,15 +72,10 @@ export function CaseStudy() {
         hookText={t("hook")}
         datestamp={hookStation.datestamp}
         polaroidCaption={hookStation.polaroidCaption ?? ""}
+        storyParas={storyParas}
       />
-      <WhatCard label={t("context.label")} facts={facts} storyParas={storyParas} />
-      <StackCard
-        heading={stackStation.heading}
-        rule={stackStation.rule}
-        intro={t("platform.intro")}
-        modules={t("platform.modules")}
-        stack={stack}
-      />
+      <WhatCard label={t("context.label")} facts={facts} />
+      <StackCard heading={stackStation.heading} stack={stack} />
       {adminHighlight ? (
         <AdminHighlightCard
           kicker={adminHighlight.kicker}
@@ -126,13 +121,10 @@ export function CaseStudy() {
         <DioramaCards
           hookText={t("hook")}
           hookStation={hookStation}
+          storyParas={storyParas}
           whatLabel={t("context.label")}
           facts={facts}
-          storyParas={storyParas}
           stackHeading={stackStation.heading}
-          stackRule={stackStation.rule}
-          platformIntro={t("platform.intro")}
-          platformModules={t("platform.modules")}
           stack={stack}
           adminKicker={adminHighlight.kicker}
           adminTitle={adminHighlight.title}
