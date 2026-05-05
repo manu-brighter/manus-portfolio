@@ -24,6 +24,10 @@ out/
 *.log
 .turbo/
 coverage/
+# Next.js auto-generated TypeScript reference — content differs between
+# `next dev` (`./.next/dev/types/...`) and `next build` (`./.next/types/...`).
+# Regenerated on every dev/build invocation; never commit.
+next-env.d.ts
 playwright-report/
 test-results/
 .lighthouseci/
