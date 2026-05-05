@@ -32,9 +32,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         priority: path === "" ? 1.0 : 0.5,
         alternates: {
           languages: Object.fromEntries(
-            routing.locales
-              .filter((l) => l !== locale)
-              .map((l) => [l, `${SITE.url}/${l}${path}/`]),
+            routing.locales.filter((l) => l !== locale).map((l) => [l, `${SITE.url}/${l}${path}/`]),
           ),
         },
       });
