@@ -79,7 +79,7 @@ const CARD_LAYOUT: Record<CardKey, CSSProperties> = {
     height: "64vh",
     transform: "rotate(-3deg)",
   },
-  public: { left: "296vh", top: "22vh", width: "110vh", height: "58vh", transform: "rotate(2deg)" },
+  public: { left: "296vh", top: "22vh", width: "110vh", height: "62vh", transform: "rotate(2deg)" },
 };
 
 export function DioramaCards(props: Props) {
