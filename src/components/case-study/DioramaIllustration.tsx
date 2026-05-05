@@ -25,7 +25,7 @@ export function DioramaIllustration() {
     >
       {/* Comic-style table-edge outlines (top + bottom) */}
       <path
-        d="M 110 120 Q 600 105, 1200 130 Q 1800 110, 2400 135 Q 3000 115, 3600 135 L 4090 135"
+        d="M 110 90 Q 600 75, 1200 100 Q 1800 80, 2400 105 Q 3000 85, 3600 105 L 4090 105"
         stroke="var(--color-ink)"
         strokeWidth={3}
         fill="none"
@@ -129,7 +129,7 @@ export function DioramaIllustration() {
       </g>
 
       {/* Pencil */}
-      <g transform="translate(1100, 110) rotate(-20)">
+      <g transform="translate(1100, 145) rotate(-20)">
         <rect
           x={0}
           y={0}
