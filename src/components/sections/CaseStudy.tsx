@@ -9,6 +9,7 @@ import { StackCard } from "@/components/case-study/cards/StackCard";
 import { WhatCard } from "@/components/case-study/cards/WhatCard";
 import { DioramaCards } from "@/components/case-study/DioramaCards";
 import { DioramaIllustration } from "@/components/case-study/DioramaIllustration";
+import { DioramaLupe } from "@/components/case-study/DioramaLupe";
 import { DioramaTrack } from "@/components/case-study/DioramaTrack";
 import { InkColumnFluidSim } from "@/components/case-study/InkColumnFluidSim";
 
@@ -157,6 +158,7 @@ export function CaseStudy() {
             footerExternal={t("footerLink.external")}
           />
         ) : null}
+        <DioramaLupe />
       </DioramaTrack>
       <InkColumnFluidSim />
     </>

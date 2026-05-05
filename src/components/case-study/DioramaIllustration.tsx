@@ -1,44 +1,21 @@
-"use client";
-
-import gsap from "gsap";
-import { useEffect, useRef } from "react";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
-
 /**
  * DioramaIllustration — single SVG component rendering all background
  * elements of the Case Study diorama:
  *   - Comic-style table-edge outlines (top + bottom)
- *   - Embedded tools: camera, hot-shoe flash, pencil, ruler, lupe,
- *     coffee mug top-down
+ *   - Embedded tools: camera, hot-shoe flash, pencil, ruler, coffee mug
+ *     top-down
  *   - Decorative ink splats (Riso spot colors, scattered)
  *
- * ViewBox 4200×1000, preserveAspectRatio xMidYMid meet. Rendered at
+ * ViewBox 4200x1000, preserveAspectRatio xMidYMid meet. Rendered at
  * h-full inside DioramaTrack (track is 420vh wide, so SVG fills track).
  *
- * The Lupe element bobs ±2px y in a 3s sine loop (preserves the prior
- * Lupe.tsx animation behaviour). Other tools are static.
+ * The Lupe (magnifier) used to live here; it's been extracted into
+ * DioramaLupe.tsx so it can sit on TOP of DioramaCards in z-order.
+ * This component is now purely presentational (no hooks, no animation),
+ * safe to render as a server component.
  */
 
 export function DioramaIllustration() {
-  const reducedMotion = useReducedMotion();
-  const lupeRef = useRef<SVGGElement>(null);
-
-  useEffect(() => {
-    if (reducedMotion) return;
-    const lupe = lupeRef.current;
-    if (!lupe) return;
-    const tween = gsap.to(lupe, {
-      y: -2,
-      duration: 1.5,
-      ease: "sine.inOut",
-      yoyo: true,
-      repeat: -1,
-    });
-    return () => {
-      tween.kill();
-    };
-  }, [reducedMotion]);
-
   return (
     <svg
       aria-hidden="true"
@@ -216,29 +193,6 @@ export function DioramaIllustration() {
           fill="none"
           stroke="var(--color-ink)"
           strokeWidth={3}
-        />
-      </g>
-
-      {/* Lupe (magnifier) — over Admin polaroid; bobs via GSAP */}
-      <g ref={lupeRef} transform="translate(2050, 380) rotate(-12)">
-        <circle cx={40} cy={40} r={55} fill="none" stroke="var(--color-ink)" strokeWidth={4} />
-        <circle
-          cx={40}
-          cy={40}
-          r={44}
-          fill="var(--color-paper-tint)"
-          opacity={0.4}
-          stroke="var(--color-ink)"
-          strokeWidth={1}
-        />
-        <line
-          x1={86}
-          y1={86}
-          x2={135}
-          y2={135}
-          stroke="var(--color-ink)"
-          strokeWidth={6}
-          strokeLinecap="round"
         />
       </g>
 
