@@ -2,8 +2,9 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { useViewTransition } from "@/components/motion/useViewTransition";
 import { NavMobileMenu } from "@/components/ui/NavMobileMenu";
-import { Link, usePathname } from "@/i18n/navigation";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { routing } from "@/i18n/routing";
 
@@ -58,6 +59,8 @@ export function Nav() {
   const t = useTranslations();
   const currentLocale = useLocale();
   const pathname = usePathname();
+  const router = useRouter();
+  const startTransition = useViewTransition();
   const [activeSection, setActiveSection] = useState<string | null>(null);
 
   // Scroll-spy: tracks which page section currently sits in the central
@@ -131,10 +134,10 @@ export function Nav() {
 
               return (
                 <li key={locale}>
-                  <Link
-                    href={pathname}
-                    locale={locale}
-                    hrefLang={locale}
+                  <button
+                    type="button"
+                    onClick={() => startTransition(() => router.replace(pathname, { locale }))}
+                    {...{ hrefLang: locale }}
                     aria-current={isActive ? "true" : undefined}
                     aria-label={label}
                     className={`type-label no-underline transition-colors ${
@@ -142,7 +145,7 @@ export function Nav() {
                     }`}
                   >
                     {locale.toUpperCase()}
-                  </Link>
+                  </button>
                 </li>
               );
             })}
