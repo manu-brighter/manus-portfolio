@@ -57,7 +57,7 @@
     "postcss": "^8.5.14",
     "raw-loader": "^4.0.2",
     "tailwindcss": "^4.2.4",
-    "typescript": "^5.7.0"
+    "typescript": "^6.0.3"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
