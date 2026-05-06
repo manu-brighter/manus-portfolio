@@ -1,9 +1,12 @@
 // src/components/case-study/Lightbox.tsx
 "use client";
 
+import gsap from "gsap";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef } from "react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useLightboxStore } from "@/lib/lightboxStore";
+import { dur, ease } from "@/lib/motion/tokens";
 
 /**
  * Lightbox — case-study image zoom modal.
@@ -16,12 +19,18 @@ import { useLightboxStore } from "@/lib/lightboxStore";
  * Touch swipe in Task 8. This task ships the open/close lifecycle and
  * the image rendering only.
  */
+const easeExpoCSS = `cubic-bezier(${ease.expo[0]}, ${ease.expo[1]}, ${ease.expo[2]}, ${ease.expo[3]})`;
+
 export function Lightbox() {
   const t = useTranslations("caseStudy.lightbox");
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const activeIndex = useLightboxStore((s) => s.activeIndex);
   const images = useLightboxStore((s) => s.images);
   const close = useLightboxStore((s) => s.close);
+  const reducedMotion = useReducedMotion();
+  const sourceRect = useLightboxStore((s) => s.sourceRect);
+  const figureRef = useRef<HTMLElement | null>(null);
+  const previousIndexRef = useRef<number | null>(null);
 
   const onBackdropClick = useCallback(
     (e: React.MouseEvent<HTMLDialogElement>) => {
@@ -62,6 +71,51 @@ export function Lightbox() {
     return () => dialog.removeEventListener("close", onClose);
   }, [close]);
 
+  useEffect(() => {
+    const figure = figureRef.current;
+    if (!figure || activeIndex === null) {
+      previousIndexRef.current = activeIndex;
+      return;
+    }
+    // Only run the FLIP open timeline on a TRANSITION from closed → open.
+    // Nav transitions (number → number) are handled in Task 7.
+    const wasClosed = previousIndexRef.current === null;
+    previousIndexRef.current = activeIndex;
+    if (!wasClosed) return;
+
+    // Reduced motion: simple opacity fade, skip FLIP entirely.
+    if (reducedMotion) {
+      gsap.fromTo(figure, { opacity: 0 }, { opacity: 1, duration: dur.short });
+      return;
+    }
+
+    if (!sourceRect) return;
+    // Capture target rect AFTER the dialog has rendered the figure at
+    // its target position. Read it from the live element.
+    const target = figure.getBoundingClientRect();
+    const dx = sourceRect.left + sourceRect.width / 2 - (target.left + target.width / 2);
+    const dy = sourceRect.top + sourceRect.height / 2 - (target.top + target.height / 2);
+    const sx = sourceRect.width / target.width;
+    const sy = sourceRect.height / target.height;
+    // Use the smaller scale so the source-rect aspect doesn't squish
+    // the target — visually the figure starts at source size, then
+    // grows. Slight aspect mismatch between polaroid frame and full
+    // image is acceptable for a 300ms transient.
+    const s = Math.min(sx, sy);
+    gsap.fromTo(
+      figure,
+      { x: dx, y: dy, scale: s, opacity: 0 },
+      {
+        x: 0,
+        y: 0,
+        scale: 1,
+        opacity: 1,
+        duration: dur.short,
+        ease: easeExpoCSS,
+      },
+    );
+  }, [activeIndex, reducedMotion, sourceRect]);
+
   // Don't render the dialog content tree at all when closed — keeps
   // the DOM clean for the visual baseline and avoids hidden image
   // network requests.
@@ -81,7 +135,7 @@ export function Lightbox() {
       className="m-0 max-h-screen max-w-full bg-transparent backdrop:bg-paper-tint/85 backdrop:backdrop-blur-sm p-0 outline-none"
     >
       <div className="grid h-screen w-screen place-items-center px-8 py-8">
-        <figure className="relative">
+        <figure ref={figureRef} className="relative">
           <picture
             className="block border-[2px] border-ink shadow-[6px_6px_0_var(--color-spot-rose)]"
             style={{ aspectRatio: image.aspect }}
