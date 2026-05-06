@@ -96,8 +96,10 @@ export function NavMobileMenu({ items, activeSection, buildHref, onAnchorClick }
                   href={buildHref(item.href)}
                   onClick={(e) => onItemClick(e, item.href)}
                   aria-current={isActive ? "true" : undefined}
-                  className={`block py-2 type-label transition-colors ${
-                    isActive ? "text-ink" : "text-ink-soft hover:text-ink"
+                  className={`relative block py-2 type-label transition-colors active:scale-[0.97] active:duration-100 after:pointer-events-none after:absolute after:bottom-1 after:left-0 after:h-[1.5px] after:w-12 after:origin-left after:bg-ink after:transition-transform after:duration-300 after:ease-out after:content-[''] hover:after:scale-x-100 ${
+                    isActive
+                      ? "text-ink after:scale-x-100"
+                      : "text-ink-soft after:scale-x-0 hover:text-ink"
                   }`}
                 >
                   {t(`nav.items.${item.key}`)}
