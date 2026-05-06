@@ -1,12 +1,16 @@
+"use client";
+
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import type { MouseEvent as ReactMouseEvent } from "react";
+import { Link, useRouter } from "@/i18n/navigation";
 
 /**
  * Site footer — distinct paper-shade band with copyright, legal links,
  * and a Riso "stamp" signature line on the right.
  *
  * Layout (desktop, single row):
- *   [© · Basel-Region · MMXXVI · Impressum · Datenschutz]      [vibecoded · selbst gehostet · ohne tracker]
+ *   [© · Basel-Region · Impressum · Datenschutz]      [MH · STUDIO · MMXXVI]
  *
  * Mobile: stacks vertically (copyright+legal first, signature below).
  *
@@ -15,11 +19,13 @@ import { Link } from "@/i18n/navigation";
  * Phase 11). z-10 lifts the footer above the persistent FluidSim canvas
  * stacking context so the band is actually visible at scroll-bottom.
  *
- * The previous social-stamp row (GH/LI/IG/MAIL) was removed because
- * those handles already render as real links in the Contact section
- * directly above; duplicating them in the footer was redundant.
+ * Click handler kills all live ScrollTrigger pin-spacers BEFORE the
+ * route swap fires (same pattern as PlaygroundCard, see Phase 7
+ * deviation). Otherwise React's removeChild on the unmounting case-
+ * study section throws NotFoundError because the pin-spacer wraps
+ * the section, so it's no longer a direct child of <main>.
  *
- * Server component — no client-side state needed.
+ * Component must be "use client" because of the click handler.
  */
 
 const LEGAL_LINKS = [
@@ -32,6 +38,22 @@ const SIGNATURE_STAMPS = ["MH", "STUDIO", "MMXXVI"] as const;
 export function Footer() {
   const t = useTranslations("footer");
   const tNav = useTranslations("nav.items");
+  const router = useRouter();
+
+  const onLegalLinkClick =
+    (href: (typeof LEGAL_LINKS)[number]["href"]) =>
+    (e: ReactMouseEvent<HTMLAnchorElement>) => {
+      // Respect modifier-clicks (open in new tab etc.) — don't intercept.
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+      e.preventDefault();
+      // Revert ALL ScrollTrigger pin spacers BEFORE the route change
+      // unmounts the home page tree. Otherwise React's removeChild
+      // fails because a pin-spacer div wraps the case-study section,
+      // so the section is no longer a direct child of <main>.
+      // kill(true) restores the original DOM hierarchy.
+      for (const trigger of ScrollTrigger.getAll()) trigger.kill(true);
+      router.push(href);
+    };
 
   return (
     <footer className="relative z-10 border-paper-line border-t-2 bg-paper-shade">
@@ -48,6 +70,7 @@ export function Footer() {
               {i > 0 ? <span aria-hidden="true"> · </span> : null}
               <Link
                 href={link.href}
+                onClick={onLegalLinkClick(link.href)}
                 className="text-ink underline decoration-ink-soft underline-offset-2 transition-colors hover:decoration-ink"
                 aria-label={tNav(link.key)}
               >
