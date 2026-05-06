@@ -14,8 +14,12 @@ test.describe("@case-study fallback breakpoint", () => {
     await expect(track, "diorama track must mount on desktop").toHaveCount(1);
   });
 
-  test("low-height viewport ≤899px renders vertical fallback", async ({ page }) => {
-    await page.setViewportSize({ width: 1366, height: 768 });
+  test("low-height viewport ≤699px renders vertical fallback", async ({ page }) => {
+    // Threshold lowered from 899 -> 700 in commit 227ab10 to keep
+    // 1920x1200 monitors at 125% Windows DPI scaling (effective
+    // viewport ~744px) on the desktop diorama. Test viewport must
+    // therefore be < 700px height to assert the fallback branch.
+    await page.setViewportSize({ width: 1366, height: 600 });
     await page.goto("/de/");
     const section = page.locator("section#case-study");
     await expect(section).toBeVisible();

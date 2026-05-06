@@ -54,6 +54,11 @@ const REVEAL_DURATION_MS = 3000;
 // Centre re-injection cadence. Without this the centre slowly drains
 // (dissipation 0.998/frame); cheap re-injections keep d ≈ 1.0 there.
 const REINJECT_INTERVAL_MS = 120;
+// Centre fade-in: spreads the initial density build-up across
+// multiple frames so the ink swells in instead of popping in.
+// 25 frames at ~60fps ≈ 400ms.
+const FADE_IN_SPLATS = 25;
+const FADE_IN_PEAK_STRENGTH = 0.07;
 // Outward radial-velocity peak (texture units / sec). Tuned against
 // REVEAL_DURATION_MS so the wavefront just reaches the corners with
 // enough headroom for the boundary to settle (smoothstep cutoff 0.85).
@@ -213,6 +218,11 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
     // Reveal-clock state
     let burstStart: number | null = null;
     let lastReinjectAt = 0;
+    // Counter for the centre fade-in phase: replaces the original
+    // single-frame strength:0.85 splat (which felt like an instant
+    // pop) with FADE_IN_SPLATS small per-frame splats that ramp the
+    // centre density gradually over ~400ms.
+    let fadeInSplatsFired = 0;
     // `locked` declared here (above the pointermove listener that closes
     // over it) so the read order matches the write order — earlier this
     // sat below `addEventListener` and worked only by closure-capture.
@@ -373,13 +383,15 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
       // and we save GPU cycles.
       if (!inViewport && burstStart === null) return;
 
-      // First reveal-true frame: anchor the clock and fire one strong
-      // centre splat — the "clean free splat in the middle" that the
-      // outward velocity field will then carry to the edges.
+      // First reveal-true frame: anchor the clock. NO instant splat —
+      // the FADE_IN_SPLATS phase below builds the centre density
+      // gradually over the first ~400ms, replacing the previous
+      // single-frame strength:0.85 splat that felt like an instant
+      // pop.
       if (revealRef.current && burstStart === null) {
         burstStart = elapsedMs;
-        runSplat({ x: 0.5, y: 0.5, radius: 0.18, strength: 0.85 });
         lastReinjectAt = elapsedMs;
+        fadeInSplatsFired = 0;
       }
 
       // Reveal progress 0..1 (0 while we're in pre-reveal ambient).
@@ -393,12 +405,28 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
       const dt = Math.min(deltaMs * 0.001, 0.033);
       runAdvect(dt, elapsedMs * 0.001, outwardSpeedAt(progress));
 
-      // Centre re-injection — only during the reveal burst window.
-      // Radial advection drains the centre as density transports
-      // outward; we drip small splats back in through the first ~85%
-      // of the reveal to keep d ≈ 1.0 there.
+      // Fade-in phase: tiny per-frame splats with linearly-growing
+      // strength build the centre density smoothly from 0 → ~0.9 over
+      // the first ~400ms. The advection's outward speed is also still
+      // ramping (0..25%) so the ink visibly swells out as it fills in.
+      if (burstStart !== null && fadeInSplatsFired < FADE_IN_SPLATS) {
+        const f = fadeInSplatsFired / FADE_IN_SPLATS;
+        // Ease-out curve: starts very subtle, accelerates toward the
+        // tail of the fade-in so the transition into the steady-state
+        // re-injection is seamless.
+        const strength = FADE_IN_PEAK_STRENGTH * (0.4 + 0.6 * f * f);
+        runSplat({ x: 0.5, y: 0.5, radius: 0.18, strength });
+        fadeInSplatsFired++;
+        lastReinjectAt = elapsedMs;
+      }
+
+      // Centre re-injection — only AFTER fade-in completes and during
+      // the reveal burst window. Radial advection drains the centre
+      // as density transports outward; we drip small splats back in
+      // through the first ~85% of the reveal to keep d ≈ 1.0 there.
       if (
         burstStart !== null &&
+        fadeInSplatsFired >= FADE_IN_SPLATS &&
         progress < 0.85 &&
         elapsedMs - lastReinjectAt >= REINJECT_INTERVAL_MS
       ) {

@@ -48,6 +48,10 @@ type Props = {
   footerDomain: string;
   footerUrl: string;
   footerExternal: string;
+  hookOnClick?: () => void;
+  adminOnClick?: () => void;
+  overlayOnClick?: () => void;
+  publicOnShotClick?: (shotIndex: number) => void;
 };
 
 /**
@@ -84,6 +88,8 @@ export function DioramaCards(props: Props) {
           hookText={props.hookText}
           datestamp={props.hookStation.datestamp}
           polaroidCaption={props.hookStation.polaroidCaption ?? ""}
+          lightboxIndex={0}
+          onPolaroidClick={props.hookOnClick}
         />
       </article>
       <article style={{ position: "absolute", ...CARD_LAYOUT.what }}>
@@ -101,6 +107,8 @@ export function DioramaCards(props: Props) {
           screenshotAlt={props.adminScreenshotAlt}
           datestamp={props.adminStation.datestamp}
           polaroidCaption={props.adminStation.polaroidCaption ?? ""}
+          lightboxIndex={1}
+          onPolaroidClick={props.adminOnClick}
         />
       </article>
       <article style={{ position: "absolute", ...CARD_LAYOUT.overlay }}>
@@ -112,6 +120,8 @@ export function DioramaCards(props: Props) {
           screenshotAlt={props.overlayScreenshotAlt}
           datestamp={props.overlayStation.datestamp}
           polaroidCaption={props.overlayStation.polaroidCaption ?? ""}
+          lightboxIndex={2}
+          onPolaroidClick={props.overlayOnClick}
         />
       </article>
       <article style={{ position: "absolute", ...CARD_LAYOUT.public }}>
@@ -123,6 +133,8 @@ export function DioramaCards(props: Props) {
           footerDomain={props.footerDomain}
           footerUrl={props.footerUrl}
           footerExternal={props.footerExternal}
+          lightboxBaseIndex={3}
+          onShotClick={props.publicOnShotClick}
         />
       </article>
     </div>

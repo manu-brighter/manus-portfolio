@@ -4,6 +4,8 @@ type Props = {
   hookText: string;
   datestamp: string;
   polaroidCaption: string;
+  onPolaroidClick?: () => void;
+  lightboxIndex?: number;
 };
 
 /**
@@ -12,7 +14,13 @@ type Props = {
  * kämpfen alle..." passage — short, headline-ish prose with «...»
  * decoration.
  */
-export function HookCard({ hookText, datestamp, polaroidCaption }: Props) {
+export function HookCard({
+  hookText,
+  datestamp,
+  polaroidCaption,
+  onPolaroidClick,
+  lightboxIndex,
+}: Props) {
   return (
     <div className="flex h-full overflow-hidden gap-[clamp(0.625rem,1.5vh,1rem)]">
       <div className="flex-shrink-0" style={{ width: "44%" }}>
@@ -23,6 +31,8 @@ export function HookCard({ hookText, datestamp, polaroidCaption }: Props) {
           datestamp={datestamp}
           caption={polaroidCaption}
           className="w-full"
+          onClick={onPolaroidClick}
+          lightboxIndex={lightboxIndex}
         >
           <picture className="block h-full w-full">
             <source

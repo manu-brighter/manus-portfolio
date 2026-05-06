@@ -52,7 +52,7 @@
     }
   },
   "footer": {
-    "location": "Région bâloise",
+    "location": "Basel · Dev",
     "year": "MMXXVI",
     "socialAriaLabel": "Réseaux sociaux",
     "legalAriaLabel": "Liens légaux",
@@ -77,15 +77,15 @@
       "status": "Status · Booting"
     },
     "bioStamps": {
-      "role": "zvoove AG · Frontend",
-      "sideProject": "Joggediballa · VP",
+      "role": "zvoove · Full Stack",
+      "sideProject": "Jogge di Balla · VP",
       "location": "Basel-Region · CH"
     },
     "heading": {
       "family": "Heller,",
       "given": "Manuel."
     },
-    "tagline": "Portfolio artisanal, calibre Awwwards",
+    "tagline": "Portfolio-vitrine artisanal de Manu",
     "taglineSuffix": "démarrage …"
   },
   "about": {
@@ -97,7 +97,7 @@
         "id": "wer-ich-bin",
         "heading": "Wer ich bin",
         "body": [
-          "Ich bin Manuel, Full-Stack Developer bei der zvoove Switzerland AG, seit November 2021. Beruflich tief drin in PHP und Vue, privat eingehend mit Kameras, Shadern und allem was zwischen Code und Bild Spass macht. Ich glaube nicht an die Trennung von 'technisch' und 'kreativ'; die spannenden Sachen passieren genau dazwischen."
+          "Ich bin Manuel, Full-Stack Developer bei zvoove Switzerland AG, seit November 2021. Beruflich tief drin in PHP und Vue, privat eingehend mit Kameras, Photoshop und allem was zwischen Code und Bild Spass macht. Ich glaube nicht an die Trennung von 'technisch' und 'kreativ'; die spannenden Sachen passieren genau dazwischen."
         ]
       },
       {
@@ -112,7 +112,7 @@
         "id": "ai-workflow",
         "heading": "Wie ich mit AI arbeite",
         "body": [
-          "Eine AI ist wie ein Pinsel: ein Werkzeug, das die Kunst nicht alleine macht. Sie ist nur so gut wie der Plan und der Prompt, den man ihr gibt, und sie braucht jemanden mit Geschmack, Kreativität und einem klaren Bild davon, wo es hingehen soll. AI-generierte Websites sehen heute alle gleich aus, weil die meisten Leute der AI nur sagen was sie wollen, nicht wie.",
+          "Eine AI ist wie ein Pinsel: ein Werkzeug, das die Kunst nicht alleine macht. Sie ist nur so gut wie der Plan und der Prompt, den man ihr gibt, und sie braucht jemanden mit Geschmack, Kreativität und einem klaren Bild davon, wo es hingehen soll. AI-generierte Websites sehen heute alle gleich aus, weil die meisten Leute der AI die Kreativität überlassen.",
           "Ich nutze einen tief eingerichteten AI-Workflow: Custom Agents, Hooks, Skills, mehrstufige Prompts, klare Konventions-Dateien. Ich habe bisher zwei komplexe Webapps damit von Null auf produktionsreif gebracht (eine davon ist die Jogge di Balla-Plattform, die andere ist genau diese Seite hier). Die Kombination aus dieser Workflow-Tiefe und meinem visuellen Sinn aus Foto und Grafik ist das, was am Ende den Unterschied macht zwischen noch einer generischen Landing-Page und etwas, das man sich merkt."
         ]
       },
@@ -120,7 +120,7 @@
         "id": "antrieb",
         "heading": "Was mich antreibt",
         "body": [
-          "Neugier, ehrlich gesagt. Ich bin für fast alles zu begeistern, und ich bin überzeugt, dass man gerade jetzt, im AI-Zeitalter, mehr denn je dranbleiben muss. Wer aufhört zu lernen, ist innerhalb von 12 Monaten abgehängt. Mir macht das Lernen aber auch einfach Spass, also ist das kein Druck, sondern Default."
+          "Ich bin für fast alles zu begeistern und überzeugt: Gerade jetzt im KI-Zeitalter muss man mehr denn je dranbleiben. Wer aufhört zu lernen, ist innerhalb von 12 Monaten abgehängt. Mir macht das Aneignen neuer Skills aber einfach Spass, für mich ist das kein Druck, sondern der Default-Modus."
         ]
       },
       {
@@ -132,8 +132,8 @@
       }
     ],
     "portrait": {
-      "alt": "Portraitfoto von Manuel Heller",
-      "caption": "Basel-Region · MMXXVI",
+      "alt": "Portrait Manuel Heller, développeur full-stack Bâle",
+      "caption": "St. Moritz · MMXXV",
       "plate": "Plate Nº 03",
       "label": "Selbstporträt",
       "stamps": [
@@ -154,8 +154,8 @@
     "pullQuotes": {
       "werIchBin": "Die spannenden Sachen passieren genau [[dazwischen]].",
       "anfangen": "Ich will verstehen, [[wie das alles unter der Haube]] läuft.",
-      "aiWorkflow": "AI-generierte Websites sehen heute alle gleich aus, weil die meisten Leute der AI nur sagen was sie wollen, nicht [[wie]].",
-      "antrieb": "Wer aufhört zu [[lernen]], ist innerhalb von 12 Monaten abgehängt."
+      "aiWorkflow": "AI-generierte Websites sehen heute alle gleich aus, weil die meisten Leute der AI die [[Kreativität]] überlassen.",
+      "antrieb": "Was mich antreibt? [[Neugier]], ehrlich gesagt."
     },
     "marginalia": {
       "werIchBin": {
@@ -212,7 +212,7 @@
         },
         "tauchen": {
           "name": "Tiefe",
-          "caption": "diving · Wo's geht"
+          "caption": "diving · certified"
         },
         "pingpong": {
           "name": "Ping-Pong",
@@ -282,25 +282,25 @@
         "weight": "l",
         "items": [
           {
-            "name": "Cypress"
+            "name": "Yii"
           },
           {
             "name": "Docker"
           },
           {
+            "name": "Vite"
+          },
+          {
             "name": "GitLab"
           },
           {
-            "name": "Yii"
+            "name": "Cypress"
           },
           {
             "name": "OpenAPI · Swagger"
           },
           {
             "name": "nginx · Linux-Server-Admin"
-          },
-          {
-            "name": "Vite"
           }
         ]
       },
@@ -484,7 +484,7 @@
   },
   "caseStudy": {
     "headline": "Vom Vereins-Chaos zur eigenen Plattform.",
-    "hook": "Vereine kämpfen alle mit demselben Mist: Excel-Listen, statische Websites, isolierte Tools. Für Jogge di Balla habe ich das aufgeräumt — eine massgeschneiderte Plattform, die von Mitgliederverwaltung bis Twitch-Overlay alles abdeckt. Vibecoded, selbst gehostet, übertrieben.",
+    "hook": "Alle Vereine kämpfen alle mit demselben Mist: Excel-Listen, statische Websites, File-/Information-Sharing, isolierte Tools. Für Jogge di Balla habe ich das aufgeräumt — eine massgeschneiderte Plattform, die von Mitgliederverwaltung bis Twitch-Overlay alles abdeckt. Vibecoded, selbst gehostet, übertrieben.",
     "context": {
       "label": "Was ist Jogge di Balla?",
       "facts": [
@@ -498,7 +498,7 @@
         },
         {
           "key": "Gönner verwaltet",
-          "value": "68"
+          "value": "68+"
         },
         {
           "key": "Events / Jahr",
@@ -510,8 +510,8 @@
         }
       ],
       "story": [
-        "Idee zur Coronazeit: drei Freunde, nichts ging, also haben wir ausgefallene Events organisiert. Schlag den Kassier (an «Schlag den Raab» angelehnt, jeder kann sich gegen unseren Vereinskassier bewerben). Silvester 2.0 (im Frühling, für alle, die scheisse ins neue Jahr gestartet sind). Apres Ski Party (gab's so in der Region noch nicht).",
-        "Meine Rolle: Vize-Präsident, Web-Entwickler, Vereinsfotograf, Kameramann, Social-Media-Manager. Weil ich das Skillset hatte und Perfektionist genug bin, aus einer Vereins-Website eine selbst gehostete Webapp zu machen."
+        "Idee zur Coronazeit: vier Freunde, nichts ging, also haben wir ausgefallene Events unter Freunden gemacht. Aus dem wurde dann ein Verein mit öffentlichen Event-Klassikern wie Schlag den Kassier, Silvester 2.0, Harassenlauf oder der beliebten Lotto-Party.",
+        "Meine Rolle: Vize-Präsident, Web-Entwickler, Vereinsfotograf, Kameramann, Social-Media-Manager. Weil ich das Skillset hatte und Perfektionist genug bin, um dem Verein nicht nur ein Gesicht, sondern eine eigene, selbst gehostete Webapp zu verpassen."
       ]
     },
     "platform": {
@@ -544,7 +544,7 @@
           "id": "admin",
           "kicker": "Highlight 01 · Tech-Substanz",
           "title": "Das Admin-Dashboard",
-          "lede": "Für Besucher unsichtbar, für den Verein das Herzstück. Hier laufen alle Fäden zusammen.",
+          "lede": "Für Besucher unsichtbar, für die Website das Herzstück. Hier laufen alle Fäden zusammen.",
           "screenshot": "admin-dashboard",
           "screenshotAlt": "Admin-Dashboard mit Berechtigungs-Card und Mitgliederliste",
           "features": [
@@ -558,7 +558,7 @@
             },
             {
               "title": "Gönner-Lifecycle",
-              "body": "68 Sponsoren über das System. Status (aktiv / abgelaufen / neu) wird automatisch berechnet und auf der öffentlichen Sponsoren-Seite live gespiegelt."
+              "body": "Sponsoren über das System. Status (aktiv / abgelaufen / neu) automatisch berechnet mit Finanz- und Adressmanagement für unseren Kassier."
             }
           ]
         },
@@ -590,14 +590,20 @@
       "label": "Öffentliche Schicht"
     },
     "reflection": {
-      "label": "Was ich heute anders machen würde",
-      "body": "Extrem viel Zeit in Testing und Bugfixes geflossen. Heute würde ich von Anfang an mehr automatisierte Tests einbauen, plus AI-gestützte Test-Generation, um schneller iterieren zu können."
+      "label": "Lessons Learned",
+      "body": "Manuelles Testing hat mich damals viel Zeit gekostet. Heute würde ich das Setup von Anfang an mit automatisierten Tests und KI-Tools aufsetzen, um Fehler direkt im Keim zu ersticken und den Fokus voll aufs Deployment zu legen."
     },
     "footerLink": {
       "label": "Live im Einsatz",
       "url": "https://joggediballa.ch",
       "domain": "joggediballa.ch",
       "external": "öffnet in neuem Tab"
+    },
+    "lightbox": {
+      "closeLabel": "Lightbox schließen",
+      "previousLabel": "Vorheriges Bild",
+      "nextLabel": "Nächstes Bild",
+      "counterLabel": "{current} / {total}"
     },
     "stations": {
       "hook": {
@@ -639,7 +645,7 @@
     "techLabel": "SONY α7 IV · 24–600mm · seit 2023",
     "ctaLabel": "Volles Portfolio auf manuelheller.myportfolio.com",
     "ctaHref": "https://manuelheller.myportfolio.com/portfolio",
-    "ctaCaption": "Originale ohne Riso-Treatment, mit voller Galerie.",
+    "ctaCaption": "",
     "slides": {
       "koenigsegg": {
         "alt": "Koenigsegg-Hypercar unter einem Hotel-Bogen in der Abenddämmerung",
@@ -649,7 +655,7 @@
       },
       "panorama": {
         "alt": "Frachtschiffe vor einer dramatischen Wolkenformation am Horizont",
-        "stamp": "PANAMA · 2024 · SEASCAPE"
+        "stamp": "COSTA RICA · 2024 · SEASCAPE"
       },
       "treeLake": {
         "alt": "Einsamer Baum am Ufer eines Sees, Spiegelung im Wasser, Costa Rica",
@@ -663,7 +669,7 @@
       },
       "pelican": {
         "alt": "Pelikan im Anflug über dem Pazifik, Costa Rica",
-        "stamp": "COSTA RICA · 2024 · WILDLIFE"
+        "stamp": "MANUEL ANTONIO · 2024 · WILDLIFE"
       }
     }
   },
@@ -697,6 +703,7 @@
         "caption": "Tipp ein Wort. Es wird gedruckt, dann von der Tinte verschluckt. Sanft.",
         "inputLabel": "TIPPE EIN WORT",
         "inputPlaceholder": "Manuel",
+        "triggerLabel": "Wort erneut drucken",
         "reducedMotionNote": "Dieses Experiment druckt Wörter live in eine laufende Fluid-Simulation. Unter prefers-reduced-motion blende ich die Animation aus — zurück zum Playground für eine ruhigere Section."
       }
     }
@@ -711,7 +718,7 @@
     },
     "channels": {
       "label": "Direkt-Kanäle",
-      "note": "GitHub ist nur semi-aktiv — kein 100-Repo-Glanzfassaden-Account. Telefon bleibt privat.",
+      "note": "GitHub ist nur semi-aktiv — kein 100-Repo-Glanzfassaden-Account.",
       "email": "E-Mail",
       "github": "GitHub",
       "linkedin": "LinkedIn",
@@ -747,7 +754,7 @@
   "legal": {
     "common": {
       "lastUpdatedLabel": "Stand",
-      "lastUpdated": "1. Mai 2026",
+      "lastUpdated": "6. Mai 2026",
       "backLabel": "Zurück zur Startseite"
     },
     "impressum": {
@@ -760,7 +767,11 @@
         {
           "id": "responsible",
           "heading": "Verantwortlich für den Inhalt",
-          "body": ["Manuel Heller", "Basel-Region, Schweiz", "manuelheller@bluewin.ch"]
+          "body": [
+            "Manuel Heller",
+            "Martisackerweg 18, 4203 Grellingen, Schweiz",
+            "manuelheller@bluewin.ch"
+          ]
         },
         {
           "id": "character",
@@ -782,6 +793,13 @@
           "body": [
             "Alle Texte, Fotos, Grafiken, Code-Beispiele und Shader-Quelltexte unterliegen dem Urheberrecht von Manuel Heller, sofern nicht anders gekennzeichnet. Eine Verwendung ausserhalb dieser Website bedarf der schriftlichen Zustimmung."
           ]
+        },
+        {
+          "id": "jurisdiction",
+          "heading": "Gerichtsstand",
+          "body": [
+            "Schweizer Recht ist anwendbar. Erfüllungsort und Gerichtsstand ist Basel-Stadt, Schweiz."
+          ]
         }
       ]
     },
@@ -795,28 +813,35 @@
         {
           "id": "responsible",
           "heading": "Verantwortlicher",
-          "body": ["Manuel Heller, Basel-Region, Schweiz · manuelheller@bluewin.ch"]
+          "body": [
+            "Manuel Heller",
+            "Martisackerweg 18, 4203 Grellingen, Schweiz",
+            "manuelheller@bluewin.ch"
+          ]
         },
         {
           "id": "data",
           "heading": "Welche Daten erhoben werden",
           "body": [
-            "Diese Website setzt keine Cookies und keinen LocalStorage. Es gibt kein Tracking, kein Analytics, keine Werbenetzwerke und keine Social-Media-Pixel. Es werden keine Daten an Dritte zu Werbezwecken weitergegeben."
+            "Diese Website setzt keine Cookies. Es gibt kein Tracking, kein Analytics, keine Werbenetzwerke und keine Social-Media-Pixel. Es werden keine Daten an Dritte zu Werbezwecken weitergegeben.",
+            "Aus rein technischen Gründen wird der LocalStorage des Browsers genutzt: ein anonymer Eintrag merkt sich die GPU-Leistungsklasse deines Geräts (damit die WebGL-Animation beim nächsten Besuch direkt im richtigen Detail-Level startet) und ein Eintrag merkt sich, dass der Lade-Bildschirm bereits gespielt wurde (damit er bei Wechsel der Sprache nicht erneut erscheint). Diese Werte sind nicht personenbezogen, werden nicht an Dritte übermittelt und können jederzeit über die Browser-Einstellungen gelöscht werden."
           ]
         },
         {
           "id": "logs",
           "heading": "Server-Logs",
           "body": [
-            "Der Hosting-Server (Linux mit nginx, eigenes Hosting in der Schweiz) protokolliert technisch notwendige Zugriffe: IP-Adresse, Zeitstempel, abgerufene URL, Referrer, User-Agent. Diese Logs werden nach 14 Tagen automatisch gelöscht und ausschliesslich zur Fehleranalyse und Sicherheitsüberwachung verwendet."
+            "Der Hosting-Server (Linux mit nginx) wird selbst betrieben und steht beim Anbieter mc-host24.de in Deutschland. Die DNS-Auflösung läuft über Cloudflare (Cloudflare, Inc., USA), das gleichzeitig als Proxy-Schutz vor Bot-Angriffen dient — dabei werden IP-Adressen technisch verarbeitet, jedoch nicht zu Tracking-Zwecken gespeichert. Der Server protokolliert technisch notwendige Zugriffe: IP-Adresse, Zeitstempel, abgerufene URL, Referrer, User-Agent. Diese Logs werden nach 14 Tagen automatisch gelöscht und ausschliesslich zur Fehleranalyse und Sicherheitsüberwachung verwendet (Rechtsgrundlage: berechtigtes Interesse, DSGVO Art. 6 Abs. 1 lit. f, sowie Art. 31 Abs. 2 lit. b DSG).",
+            "Cloudflare ist über Standard-Vertragsklauseln (Art. 46 DSGVO) für Datentransfers in die USA abgesichert."
           ]
         },
         {
           "id": "form",
           "heading": "Kontaktformular",
           "body": [
-            "Wenn du das Kontaktformular nutzt, werden Name, E-Mail-Adresse und deine Nachricht via Resend (Resend.com, USA) an mich übermittelt. Resend speichert diese Daten zur technischen Übermittlung; es gelten deren Datenschutzbestimmungen.",
-            "Deine Nachricht wird nach Beantwortung gelöscht, spätestens nach sechs Monaten. Du kannst jederzeit Auskunft, Berichtigung oder Löschung verlangen — schreib einfach an manuelheller@bluewin.ch."
+            "Bei Nutzung des Kontaktformulars wird aktuell der mailto-Mechanismus deines E-Mail-Clients aktiviert — die Nachricht läuft über deinen E-Mail-Provider, nicht über einen Server unter meiner Kontrolle. Dabei werden ausschliesslich die Daten verarbeitet, die du selbst in deinem Mail-Client eingibst.",
+            "Sollte zu einem späteren Zeitpunkt eine direkte Übermittlung über einen Server-Bridge (Resend.com, Resend, Inc., USA) aktiviert werden, würden Name, E-Mail-Adresse und Nachricht über diesen technischen Mittler an mich übermittelt. Resend wäre über Standard-Vertragsklauseln (Art. 46 DSGVO) abgesichert. Eine entsprechende Anpassung dieser Erklärung erfolgt mit Aktivierung.",
+            "Rechtsgrundlage in beiden Fällen: deine Einwilligung durch das Absenden (Art. 6 Abs. 1 lit. a DSGVO, Art. 31 Abs. 1 DSG). Eingehende Nachrichten werden nach Beantwortung gelöscht, spätestens jedoch nach sechs Monaten. Du kannst jederzeit Auskunft, Berichtigung oder Löschung verlangen — schreib einfach an manuelheller@bluewin.ch."
           ]
         },
         {
@@ -827,10 +852,26 @@
           ]
         },
         {
+          "id": "externalLinks",
+          "heading": "Externe Verlinkungen",
+          "body": [
+            "Diese Website verweist an mehreren Stellen auf externe Plattformen, deren Inhalte ich nicht beeinflussen oder kontrollieren kann. Beim Klick auf einen externen Link verlässt du diese Seite; ab dort gelten die Datenschutzbestimmungen des jeweiligen Anbieters.",
+            "Aktuell verlinkte externe Dienste: GitHub (github.com), LinkedIn (linkedin.com), Instagram (instagram.com), Adobe Portfolio (manuelheller.myportfolio.com), Twitch (twitch.tv), Jogge di Balla (joggediballa.ch). Eine Liste der genauen Anbieter mit Sitzland kann jederzeit per E-Mail bei mir angefragt werden."
+          ]
+        },
+        {
+          "id": "security",
+          "heading": "Datensicherheit",
+          "body": [
+            "Sämtliche Verbindungen zur Website werden über TLS 1.3 verschlüsselt. Der Server wird regelmässig aktualisiert und durch Cloudflare-Proxy gegen automatisierte Angriffe abgeschirmt. Diese Massnahmen entsprechen den Anforderungen aus DSGVO Art. 32 und DSG Art. 8."
+          ]
+        },
+        {
           "id": "rights",
           "heading": "Deine Rechte",
           "body": [
-            "Nach Schweizer Datenschutzgesetz (revDSG) und EU-DSGVO hast du das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung und Datenportabilität. Wende dich für alle Anfragen an: manuelheller@bluewin.ch."
+            "Nach Schweizer Datenschutzgesetz (revDSG) und EU-DSGVO hast du das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung und Datenportabilität. Wende dich für alle Anfragen an: manuelheller@bluewin.ch.",
+            "Für Beschwerden über die Verarbeitung deiner Daten kannst du dich an die zuständige Aufsichtsbehörde wenden: in der Schweiz an den Eidgenössischen Datenschutzbeauftragten (EDÖB, https://www.edoeb.admin.ch); innerhalb der EU an die Datenschutzbehörde deines Wohnsitzlandes."
           ]
         }
       ]

@@ -99,7 +99,25 @@ export function Nav() {
   // active only once its top crosses into the 20%–30% viewport strip,
   // which avoids the active-state flicker when a section is just
   // peeking in from below.
+  //
+  // Effect re-runs on pathname change so that:
+  //   - On /playground/[slug] experiment routes the "Playground"
+  //     nav-item stays underlined so the user has a sense-of-place
+  //     indicator — they're inside a Playground sub-route.
+  //   - On other non-home routes (/impressum, /datenschutz) the
+  //     section ids don't exist in the DOM and there's no equivalent
+  //     nav-item, so activeSection drops to null (no underline).
+  //   - On nav back to home, the observer reattaches to the freshly-
+  //     mounted sections.
   useEffect(() => {
+    if (!onHome) {
+      if (pathname.startsWith("/playground/")) {
+        setActiveSection("playground");
+      } else {
+        setActiveSection(null);
+      }
+      return;
+    }
     const targets = SECTION_IDS.map((id) => document.getElementById(id)).filter(
       (el): el is HTMLElement => el !== null,
     );
@@ -117,7 +135,7 @@ export function Nav() {
 
     for (const el of targets) observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [onHome, pathname]);
 
   return (
     <nav

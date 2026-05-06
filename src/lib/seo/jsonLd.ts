@@ -19,7 +19,23 @@ export function buildJsonLd(locale: Locale, description: string) {
     "@type": "Person",
     name: SITE.author.name,
     url: SITE.url,
-    image: `${SITE.url}/icon-512.png`,
+    image: {
+      "@type": "ImageObject",
+      contentUrl: `${SITE.url}/profile/portrait-1200w.jpg`,
+      url: `${SITE.url}/profile/portrait-1200w.jpg`,
+      width: 800,
+      height: 1200,
+      caption: "Portraitfoto Manuel Heller, Full-Stack Developer Basel",
+      creator: {
+        "@type": "Person",
+        name: SITE.author.name,
+      },
+      copyrightHolder: {
+        "@type": "Person",
+        name: SITE.author.name,
+      },
+      copyrightNotice: `© ${SITE.author.name}`,
+    },
     jobTitle: "Full-Stack Developer",
     worksFor: {
       "@type": "Organization",
@@ -31,6 +47,21 @@ export function buildJsonLd(locale: Locale, description: string) {
       addressRegion: "BS",
       addressCountry: "CH",
     },
+    nationality: {
+      "@type": "Country",
+      name: "CH",
+    },
+    knowsLanguage: ["de", "en", "fr"],
+    knowsAbout: [
+      "Full-Stack Development",
+      "PHP",
+      "Vue.js",
+      "TypeScript",
+      "Webdesign",
+      "Wildlife Photography",
+      "WebGL Shaders",
+      "AI-Assisted Development",
+    ],
     email: `mailto:${SITE.author.email}`,
     sameAs: [
       SITE.author.socials.github,

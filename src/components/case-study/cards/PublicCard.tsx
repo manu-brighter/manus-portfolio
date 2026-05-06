@@ -18,6 +18,8 @@ type Props = {
   footerDomain: string;
   footerUrl: string;
   footerExternal: string;
+  onShotClick?: (shotIndex: number) => void;
+  lightboxBaseIndex?: number;
 };
 
 /**
@@ -33,6 +35,8 @@ export function PublicCard({
   footerDomain,
   footerUrl,
   footerExternal,
+  onShotClick,
+  lightboxBaseIndex,
 }: Props) {
   return (
     <div className="flex h-full flex-col gap-[clamp(0.5rem,1.2vh,0.75rem)]">
@@ -63,6 +67,8 @@ export function PublicCard({
                 datestamp={s.datestamp}
                 caption={s.caption}
                 className="w-full"
+                onClick={onShotClick ? () => onShotClick(i) : undefined}
+                lightboxIndex={lightboxBaseIndex !== undefined ? lightboxBaseIndex + i : undefined}
               >
                 <picture className="block h-full w-full">
                   <source

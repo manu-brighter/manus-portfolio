@@ -21,6 +21,16 @@ const root = resolve(__dirname, "..");
 
 const QUALITY = { avif: 60, webp: 80, jpg: 82 };
 
+const COPYRIGHT_YEAR = new Date().getFullYear();
+const COPYRIGHT_EXIF = {
+  exif: {
+    IFD0: {
+      Copyright: `© ${COPYRIGHT_YEAR} Manuel Heller`,
+      Artist: "Manuel Heller",
+    },
+  },
+};
+
 /** @typedef {{
  *   group: string,
  *   source: string,
@@ -31,11 +41,12 @@ const QUALITY = { avif: 60, webp: 80, jpg: 82 };
  *   jpgFallbackWidth?: number,
  *   resize?: { width?: number, height?: number, fit?: "cover" | "inside" },
  *   quality?: { avif?: number, webp?: number, jpg?: number },
+ *   copyright?: boolean,
  * }} Task */
 
 /** @type {Task[]} */
 const TASKS = [
-  // — Phase 9 · Photography —
+  // — Phase 9 · Photography — (copyright: true → embeds EXIF Copyright + Artist)
   {
     group: "photography",
     source: "content-input/photography/source/DSC05426-Verbessert-RR.jpg",
@@ -45,6 +56,7 @@ const TASKS = [
     codecs: ["avif", "webp"],
     jpgFallbackWidth: 1200,
     quality: { avif: 42, webp: 70 },
+    copyright: true,
   },
   {
     group: "photography",
@@ -55,6 +67,7 @@ const TASKS = [
     codecs: ["avif", "webp"],
     jpgFallbackWidth: 1200,
     quality: { avif: 42, webp: 70 },
+    copyright: true,
   },
   {
     group: "photography",
@@ -65,6 +78,7 @@ const TASKS = [
     codecs: ["avif", "webp"],
     jpgFallbackWidth: 1920,
     quality: { avif: 50, webp: 75 },
+    copyright: true,
   },
   {
     group: "photography",
@@ -75,6 +89,7 @@ const TASKS = [
     codecs: ["avif", "webp"],
     jpgFallbackWidth: 1200,
     quality: { avif: 38, webp: 65 },
+    copyright: true,
   },
   {
     group: "photography",
@@ -89,6 +104,7 @@ const TASKS = [
     // ratio without distortion.
     resize: { width: 1920, height: 1080, fit: "cover" },
     quality: { avif: 42, webp: 70 },
+    copyright: true,
   },
   // — Phase 12 · Work-Section Portfolio + Case Study Joggediballa screenshots —
   {
@@ -163,6 +179,9 @@ for (const task of tasks) {
       base = base.resize(task.resize);
     }
     base = base.resize({ width: w, withoutEnlargement: true });
+    if (task.copyright) {
+      base = base.withMetadata(COPYRIGHT_EXIF);
+    }
 
     if (codecs.includes("avif")) {
       await base.clone().avif({ quality: q.avif }).toFile(`${outDir}/${task.outName}-${w}w.avif`);
@@ -175,6 +194,9 @@ for (const task of tasks) {
   let jpgBase = sharp(src);
   if (task.resize) {
     jpgBase = jpgBase.resize(task.resize);
+  }
+  if (task.copyright) {
+    jpgBase = jpgBase.withMetadata(COPYRIGHT_EXIF);
   }
   await jpgBase
     .resize({ width: fallbackW, withoutEnlargement: true })

@@ -81,6 +81,14 @@
        on the fluid sim canvas. Lenis handles smooth scroll; the browser's
        overscroll gestures would fight the fluid pointer input. */
     overscroll-behavior: none;
+    /* Clip stray horizontal overflow without creating a scroll container.
+       The case-study diorama track (420vh wide) lives inside an
+       overflow-hidden section, but other absolutely-positioned ink-splat
+       SVGs and rotated polaroid corners can leak a few px past the
+       viewport edge — those would otherwise allow horizontal scroll on
+       the page itself. `clip` (vs `hidden`) doesn't create a new scroll
+       containing block, so position:fixed children stay viewport-bound. */
+    overflow-x: clip;
   }
 
   html::-webkit-scrollbar {
@@ -493,6 +501,18 @@
 
   .plate-corners {
     position: relative;
+  }
+
+  /* Leva control panel (Ink Drop Studio playground) — push below the
+   * sticky nav. Leva mounts a fixed-positioned root with stitches-
+   * generated `leva-c-XXXXX-fill-false` classes (no #leva__root id);
+   * only the ROOT has the `-fill-` variant suffix, children of the
+   * panel use plain `leva-c-XXXXX` hashes. Targeting via the fill
+   * variant makes us robust to stitches hash drift AND avoids
+   * matching the ~65 child elements inside the panel.
+   * !important needed to beat Leva's stitches CSS-in-JS specificity. */
+  [class*="leva-c-"][class*="-fill-"] {
+    top: 5rem !important;
   }
 }
 

@@ -230,18 +230,39 @@ function TypeAsFluidCanvas() {
         <label className="type-label-stamp mb-3 block text-ink" htmlFor="type-as-fluid-input">
           {t("inputLabel")}
         </label>
-        <input
-          id="type-as-fluid-input"
-          type="text"
-          value={text}
-          onChange={(e) => setText(e.target.value.slice(0, 24))}
-          placeholder={t("inputPlaceholder")}
-          autoComplete="off"
-          spellCheck={false}
-          maxLength={24}
-          className="type-h2 w-full border-[1.5px] border-ink bg-paper px-4 py-3 text-center text-ink placeholder:text-ink-faint focus:outline-none focus:shadow-[3px_3px_0_var(--color-ink)] focus:-translate-x-[1px] focus:-translate-y-[1px] transition-[transform,box-shadow]"
-          style={{ fontStyle: "italic", letterSpacing: "0.05em" }}
-        />
+        <div className="flex items-stretch gap-2">
+          <input
+            id="type-as-fluid-input"
+            type="text"
+            value={text}
+            onChange={(e) => setText(e.target.value.slice(0, 24))}
+            placeholder={t("inputPlaceholder")}
+            autoComplete="off"
+            spellCheck={false}
+            maxLength={24}
+            className="type-h2 flex-1 border-[1.5px] border-ink bg-paper px-4 py-3 text-center text-ink placeholder:text-ink-faint focus:outline-none focus:shadow-[3px_3px_0_var(--color-ink)] focus:-translate-x-[1px] focus:-translate-y-[1px] transition-[transform,box-shadow]"
+            style={{ fontStyle: "italic", letterSpacing: "0.05em" }}
+          />
+          <button
+            type="button"
+            aria-label={t("triggerLabel")}
+            onClick={() => {
+              const stamper = stamperRef.current;
+              const orchestrator = orchestratorRef.current;
+              if (!stamper || !orchestrator) return;
+              const word =
+                textRef.current.length > 0
+                  ? textRef.current
+                  : (TYPE_AS_FLUID_DEFAULTS.defaultWords[
+                      Math.floor(Math.random() * TYPE_AS_FLUID_DEFAULTS.defaultWords.length)
+                    ] ?? "MANUEL");
+              stampWord(stamper, orchestrator, word);
+            }}
+            className="grid aspect-square shrink-0 min-w-[4.5rem] place-items-center border-[1.5px] border-ink bg-paper text-ink text-2xl leading-none shadow-[3px_3px_0_var(--color-ink)] transition-[transform,box-shadow] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[1px_1px_0_var(--color-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+          >
+            <span aria-hidden="true">↻</span>
+          </button>
+        </div>
       </div>
     </ExperimentChrome>
   );
