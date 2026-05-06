@@ -697,6 +697,7 @@
         "caption": "Tipp ein Wort. Es wird gedruckt, dann von der Tinte verschluckt. Sanft.",
         "inputLabel": "TIPPE EIN WORT",
         "inputPlaceholder": "Manuel",
+        "triggerLabel": "Wort erneut drucken",
         "reducedMotionNote": "Dieses Experiment druckt Wörter live in eine laufende Fluid-Simulation. Unter prefers-reduced-motion blende ich die Animation aus — zurück zum Playground für eine ruhigere Section."
       }
     }
