@@ -28,7 +28,7 @@ if (typeof window !== "undefined") {
  */
 
 const MOBILE_MAX_WIDTH = 768;
-const FALLBACK_MAX_HEIGHT = 800; // 1vh < 8px is the "unusable cards" cutoff; covers 1366x768 / 1280x720 / 1600x900-with-chrome / 1920x1200 at 125% Windows DPI
+const FALLBACK_MAX_HEIGHT = 700; // empirically: 1920x1200 with 125% Windows DPI + browser chrome resolves to ~744px CSS-viewport height. 700 keeps that case on diorama while still routing real laptop classes (1366x768 / 1280x720 with chrome) to the fallback.
 const TRACK_WIDTH_VH = 420;
 
 type Props = {
