@@ -63,16 +63,20 @@ export function DioramaLupe() {
             stroke="var(--color-ink)"
             strokeWidth={1}
           />
+          {/* Handle: a single thicker line with rounded linecap.
+              No separate knob — the linecap=round already gives a clean
+              hemispherical end. Previous (line + circle knob) read as
+              "diagonally clipped" because the circle sat past the line
+              tip rather than continuing it. */}
           <line
-            x1={100}
-            y1={100}
-            x2={142}
-            y2={142}
+            x1={98}
+            y1={98}
+            x2={148}
+            y2={148}
             stroke="var(--color-ink)"
-            strokeWidth={7}
+            strokeWidth={11}
             strokeLinecap="round"
           />
-          <circle cx={146} cy={146} r={5} fill="var(--color-ink)" />
         </g>
       </svg>
     </div>
