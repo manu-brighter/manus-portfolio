@@ -38,9 +38,9 @@ const TASKS = [
   // — Phase 9 · Photography —
   {
     group: "photography",
-    source: "content-input/photography/source/DSC06022-Verbessert-RR.jpg",
+    source: "content-input/photography/source/DSC05426-Verbessert-RR.jpg",
     outDir: "public/photography",
-    outName: "01-egret",
+    outName: "01-pelican",
     widths: [800, 1200, 1600],
     codecs: ["avif", "webp"],
     jpgFallbackWidth: 1200,
@@ -84,6 +84,10 @@ const TASKS = [
     widths: [800, 1200, 1600],
     codecs: ["avif", "webp"],
     jpgFallbackWidth: 1200,
+    // 16:9 aspect crop. Source frames the croc head with the butterfly
+    // off-centre; sharp's `fit: cover` centres + crops to the target
+    // ratio without distortion.
+    resize: { width: 1920, height: 1080, fit: "cover" },
     quality: { avif: 42, webp: 70 },
   },
   // — Phase 12 · Work-Section Portfolio + Case Study Joggediballa screenshots —
@@ -141,6 +145,11 @@ if (tasks.length === 0) {
 
 for (const task of tasks) {
   const src = resolve(root, task.source);
+  if (!existsSync(src)) {
+    // biome-ignore lint/suspicious/noConsole: CLI script
+    console.warn(`⊘ ${task.group} · ${task.outName} — source not found, skipped (${task.source})`);
+    continue;
+  }
   const outDir = resolve(root, task.outDir);
   ensureDir(outDir);
 

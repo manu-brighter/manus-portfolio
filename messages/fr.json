@@ -641,10 +641,6 @@
     "ctaHref": "https://manuelheller.myportfolio.com/portfolio",
     "ctaCaption": "Originale ohne Riso-Treatment, mit voller Galerie.",
     "slides": {
-      "egret": {
-        "alt": "Schneereiher mit ausgebreiteten Flügeln am Wasser, Costa Rica",
-        "stamp": "COSTA RICA · 2024 · WILDLIFE"
-      },
       "koenigsegg": {
         "alt": "Koenigsegg-Hypercar unter einem Hotel-Bogen in der Abenddämmerung",
         "stamp": "ST. MORITZ · 2025 · AUTO",
@@ -664,6 +660,10 @@
       "crocodile": {
         "alt": "Krokodil mit einem Schmetterling auf der Schnauze, Costa Rica",
         "stamp": "TÁRCOLES · 2024 · WILDLIFE"
+      },
+      "pelican": {
+        "alt": "Pelikan im Anflug über dem Pazifik, Costa Rica",
+        "stamp": "COSTA RICA · 2024 · WILDLIFE"
       }
     }
   },

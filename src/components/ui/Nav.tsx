@@ -71,17 +71,25 @@ export function Nav() {
   const onHome = pathname === "/";
   const buildHref = (hash: string) => (onHome ? hash : `/${currentLocale}/${hash}`);
 
-  // Sub-route -> home anchor navigation: stash the target section id in
-  // sessionStorage and let next-intl's router push us home. The browser's
-  // native hash-scroll fires before GSAP ScrollTrigger pins the case-study
-  // section, so the user would land on the wrong section ("alle um eins
-  // verschoben"). <ScrollToOnLoad /> reads the storage entry post-mount
-  // and smooth-scrolls once the pin extent is live. On the home route we
-  // let the browser handle anchors natively — no preventDefault.
-  const handleSubRouteAnchor = (e: MouseEvent<HTMLAnchorElement>, hash: string) => {
-    if (onHome) return;
+  // Anchor navigation handler. Two flows:
+  //   - On home: preventDefault + scrollIntoView({ behavior: "smooth" })
+  //     so the user gets the same animated travel they get when arriving
+  //     from a sub-route. Native hash-scroll is instant — feels jarring
+  //     compared with the sub-route arrival flow.
+  //   - On sub-route (/playground/[slug] etc): stash the target id in
+  //     sessionStorage and let next-intl's router push us home. The
+  //     browser's native hash-scroll fires before GSAP ScrollTrigger
+  //     pins the case-study section, so user would land on the wrong
+  //     section ("alle um eins verschoben"). <ScrollToOnLoad /> reads
+  //     the storage entry post-mount and smooth-scrolls once pin extent
+  //     is live.
+  const handleAnchor = (e: MouseEvent<HTMLAnchorElement>, hash: string) => {
     e.preventDefault();
     const target = hash.startsWith("#") ? hash.slice(1) : hash;
+    if (onHome) {
+      document.getElementById(target)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
     sessionStorage.setItem("scrollToOnLoad", target);
     router.push("/");
   };
@@ -126,7 +134,7 @@ export function Nav() {
             items={NAV_ITEMS_MOBILE}
             activeSection={activeSection}
             buildHref={buildHref}
-            onAnchorClick={handleSubRouteAnchor}
+            onAnchorClick={handleAnchor}
           />
           <ul className="hidden items-center gap-5 md:flex md:gap-7">
             {NAV_ITEMS_DESKTOP.map((item) => {
@@ -136,7 +144,7 @@ export function Nav() {
                 <li key={item.href}>
                   <a
                     href={buildHref(item.href)}
-                    onClick={(e) => handleSubRouteAnchor(e, item.href)}
+                    onClick={(e) => handleAnchor(e, item.href)}
                     aria-current={isActive ? "true" : undefined}
                     className={`type-label relative inline-block transition-colors active:scale-[0.94] active:duration-100 after:pointer-events-none after:absolute after:bottom-[-3px] after:left-0 after:h-[1.5px] after:w-full after:origin-left after:bg-ink after:transition-transform after:duration-300 after:ease-out after:content-[''] hover:after:scale-x-100 ${
                       isActive

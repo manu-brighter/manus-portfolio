@@ -53,9 +53,9 @@ const SPOT_BG_CLASS: Record<SpotColor, string> = {
 
 const SLIDES: readonly [Slide, Slide, Slide, Slide, Slide] = [
   {
-    baseName: "01-egret",
-    altKey: "egret",
-    stampKey: "egret",
+    baseName: "01-pelican",
+    altKey: "pelican",
+    stampKey: "pelican",
     spot: "amber",
     aspect: 3 / 2,
     layout: "full",
@@ -93,7 +93,7 @@ const SLIDES: readonly [Slide, Slide, Slide, Slide, Slide] = [
     altKey: "crocodile",
     stampKey: "crocodile",
     spot: "rose",
-    aspect: 3 / 2,
+    aspect: 16 / 9,
     layout: "full",
     widths: [800, 1200, 1600],
   },
