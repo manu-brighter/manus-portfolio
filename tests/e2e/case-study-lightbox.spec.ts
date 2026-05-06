@@ -63,7 +63,10 @@ test.describe("@case-study lightbox", () => {
     // generous waits. Genuine WebKit-specific reduced-motion
     // regressions would also fail on chromium — the redundancy isn't
     // worth a flake in CI.
-    test.skip(browserName === "webkit", "reduced-motion code path is browser-agnostic; chromium covers it");
+    test.skip(
+      browserName === "webkit",
+      "reduced-motion code path is browser-agnostic; chromium covers it",
+    );
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/de/");
     // Under reduced-motion DioramaTrack swaps from desktop diorama to
