@@ -74,16 +74,28 @@ export function Polaroid({
     >
       <PlateCornerMarks />
       {onClick ? (
-        <button
-          type="button"
+        // Stays a <div> (NOT a <button>) so default button user-agent styles
+        // and the `block w-full` reset can't perturb the card-layout geometry
+        // we tuned in the responsive-fix sprint. ARIA role + keyboard handler
+        // gives the same accessibility as a real button. The cursor + focus
+        // ring + hover-scale read identically.
+        <div
+          role="button"
+          tabIndex={0}
           onClick={onClick}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              onClick();
+            }
+          }}
           aria-haspopup="dialog"
           data-lightbox-index={lightboxIndex}
-          className="group relative block w-full overflow-hidden border-[1.5px] border-ink cursor-zoom-in transition-transform duration-300 hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper motion-reduce:transition-none motion-reduce:hover:scale-100"
+          className="relative overflow-hidden border-[1.5px] border-ink cursor-zoom-in transition-transform duration-300 hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper motion-reduce:transition-none motion-reduce:hover:scale-100"
           style={{ aspectRatio: aspect }}
         >
           {children}
-        </button>
+        </div>
       ) : (
         <div
           className="relative overflow-hidden border-[1.5px] border-ink"

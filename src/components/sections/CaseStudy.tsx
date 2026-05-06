@@ -131,7 +131,7 @@ export function CaseStudy() {
   // opens the lightbox.
   const handleOpen = (index: number) => () => {
     if (typeof document === "undefined") return;
-    const el = document.querySelector<HTMLElement>(`button[data-lightbox-index="${index}"]`);
+    const el = document.querySelector<HTMLElement>(`[data-lightbox-index="${index}"]`);
     const rect = el?.getBoundingClientRect();
     if (!rect) return;
     openLightbox(index, rect);

@@ -11,7 +11,7 @@ test.describe("@case-study lightbox", () => {
     await page.goto("/de/");
     const adminPolaroid = page
       .locator("article", { has: page.getByText(/Admin-Dashboard|Highlight 01|Sichtbarstes/) })
-      .locator("button[aria-haspopup='dialog']")
+      .locator("[aria-haspopup='dialog']")
       .first();
     await adminPolaroid.scrollIntoViewIfNeeded();
     await adminPolaroid.click();
@@ -24,7 +24,7 @@ test.describe("@case-study lightbox", () => {
   test("ESC closes the open lightbox", async ({ page }) => {
     await page.goto("/de/");
     const firstClickable = page
-      .locator("section#case-study button[aria-haspopup='dialog']")
+      .locator("section#case-study [aria-haspopup='dialog']")
       .first();
     await firstClickable.scrollIntoViewIfNeeded();
     await firstClickable.click();
@@ -36,7 +36,7 @@ test.describe("@case-study lightbox", () => {
   test("right-arrow advances to the next image (with wrap-around)", async ({ page }) => {
     await page.goto("/de/");
     const firstClickable = page
-      .locator("section#case-study button[aria-haspopup='dialog']")
+      .locator("section#case-study [aria-haspopup='dialog']")
       .first();
     await firstClickable.scrollIntoViewIfNeeded();
     await firstClickable.click();
@@ -49,7 +49,7 @@ test.describe("@case-study lightbox", () => {
   test("backdrop click closes the lightbox", async ({ page }) => {
     await page.goto("/de/");
     const firstClickable = page
-      .locator("section#case-study button[aria-haspopup='dialog']")
+      .locator("section#case-study [aria-haspopup='dialog']")
       .first();
     await firstClickable.scrollIntoViewIfNeeded();
     await firstClickable.click();
@@ -64,7 +64,7 @@ test.describe("@case-study lightbox", () => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/de/");
     const firstClickable = page
-      .locator("section#case-study button[aria-haspopup='dialog']")
+      .locator("section#case-study [aria-haspopup='dialog']")
       .first();
     await firstClickable.scrollIntoViewIfNeeded();
     await firstClickable.click();
