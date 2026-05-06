@@ -57,7 +57,13 @@ test.describe("@case-study lightbox", () => {
   test("reduced-motion: no FLIP transform applied", async ({ page, browserName: _ }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/de/");
+    // Under reduced-motion the DioramaTrack swaps to the vertical-stack
+    // mobileFallback branch on hydration. That swap can detach + remount
+    // the polaroid wrapper between the locator() capture and the
+    // scrollIntoView call, especially in CI where hydration is slower.
+    // waitFor 'attached' rebinds the locator post-swap and survives.
     const firstClickable = page.locator("section#case-study [aria-haspopup='dialog']").first();
+    await firstClickable.waitFor({ state: "attached", timeout: 10000 });
     await firstClickable.scrollIntoViewIfNeeded();
     await firstClickable.click();
     const img = page.locator("dialog[open] img").first();
