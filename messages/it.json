@@ -69,7 +69,8 @@
   },
   "scrollProgress": {
     "ariaLabel": "Navigazione sezioni",
-    "heroLabel": "Hero"
+    "heroLabel": "Hero",
+    "aboutObjectsLabel": "Off the Screen"
   },
   "hero": {
     "statusStamps": {
