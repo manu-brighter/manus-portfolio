@@ -1,4 +1,20 @@
 {
+  "meta": {
+    "title": "Manuel Heller — Portfolio",
+    "titleTemplate": "%s · Manuel Heller",
+    "description": "Portfolio de Manuel Heller, développeur full-stack (PHP/Vue) chez zvoove Switzerland avec un œil pour le webdesign, la photographie et les shaders. Vibecodé avec Claude Code.",
+    "keywords": [
+      "Manuel Heller",
+      "Portfolio",
+      "Développeur Full-Stack",
+      "WebGL",
+      "Shader",
+      "Vibecoding",
+      "Design Riso",
+      "Suisse",
+      "Bâle"
+    ]
+  },
   "skipLink": {
     "label": "Aller au contenu"
   },
@@ -14,7 +30,14 @@
       "playground": "Playground",
       "contact": "Contact",
       "impressum": "Mentions légales",
-      "datenschutz": "Confidentialité"
+      "datenschutz": "Confidentialité",
+      "skills": "Skills",
+      "casestudy": "Étude de cas",
+      "photography": "Photographie"
+    },
+    "mobileMenu": {
+      "open": "Ouvrir le menu",
+      "close": "Fermer le menu"
     }
   },
   "localeSwitcher": {
@@ -326,6 +349,18 @@
           {
             "name": "Lenis",
             "vibecoded": true
+          },
+          {
+            "name": "next-intl",
+            "vibecoded": true
+          },
+          {
+            "name": "zustand · State",
+            "vibecoded": true
+          },
+          {
+            "name": "GLSL · WebGL Shader",
+            "vibecoded": true
           }
         ]
       },
@@ -402,11 +437,12 @@
           "React 19",
           "TypeScript",
           "Tailwind v4",
-          "GSAP",
+          "GSAP · ScrollTrigger",
           "Lenis",
           "R3F",
           "WebGL Shader",
-          "next-intl"
+          "next-intl",
+          "zustand · State"
         ],
         "description": "Diese Seite. Fullscreen GPU-Fluid-Simulation als Hero, Risograph-inspirierte Editorial-Ästhetik, vibecoded in mehrwöchigen Sessions mit Claude Code.",
         "metaNote": "Du surfst gerade auf einer GPU-Fluid-Simulation. Kein Iframe, kein Video-Loop, keine Lottie-Datei. Echte Frames.",

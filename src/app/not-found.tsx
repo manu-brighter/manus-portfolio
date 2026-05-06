@@ -1,127 +1,100 @@
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
-import { routing } from "@/i18n/routing";
+"use client";
 
-/**
- * Global 404. Static export emits this as `out/404.html`; Nginx will be
- * configured (Sprint 6) to serve it on any unknown path. Owns its own
- * `<html>`/`<body>` because the root layout is a pass-through (same
- * pattern as `src/app/page.tsx`).
- *
- * Strings come from the `notFound` namespace of the default locale's
- * messages — the page is served for ANY unknown URL incl. ones the user
- * typed at `/en/...` or `/fr/...`, so route-based locale detection
- * doesn't apply. We pin to `routing.defaultLocale` (de) and offer a
- * locale-switch row in the footer for users who want to land on their
- * preferred locale's home.
- *
- * Visual: Riso paper backdrop, asymmetric right-aligned italic
- * headline (the Hero pattern), spot-rose ink-drop SVG as the lone
- * decoration. No fluid sim — this is a static fallback, the canvas
- * shouldn't even mount.
- *
- * `<html lang>` is hardcoded `de` to match the rendered copy. SEO is
- * `noindex` so this is purely an AT signal: a screen reader switching
- * to a German voice is correct here.
- */
+import "./globals.css";
+import "@fontsource/instrument-serif/400-italic.css";
+import "@fontsource/instrument-serif/400.css";
+import "@fontsource-variable/inter";
+import "@fontsource-variable/jetbrains-mono";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations({ locale: routing.defaultLocale, namespace: "notFound" });
-  return {
-    title: `${t("metaTitle")} · Manuel Heller`,
-    description: t("body"),
-    robots: { index: false, follow: false },
-  };
-}
+import gsap from "gsap";
+import Link from "next/link";
+import { useEffect, useRef } from "react";
 
-export default async function GlobalNotFound() {
-  const t = await getTranslations({ locale: routing.defaultLocale, namespace: "notFound" });
-  const tLocale = await getTranslations({
-    locale: routing.defaultLocale,
-    namespace: "localeSwitcher",
-  });
+export default function NotFound() {
+  const inkRef = useRef<SVGGElement>(null);
+
+  useEffect(() => {
+    const ink = inkRef.current;
+    if (!ink) return;
+    const tl = gsap.timeline();
+    tl.from(ink.children, {
+      scale: 0,
+      opacity: 0,
+      transformOrigin: "center",
+      duration: 1.2,
+      ease: "elastic.out(1, 0.5)",
+      stagger: 0.08,
+    });
+    return () => {
+      tl.kill();
+    };
+  }, []);
 
   return (
-    <html lang={routing.defaultLocale}>
-      <body className="bg-paper text-ink">
-        <main
-          id="main"
-          className="container-page flex min-h-dvh flex-col justify-between py-16 md:py-24"
-        >
-          <header className="flex items-start justify-between gap-6">
-            <p className="type-label-stamp">{t("stamp")}</p>
-            <p className="type-label text-ink-muted">
-              <span aria-hidden="true">manuelheller.dev</span>
-            </p>
-          </header>
-
-          <div className="grid-12 items-center gap-y-10 py-16 md:py-24">
-            <div
-              aria-hidden="true"
-              className="col-span-12 flex justify-center md:col-span-4 md:justify-start"
+    <html lang="de">
+      <body
+        className="flex min-h-dvh flex-col items-center justify-center bg-paper text-ink"
+        suppressHydrationWarning
+      >
+        <main className="container-page flex max-w-xl flex-col items-center gap-10 py-20 text-center">
+          {/* Ink bloom — 4 spot-colour blobs animating in */}
+          <svg viewBox="0 0 200 200" width="220" height="220" aria-hidden="true">
+            <g ref={inkRef} style={{ mixBlendMode: "multiply" }}>
+              <ellipse cx="80" cy="80" rx="70" ry="60" fill="#FF6BA0" opacity="0.7" />
+              <ellipse cx="120" cy="80" rx="60" ry="70" fill="#FFC474" opacity="0.7" />
+              <ellipse cx="80" cy="120" rx="65" ry="60" fill="#7CE8C4" opacity="0.7" />
+              <ellipse cx="120" cy="120" rx="70" ry="65" fill="#B89AFF" opacity="0.7" />
+            </g>
+            <text
+              x="100"
+              y="116"
+              fontFamily="serif"
+              fontStyle="italic"
+              fontSize="56"
+              fontWeight="400"
+              textAnchor="middle"
+              fill="#0A0608"
             >
-              {/* Spot-rose ink drop with mint misregistration ghost.
-                  Decorative — page meaning lives in the headline + body. */}
-              <svg
-                width="180"
-                height="220"
-                viewBox="0 0 180 220"
-                className="max-w-[55vw] md:max-w-none"
-                role="presentation"
-              >
-                <title>Ink drop</title>
-                <path
-                  d="M90 18 C 130 80, 162 130, 162 160 C 162 192, 130 214, 90 214 C 50 214, 18 192, 18 160 C 18 130, 50 80, 90 18 Z"
-                  fill="var(--color-spot-mint)"
-                  transform="translate(3 3)"
-                  opacity="0.85"
-                />
-                <path
-                  d="M90 18 C 130 80, 162 130, 162 160 C 162 192, 130 214, 90 214 C 50 214, 18 192, 18 160 C 18 130, 50 80, 90 18 Z"
-                  fill="var(--color-spot-rose)"
-                  stroke="var(--color-ink)"
-                  strokeWidth="2"
-                />
-              </svg>
-            </div>
+              404
+            </text>
+          </svg>
 
-            <div className="col-span-12 md:col-span-8">
-              <h1 className="type-display text-ink">{t("headline")}</h1>
-              <p className="type-body-lg ml-auto mt-8 text-right text-ink-soft">{t("body")}</p>
-              <div className="mt-10 flex flex-col items-end gap-3">
-                <a href={`/${routing.defaultLocale}/`} className="riso-submit no-underline">
-                  ← {t("backHome")}
-                </a>
-                <a
-                  href={`/${routing.defaultLocale}/#work`}
-                  className="type-label text-ink-muted underline decoration-spot-rose decoration-2 underline-offset-4 transition-colors hover:text-ink"
-                >
-                  {t("backWork")} →
-                </a>
-              </div>
-            </div>
+          <div className="space-y-4">
+            <h1 className="font-display text-[clamp(2rem,5vw,3.5rem)] text-ink italic leading-tight">
+              Diese Seite ist im Scrollen verloren gegangen.
+            </h1>
+            <p className="text-ink-soft text-lg">
+              Vielleicht ein Tippfehler? Vielleicht eine Seite, die nie da war? In jedem Fall — kein
+              Drama. Zurück zum Anfang:
+            </p>
           </div>
 
-          <footer className="flex flex-col items-start justify-between gap-4 border-paper-line border-t pt-6 md:flex-row md:items-center">
-            <p className="type-label text-ink-muted">© Manuel Heller · Basel-Region · MMXXVI</p>
-            <ul aria-label={tLocale("ariaLabel")} className="flex items-center gap-1.5">
-              {routing.locales.map((locale) => {
-                const name = tLocale(`locales.${locale}`);
-                return (
-                  <li key={locale}>
-                    <a
-                      href={`/${locale}/`}
-                      hrefLang={locale}
-                      aria-label={tLocale("switchLabel", { name })}
-                      className="type-label text-ink-muted no-underline transition-colors hover:text-ink"
-                    >
-                      {locale.toUpperCase()}
-                    </a>
-                  </li>
-                );
-              })}
-            </ul>
-          </footer>
+          <div className="flex flex-wrap justify-center gap-3 font-mono text-xs uppercase tracking-[0.18em]">
+            <Link
+              href="/de/"
+              className="border-2 border-ink px-4 py-2 transition-colors hover:bg-ink hover:text-paper"
+            >
+              Deutsch
+            </Link>
+            <Link
+              href="/en/"
+              className="border-2 border-ink px-4 py-2 transition-colors hover:bg-ink hover:text-paper"
+            >
+              English
+            </Link>
+            <Link
+              href="/fr/"
+              className="border-2 border-ink px-4 py-2 transition-colors hover:bg-ink hover:text-paper"
+            >
+              Français
+            </Link>
+            <Link
+              href="/it/"
+              className="border-2 border-ink px-4 py-2 transition-colors hover:bg-ink hover:text-paper"
+            >
+              Italiano
+            </Link>
+          </div>
         </main>
       </body>
     </html>

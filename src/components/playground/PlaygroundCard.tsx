@@ -1,5 +1,6 @@
 "use client";
 
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useTranslations } from "next-intl";
 import {
   type ComponentType,
@@ -122,6 +123,12 @@ export function PlaygroundCard({ slug, i18nKey, cardSpot, visual, LiveSim }: Pla
     startGrow({ x, y, color: cardSpot });
     navTimerRef.current = window.setTimeout(
       () => {
+        // Revert ALL ScrollTrigger pin spacers BEFORE the route change
+        // unmounts the home page. Otherwise React's removeChild fails
+        // because pin-spacer divs are now between <main> and the pinned
+        // <section>, so the section is no longer a direct child of main.
+        // kill(true) restores the original DOM hierarchy.
+        for (const t of ScrollTrigger.getAll()) t.kill(true);
         router.push(`/playground/${slug}`);
         navTimerRef.current = null;
       },

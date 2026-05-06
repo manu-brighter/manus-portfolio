@@ -1,4 +1,20 @@
 {
+  "meta": {
+    "title": "Manuel Heller — Craft Portfolio",
+    "titleTemplate": "%s · Manuel Heller",
+    "description": "Portfolio of Manuel Heller, full-stack developer (PHP/Vue) at zvoove Switzerland with an eye for web design, photography, and shaders. Vibecoded with Claude Code.",
+    "keywords": [
+      "Manuel Heller",
+      "Portfolio",
+      "Full-Stack Developer",
+      "WebGL",
+      "Shader",
+      "Vibecoding",
+      "Riso Design",
+      "Switzerland",
+      "Basel"
+    ]
+  },
   "skipLink": {
     "label": "Skip to content"
   },
@@ -14,7 +30,14 @@
       "playground": "Playground",
       "contact": "Contact",
       "impressum": "Imprint",
-      "datenschutz": "Privacy"
+      "datenschutz": "Privacy",
+      "skills": "Skills",
+      "casestudy": "Case Study",
+      "photography": "Photography"
+    },
+    "mobileMenu": {
+      "open": "Open menu",
+      "close": "Close menu"
     }
   },
   "localeSwitcher": {
@@ -326,6 +349,18 @@
           {
             "name": "Lenis",
             "vibecoded": true
+          },
+          {
+            "name": "next-intl",
+            "vibecoded": true
+          },
+          {
+            "name": "zustand · State",
+            "vibecoded": true
+          },
+          {
+            "name": "GLSL · WebGL Shader",
+            "vibecoded": true
           }
         ]
       },
@@ -402,11 +437,12 @@
           "React 19",
           "TypeScript",
           "Tailwind v4",
-          "GSAP",
+          "GSAP · ScrollTrigger",
           "Lenis",
           "R3F",
           "WebGL Shader",
-          "next-intl"
+          "next-intl",
+          "zustand · State"
         ],
         "description": "Diese Seite. Fullscreen GPU-Fluid-Simulation als Hero, Risograph-inspirierte Editorial-Ästhetik, vibecoded in mehrwöchigen Sessions mit Claude Code.",
         "metaNote": "Du surfst gerade auf einer GPU-Fluid-Simulation. Kein Iframe, kein Video-Loop, keine Lottie-Datei. Echte Frames.",

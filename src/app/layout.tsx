@@ -23,10 +23,11 @@ import type { ReactNode } from "react";
  * CSS + font imports stay here so they apply to the redirect page too.
  */
 export const metadata: Metadata = {
+  metadataBase: new URL("https://manuelheller.dev"),
   title: "Manuel Heller — Craft Portfolio",
   description: "Toon Fluid — an Awwwards-grade craft portfolio by Manuel Heller.",
-  authors: [{ name: "Manuel Heller" }],
-  robots: { index: false, follow: false },
+  // Per-locale metadata in [locale]/layout.tsx overrides this for locale routes.
+  // The root index.html (locale redirect) inherits this minimal shape.
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

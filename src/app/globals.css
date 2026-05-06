@@ -495,3 +495,26 @@
     position: relative;
   }
 }
+
+/* View Transitions API: crossfade between locales. Browsers without
+   support fall back to no animation (synchronous swap). */
+@layer base {
+  @media (prefers-reduced-motion: no-preference) {
+    ::view-transition-old(root) {
+      animation: 200ms ease-out both fade-out;
+    }
+    ::view-transition-new(root) {
+      animation: 200ms ease-in both fade-in;
+    }
+    @keyframes fade-out {
+      to {
+        opacity: 0;
+      }
+    }
+    @keyframes fade-in {
+      from {
+        opacity: 0;
+      }
+    }
+  }
+}

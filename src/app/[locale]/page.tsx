@@ -8,6 +8,7 @@ import { Photography } from "@/components/sections/Photography";
 import { Playground } from "@/components/sections/Playground";
 import { Skills } from "@/components/sections/Skills";
 import { Work } from "@/components/sections/Work";
+import { ScrollToOnLoad } from "@/components/ui/ScrollToOnLoad";
 import { routing } from "@/i18n/routing";
 
 export function generateStaticParams() {
@@ -24,6 +25,7 @@ export default function HomePage({ params }: HomePageProps) {
 
   return (
     <>
+      <ScrollToOnLoad />
       <Hero />
       <About />
       <Skills />
