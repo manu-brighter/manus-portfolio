@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { type MouseEvent, useEffect, useState } from "react";
 
 /**
  * Mobile hamburger menu — only mounts the dropdown subtree on mobile
@@ -20,9 +20,11 @@ type Props = {
   activeSection: string | null;
   /** Builds the final href for a hash-anchor; on sub-routes prefixes the locale path. */
   buildHref: (hash: string) => string;
+  /** Sub-route anchor click handler — preventDefault + stashes target for ScrollToOnLoad. */
+  onAnchorClick: (e: MouseEvent<HTMLAnchorElement>, hash: string) => void;
 };
 
-export function NavMobileMenu({ items, activeSection, buildHref }: Props) {
+export function NavMobileMenu({ items, activeSection, buildHref, onAnchorClick }: Props) {
   const t = useTranslations();
   const [open, setOpen] = useState(false);
 
@@ -47,8 +49,13 @@ export function NavMobileMenu({ items, activeSection, buildHref }: Props) {
   }, [open]);
 
   // Close menu on anchor-click so the user lands on the section without
-  // the dropdown obscuring it.
-  const onItemClick = () => setOpen(false);
+  // the dropdown obscuring it. Also delegate to the parent's sub-route
+  // handler so /playground/[slug] -> home anchors stash a sessionStorage
+  // target for <ScrollToOnLoad />.
+  const onItemClick = (e: MouseEvent<HTMLAnchorElement>, hash: string) => {
+    setOpen(false);
+    onAnchorClick(e, hash);
+  };
 
   return (
     <div className="md:hidden">
@@ -87,7 +94,7 @@ export function NavMobileMenu({ items, activeSection, buildHref }: Props) {
               <li key={item.href}>
                 <a
                   href={buildHref(item.href)}
-                  onClick={onItemClick}
+                  onClick={(e) => onItemClick(e, item.href)}
                   aria-current={isActive ? "true" : undefined}
                   className={`block py-2 type-label transition-colors ${
                     isActive ? "text-ink" : "text-ink-soft hover:text-ink"

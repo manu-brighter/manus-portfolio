@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { type MouseEvent, useEffect, useState } from "react";
 import { useViewTransition } from "@/components/motion/useViewTransition";
 import { NavMobileMenu } from "@/components/ui/NavMobileMenu";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
@@ -71,6 +71,21 @@ export function Nav() {
   const onHome = pathname === "/";
   const buildHref = (hash: string) => (onHome ? hash : `/${currentLocale}/${hash}`);
 
+  // Sub-route -> home anchor navigation: stash the target section id in
+  // sessionStorage and let next-intl's router push us home. The browser's
+  // native hash-scroll fires before GSAP ScrollTrigger pins the case-study
+  // section, so the user would land on the wrong section ("alle um eins
+  // verschoben"). <ScrollToOnLoad /> reads the storage entry post-mount
+  // and smooth-scrolls once the pin extent is live. On the home route we
+  // let the browser handle anchors natively — no preventDefault.
+  const handleSubRouteAnchor = (e: MouseEvent<HTMLAnchorElement>, hash: string) => {
+    if (onHome) return;
+    e.preventDefault();
+    const target = hash.startsWith("#") ? hash.slice(1) : hash;
+    sessionStorage.setItem("scrollToOnLoad", target);
+    router.push("/");
+  };
+
   // Scroll-spy: tracks which page section currently sits in the central
   // viewport band. rootMargin "-20% 0px -70% 0px" treats a section as
   // active only once its top crosses into the 20%–30% viewport strip,
@@ -111,6 +126,7 @@ export function Nav() {
             items={NAV_ITEMS_MOBILE}
             activeSection={activeSection}
             buildHref={buildHref}
+            onAnchorClick={handleSubRouteAnchor}
           />
           <ul className="hidden items-center gap-5 md:flex md:gap-7">
             {NAV_ITEMS_DESKTOP.map((item) => {
@@ -120,6 +136,7 @@ export function Nav() {
                 <li key={item.href}>
                   <a
                     href={buildHref(item.href)}
+                    onClick={(e) => handleSubRouteAnchor(e, item.href)}
                     aria-current={isActive ? "true" : undefined}
                     className={`type-label transition-colors ${
                       isActive ? "text-ink" : "text-ink-soft hover:text-ink"

@@ -4,6 +4,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useSceneVisibility } from "@/lib/sceneVisibility";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -38,7 +39,9 @@ export function DioramaTrack({ children, mobileFallback }: Props) {
   const reducedMotion = useReducedMotion();
   const sectionRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<ScrollTrigger | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const sceneHidden = useSceneVisibility((s) => s.hidden);
 
   useEffect(() => {
     const mq = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
@@ -54,7 +57,6 @@ export function DioramaTrack({ children, mobileFallback }: Props) {
     const track = trackRef.current;
     if (!section || !track) return;
 
-    let trigger: ScrollTrigger | null = null;
     let raf2 = 0;
 
     const raf1 = requestAnimationFrame(() => {
@@ -64,7 +66,7 @@ export function DioramaTrack({ children, mobileFallback }: Props) {
         let distance = trackWidth - viewportWidth;
         if (distance <= 0) return;
 
-        trigger = ScrollTrigger.create({
+        triggerRef.current = ScrollTrigger.create({
           trigger: section,
           start: "top top",
           end: () => `+=${distance}`,
@@ -87,10 +89,23 @@ export function DioramaTrack({ children, mobileFallback }: Props) {
     return () => {
       cancelAnimationFrame(raf1);
       cancelAnimationFrame(raf2);
-      trigger?.kill(true);
+      triggerRef.current?.kill(true);
+      triggerRef.current = null;
       gsap.set(track, { x: 0 });
     };
   }, [reducedMotion, isMobile]);
+
+  // Pre-unmount cleanup: when the user clicks a playground card,
+  // SceneVisibilityGate flips `sceneHidden=true` (one frame later via
+  // rAF, per the previous fix). Kill the ScrollTrigger here BEFORE
+  // React starts unmounting the page tree — otherwise the pin-spacer
+  // (a ScrollTrigger-injected sibling outside React's reconciliation
+  // tree) confuses React's removeChild and throws NotFoundError.
+  useEffect(() => {
+    if (!sceneHidden) return;
+    triggerRef.current?.kill(true);
+    triggerRef.current = null;
+  }, [sceneHidden]);
 
   if (isMobile || reducedMotion) {
     return (
