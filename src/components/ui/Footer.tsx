@@ -35,40 +35,37 @@ export function Footer() {
   const tNav = useTranslations("nav.items");
 
   return (
-    <footer className="border-paper-line border-t bg-paper">
-      <div className="container-page flex flex-col gap-6 py-8">
-        <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
-          <p className="type-label text-ink-muted">
-            © Manuel Heller
-            <span aria-hidden="true"> · </span>
-            {t("location")}
-            <span aria-hidden="true"> · </span>
-            {t("year")}
-          </p>
-
-          <ul aria-label={t("socialAriaLabel")} className="flex items-center gap-2.5">
-            {SOCIAL_STAMPS.map((stamp) => (
-              <li key={stamp.key}>
-                <abbr className="type-label-stamp no-underline" title={t(`social.${stamp.key}`)}>
-                  {stamp.label}
-                </abbr>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <ul
-          aria-label={t("legalAriaLabel")}
-          className="flex flex-wrap items-center gap-x-5 gap-y-2"
-        >
-          {LEGAL_LINKS.map((link) => (
-            <li key={link.key}>
+    <footer className="border-paper-line border-t-2 bg-paper-shade">
+      <div className="container-page flex flex-col items-start justify-between gap-6 py-12 md:flex-row md:items-center">
+        <p className="type-label text-ink-muted">
+          © Manuel Heller
+          <span aria-hidden="true"> · </span>
+          {t("location")}
+          <span aria-hidden="true"> · </span>
+          {t("year")}
+          <span aria-hidden="true" className="mx-3">
+            ·
+          </span>
+          {LEGAL_LINKS.map((link, i) => (
+            <span key={link.key}>
+              {i > 0 ? <span aria-hidden="true"> · </span> : null}
               <Link
                 href={link.href}
-                className="type-label text-ink-muted no-underline transition-colors hover:text-ink"
+                className="text-ink underline decoration-ink-soft underline-offset-2 transition-colors hover:decoration-ink"
+                aria-label={tNav(link.key)}
               >
                 {tNav(link.key)}
               </Link>
+            </span>
+          ))}
+        </p>
+
+        <ul aria-label={t("socialAriaLabel")} className="flex items-center gap-2.5">
+          {SOCIAL_STAMPS.map((stamp) => (
+            <li key={stamp.key}>
+              <abbr className="type-label-stamp no-underline" title={t(`social.${stamp.key}`)}>
+                {stamp.label}
+              </abbr>
             </li>
           ))}
         </ul>
