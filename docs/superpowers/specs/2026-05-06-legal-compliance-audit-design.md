@@ -164,32 +164,56 @@ Body: [
 
 Plain `<p>` below the section list: "Stand: 6. Mai 2026"
 
-## 6. Footer legal-links visibility uplift (point #15)
+## 6. Legal-links visibility uplift (point #15) — Footer + Nav
 
-Currently the legal-links row uses `text-ink-muted` (low contrast, ~6.5:1 — passes AA but reads as decoration). The row sits below the social stamps + copyright line, so visually it's the third tier of footer content, easy to skip.
+Per Manuel's review 2026-05-06: with the actual deployed page, after Section 07 Contact "kommt nichts mehr" — i.e. the footer is effectively invisible to visitors. Playwright DOM inspection confirms the footer DOES render at the bottom of the document (`y=21564-21702`, 138px tall, both Impressum + Datenschutz links present), so this is a perception/discoverability failure, not a code-rendering bug.
 
-Two complementary changes:
+Likely causes:
+- Footer styling is highly subtle: same `bg-paper` as the page above, only a 1px `border-t` separator, `text-ink-muted` on the legal links → reads as a faint extension of the Contact section.
+- The page is ~21,700px tall; visitors scrolling deep through the diorama-pin and photography ink-mask reveals may not scroll the final viewport-height to actually surface the footer.
+- The native scrollbar is hidden site-wide (Phase 4 deviation, replaced by ScrollProgress dots that count sections only) — visitors have no visual cue for "you're not at the bottom yet".
+- A SECOND `<footer>` element exists inside the Photography section's CTA block (`<footer className="container-page grid-12 mt-20 ...">` in `Photography.tsx`) — semantically valid but visitors see "a footer" mid-page and assume the layout-level footer doesn't exist. Worth renaming the Photography internal element from `<footer>` to a plain `<div>` to avoid confusion (it carries no `role="contentinfo"` semantics anyway).
 
-1. **Move Impressum/Datenschutz to the SAME line as the © copyright**, not below. Currently:
+Three complementary changes:
 
-   ```
-   [© Manuel Heller · Basel-Region · MMXXVI]   [GH · LI · IG · MAIL]
-   [Impressum · Datenschutz]
-   ```
+### 6.1 Surface legal links in the Nav (always visible)
 
-   New:
+Add `Impressum · Datenschutz` entries to the right side of the Nav, between the existing locale-switcher and the section anchors. Always visible at the top of every page; no scrolling required. This is the primary fix for discoverability.
 
-   ```
-   [© Manuel Heller · Basel-Region · MMXXVI · Impressum · Datenschutz]   [GH · LI · IG · MAIL]
-   ```
+Location: `src/components/ui/Nav.tsx` — extend the existing nav-items list with two `<Link>` elements that route to `/[locale]/impressum` and `/[locale]/datenschutz`. Style: same `type-label` font as other nav items but with `text-ink-muted` so they're present-but-not-prominent (legal links shouldn't outshout content nav).
 
-   On mobile, stacks vertically as before but legal-links sit RIGHT under the copyright line, not as a separate row.
+On mobile: include in the hamburger menu (`NavMobileMenu.tsx`) below the section anchors.
 
-2. **Strengthen contrast** on legal links: switch from `text-ink-muted` (rgba(10,6,8,0.7)) to `text-ink` (full opacity) with `underline decoration-ink-soft underline-offset-2 hover:decoration-ink` for visible link affordance. Read like normal in-text links, not decoration.
+### 6.2 Strengthen the footer copy
 
-3. **Optional: add `Impressum · Datenschutz` next to the locale-switcher in the Nav.** Many sites surface legal links in the top-level nav. For a portfolio with deep-scroll first-section magic, this avoids forcing visitors to scroll past everything to find legal pages. Considered overkill for this scope; leave for a future polish pass.
+Move Impressum/Datenschutz to the SAME line as the © copyright (current pattern places them one row below):
 
-Visual change scope: ~10 lines in `Footer.tsx`. No re-layout of the footer container.
+```
+Before:
+  [© Manuel Heller · Basel-Region · MMXXVI]   [GH · LI · IG · MAIL]
+  [Impressum · Datenschutz]
+
+After:
+  [© Manuel Heller · Basel-Region · MMXXVI · Impressum · Datenschutz]   [GH · LI · IG · MAIL]
+```
+
+On mobile, both lines stack but legal-links sit immediately after the copyright line, not as a third separate row.
+
+Strengthen contrast: `text-ink-muted` (rgba(10,6,8,0.7)) → `text-ink` (full opacity) with `underline decoration-ink-soft underline-offset-2 hover:decoration-ink` for visible link affordance.
+
+### 6.3 Make the footer visually distinct (anti-perception-bug)
+
+The footer is rendered but visually identical to the Contact section above it (same paper bg). Add a subtle paper-shade band so visitors recognize "this is the bottom":
+- Background: `bg-paper-shade` (slightly darker than `bg-paper`) instead of plain paper
+- Increase `py-8` → `py-12` so the band has more vertical presence
+
+Together (6.1 + 6.2 + 6.3) ensure the legal links are reachable from the top of every page (Nav) AND visually obvious when reached from the bottom (paper-shade band).
+
+### 6.4 Rename Photography internal `<footer>` → `<div>`
+
+Prevents the "two footers" confusion. Single-line change in `Photography.tsx`. The element carries no contentinfo semantics; switching to a `<div>` doesn't lose any a11y signal.
+
+Visual change scope: ~10 lines in `Footer.tsx`, ~5 lines in `Nav.tsx`, ~3 lines in `NavMobileMenu.tsx`, 1 character in `Photography.tsx`.
 
 ## 7. Mobile fallback consideration
 
