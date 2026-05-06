@@ -338,7 +338,9 @@ export function Photography() {
             <span>{t("ctaLabel")}</span>
             <span aria-hidden="true">↗</span>
           </a>
-          <p className="mt-3 type-body-sm text-ink-muted">{t("ctaCaption")}</p>
+          {t("ctaCaption") ? (
+            <p className="mt-3 type-body-sm text-ink-muted">{t("ctaCaption")}</p>
+          ) : null}
         </div>
       </footer>
     </section>
