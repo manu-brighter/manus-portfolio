@@ -504,13 +504,14 @@
   }
 
   /* Leva control panel (Ink Drop Studio playground) — push below the
-   * sticky nav. Leva mounts a fixed-positioned root via React portal
-   * directly under <body>; the element gets stitches-generated
-   * leva-c-XXXXX classes (no #leva__root id) and starts at top:10px.
-   * Target the body-level Leva root via attribute selector so the
-   * stitches hash drift across versions doesn't break us. !important
-   * needed to beat Leva's stitches CSS-in-JS specificity. */
-  body > div[class^="leva-c-"] {
+   * sticky nav. Leva mounts a fixed-positioned root with stitches-
+   * generated `leva-c-XXXXX-fill-false` classes (no #leva__root id);
+   * only the ROOT has the `-fill-` variant suffix, children of the
+   * panel use plain `leva-c-XXXXX` hashes. Targeting via the fill
+   * variant makes us robust to stitches hash drift AND avoids
+   * matching the ~65 child elements inside the panel.
+   * !important needed to beat Leva's stitches CSS-in-JS specificity. */
+  [class*="leva-c-"][class*="-fill-"] {
     top: 5rem !important;
   }
 }
