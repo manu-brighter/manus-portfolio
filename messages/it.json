@@ -767,7 +767,11 @@
         {
           "id": "responsible",
           "heading": "Verantwortlich für den Inhalt",
-          "body": ["Manuel Heller", "Basel-Region, Schweiz", "manuelheller@bluewin.ch"]
+          "body": [
+            "Manuel Heller",
+            "Basel-Region, Schweiz",
+            "manuelheller@bluewin.ch"
+          ]
         },
         {
           "id": "character",
@@ -802,7 +806,9 @@
         {
           "id": "responsible",
           "heading": "Verantwortlicher",
-          "body": ["Manuel Heller, Basel-Region, Schweiz · manuelheller@bluewin.ch"]
+          "body": [
+            "Manuel Heller, Basel-Region, Schweiz · manuelheller@bluewin.ch"
+          ]
         },
         {
           "id": "data",
