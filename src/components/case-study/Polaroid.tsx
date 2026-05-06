@@ -54,7 +54,7 @@ export function Polaroid({
   const cssVars = { "--polaroid-spot": SPOT_VAR[spot] } as CSSProperties;
   return (
     <figure
-      className={`plate-corners relative inline-block bg-paper-tint p-3 md:p-4 ${className ?? ""}`}
+      className={`plate-corners relative inline-block bg-paper-tint p-[clamp(0.5rem,1.2vh,1rem)] ${className ?? ""}`}
       style={{
         ...cssVars,
         transform: `rotate(${effectiveRotate}deg)`,
@@ -71,13 +71,13 @@ export function Polaroid({
       {datestamp ? (
         <span
           aria-hidden="true"
-          className="absolute top-1 right-2 font-mono text-[0.55rem] tracking-[0.16em] text-ink-muted"
+          className="absolute top-1 right-2 font-mono text-[clamp(0.5rem,0.65vh,0.6rem)] tracking-[0.16em] text-ink-muted"
         >
           {datestamp}
         </span>
       ) : null}
       {caption ? (
-        <figcaption className="mt-2 font-mono text-[0.625rem] tracking-[0.18em] text-ink-muted uppercase md:text-[0.7rem]">
+        <figcaption className="mt-2 font-mono text-[clamp(0.5625rem,0.75vh,0.7rem)] tracking-[0.18em] text-ink-muted uppercase">
           {caption}
         </figcaption>
       ) : null}

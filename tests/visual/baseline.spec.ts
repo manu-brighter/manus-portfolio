@@ -26,6 +26,10 @@ test.describe("@visual phase 2 baseline", () => {
     await expect(page).toHaveScreenshot("home-de-desktop.png", {
       fullPage: true,
       animations: "disabled",
+      // WebGL fluid-sim + HeroSkillPulse (GSAP RAF loop) are not CSS animations
+      // so `animations: "disabled"` does not freeze them. Observed variance is
+      // up to ~400px on a ~23M-pixel full-page capture (<0.002%). 500px budget.
+      maxDiffPixels: 500,
     });
   });
 

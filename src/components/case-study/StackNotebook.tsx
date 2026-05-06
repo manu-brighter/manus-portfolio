@@ -19,7 +19,7 @@ type Props = {
 export function StackNotebook({ heading, items, rotate = -1.5 }: Props) {
   return (
     <article
-      className="relative bg-paper-tint p-6 md:p-8"
+      className="relative bg-paper-tint p-[clamp(0.875rem,2.4vh,2rem)]"
       style={{
         transform: `rotate(${rotate}deg)`,
         boxShadow: "4px 4px 0 var(--color-ink), 2px 2px 0 var(--color-spot-amber)",
@@ -41,10 +41,12 @@ export function StackNotebook({ heading, items, rotate = -1.5 }: Props) {
         className="absolute right-0 bottom-0 size-5"
         style={{ background: "var(--color-paper-shade)" }}
       />
-      <h3 className="relative font-mono text-[0.75rem] uppercase tracking-[0.2em] text-ink">
+      <h3 className="relative font-mono text-[clamp(0.625rem,1vh,0.75rem)] uppercase tracking-[0.2em] text-ink">
         {heading}
       </h3>
-      <div className="relative mt-4 font-mono text-sm leading-7 text-ink">{items}</div>
+      <div className="relative mt-[clamp(0.5rem,1.6vh,1rem)] font-mono text-[clamp(0.75rem,1.2vh,0.875rem)] leading-[1.7] text-ink">
+        {items}
+      </div>
     </article>
   );
 }

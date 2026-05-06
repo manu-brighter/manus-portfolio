@@ -14,7 +14,7 @@ type Props = {
  */
 export function HookCard({ hookText, datestamp, polaroidCaption }: Props) {
   return (
-    <div className="flex h-full gap-4">
+    <div className="flex h-full overflow-hidden gap-[clamp(0.625rem,1.5vh,1rem)]">
       <div className="flex-shrink-0" style={{ width: "44%" }}>
         <Polaroid
           aspect="9/16"
@@ -45,7 +45,7 @@ export function HookCard({ hookText, datestamp, polaroidCaption }: Props) {
         </Polaroid>
       </div>
       <div className="flex flex-1 items-center min-w-0">
-        <blockquote className="font-display italic text-ink text-[clamp(1rem,1.5vh,1.4rem)] leading-snug tracking-[-0.01em]">
+        <blockquote className="font-display italic text-ink text-[clamp(0.9375rem,1.5vh,1.4rem)] leading-snug tracking-[-0.01em]">
           <span aria-hidden="true" className="mr-1 text-spot-amber">
             «
           </span>

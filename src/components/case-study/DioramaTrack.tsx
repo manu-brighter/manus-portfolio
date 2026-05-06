@@ -20,12 +20,15 @@ if (typeof window !== "undefined") {
  * track scales consistently across normal desktop and ultrawide
  * displays. Ink-column fluid sim is rendered separately by parent.
  *
- * Mobile (<768px) and reduced-motion: pin disabled, children render
- * in a vertical fallback flow (parent passes a `mobileFallback` prop
- * with a vertical-stack representation).
+ * Fallback (width <768px OR height <900px) and reduced-motion: pin
+ * disabled, children render in a vertical fallback flow (parent passes
+ * a `mobileFallback` prop with a vertical-stack representation). The
+ * height branch catches flat laptop viewports (1366x768, 1600x900,
+ * 1280x720) where vh-scaled cards become unreadably small.
  */
 
-const MOBILE_BREAKPOINT = 768;
+const MOBILE_MAX_WIDTH = 768;
+const FALLBACK_MAX_HEIGHT = 900; // routes 1366x768, 1600x900, 1280x720 to fallback
 const TRACK_WIDTH_VH = 420;
 
 type Props = {
@@ -40,19 +43,21 @@ export function DioramaTrack({ children, mobileFallback }: Props) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<ScrollTrigger | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const [useFallback, setUseFallback] = useState(false);
   const sceneHidden = useSceneVisibility((s) => s.hidden);
 
   useEffect(() => {
-    const mq = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
-    setIsMobile(mq.matches);
-    const onChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    const mq = window.matchMedia(
+      `(max-width: ${MOBILE_MAX_WIDTH - 1}px), (max-height: ${FALLBACK_MAX_HEIGHT - 1}px)`,
+    );
+    setUseFallback(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => setUseFallback(e.matches);
     mq.addEventListener("change", onChange);
     return () => mq.removeEventListener("change", onChange);
   }, []);
 
   useEffect(() => {
-    if (reducedMotion || isMobile) return;
+    if (reducedMotion || useFallback) return;
     const section = sectionRef.current;
     const track = trackRef.current;
     if (!section || !track) return;
@@ -93,7 +98,7 @@ export function DioramaTrack({ children, mobileFallback }: Props) {
       triggerRef.current = null;
       gsap.set(track, { x: 0 });
     };
-  }, [reducedMotion, isMobile]);
+  }, [reducedMotion, useFallback]);
 
   // Pre-unmount cleanup: when the user clicks a playground card,
   // SceneVisibilityGate flips `sceneHidden=true` (one frame later via
@@ -107,7 +112,7 @@ export function DioramaTrack({ children, mobileFallback }: Props) {
     triggerRef.current = null;
   }, [sceneHidden]);
 
-  if (isMobile || reducedMotion) {
+  if (useFallback || reducedMotion) {
     return (
       <section
         id="case-study"

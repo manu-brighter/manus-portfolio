@@ -917,6 +917,42 @@ actually shipped.
   `stations.stack.rule`, `publicLayer.screenshots`, `subhead`, etc.)
   were stripped in the post-PR cleanup pass.
 
+### Phase 12 — Cross-resolution responsive fix (2026-05-06)
+
+- **Card boxes scale with vh; card content now scales with vh too.**
+  The original Phase 12 diorama scaled card *boxes* in vh but kept
+  paddings, gaps, and font-clamp mins as fixed-px (e.g. `p-4`,
+  `clamp(0.7rem, 1vh, 0.95rem)`). On viewports below ~1440p height
+  the font-clamp floors kicked in and content overflowed the
+  shrinking boxes (visible on Manuel's work setup: 2560×1440 +
+  1920×1200). Fix: replace fixed paddings/gaps with vh-clamped
+  equivalents and lower font-clamp mins (≥10px floor for small
+  mono labels, ≥11-15px for body/heads). Sub-pixel decoration
+  spacing (`space-y-1`, `mt-0.5`, `pl-2`) stays fixed — vh-scaling
+  4-px values is noise.
+- **Mobile-fallback breakpoint is height-aware.** Old:
+  `(max-width: 767px)`. New: `(max-width: 767px), (max-height: 899px)`.
+  Catches 1366×768, 1600×900, 1280×720 laptop-class viewports
+  where the diorama would scale to 1vh < 9px (unusable). State
+  variable renamed `isMobile` → `useFallback`.
+- **Visual baseline at 1280×800 now renders the vertical fallback.**
+  The pre-fix baseline accidentally captured a hero-only crop
+  (Phase 2 era, before later sections existed). The new
+  full-page baseline at 1280×800 (h ≤ 899) shows the case-study
+  vertical-stack fallback rather than the desktop diorama. The
+  test got a `maxDiffPixels: 500` budget on a ~23M-pixel capture
+  (<0.002%) to absorb non-deterministic WebGL fluid-sim and
+  GSAP HeroSkillPulse RAF variance — `animations: "disabled"` only
+  freezes CSS animations, not RAF/Canvas content.
+- **`overflow-hidden` belt-and-suspenders on each card.** If any
+  residual content overflows on an edge case, it gets clipped
+  inside its own card boundary instead of spilling into siblings.
+- **Polaroid is case-study-exclusive.** About-Portrait uses a
+  different `Portrait` component (`src/components/ui/Portrait.tsx`).
+  Polaroid token changes have no cross-section regression risk.
+- Spec: `docs/superpowers/specs/2026-05-06-case-study-responsive-fix-design.md`.
+  Plan: `docs/superpowers/plans/2026-05-06-case-study-responsive-fix.md`.
+
 ## Phase 13 deviations
 
 ### Phase 13 — Launch Pass (SEO + Meta + Favicon + Pre-Deployment)

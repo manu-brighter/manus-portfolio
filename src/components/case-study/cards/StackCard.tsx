@@ -14,7 +14,7 @@ type Props = {
  */
 export function StackCard({ heading, stack }: Props) {
   return (
-    <div className="flex h-full flex-col gap-2">
+    <div className="flex h-full flex-col overflow-hidden gap-[clamp(0.375rem,0.9vh,0.5rem)]">
       <StackNotebook
         heading={heading}
         items={
