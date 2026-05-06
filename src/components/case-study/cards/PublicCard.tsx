@@ -103,9 +103,9 @@ export function PublicCard({
         href={footerUrl}
         target="_blank"
         rel="noreferrer noopener external"
-        className="inline-flex items-baseline gap-2 border-b-2 border-ink font-display italic text-ink text-[clamp(1rem,1.5vh,1.5rem)] leading-none w-fit hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint"
+        className="inline-flex items-baseline gap-2 bg-spot-amber px-3 py-2 font-display italic text-ink text-[clamp(1rem,1.5vh,1.5rem)] leading-none w-fit shadow-[3px_3px_0_var(--color-ink)] transition-[transform,box-shadow] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[1px_1px_0_var(--color-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
       >
-        <span className="font-mono text-[clamp(0.625rem,0.9vh,0.875rem)] uppercase tracking-[0.2em] text-ink-muted">
+        <span className="font-mono text-[clamp(0.625rem,0.9vh,0.875rem)] uppercase tracking-[0.2em] text-ink">
           {footerLabel}
         </span>
         {footerDomain}
