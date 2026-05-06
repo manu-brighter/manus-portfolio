@@ -327,7 +327,7 @@ export function Photography() {
         </div>
       </div>
 
-      <footer className="container-page grid-12 mt-20 gap-y-4 md:mt-28">
+      <div className="container-page grid-12 mt-20 gap-y-4 md:mt-28">
         <div className="col-span-12 md:col-span-8 md:col-start-3">
           <a
             href={t("ctaHref")}
@@ -336,13 +336,15 @@ export function Photography() {
             className="group inline-flex items-baseline gap-3 bg-spot-amber px-4 py-3 font-display italic text-ink text-[clamp(1rem,1.4vw,1.4rem)] leading-none w-fit shadow-[3px_3px_0_var(--color-ink)] transition-[transform,box-shadow] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[1px_1px_0_var(--color-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper motion-reduce:transition-none"
           >
             <span>{t("ctaLabel")}</span>
-            <span aria-hidden="true" className="font-mono not-italic">↗</span>
+            <span aria-hidden="true" className="font-mono not-italic">
+              ↗
+            </span>
           </a>
           {t("ctaCaption") ? (
             <p className="mt-3 type-body-sm text-ink-muted">{t("ctaCaption")}</p>
           ) : null}
         </div>
-      </footer>
+      </div>
     </section>
   );
 }
