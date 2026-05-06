@@ -10,6 +10,8 @@ type Props = {
   screenshotAlt: string;
   datestamp: string;
   polaroidCaption: string;
+  onPolaroidClick?: () => void;
+  lightboxIndex?: number;
 };
 
 /**
@@ -24,6 +26,8 @@ export function OverlayHighlightCard({
   screenshotAlt,
   datestamp,
   polaroidCaption,
+  onPolaroidClick,
+  lightboxIndex,
 }: Props) {
   return (
     <div className="flex h-full flex-col overflow-hidden gap-[clamp(0.5rem,1.2vh,0.75rem)] bg-paper-tint p-[clamp(0.625rem,1.6vh,1rem)]">
@@ -35,6 +39,8 @@ export function OverlayHighlightCard({
           datestamp={datestamp}
           caption={polaroidCaption}
           className="w-full"
+          onClick={onPolaroidClick}
+          lightboxIndex={lightboxIndex}
         >
           <picture className="block h-full w-full">
             <source

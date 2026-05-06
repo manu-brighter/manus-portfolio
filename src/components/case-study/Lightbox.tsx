@@ -32,14 +32,15 @@ export function Lightbox() {
   const reducedMotion = useReducedMotion();
   const sourceRect = useLightboxStore((s) => s.sourceRect);
   const figureRef = useRef<HTMLElement | null>(null);
+  const gridRef = useRef<HTMLDivElement | null>(null);
   const previousIndexRef = useRef<number | null>(null);
 
   const onBackdropClick = useCallback(
     (e: React.MouseEvent<HTMLDialogElement>) => {
-      // Native <dialog> backdrop click bubbles to the dialog itself
-      // when the user clicks outside the inner content. Detect via
-      // target identity.
-      if (e.target === e.currentTarget) {
+      // Close when the click lands on the backdrop area:
+      // - e.target === dialog itself (CSS ::backdrop in some browsers)
+      // - e.target === the grid wrapper div (empty space outside figure)
+      if (e.target === e.currentTarget || e.target === gridRef.current) {
         close();
       }
     },
@@ -189,7 +190,7 @@ export function Lightbox() {
       aria-labelledby="lightbox-caption"
       className="m-0 max-h-screen max-w-full bg-transparent backdrop:bg-paper-tint/85 backdrop:backdrop-blur-sm p-0 outline-none"
     >
-      <div className="grid h-screen w-screen place-items-center px-8 py-8">
+      <div ref={gridRef} className="grid h-screen w-screen place-items-center px-8 py-8">
         <figure ref={figureRef} className="relative">
           <picture
             className="block border-[2px] border-ink shadow-[6px_6px_0_var(--color-spot-rose)]"
