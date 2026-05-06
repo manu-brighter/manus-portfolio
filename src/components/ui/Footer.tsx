@@ -41,8 +41,7 @@ export function Footer() {
   const router = useRouter();
 
   const onLegalLinkClick =
-    (href: (typeof LEGAL_LINKS)[number]["href"]) =>
-    (e: ReactMouseEvent<HTMLAnchorElement>) => {
+    (href: (typeof LEGAL_LINKS)[number]["href"]) => (e: ReactMouseEvent<HTMLAnchorElement>) => {
       // Respect modifier-clicks (open in new tab etc.) — don't intercept.
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
       e.preventDefault();
