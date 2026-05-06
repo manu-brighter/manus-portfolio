@@ -27,7 +27,9 @@ export function generateStaticParams() {
 }
 
 async function getBrandImageDataUrl() {
-  const filePath = path.join(process.cwd(), "public", "brand", "icon-source.png");
+  // Trimmed transparent variant — composited cleanly onto the Twitter
+  // card's paper-bg without producing a paper-on-paper rectangle.
+  const filePath = path.join(process.cwd(), "public", "brand", "icon-source-transparent.png");
   const buffer = await readFile(filePath);
   return `data:image/png;base64,${buffer.toString("base64")}`;
 }
