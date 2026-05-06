@@ -28,7 +28,7 @@ if (typeof window !== "undefined") {
  */
 
 const MOBILE_MAX_WIDTH = 768;
-const FALLBACK_MAX_HEIGHT = 900; // routes 1366x768, 1600x900, 1280x720 to fallback
+const FALLBACK_MAX_HEIGHT = 800; // 1vh < 8px is the "unusable cards" cutoff; covers 1366x768 / 1280x720 / 1600x900-with-chrome / 1920x1200 at 125% Windows DPI
 const TRACK_WIDTH_VH = 420;
 
 type Props = {
