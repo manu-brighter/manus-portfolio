@@ -31,6 +31,15 @@ type Props = {
   datestamp?: string;
   /** Pass-through className for outer wrapper (sizing). */
   className?: string;
+  /** When provided, the inner image-frame becomes a <button> that
+   *  triggers this handler on click. The button is the FLIP source —
+   *  the lightbox captures its bounding rect for the zoom animation.
+   *  When omitted (legacy / non-clickable), the frame stays a <div>. */
+  onClick?: () => void;
+  /** When provided, decorates the inner button with
+   *  data-lightbox-index, used by the parent CaseStudy to look up the
+   *  source rect at open time. */
+  lightboxIndex?: number;
 };
 
 const SPOT_VAR: Record<Props["spot"], string> = {
@@ -48,6 +57,8 @@ export function Polaroid({
   caption,
   datestamp,
   className,
+  onClick,
+  lightboxIndex,
 }: Props) {
   const reducedMotion = useReducedMotion();
   const effectiveRotate = reducedMotion ? 0 : rotate;
@@ -62,12 +73,25 @@ export function Polaroid({
       }}
     >
       <PlateCornerMarks />
-      <div
-        className="relative overflow-hidden border-[1.5px] border-ink"
-        style={{ aspectRatio: aspect }}
-      >
-        {children}
-      </div>
+      {onClick ? (
+        <button
+          type="button"
+          onClick={onClick}
+          aria-haspopup="dialog"
+          data-lightbox-index={lightboxIndex}
+          className="group relative block w-full overflow-hidden border-[1.5px] border-ink cursor-zoom-in transition-transform duration-300 hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper motion-reduce:transition-none motion-reduce:hover:scale-100"
+          style={{ aspectRatio: aspect }}
+        >
+          {children}
+        </button>
+      ) : (
+        <div
+          className="relative overflow-hidden border-[1.5px] border-ink"
+          style={{ aspectRatio: aspect }}
+        >
+          {children}
+        </div>
+      )}
       {datestamp ? (
         <span
           aria-hidden="true"
