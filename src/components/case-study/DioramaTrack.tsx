@@ -20,9 +20,11 @@ if (typeof window !== "undefined") {
  * track scales consistently across normal desktop and ultrawide
  * displays. Ink-column fluid sim is rendered separately by parent.
  *
- * Mobile (<768px) and reduced-motion: pin disabled, children render
- * in a vertical fallback flow (parent passes a `mobileFallback` prop
- * with a vertical-stack representation).
+ * Fallback (width <768px OR height <900px) and reduced-motion: pin
+ * disabled, children render in a vertical fallback flow (parent passes
+ * a `mobileFallback` prop with a vertical-stack representation). The
+ * height branch catches flat laptop viewports (1366x768, 1600x900,
+ * 1280x720) where vh-scaled cards become unreadably small.
  */
 
 const MOBILE_MAX_WIDTH = 768;
