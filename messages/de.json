@@ -754,7 +754,7 @@
   "legal": {
     "common": {
       "lastUpdatedLabel": "Stand",
-      "lastUpdated": "1. Mai 2026",
+      "lastUpdated": "6. Mai 2026",
       "backLabel": "Zurück zur Startseite"
     },
     "impressum": {
@@ -767,7 +767,11 @@
         {
           "id": "responsible",
           "heading": "Verantwortlich für den Inhalt",
-          "body": ["Manuel Heller", "Basel-Region, Schweiz", "manuelheller@bluewin.ch"]
+          "body": [
+            "Manuel Heller",
+            "Martisackerweg 18, 4203 Grellingen, Schweiz",
+            "manuelheller@bluewin.ch"
+          ]
         },
         {
           "id": "character",
@@ -788,6 +792,13 @@
           "heading": "Urheberrecht",
           "body": [
             "Alle Texte, Fotos, Grafiken, Code-Beispiele und Shader-Quelltexte unterliegen dem Urheberrecht von Manuel Heller, sofern nicht anders gekennzeichnet. Eine Verwendung ausserhalb dieser Website bedarf der schriftlichen Zustimmung."
+          ]
+        },
+        {
+          "id": "jurisdiction",
+          "heading": "Gerichtsstand",
+          "body": [
+            "Schweizer Recht ist anwendbar. Erfüllungsort und Gerichtsstand ist Basel-Stadt, Schweiz."
           ]
         }
       ]
