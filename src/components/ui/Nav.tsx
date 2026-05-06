@@ -99,7 +99,18 @@ export function Nav() {
   // active only once its top crosses into the 20%–30% viewport strip,
   // which avoids the active-state flicker when a section is just
   // peeking in from below.
+  //
+  // Effect re-runs on pathname change so that:
+  //   - On non-home routes (/impressum, /datenschutz, /playground/[slug])
+  //     the section ids don't exist in the DOM → observer has no targets,
+  //     and we clear activeSection so the underline indicator drops.
+  //   - On nav back to home, the observer reattaches to the freshly-
+  //     mounted sections.
   useEffect(() => {
+    if (!onHome) {
+      setActiveSection(null);
+      return;
+    }
     const targets = SECTION_IDS.map((id) => document.getElementById(id)).filter(
       (el): el is HTMLElement => el !== null,
     );
@@ -117,7 +128,7 @@ export function Nav() {
 
     for (const el of targets) observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [onHome]);
 
   return (
     <nav
