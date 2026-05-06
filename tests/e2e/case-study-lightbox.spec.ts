@@ -23,9 +23,7 @@ test.describe("@case-study lightbox", () => {
 
   test("ESC closes the open lightbox", async ({ page }) => {
     await page.goto("/de/");
-    const firstClickable = page
-      .locator("section#case-study [aria-haspopup='dialog']")
-      .first();
+    const firstClickable = page.locator("section#case-study [aria-haspopup='dialog']").first();
     await firstClickable.scrollIntoViewIfNeeded();
     await firstClickable.click();
     await expect(page.locator("dialog[open]")).toBeVisible();
@@ -35,9 +33,7 @@ test.describe("@case-study lightbox", () => {
 
   test("right-arrow advances to the next image (with wrap-around)", async ({ page }) => {
     await page.goto("/de/");
-    const firstClickable = page
-      .locator("section#case-study [aria-haspopup='dialog']")
-      .first();
+    const firstClickable = page.locator("section#case-study [aria-haspopup='dialog']").first();
     await firstClickable.scrollIntoViewIfNeeded();
     await firstClickable.click();
     const counter = page.locator("dialog[open] [data-testid='lightbox-counter']");
@@ -48,9 +44,7 @@ test.describe("@case-study lightbox", () => {
 
   test("backdrop click closes the lightbox", async ({ page }) => {
     await page.goto("/de/");
-    const firstClickable = page
-      .locator("section#case-study [aria-haspopup='dialog']")
-      .first();
+    const firstClickable = page.locator("section#case-study [aria-haspopup='dialog']").first();
     await firstClickable.scrollIntoViewIfNeeded();
     await firstClickable.click();
     const dialog = page.locator("dialog[open]");
@@ -63,9 +57,7 @@ test.describe("@case-study lightbox", () => {
   test("reduced-motion: no FLIP transform applied", async ({ page, browserName: _ }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/de/");
-    const firstClickable = page
-      .locator("section#case-study [aria-haspopup='dialog']")
-      .first();
+    const firstClickable = page.locator("section#case-study [aria-haspopup='dialog']").first();
     await firstClickable.scrollIntoViewIfNeeded();
     await firstClickable.click();
     const img = page.locator("dialog[open] img").first();

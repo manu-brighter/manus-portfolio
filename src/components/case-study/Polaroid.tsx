@@ -79,6 +79,7 @@ export function Polaroid({
         // we tuned in the responsive-fix sprint. ARIA role + keyboard handler
         // gives the same accessibility as a real button. The cursor + focus
         // ring + hover-scale read identically.
+        // biome-ignore lint/a11y/useSemanticElements: real <button> default UA styling perturbed the diorama card-layout geometry; div+role=button is the documented workaround (see commit 838d12a)
         <div
           role="button"
           tabIndex={0}

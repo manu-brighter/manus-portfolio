@@ -813,7 +813,9 @@
         {
           "id": "responsible",
           "heading": "Verantwortlicher",
-          "body": ["Manuel Heller, Martisackerweg 18, 4203 Grellingen, Schweiz · manuelheller@bluewin.ch"]
+          "body": [
+            "Manuel Heller, Martisackerweg 18, 4203 Grellingen, Schweiz · manuelheller@bluewin.ch"
+          ]
         },
         {
           "id": "data",
