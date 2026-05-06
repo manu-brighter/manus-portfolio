@@ -37,6 +37,11 @@ for (const task of TASKS) {
   for (const w of WIDTHS) {
     const out = resolve(outDir, `${task.slug}-${w}w.png`);
     await sharp(src)
+      // Trim transparent padding around the icon so the rendered <img>
+      // height is set by the icon itself, not by the source artboard's
+      // empty space. Threshold 1 = drop fully-transparent pixels only;
+      // background match is alpha:0.
+      .trim({ background: { r: 0, g: 0, b: 0, alpha: 0 }, threshold: 1 })
       .resize({ width: w, withoutEnlargement: true })
       .png({ compressionLevel: 9 })
       .toFile(out);

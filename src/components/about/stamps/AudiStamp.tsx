@@ -21,11 +21,9 @@ export function AudiStamp({ spotVar: _spotVar }: Props) {
     <img
       src="/about/objects/car-120w.png"
       srcSet="/about/objects/car-120w.png 1x, /about/objects/car-240w.png 2x"
-      width={140}
-      height={90}
       alt=""
       aria-hidden="true"
-      className="block object-contain"
+      className="block h-16 w-auto max-w-[140px] object-contain"
       style={{ transform: "rotate(0.5deg)" }}
     />
   );
