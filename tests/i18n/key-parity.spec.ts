@@ -21,14 +21,12 @@ const ROOT = resolve(__dirname, "..", "..");
 function flatten(obj: unknown, prefix = ""): string[] {
   if (obj === null || typeof obj !== "object") return [prefix];
   if (Array.isArray(obj)) {
-    // For arrays, the relevant "key shape" is the array's element
-    // structure. Take the FIRST element as canonical and walk it.
-    // Mirrored arrays may have different lengths in legitimate cases
-    // (e.g. an array of strings of different counts), but the
-    // structural shape per element should match. Simplification: only
-    // walk the first element; if it's primitive, the array is leaf.
     if (obj.length === 0) return [prefix];
-    return flatten(obj[0], `${prefix}[]`);
+    // Union the shapes of ALL elements, not just the first. Homogeneous
+    // arrays produce the same result; heterogeneous arrays (e.g.
+    // work.projects where [1] may be missing fields [0] has) are caught
+    // rather than silently skipped.
+    return [...new Set(obj.flatMap((el) => flatten(el, `${prefix}[]`)))].sort();
   }
   return Object.keys(obj as Record<string, unknown>)
     .flatMap((k) => flatten((obj as Record<string, unknown>)[k], prefix ? `${prefix}.${k}` : k))

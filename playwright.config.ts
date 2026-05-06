@@ -40,6 +40,9 @@ export default defineConfig({
     {
       name: "webkit",
       use: { ...devices["Desktop Safari"] },
+      // i18n key-parity is pure node (no browser fixture). Running it on
+      // every project doubles CI time for identical results. Chromium only.
+      testIgnore: /tests\/i18n\//,
     },
   ],
   webServer: {
