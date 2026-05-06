@@ -2,33 +2,32 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
 /**
- * Site footer.
+ * Site footer — distinct paper-shade band with copyright, legal links,
+ * and a Riso "stamp" signature line on the right.
  *
- * Layout (desktop):
- *   [ © · Basel-Region · MMXXVI ]            [ GH · LI · IG · MAIL ]
- *   [ Impressum · Datenschutz ]
+ * Layout (desktop, single row):
+ *   [© · Basel-Region · MMXXVI · Impressum · Datenschutz]      [vibecoded · selbst gehostet · ohne tracker]
  *
- * Mobile: stacks. Social handles stay non-interactive stamps (no real
- * links yet on the corresponding social profiles for the IG slot, and
- * the abbr-with-title pattern preserves keyboard order without an
- * `<a href="#">` no-op). Legal links use the localized `<Link>` from
- * next-intl/navigation so they land on the locale-prefixed routes
- * (`/de/impressum`, `/en/impressum`, …) that Phase 11 ships.
+ * Mobile: stacks vertically (copyright+legal first, signature below).
+ *
+ * The legal links use the localized <Link> from next-intl/navigation so
+ * they land on locale-prefixed routes (/de/impressum etc., shipped in
+ * Phase 11). z-10 lifts the footer above the persistent FluidSim canvas
+ * stacking context so the band is actually visible at scroll-bottom.
+ *
+ * The previous social-stamp row (GH/LI/IG/MAIL) was removed because
+ * those handles already render as real links in the Contact section
+ * directly above; duplicating them in the footer was redundant.
  *
  * Server component — no client-side state needed.
  */
-
-const SOCIAL_STAMPS = [
-  { label: "GH", key: "github" },
-  { label: "LI", key: "linkedin" },
-  { label: "IG", key: "instagram" },
-  { label: "MAIL", key: "email" },
-] as const;
 
 const LEGAL_LINKS = [
   { href: "/impressum", key: "impressum" },
   { href: "/datenschutz", key: "datenschutz" },
 ] as const;
+
+const SIGNATURE_STAMPS = ["vibecoded", "selbst gehostet", "ohne tracker"] as const;
 
 export function Footer() {
   const t = useTranslations("footer");
@@ -60,15 +59,18 @@ export function Footer() {
           ))}
         </p>
 
-        <ul aria-label={t("socialAriaLabel")} className="flex items-center gap-2.5">
-          {SOCIAL_STAMPS.map((stamp) => (
-            <li key={stamp.key}>
-              <abbr className="type-label-stamp no-underline" title={t(`social.${stamp.key}`)}>
-                {stamp.label}
-              </abbr>
-            </li>
+        <p className="type-label-stamp text-ink-muted">
+          {SIGNATURE_STAMPS.map((stamp, i) => (
+            <span key={stamp}>
+              {i > 0 ? (
+                <span aria-hidden="true" className="mx-2">
+                  ·
+                </span>
+              ) : null}
+              {stamp}
+            </span>
           ))}
-        </ul>
+        </p>
       </div>
     </footer>
   );
