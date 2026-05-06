@@ -61,6 +61,39 @@ export function Lightbox() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [activeIndex, prev, next]);
 
+  useEffect(() => {
+    if (activeIndex === null) return;
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    let startX = 0;
+    let startY = 0;
+    let tracking = false;
+    const onPointerDown = (e: PointerEvent) => {
+      // Only track touch / pen — mouse drags shouldn't navigate
+      // (mouse users have arrow keys + buttons).
+      if (e.pointerType !== "touch" && e.pointerType !== "pen") return;
+      startX = e.clientX;
+      startY = e.clientY;
+      tracking = true;
+    };
+    const onPointerUp = (e: PointerEvent) => {
+      if (!tracking) return;
+      tracking = false;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      // Horizontal commit threshold; ignore predominantly-vertical swipes.
+      if (Math.abs(dy) > 80) return;
+      if (dx < -50) next();
+      else if (dx > 50) prev();
+    };
+    dialog.addEventListener("pointerdown", onPointerDown);
+    dialog.addEventListener("pointerup", onPointerUp);
+    return () => {
+      dialog.removeEventListener("pointerdown", onPointerDown);
+      dialog.removeEventListener("pointerup", onPointerUp);
+    };
+  }, [activeIndex, prev, next]);
+
   // Open / close the native dialog when activeIndex flips.
   useEffect(() => {
     const dialog = dialogRef.current;
