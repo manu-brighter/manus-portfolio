@@ -143,8 +143,8 @@ export function DioramaIllustration() {
         <rect x={-15} y={0} width={15} height={14} fill="var(--color-ink)" />
       </g>
 
-      {/* Ruler — placed below WhatCard */}
-      <g transform="translate(880, 540) rotate(8)">
+      {/* Ruler — placed in the gap between WhatCard (ends ~60vh) and StackCard (~70vh) */}
+      <g transform="translate(880, 615) rotate(8)">
         <rect
           x={0}
           y={0}

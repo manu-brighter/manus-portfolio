@@ -35,7 +35,7 @@ export function PublicCard({
   footerExternal,
 }: Props) {
   return (
-    <div className="flex h-full flex-col overflow-hidden gap-[clamp(0.5rem,1.2vh,0.75rem)]">
+    <div className="flex h-full flex-col gap-[clamp(0.5rem,1.2vh,0.75rem)]">
       <div className="flex flex-1 items-start gap-[clamp(0.375rem,0.9vh,0.5rem)]">
         {shots.map((s, i) => {
           const widths = s.aspect === "9/16" ? [360, 540, 720] : [480, 800, 1200];
