@@ -174,15 +174,20 @@ Likely causes:
 - The native scrollbar is hidden site-wide (Phase 4 deviation, replaced by ScrollProgress dots that count sections only) — visitors have no visual cue for "you're not at the bottom yet".
 - A SECOND `<footer>` element exists inside the Photography section's CTA block (`<footer className="container-page grid-12 mt-20 ...">` in `Photography.tsx`) — semantically valid but visitors see "a footer" mid-page and assume the layout-level footer doesn't exist. Worth renaming the Photography internal element from `<footer>` to a plain `<div>` to avoid confusion (it carries no `role="contentinfo"` semantics anyway).
 
+Per Manuel's review 2026-05-06: he explicitly does NOT want legal links surfaced in the Nav or burger-menu — they belong in the Footer at the very bottom, period. The Footer just needs to be visible enough that visitors actually notice it.
+
 Three complementary changes:
 
-### 6.1 Surface legal links in the Nav (always visible)
+### 6.1 Make the Footer visually distinct (PRIMARY FIX — implement first)
 
-Add `Impressum · Datenschutz` entries to the right side of the Nav, between the existing locale-switcher and the section anchors. Always visible at the top of every page; no scrolling required. This is the primary fix for discoverability.
+The Footer renders correctly at the bottom of the document (verified via Playwright: y=21564-21702, 138px tall, both legal links present), but visually it disappears into the same `bg-paper` as the Contact section above it. The screenshot of scroll-bottom shows nothing recognizable as a "footer band" beyond a faint border-line.
 
-Location: `src/components/ui/Nav.tsx` — extend the existing nav-items list with two `<Link>` elements that route to `/[locale]/impressum` and `/[locale]/datenschutz`. Style: same `type-label` font as other nav items but with `text-ink-muted` so they're present-but-not-prominent (legal links shouldn't outshout content nav).
+Changes to `src/components/ui/Footer.tsx`:
+- Background: `bg-paper` → `bg-paper-shade` (one Riso plate darker — already in the design tokens).
+- Vertical padding: `py-8` → `py-12` so the band has obvious vertical presence (≈ 96px tall instead of ≈ 64px).
+- Top border: keep `border-paper-line border-t` but the contrast against paper-shade vs. paper above will read as a clear horizontal divider.
 
-On mobile: include in the hamburger menu (`NavMobileMenu.tsx`) below the section anchors.
+This is the single most important change — without it the rest of the visibility uplift is academic.
 
 ### 6.2 Strengthen the footer copy
 
@@ -201,19 +206,11 @@ On mobile, both lines stack but legal-links sit immediately after the copyright 
 
 Strengthen contrast: `text-ink-muted` (rgba(10,6,8,0.7)) → `text-ink` (full opacity) with `underline decoration-ink-soft underline-offset-2 hover:decoration-ink` for visible link affordance.
 
-### 6.3 Make the footer visually distinct (anti-perception-bug)
-
-The footer is rendered but visually identical to the Contact section above it (same paper bg). Add a subtle paper-shade band so visitors recognize "this is the bottom":
-- Background: `bg-paper-shade` (slightly darker than `bg-paper`) instead of plain paper
-- Increase `py-8` → `py-12` so the band has more vertical presence
-
-Together (6.1 + 6.2 + 6.3) ensure the legal links are reachable from the top of every page (Nav) AND visually obvious when reached from the bottom (paper-shade band).
-
-### 6.4 Rename Photography internal `<footer>` → `<div>`
+### 6.3 Rename Photography internal `<footer>` → `<div>`
 
 Prevents the "two footers" confusion. Single-line change in `Photography.tsx`. The element carries no contentinfo semantics; switching to a `<div>` doesn't lose any a11y signal.
 
-Visual change scope: ~10 lines in `Footer.tsx`, ~5 lines in `Nav.tsx`, ~3 lines in `NavMobileMenu.tsx`, 1 character in `Photography.tsx`.
+Visual change scope: ~10 lines in `Footer.tsx`, 1 character in `Photography.tsx`. No Nav / mobile-menu changes (per Manuel's explicit preference: legal stays footer-only).
 
 ## 7. Mobile fallback consideration
 
