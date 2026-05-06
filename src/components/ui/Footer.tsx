@@ -27,7 +27,7 @@ const LEGAL_LINKS = [
   { href: "/datenschutz", key: "datenschutz" },
 ] as const;
 
-const SIGNATURE_STAMPS = ["vibecoded", "selbst gehostet", "ohne tracker"] as const;
+const SIGNATURE_STAMPS = ["MH", "STUDIO", "MMXXVI"] as const;
 
 export function Footer() {
   const t = useTranslations("footer");
@@ -40,8 +40,6 @@ export function Footer() {
           © Manuel Heller
           <span aria-hidden="true"> · </span>
           {t("location")}
-          <span aria-hidden="true"> · </span>
-          {t("year")}
           <span aria-hidden="true" className="mx-3">
             ·
           </span>
