@@ -101,14 +101,21 @@ export function Nav() {
   // peeking in from below.
   //
   // Effect re-runs on pathname change so that:
-  //   - On non-home routes (/impressum, /datenschutz, /playground/[slug])
-  //     the section ids don't exist in the DOM → observer has no targets,
-  //     and we clear activeSection so the underline indicator drops.
+  //   - On /playground/[slug] experiment routes the "Playground"
+  //     nav-item stays underlined so the user has a sense-of-place
+  //     indicator — they're inside a Playground sub-route.
+  //   - On other non-home routes (/impressum, /datenschutz) the
+  //     section ids don't exist in the DOM and there's no equivalent
+  //     nav-item, so activeSection drops to null (no underline).
   //   - On nav back to home, the observer reattaches to the freshly-
   //     mounted sections.
   useEffect(() => {
     if (!onHome) {
-      setActiveSection(null);
+      if (pathname.startsWith("/playground/")) {
+        setActiveSection("playground");
+      } else {
+        setActiveSection(null);
+      }
       return;
     }
     const targets = SECTION_IDS.map((id) => document.getElementById(id)).filter(
@@ -128,7 +135,7 @@ export function Nav() {
 
     for (const el of targets) observer.observe(el);
     return () => observer.disconnect();
-  }, [onHome]);
+  }, [onHome, pathname]);
 
   return (
     <nav

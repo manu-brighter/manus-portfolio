@@ -3,7 +3,7 @@
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useTranslations } from "next-intl";
 import type { MouseEvent as ReactMouseEvent } from "react";
-import { Link, useRouter } from "@/i18n/navigation";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 
 /**
  * Site footer — distinct paper-shade band with copyright, legal links,
@@ -39,6 +39,12 @@ export function Footer() {
   const t = useTranslations("footer");
   const tNav = useTranslations("nav.items");
   const router = useRouter();
+  const pathname = usePathname();
+
+  // Don't render on playground experiment routes — those routes
+  // present a fullscreen WebGL experiment and the editorial paper-
+  // shade footer band would clip into the experiment's chrome.
+  if (pathname.startsWith("/playground/")) return null;
 
   const onLegalLinkClick =
     (href: (typeof LEGAL_LINKS)[number]["href"]) => (e: ReactMouseEvent<HTMLAnchorElement>) => {

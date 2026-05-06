@@ -504,11 +504,13 @@
   }
 
   /* Leva control panel (Ink Drop Studio playground) — push below the
-   * sticky nav. Leva's portal mounts at #leva__root and positions
-   * itself top:10px right:10px by default; that clips into our 57px
-   * Nav. Bump top to ~5rem so the panel breathes a quarter-rem below
-   * the nav's bottom edge. Right offset stays per Leva default. */
-  #leva__root {
+   * sticky nav. Leva mounts a fixed-positioned root via React portal
+   * directly under <body>; the element gets stitches-generated
+   * leva-c-XXXXX classes (no #leva__root id) and starts at top:10px.
+   * Target the body-level Leva root via attribute selector so the
+   * stitches hash drift across versions doesn't break us. !important
+   * needed to beat Leva's stitches CSS-in-JS specificity. */
+  body > div[class^="leva-c-"] {
     top: 5rem !important;
   }
 }
