@@ -27,6 +27,8 @@ export function Lightbox() {
   const activeIndex = useLightboxStore((s) => s.activeIndex);
   const images = useLightboxStore((s) => s.images);
   const close = useLightboxStore((s) => s.close);
+  const prev = useLightboxStore((s) => s.prev);
+  const next = useLightboxStore((s) => s.next);
   const reducedMotion = useReducedMotion();
   const sourceRect = useLightboxStore((s) => s.sourceRect);
   const figureRef = useRef<HTMLElement | null>(null);
@@ -43,6 +45,21 @@ export function Lightbox() {
     },
     [close],
   );
+
+  useEffect(() => {
+    if (activeIndex === null) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        prev();
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        next();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [activeIndex, prev, next]);
 
   // Open / close the native dialog when activeIndex flips.
   useEffect(() => {
@@ -81,7 +98,12 @@ export function Lightbox() {
     // Nav transitions (number → number) are handled in Task 7.
     const wasClosed = previousIndexRef.current === null;
     previousIndexRef.current = activeIndex;
-    if (!wasClosed) return;
+    if (!wasClosed) {
+      // Number → number (prev/next) — short cross-fade, no FLIP.
+      if (reducedMotion) return;
+      gsap.fromTo(figure, { opacity: 0 }, { opacity: 1, duration: dur.micro, ease: easeExpoCSS });
+      return;
+    }
 
     // Reduced motion: simple opacity fade, skip FLIP entirely.
     if (reducedMotion) {
@@ -166,6 +188,22 @@ export function Lightbox() {
           className="absolute top-6 right-6 grid size-12 place-items-center border-[1.5px] border-ink bg-paper text-ink text-2xl leading-none shadow-[3px_3px_0_var(--color-ink)] transition-[transform,box-shadow] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[1px_1px_0_var(--color-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper motion-reduce:transition-none"
         >
           <span aria-hidden="true">×</span>
+        </button>
+        <button
+          type="button"
+          onClick={prev}
+          aria-label={t("previousLabel")}
+          className="-translate-y-1/2 absolute top-1/2 left-6 grid size-12 place-items-center border-[1.5px] border-ink bg-paper text-ink text-2xl leading-none shadow-[3px_3px_0_var(--color-ink)] transition-[transform,box-shadow] hover:translate-x-[-2px] hover:translate-y-[calc(-50%+2px)] hover:shadow-[5px_3px_0_var(--color-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper motion-reduce:transition-none"
+        >
+          <span aria-hidden="true">‹</span>
+        </button>
+        <button
+          type="button"
+          onClick={next}
+          aria-label={t("nextLabel")}
+          className="-translate-y-1/2 absolute top-1/2 right-6 grid size-12 place-items-center border-[1.5px] border-ink bg-paper text-ink text-2xl leading-none shadow-[3px_3px_0_var(--color-ink)] transition-[transform,box-shadow] hover:translate-x-[2px] hover:translate-y-[calc(-50%+2px)] hover:shadow-[1px_3px_0_var(--color-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper motion-reduce:transition-none"
+        >
+          <span aria-hidden="true">›</span>
         </button>
       </div>
     </dialog>
