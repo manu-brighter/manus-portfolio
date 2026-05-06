@@ -1,19 +1,19 @@
 # Server-side handoff: manuelheller.dev deployment
 
 **Audience:** Claude Code instance running on Manuel's mc-host24.de root server.
-**Working directory expected on server:** `/var/www/manusportfolio` (clone target).
+**Working directory expected on server:** `/var/www/manus-portfolio` (clone target).
 **Companion live site:** `joggediballa.ch` already runs on this server (different vhost, MariaDB-backed).
 
 ## Context Manuel has provided
 
 > Aktuell habe ich eine laufende website (joggediballa.ch) im verzeichnis
-> /var/www/joggediballa welche auf diesem root server läuft (zu dieser
+> /var/www/joggediballa-mainpage welche auf diesem root server läuft (zu dieser
 > website gehört die datenbank joggediballa welche auf mariadb läuft).
 > Der server selbst ist von mc-host24.de und von mir mit hilfe von gemini
 > eingerichtet worden. Ich habe den server gerade von 4gb auf 6gb upgraded.
 >
 > Erste Aufgabe: durchsuche alles was es auf dem server geben könnte
-> bezüglich dem thema schutzmechanismen, hinterfrage ob das so sinn macht
+> bezüglich dem thema schutzmechanismen (performance, ram usw.), hinterfrage ob das so sinn macht
 > wie es implementiert ist, passe wenn sinnvoll auf 6gb an. Analysiere
 > alle tools, features, configs. Geh das gesamte server-setup durch
 > (nginx conf etc.), review sauber, hinterfrage, bring verbesserungen
@@ -21,7 +21,7 @@
 > Setup zwischen joggediballa und manusportfolio sollte konsistent sein
 > ausser ein Unterschied bringt klaren Vorteil.
 >
-> Zweite Aufgabe: portfolio website einrichten auf /var/www/manusportfolio.
+> Zweite Aufgabe: portfolio website einrichten auf /var/www/manus-portfolio.
 > Domain manuelheller.dev (Ionos). Bei Fragen zuerst fragen. Wenn etwas
 > manuell ausserhalb des Servers zu erledigen ist (DNS, etc.), Manuel
 > Bescheid geben.
@@ -42,25 +42,25 @@
 ## What to do, step by step
 
 1. **Server-side audit (joggediballa setup review)**
-   - Walk the entire `/var/www/joggediballa/` setup, the active nginx vhost configs (`/etc/nginx/sites-{available,enabled}/`), systemd services, fail2ban / ufw / iptables rules, MariaDB config, certbot setup, log rotation policies.
+   - Walk the entire `/var/www/joggediballa-mainpage/` setup, the active nginx vhost configs (`/etc/nginx/sites-{available,enabled}/`), systemd services, fail2ban / ufw / iptables rules, MariaDB config, certbot setup, log rotation policies.
    - List protective mechanisms. Cross-check whether 4GB-tuned values (worker counts, ulimits, MariaDB buffer pools) need to be relaxed or expanded for 6GB.
    - Document findings in a temporary `/root/server-audit.md` or similar before changing anything.
 
 2. **Deployment-pattern decision**
    - Will `manusportfolio` be deployed via `git pull` + `pnpm build` directly on the server, or via CI artifact upload? Pick whichever pattern joggediballa already uses; consistency wins. If joggediballa has no pattern, recommend git pull + build on server (simplest for a static export).
-   - Set up a deploy user (non-root) for `/var/www/manusportfolio`.
+   - Set up a deploy user (non-root) for `/var/www/manus-portfolio`.
 
 3. **Repo clone + first build**
-   - Clone `git@github.com:manu-brighter/manus-portfolio.git` to `/var/www/manusportfolio`.
+   - Clone `git@github.com:manu-brighter/manus-portfolio.git` to `/var/www/manus-portfolio`.
    - Install Node.js 20+ (or whichever LTS the server already has for joggediballa) and pnpm.
-   - Run `pnpm install --frozen-lockfile && pnpm build`. Output lands in `/var/www/manusportfolio/out/`.
+   - Run `pnpm install --frozen-lockfile && pnpm build`. Output lands in `/var/www/manus-portfolio/out/`.
    - Verify the `out/` folder structure and that `out/index.html` exists (root redirect to default locale).
 
 4. **nginx vhost**
    - Create `/etc/nginx/sites-available/manuelheller.dev` with:
      - `listen 443 ssl http2;`
      - `server_name manuelheller.dev;`
-     - `root /var/www/manusportfolio/out;`
+     - `root /var/www/manus-portfolio/out;`
      - `index index.html;`
      - **Trailing-slash handling:** The static export emits paths like `/de/index.html` and `/de/playground/ink-drop-studio/index.html`. nginx's `try_files $uri $uri/ $uri.html =404;` handles all three forms (exact, dir-style with trailing slash, and `.html`-extension fallback).
      - **Cache headers:** `/_next/static/*` → `Cache-Control: public, max-age=31536000, immutable`. HTML files → `Cache-Control: public, max-age=300, must-revalidate`. Other assets (images, fonts) → `Cache-Control: public, max-age=86400`.
@@ -106,7 +106,7 @@
 
 ## Open questions for Manuel before starting
 
-1. **Server access**: confirm SSH key + user have permission to write `/var/www/manusportfolio` and reload nginx. Sudo password handy?
+1. **Server access**: confirm SSH key + user have permission to write `/var/www/manus-portfolio` and reload nginx. Sudo password handy?
 2. **CI/CD preference**: deploy via git-pull-on-server + manual `pnpm build`, or set up a webhook + auto-deploy on `main` push? (Recommended: git-pull manual for now; auto-deploy can land later.)
 3. **Plausible analytics**: install in this same handoff, or split into a follow-up session? (Recommended: split — get the portfolio live first, observe stability for a day, then add analytics.)
 4. **Existing joggediballa-setup quirks**: anything Manuel already knows is suboptimal that you'd like Claude-on-server to address? (e.g., known too-tight worker_processes, DB query that hangs, etc.)
