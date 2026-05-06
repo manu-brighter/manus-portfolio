@@ -97,6 +97,14 @@ async function processFile(filePath) {
   // Overwrite the original file with the newly encoded buffer.
   writeFileSync(filePath, buf);
   const sizeAfter = buf.byteLength;
+
+  // Verify EXIF was embedded — AVIF/libheif may silently drop it.
+  const verify = await sharp(buf).metadata();
+  if (!verify.exif) {
+    // biome-ignore lint/suspicious/noConsole: CLI script
+    console.warn(`  EXIF not embedded: ${filePath} (likely AVIF/libheif limitation)`);
+  }
+
   return { sizeBefore, sizeAfter, delta: sizeAfter - sizeBefore };
 }
 

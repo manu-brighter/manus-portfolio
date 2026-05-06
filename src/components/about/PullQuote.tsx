@@ -102,7 +102,6 @@ export function PullQuote({ text, threshold = UNDERLINE_THRESHOLD_DEFAULT }: Pul
               viewBox="0 0 100 12"
               preserveAspectRatio="none"
             >
-              <title>Underline</title>
               <path
                 ref={underlineRef}
                 d="M2 8 Q 25 4, 50 7 T 98 6"
