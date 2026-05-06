@@ -100,7 +100,7 @@ export function ObjectGrid() {
                       "radial-gradient(circle at 0% 0%, var(--tile-spot) 0%, transparent 65%)",
                   }}
                 />
-                <div className="relative flex min-h-[5.625rem] items-center justify-center pt-2">
+                <div className="relative flex h-[6.25rem] items-center justify-center">
                   <TileStamp k={tile.key} spotVar={SPOT_VAR[tile.spot]} />
                 </div>
                 <figcaption className="relative mt-1 transition-transform duration-[280ms] ease-out group-hover:translate-x-[2px]">
