@@ -891,11 +891,11 @@
     }
   },
   "notFound": {
-    "metaTitle": "404 · Im Fluid versickert",
+    "metaTitle": "404 · Lost in the fluid",
     "stamp": "Error 404",
-    "headline": "Diese Seite ist im Fluid versickert.",
-    "body": "Die URL existiert nicht — entweder Tippfehler, alter Link, oder die Tinte hat sie verschluckt. Beides ist möglich.",
-    "backHome": "Zurück zur Startseite",
-    "backWork": "Arbeiten ansehen"
+    "headline": "This page got lost in the fluid.",
+    "body": "The URL doesn't exist. Either a typo, an old link, or the ink swallowed it. Both are possible.",
+    "backHome": "Back to home",
+    "backWork": "See work"
   }
 }
