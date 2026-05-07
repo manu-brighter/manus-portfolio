@@ -92,7 +92,7 @@
   "about": {
     "sectionLabel": "Section 01 · About",
     "headline": "Full-stack developer with an artist's eye.",
-    "subhead": "Code, photo, design — same craft, different surface.",
+    "subhead": "Code, photo, design: same craft, different surface.",
     "parts": [
       {
         "id": "wer-ich-bin",
@@ -106,7 +106,7 @@
         "heading": "How I got here",
         "body": [
           "Programming came to me through gaming. I set up my own Minecraft modpack server and started writing Mining Turtles in Lua. That was the moment I realised: I want to understand how all of this works under the hood.",
-          "My apprenticeship was IT-systems engineer (Betriebsinformatiker EFZ) at Novartis. I actually wanted to be a developer, but Novartis only offered the systems-engineer track — and you don't pass on a Novartis apprenticeship. Four years of servers, networks, support: solid foundation, but by the end it was clear: I'm applying as a developer. With zvoove since 2021, working on the main product zvoove Core, various API/interface tools, and Cypress E2E tests."
+          "My apprenticeship was IT-systems engineer (Betriebsinformatiker EFZ) at Novartis. I actually wanted to be a developer, but Novartis only offered the systems-engineer track, and you don't pass on a Novartis apprenticeship. Four years of servers, networks, support: solid foundation, but by the end it was clear: I'm applying as a developer. With zvoove since 2021, working on the main product zvoove Core, various API/interface tools, and Cypress E2E tests."
         ]
       },
       {
@@ -121,14 +121,14 @@
         "id": "antrieb",
         "heading": "What drives me",
         "body": [
-          "I get excited about almost everything, and I'm convinced: in the AI era especially you have to stay on it more than ever. Stop learning and you're twelve months away from being left behind. Picking up new skills just feels like fun to me — for me that's not pressure, it's the default mode."
+          "I get excited about almost everything, and I'm convinced: in the AI era especially you have to stay on it more than ever. Stop learning and you're twelve months away from being left behind. Picking up new skills just feels like fun to me; for me that's not pressure, it's the default mode."
         ]
       },
       {
         "id": "off-screen",
         "heading": "Off the screen",
         "body": [
-          "Wildlife photography is my biggest passion. I travel solo to Costa Rica or Thailand and trudge into the jungle myself to get animals in the wild in front of the lens. Plus cars (see my Audi S5 tuning project), ski/snowboard, diving, and Jogge di Balla — the club where I'm vice-president, web developer, club photographer, cameraman, and social-media manager all in one."
+          "Wildlife photography is my biggest passion. I travel solo to Costa Rica or Thailand and trudge into the jungle myself to get animals in the wild in front of the lens. Plus cars (see my Audi S5 tuning project), ski/snowboard, diving, and Jogge di Balla, the club where I'm vice-president, web developer, club photographer, cameraman, and social-media manager all in one."
         ]
       }
     ],
@@ -497,7 +497,7 @@
   },
   "caseStudy": {
     "headline": "From club chaos to a custom platform.",
-    "hook": "All clubs fight the same mess: Excel sheets, static websites, file/info sharing, isolated tools. For Jogge di Balla I cleaned that up — a custom-built platform that covers everything from member management to a Twitch overlay. Vibecoded, self-hosted, over-engineered.",
+    "hook": "All clubs fight the same mess: Excel sheets, static websites, file/info sharing, isolated tools. For Jogge di Balla I cleaned that up: a custom-built platform that covers everything from member management to a Twitch overlay. Vibecoded, self-hosted, over-engineered.",
     "context": {
       "label": "What is Jogge di Balla?",
       "facts": [
@@ -563,7 +563,7 @@
           "features": [
             {
               "title": "Dynamic permission system",
-              "body": "Granular rights (edit_events, manage_sponsors, edit_shotcounter, …) assignable per card per role — no code changes needed. Backend checks every tRPC call through a custom requirePermission() middleware."
+              "body": "Granular rights (edit_events, manage_sponsors, edit_shotcounter, …) assignable per card per role, no code changes needed. Backend checks every tRPC call through a custom requirePermission() middleware."
             },
             {
               "title": "Attendance tracking with statistics",
@@ -593,7 +593,7 @@
             },
             {
               "title": "Reach: honestly small",
-              "body": "~15–20 concurrent viewers, ~100 total. The tooling is solidly built anyway — and reusable."
+              "body": "~15–20 concurrent viewers, ~100 total. The tooling is solidly built anyway, and reusable."
             }
           ]
         }
@@ -654,34 +654,34 @@
     "sectionLabel": "05 / Photography",
     "eyebrow": "Through the Lens",
     "headline": "Through the Lens.",
-    "lede": "Wildlife und Autos sind meine zwei Welten. Die einen jage ich solo durch den Dschungel von Costa Rica oder Thailand, die anderen finden mich meist näher zuhause. Was beide verbindet: Geduld, Licht, und der eine Moment, der den ganzen Tag rechtfertigt.",
-    "techLabel": "SONY α7 IV · 24–600mm · seit 2023",
-    "ctaLabel": "Volles Portfolio auf manuelheller.myportfolio.com",
+    "lede": "Wildlife and cars are my two worlds. The first I chase solo through the jungles of Costa Rica or Thailand, the second usually find me closer to home. What connects them: patience, light, and that one moment that justifies the whole day.",
+    "techLabel": "SONY α7 IV · 24–600mm · since 2023",
+    "ctaLabel": "Full portfolio on manuelheller.myportfolio.com",
     "ctaHref": "https://manuelheller.myportfolio.com/portfolio",
     "ctaCaption": "",
     "slides": {
       "koenigsegg": {
-        "alt": "Koenigsegg-Hypercar unter einem Hotel-Bogen in der Abenddämmerung",
+        "alt": "Koenigsegg hypercar under a hotel arch at dusk",
         "stamp": "ST. MORITZ · 2025 · AUTO",
-        "title": "Stillstand bei 30 km/h.",
-        "body": "Manchmal ist das spannendste Bild nicht das mit der höchsten Verschlusszeit, sondern das mit dem Licht das nur fünf Minuten lang da ist."
+        "title": "Freezed at 30 km/h.",
+        "body": "Sometimes the most interesting frame isn't the one with the highest shutter speed. It's the one with the light that only sits there for five minutes."
       },
       "panorama": {
-        "alt": "Frachtschiffe vor einer dramatischen Wolkenformation am Horizont",
+        "alt": "Freighters under a dramatic cloud formation on the horizon",
         "stamp": "COSTA RICA · 2024 · SEASCAPE"
       },
       "treeLake": {
-        "alt": "Einsamer Baum am Ufer eines Sees, Spiegelung im Wasser, Costa Rica",
+        "alt": "Lone tree at the edge of a lake, reflection in the water, Costa Rica",
         "stamp": "LAKE ARENAL · 2024 · LANDSCAPE",
-        "title": "Geduld als Bildkomposition.",
-        "body": "Lake Arenal: anderthalb Stunden auf den Wind gewartet, der die Wasseroberfläche endlich glättet. Reflexion macht das Bild, nicht der Baum."
+        "title": "Patience as composition.",
+        "body": "Lake Arenal: an hour and a half waiting for the wind to drop and finally smooth the water. The reflection makes the picture, not the tree."
       },
       "crocodile": {
-        "alt": "Krokodil mit einem Schmetterling auf der Schnauze, Costa Rica",
+        "alt": "Crocodile with a butterfly on its snout, Costa Rica",
         "stamp": "TÁRCOLES · 2024 · WILDLIFE"
       },
       "pelican": {
-        "alt": "Pelikan im Anflug über dem Pazifik, Costa Rica",
+        "alt": "Pelican in flight over the Pacific, Costa Rica",
         "stamp": "MANUEL ANTONIO · 2024 · WILDLIFE"
       }
     }
