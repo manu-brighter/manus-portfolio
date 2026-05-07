@@ -39,7 +39,13 @@ export function PublicCard({
   lightboxBaseIndex,
 }: Props) {
   return (
-    <div className="flex h-full flex-col gap-[clamp(0.5rem,1.2vh,0.75rem)] overflow-hidden">
+    // No overflow-hidden here: the 3 polaroid widths intentionally sum to
+    // 100%+ with rotation extending past the right edge for a Riso
+    // "scattered prints" feel. A defensive overflow-hidden flat-clips the
+    // rightmost (phone) shot — see commit 9620676 (Drop ruler / unclip
+    // PublicCard). Other 5 cards keep overflow-hidden; they have inner
+    // content that benefits from the safety net.
+    <div className="flex h-full flex-col gap-[clamp(0.5rem,1.2vh,0.75rem)]">
       <div className="flex flex-1 items-start gap-[clamp(0.375rem,0.9vh,0.5rem)]">
         {shots.map((s, i) => {
           const widths = s.aspect === "9/16" ? [360, 540, 720] : [480, 800, 1200];
