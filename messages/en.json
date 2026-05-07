@@ -724,43 +724,43 @@
   "contact": {
     "sectionLabel": "Section 07 · Contact",
     "headline": "Let's talk.",
-    "subhead": "Auftrag, Frage, Tipp oder einfach Hallo — die Inbox ist offen.",
+    "subhead": "Request, question, idea, or just a hello, the inbox is open.",
     "intro": {
-      "label": "Ein paar Worte vorab",
-      "body": "Ich antworte üblicherweise innerhalb von ein bis zwei Tagen. Für Recruiter und Anfragen aus der Vereinswelt: bitte kurz schreiben woher du kommst, das spart die zweite Mail."
+      "label": "A few words upfront",
+      "body": "I usually reply within one or two days. For recruiters and club-world enquiries: please mention briefly where you're coming from, it saves the second email."
     },
     "channels": {
-      "label": "Direkt-Kanäle",
-      "note": "GitHub ist nur semi-aktiv — kein 100-Repo-Glanzfassaden-Account.",
-      "email": "E-Mail",
+      "label": "Direct channels",
+      "note": "GitHub is only semi-active, not a 100-repo polished-facade account.",
+      "email": "Email",
       "github": "GitHub",
       "linkedin": "LinkedIn",
-      "photos": "Fotos"
+      "photos": "Photos"
     },
     "form": {
       "name": {
         "label": "Name",
-        "placeholder": "Wie heisst du?"
+        "placeholder": "What's your name?"
       },
       "email": {
-        "label": "E-Mail",
-        "placeholder": "deine@adresse.ch"
+        "label": "Email",
+        "placeholder": "you@address.ch"
       },
       "message": {
-        "label": "Nachricht",
-        "placeholder": "Was beschäftigt dich? (mind. 10 Zeichen)"
+        "label": "Message",
+        "placeholder": "What's on your mind? (min. 10 characters)"
       },
       "honeypot": {
-        "label": "Bitte nicht ausfüllen"
+        "label": "Please don't fill in"
       },
       "submit": {
-        "label": "Senden",
-        "sending": "Sende …"
+        "label": "Send",
+        "sending": "Sending …"
       },
       "status": {
-        "fallback": "Form-Versand ist gerade noch nicht verdrahtet. Schreib mir direkt:",
-        "error": "Hat nicht geklappt. Bitte direkt per E-Mail.",
-        "mailSubject": "Anfrage über manuelheller.dev"
+        "fallback": "Form delivery isn't wired up yet. Write me directly:",
+        "error": "Didn't go through. Please email me directly.",
+        "mailSubject": "Enquiry via manuelheller.dev"
       }
     }
   },
