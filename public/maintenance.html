@@ -1,0 +1,275 @@
+<!doctype html>
+<!--
+  Maintenance page for manuelheller.dev.
+
+  Self-contained: inline CSS, no JS, no external font / asset deps.
+  Works even if the rest of out/ is empty or being redeployed.
+
+  HOW TO TOGGLE (server-side, no nginx reload needed).
+  Replace <docroot> with the actual nginx document root for
+  manuelheller.dev (currently /var/www/manus-portfolio/out per the
+  server-handoff doc; the snippet below uses $document_root, so the
+  flag-file lives next to the deployed out/ contents):
+
+    # turn maintenance ON
+    touch <docroot>/.maintenance
+
+    # turn it OFF
+    rm <docroot>/.maintenance
+
+  NGINX SNIPPET (add inside the server { ... } block):
+
+    if (-f $document_root/.maintenance) {
+      return 503;
+    }
+    error_page 503 /maintenance.html;
+    location = /maintenance.html {
+      internal;
+      add_header Cache-Control "no-store, must-revalidate";
+    }
+
+  The internal = directive prevents direct GET /maintenance.html (only the
+  503 error_page handler can serve it). Cache-Control prevents Cloudflare
+  + browsers from caching the maintenance state past the toggle-off.
+
+  Returns proper HTTP 503 so search engines treat the outage as
+  temporary and don't deindex.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>Off the press · manuelheller.dev</title>
+    <style>
+      :root {
+        --paper: #f0e8dc;
+        --paper-tint: #fef2e2;
+        --paper-shade: #e4dbcd;
+        --ink: #0a0608;
+        --ink-muted: rgba(10, 6, 8, 0.7);
+        --rose: #ff6ba0;
+        --amber: #ffc474;
+        --mint: #7ce8c4;
+        --violet: #b89aff;
+        --serif: Georgia, "Times New Roman", serif;
+        --mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, "Courier New", monospace;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        min-height: 100vh;
+        background-color: var(--paper);
+        background-image:
+          radial-gradient(circle at 1px 1px, rgba(10, 6, 8, 0.08) 1px, transparent 0),
+          radial-gradient(circle at 50% 50%, transparent 60%, rgba(10, 6, 8, 0.04) 100%);
+        background-size: 18px 18px, 100% 100%;
+        color: var(--ink);
+        font-family: var(--serif);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1.5rem;
+        position: relative;
+        overflow: hidden;
+      }
+
+      ::selection {
+        background: var(--rose);
+        color: var(--paper-tint);
+      }
+
+      /* Decorative spot-color blobs in corners */
+      body::before,
+      body::after {
+        content: "";
+        position: fixed;
+        width: 320px;
+        height: 320px;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.35;
+        pointer-events: none;
+        z-index: 0;
+      }
+      body::before {
+        top: -120px;
+        left: -120px;
+        background: var(--rose);
+      }
+      body::after {
+        bottom: -120px;
+        right: -120px;
+        background: var(--mint);
+      }
+
+      main {
+        position: relative;
+        z-index: 1;
+        max-width: 640px;
+        width: 100%;
+        text-align: left;
+      }
+
+      .stamp {
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+        display: inline-block;
+        border: 1.5px solid var(--ink);
+        padding: 0.35rem 0.7rem;
+        background: var(--paper-tint);
+        box-shadow: 2px 2px 0 var(--violet);
+      }
+
+      .eyebrow {
+        margin-bottom: 1.5rem;
+      }
+
+      h1 {
+        font-family: var(--serif);
+        font-style: italic;
+        font-weight: 400;
+        font-size: clamp(3rem, 9vw, 6.5rem);
+        line-height: 0.95;
+        letter-spacing: -0.02em;
+        margin: 0 0 1.5rem 0;
+        color: var(--ink);
+        /* Riso misregistration: rose + mint ghost layers offset behind ink */
+        text-shadow:
+          3px 0 0 var(--rose),
+          -3px 1px 0 var(--mint);
+      }
+
+      h1 .small {
+        display: block;
+        font-size: 0.42em;
+        font-style: normal;
+        font-family: var(--mono);
+        font-weight: 500;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        text-shadow: none;
+        color: var(--ink-muted);
+        margin-top: 1.2rem;
+      }
+
+      .lede {
+        font-size: 1.25rem;
+        line-height: 1.45;
+        color: var(--ink);
+        margin: 0 0 1rem 0;
+        max-width: 32em;
+      }
+
+      .lede em {
+        font-style: italic;
+        background: linear-gradient(transparent 60%, var(--amber) 60%);
+        padding: 0 0.1em;
+      }
+
+      .joke {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: var(--ink-muted);
+        margin: 0 0 2.5rem 0;
+        max-width: 32em;
+      }
+
+      footer {
+        position: relative;
+        z-index: 1;
+        margin-top: 2rem;
+        max-width: 640px;
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 1rem;
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+      }
+
+      footer .signature {
+        font-family: var(--serif);
+        font-style: italic;
+        font-size: 1rem;
+        text-transform: none;
+        letter-spacing: 0;
+        color: var(--ink);
+      }
+
+      footer .dot {
+        opacity: 0.5;
+      }
+
+      footer a {
+        color: var(--ink);
+        text-decoration: none;
+        border-bottom: 1.5px solid var(--ink);
+        padding-bottom: 1px;
+      }
+      footer a:hover {
+        color: var(--rose);
+        border-bottom-color: var(--rose);
+      }
+
+      @media (prefers-reduced-motion: no-preference) {
+        h1 {
+          animation: drift 8s ease-in-out infinite alternate;
+        }
+        @keyframes drift {
+          from {
+            text-shadow: 3px 0 0 var(--rose), -3px 1px 0 var(--mint);
+          }
+          to {
+            text-shadow: 4px -1px 0 var(--rose), -4px 2px 0 var(--mint);
+          }
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="eyebrow">
+        <span class="stamp">Status · 503 · Off the press</span>
+      </div>
+      <h1>
+        Off the press.<span class="small">Currently re-inking.</span>
+      </h1>
+      <p class="lede">
+        Site's down for a moment. The Riso plates drifted, and someone has to
+        <em>realign them by hand</em>.
+      </p>
+      <p class="joke">
+        That someone is me. I'm either fixing a shader bug, deploying something
+        I shouldn't, or watching a pelican over the Pacific. All three are
+        equally likely. Refresh in a bit.
+      </p>
+    </main>
+    <footer>
+      <span class="signature">— manu</span>
+      <span class="dot">·</span>
+      <span>manuelheller.dev</span>
+      <span class="dot">·</span>
+      <a href="mailto:manuelheller@bluewin.ch">manuelheller@bluewin.ch</a>
+    </footer>
+  </body>
+</html>

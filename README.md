@@ -35,6 +35,31 @@ pnpm test:a11y          # axe across all 4 locales
 pnpm lighthouse         # local Lighthouse run (Linux/CI; broken on Windows)
 ```
 
+Static export → Nginx + Cloudflare. Server-side runbook for the
+initial deployment (and for a fresh AI session dropped onto the
+server) lives at
+[`docs/superpowers/server-handoff/2026-05-06-deploy-manusportfolio.md`](docs/superpowers/server-handoff/2026-05-06-deploy-manusportfolio.md).
+
+## Maintenance mode
+
+`public/maintenance.html` ships with the static export and renders
+through an Nginx flag-file toggle, so the site can be taken offline
+without redeploying or reloading Nginx:
+
+```bash
+# Maintenance ON  (replace <docroot> with the nginx document root —
+# /var/www/manus-portfolio/out per the server-handoff doc)
+touch <docroot>/.maintenance
+
+# Maintenance OFF
+rm    <docroot>/.maintenance
+```
+
+The HTTP status served during maintenance is `503` so search engines
+treat the outage as temporary (no deindex). Required Nginx snippet
+is documented in the HTML comment at the top of
+[`public/maintenance.html`](public/maintenance.html).
+
 ## Why look at the source
 
 This is a **vibecoded** portfolio — built with [Claude Code](https://claude.com/claude-code) over multiple iterative sessions. The repo
@@ -48,6 +73,8 @@ production-grade single-page-portfolio. Notable bits:
 - `src/components/motion/OverprintReveal.tsx` — Riso misregistration
   reveal primitive (3 stacked layers per char + IO-driven GSAP timeline).
 - `src/lib/raf.ts` — single shared RAF ticker for GSAP + Lenis + R3F.
+- `public/maintenance.html` — single-file, fully self-contained Riso-
+  styled 503 page (inline CSS, system fonts, no external assets).
 - `.claude/CLAUDE.md` — deviations from the original plan, accumulated
   over ~13 phases of iterative implementation.
 
