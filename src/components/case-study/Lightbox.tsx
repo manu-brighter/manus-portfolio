@@ -87,11 +87,16 @@ export function Lightbox() {
       if (dx < -50) next();
       else if (dx > 50) prev();
     };
+    const onPointerCancel = () => {
+      tracking = false;
+    };
     dialog.addEventListener("pointerdown", onPointerDown);
     dialog.addEventListener("pointerup", onPointerUp);
+    dialog.addEventListener("pointercancel", onPointerCancel);
     return () => {
       dialog.removeEventListener("pointerdown", onPointerDown);
       dialog.removeEventListener("pointerup", onPointerUp);
+      dialog.removeEventListener("pointercancel", onPointerCancel);
     };
   }, [activeIndex, prev, next]);
 
@@ -135,12 +140,14 @@ export function Lightbox() {
     if (!wasClosed) {
       // Number → number (prev/next) — short cross-fade, no FLIP.
       if (reducedMotion) return;
+      gsap.killTweensOf(figure);
       gsap.fromTo(figure, { opacity: 0 }, { opacity: 1, duration: dur.micro, ease: easeExpoCSS });
       return;
     }
 
     // Reduced motion: simple opacity fade, skip FLIP entirely.
     if (reducedMotion) {
+      gsap.killTweensOf(figure);
       gsap.fromTo(figure, { opacity: 0 }, { opacity: 1, duration: dur.short });
       return;
     }
@@ -158,6 +165,7 @@ export function Lightbox() {
     // grows. Slight aspect mismatch between polaroid frame and full
     // image is acceptable for a 300ms transient.
     const s = Math.min(sx, sy);
+    gsap.killTweensOf(figure);
     gsap.fromTo(
       figure,
       { x: dx, y: dy, scale: s, opacity: 0 },

@@ -1,35 +1,19 @@
-"use client";
-
 import "./globals.css";
 import "@fontsource/instrument-serif/400-italic.css";
 import "@fontsource/instrument-serif/400.css";
 import "@fontsource-variable/inter";
 import "@fontsource-variable/jetbrains-mono";
 
-import gsap from "gsap";
+import type { Metadata } from "next";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { NotFoundAnimation } from "./not-found-animation";
+
+export const metadata: Metadata = {
+  title: "404 — Seite nicht gefunden",
+  robots: { index: false, follow: false },
+};
 
 export default function NotFound() {
-  const inkRef = useRef<SVGGElement>(null);
-
-  useEffect(() => {
-    const ink = inkRef.current;
-    if (!ink) return;
-    const tl = gsap.timeline();
-    tl.from(ink.children, {
-      scale: 0,
-      opacity: 0,
-      transformOrigin: "center",
-      duration: 1.2,
-      ease: "elastic.out(1, 0.5)",
-      stagger: 0.08,
-    });
-    return () => {
-      tl.kill();
-    };
-  }, []);
-
   return (
     <html lang="de">
       <body
@@ -38,26 +22,7 @@ export default function NotFound() {
       >
         <main className="container-page flex max-w-xl flex-col items-center gap-10 py-20 text-center">
           {/* Ink bloom — 4 spot-colour blobs animating in */}
-          <svg viewBox="0 0 200 200" width="220" height="220" aria-hidden="true">
-            <g ref={inkRef} style={{ mixBlendMode: "multiply" }}>
-              <ellipse cx="80" cy="80" rx="70" ry="60" fill="#FF6BA0" opacity="0.7" />
-              <ellipse cx="120" cy="80" rx="60" ry="70" fill="#FFC474" opacity="0.7" />
-              <ellipse cx="80" cy="120" rx="65" ry="60" fill="#7CE8C4" opacity="0.7" />
-              <ellipse cx="120" cy="120" rx="70" ry="65" fill="#B89AFF" opacity="0.7" />
-            </g>
-            <text
-              x="100"
-              y="116"
-              fontFamily="serif"
-              fontStyle="italic"
-              fontSize="56"
-              fontWeight="400"
-              textAnchor="middle"
-              fill="#0A0608"
-            >
-              404
-            </text>
-          </svg>
+          <NotFoundAnimation />
 
           <div className="space-y-4">
             <h1 className="font-display text-[clamp(2rem,5vw,3.5rem)] text-ink italic leading-tight">

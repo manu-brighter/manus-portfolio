@@ -194,7 +194,6 @@ export function Nav() {
                   <button
                     type="button"
                     onClick={() => startTransition(() => router.replace(pathname, { locale }))}
-                    {...{ hrefLang: locale }}
                     aria-current={isActive ? "true" : undefined}
                     aria-label={label}
                     className={`type-label no-underline transition-colors ${

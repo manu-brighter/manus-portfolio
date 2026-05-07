@@ -15,10 +15,13 @@ test.describe("@seo sitemap.xml", () => {
     const body = await response.text();
     // Root element + sitemap-protocol namespace
     expect(body).toContain('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"');
-    // At least one <url><loc> entry — sitemap.ts emits 20 entries
-    // (4 locales × 3 static paths + 4 × 2 playground slugs).
+    // At least one <url><loc> entry — sitemap.ts emits 12 entries
+    // (4 locales × 3 static paths: /, /impressum, /datenschutz).
+    // Playground slugs were removed from the sitemap because robots.txt
+    // disallows /playground/* — emitting them would create a
+    // sitemap-vs-robots conflict for Google's canonicalisation.
     const locMatches = body.match(/<loc>/g) ?? [];
-    expect(locMatches.length, "<loc> count").toBeGreaterThanOrEqual(20);
+    expect(locMatches.length, "<loc> count").toBeGreaterThanOrEqual(12);
     // hreflang alternates emitted via xhtml:link rel="alternate"
     expect(body).toContain("xhtml:link");
     expect(body).toContain('rel="alternate"');
