@@ -24,10 +24,24 @@ type SectionDef = {
   color: string;
 };
 
+// Section order MUST match the actual page flow (see [locale]/page.tsx).
+// IntersectionObserver-driven activeIndex relies on this ordering: when
+// the user scrolls down the IO entries fire in DOM-position order, and
+// the topmost-intersecting entry wins via the sort step in the IO
+// callback below. If you put dots out-of-order, the active state will
+// flicker between non-adjacent indices and the connecting line will
+// run backwards.
+//
+// Riso 4-spot rotation cycles mint → rose → amber → violet across the
+// 9 dots so each adjacent pair has distinct colour identity.
 const SECTION_DEFS: SectionDef[] = [
   { id: "hero", labelKey: "hero", color: "var(--color-spot-mint)" },
-  { id: "work", labelKey: "work", color: "var(--color-spot-amber)" },
   { id: "about", labelKey: "about", color: "var(--color-spot-rose)" },
+  { id: "about-objects", labelKey: "aboutObjects", color: "var(--color-spot-amber)" },
+  { id: "skills", labelKey: "skills", color: "var(--color-spot-violet)" },
+  { id: "work", labelKey: "work", color: "var(--color-spot-mint)" },
+  { id: "case-study", labelKey: "casestudy", color: "var(--color-spot-rose)" },
+  { id: "photography", labelKey: "photography", color: "var(--color-spot-amber)" },
   { id: "playground", labelKey: "playground", color: "var(--color-spot-violet)" },
   { id: "contact", labelKey: "contact", color: "var(--color-spot-mint)" },
 ];
@@ -61,15 +75,23 @@ export function ScrollProgress() {
   useEffect(() => {
     if (sections.length === 0) return;
 
+    // Pick the topmost intersecting section (matches Nav.tsx scroll-spy).
+    // Iterating entries blindly + setActiveIndex per-entry produces a
+    // race when adjacent sections briefly overlap during scroll: the
+    // last entry "wins" rather than the visually-active one. Filter →
+    // sort by viewport-top → take first. rootMargin "-20% 0px -70%"
+    // treats a section as active when its top crosses into the
+    // 20–30% viewport strip, identical to Nav for handoff consistency.
     const observer = new IntersectionObserver(
       (entries) => {
-        for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
-          const idx = sections.findIndex((s) => s.el === entry.target);
-          if (idx >= 0) setActiveIndex(idx);
-        }
+        const [topmost] = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (!topmost) return;
+        const idx = sections.findIndex((s) => s.el === topmost.target);
+        if (idx >= 0) setActiveIndex(idx);
       },
-      { threshold: 0.35 },
+      { rootMargin: "-20% 0px -70% 0px", threshold: 0 },
     );
 
     for (const s of sections) observer.observe(s.el);
@@ -125,9 +147,12 @@ export function ScrollProgress() {
   // Don't render if no sections found
   if (sections.length < 1) return null;
 
-  // Section label for ARIA
+  // Section label for ARIA — hero + about-objects don't exist in nav.items
+  // (they're not top-level nav destinations), so they get dedicated keys
+  // under scrollProgress.*. Everything else maps to the existing nav label.
   const getLabel = (s: ActiveSection) => {
     if (s.id === "hero") return t("heroLabel");
+    if (s.id === "about-objects") return t("aboutObjectsLabel");
     return navT(s.labelKey);
   };
 

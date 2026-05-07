@@ -37,6 +37,8 @@ export function ContactForm() {
 
   const [status, setStatus] = useState<"idle" | "sending" | "fallback" | "error">("idle");
   const fallbackTimerRef = useRef<number | null>(null);
+  const nameValueRef = useRef<string>("");
+  const messageValueRef = useRef<string>("");
 
   // Cancel any in-flight stub timer on unmount so React doesn't warn
   // about a state update on an unmounted component.
@@ -58,6 +60,10 @@ export function ContactForm() {
     // the whole point of the trap is to look like a successful submit
     // to the bot while doing nothing.
     if (formData.get("bot-trap")) return;
+
+    // Stash field values so the fallback mailto can pre-fill body.
+    nameValueRef.current = String(formData.get("name") ?? "");
+    messageValueRef.current = String(formData.get("message") ?? "");
 
     setStatus("sending");
     // Phase-11 Sprint-1 stub: Resend Worker not deployed yet — graceful
@@ -151,7 +157,7 @@ export function ContactForm() {
           <span>
             {t("status.fallback")}{" "}
             <a
-              href={`mailto:${SITE.author.email}?subject=${encodeURIComponent(t("status.mailSubject"))}`}
+              href={`mailto:${SITE.author.email}?subject=${encodeURIComponent(t("status.mailSubject"))}&body=${encodeURIComponent(`${nameValueRef.current ? `Von: ${nameValueRef.current}\n\n` : ""}${messageValueRef.current}`)}`}
               className="underline decoration-spot-rose decoration-2 underline-offset-4 transition-colors hover:text-ink"
             >
               {SITE.author.email}

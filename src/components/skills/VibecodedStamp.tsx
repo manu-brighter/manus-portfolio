@@ -30,6 +30,7 @@ export function VibecodedStamp({ children, delay = 0 }: Props) {
   const reducedMotion = useReducedMotion();
   const wrapRef = useRef<HTMLSpanElement>(null);
   const haloRef = useRef<HTMLSpanElement>(null);
+  const tlRef = useRef<gsap.core.Timeline | null>(null);
 
   useEffect(() => {
     if (reducedMotion) return;
@@ -51,6 +52,7 @@ export function VibecodedStamp({ children, delay = 0 }: Props) {
           observer.disconnect();
 
           const tl = gsap.timeline({ delay });
+          tlRef.current = tl;
           tl.to(wrap, {
             scale: 1,
             rotate: 0,
@@ -71,6 +73,7 @@ export function VibecodedStamp({ children, delay = 0 }: Props) {
 
     return () => {
       observer.disconnect();
+      tlRef.current?.kill();
     };
   }, [reducedMotion, delay]);
 

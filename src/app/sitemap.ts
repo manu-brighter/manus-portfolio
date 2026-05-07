@@ -14,7 +14,6 @@ import { SITE } from "@/lib/site";
  * content edits; for a portfolio that's fine.
  */
 const STATIC_PATHS = ["", "/impressum", "/datenschutz"] as const;
-const PLAYGROUND_SLUGS = ["ink-drop-studio", "type-as-fluid"] as const;
 
 export const dynamic = "force-static";
 
@@ -33,22 +32,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
         alternates: {
           languages: Object.fromEntries(
             routing.locales.filter((l) => l !== locale).map((l) => [l, `${SITE.url}/${l}${path}/`]),
-          ),
-        },
-      });
-    }
-    for (const slug of PLAYGROUND_SLUGS) {
-      const url = `${SITE.url}/${locale}/playground/${slug}/`;
-      entries.push({
-        url,
-        lastModified: now,
-        changeFrequency: "monthly",
-        priority: 0.6,
-        alternates: {
-          languages: Object.fromEntries(
-            routing.locales
-              .filter((l) => l !== locale)
-              .map((l) => [l, `${SITE.url}/${l}/playground/${slug}/`]),
           ),
         },
       });
