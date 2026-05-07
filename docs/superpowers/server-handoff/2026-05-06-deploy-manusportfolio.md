@@ -116,3 +116,71 @@
 - The portfolio is a **static export**. No Node.js runtime on the server. No PM2, no systemd unit for the app. Just nginx serving files.
 - Lighthouse perf score is intentionally relaxed to ~0.55 in `.lighthouserc.json` because the hero FluidSim runs continuously. This is a **post-launch optimisation backlog item** — do not block launch on it.
 - The `next-env.d.ts` is gitignored. After `pnpm install`, the file may regenerate during `pnpm build` — that's expected; never commit it.
+
+## Post-deployment additions
+
+These were added after the initial deployment in section 1–8. Append
+them to an existing live setup; they don't require a fresh redeploy
+beyond the steps documented per item.
+
+### Maintenance page (flag-file toggle)
+
+`public/maintenance.html` ships with the static export, so after the
+next `pnpm build && rsync` the file lives at
+`/var/www/manus-portfolio/out/maintenance.html`.
+
+**One-time nginx config addition**, inside the existing `server { ... }`
+block of `/etc/nginx/sites-available/manuelheller.dev`:
+
+```nginx
+if (-f $document_root/.maintenance) {
+  return 503;
+}
+error_page 503 /maintenance.html;
+location = /maintenance.html {
+  internal;
+  add_header Cache-Control "no-store, must-revalidate";
+}
+```
+
+- `internal;` makes `/maintenance.html` only reachable via the 503
+  error_page handler — direct GET hits return 404, so the URL stays
+  off Google.
+- `Cache-Control: no-store` prevents Cloudflare + browsers from
+  caching the maintenance state past the toggle-off.
+- Returns proper HTTP 503 so search engines treat the outage as
+  temporary and don't deindex.
+
+`nginx -t && systemctl reload nginx` once after adding the snippet,
+then no reload is needed for any subsequent toggle.
+
+**Toggle commands** (run as root or the deploy user that owns
+`/var/www/manus-portfolio/out/`):
+
+```bash
+# Maintenance ON
+touch /var/www/manus-portfolio/out/.maintenance
+
+# Maintenance OFF
+rm /var/www/manus-portfolio/out/.maintenance
+```
+
+**Smoke-test the toggle** (extends step 7):
+
+```bash
+# Before toggle
+curl -I https://manuelheller.dev/    # expect 200
+
+# Toggle ON
+touch /var/www/manus-portfolio/out/.maintenance
+curl -I https://manuelheller.dev/    # expect 503
+curl -s https://manuelheller.dev/ | grep "Off the press"   # expect match
+
+# Toggle OFF
+rm /var/www/manus-portfolio/out/.maintenance
+curl -I https://manuelheller.dev/    # expect 200 again
+```
+
+The same snippet + commands are also documented in an HTML comment
+at the top of `public/maintenance.html` itself, so the runbook stays
+discoverable from inside the repo.

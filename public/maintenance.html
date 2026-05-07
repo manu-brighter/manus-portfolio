@@ -5,13 +5,17 @@
   Self-contained: inline CSS, no JS, no external font / asset deps.
   Works even if the rest of out/ is empty or being redeployed.
 
-  HOW TO TOGGLE (server-side, no nginx reload needed):
+  HOW TO TOGGLE (server-side, no nginx reload needed).
+  Replace <docroot> with the actual nginx document root for
+  manuelheller.dev (currently /var/www/manus-portfolio/out per the
+  server-handoff doc; the snippet below uses $document_root, so the
+  flag-file lives next to the deployed out/ contents):
 
     # turn maintenance ON
-    touch /var/www/manuelheller.dev/.maintenance
+    touch <docroot>/.maintenance
 
     # turn it OFF
-    rm /var/www/manuelheller.dev/.maintenance
+    rm <docroot>/.maintenance
 
   NGINX SNIPPET (add inside the server { ... } block):
 
