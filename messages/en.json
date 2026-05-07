@@ -91,44 +91,44 @@
   },
   "about": {
     "sectionLabel": "Section 01 · About",
-    "headline": "Full-Stack Developer mit künstlerischem Auge.",
-    "subhead": "Code, Foto, Design: alles dasselbe Handwerk in unterschiedlicher Form.",
+    "headline": "Full-stack developer with an artist's eye.",
+    "subhead": "Code, photo, design — same craft, different surface.",
     "parts": [
       {
         "id": "wer-ich-bin",
-        "heading": "Wer ich bin",
+        "heading": "Who I am",
         "body": [
-          "Ich bin Manuel, Full-Stack Developer bei zvoove Switzerland AG, seit November 2021. Beruflich tief drin in PHP und Vue, privat eingehend mit Kameras, Photoshop und allem was zwischen Code und Bild Spass macht. Ich glaube nicht an die Trennung von 'technisch' und 'kreativ'; die spannenden Sachen passieren genau dazwischen."
+          "I'm Manuel, full-stack developer at zvoove Switzerland AG since November 2021. PHP and Vue at work, cameras and Photoshop after hours, and everything in between that lives where code meets image. I don't buy the split between 'technical' and 'creative'; the interesting stuff happens exactly in-between."
         ]
       },
       {
         "id": "wie-angefangen",
-        "heading": "Wie ich angefangen habe",
+        "heading": "How I got here",
         "body": [
-          "Programmieren kam bei mir über Gaming. Ich habe einen eigenen Minecraft-Modpack-Server aufgesetzt und angefangen, Mining-Turtles in Lua zu programmieren. Das war der Moment in dem ich gemerkt habe: ich will verstehen, wie das alles unter der Haube läuft.",
-          "Die Berufslehre habe ich dann als Betriebsinformatiker EFZ bei Novartis gemacht. Eigentlich wollte ich Entwickler werden, aber Novartis bot nur den Betriebsinformatiker-Track, und so einen Ausbildungsplatz lässt man sich nicht entgehen. Vier Jahre Server, Netzwerk, Support: solide Grundlage, aber spätestens am Ende der Lehre war klar, ich bewerbe mich als Developer. Seit 2021 bin ich bei zvoove und arbeite am Hauptprodukt zvoove Core, an diversen Schnittstellen-Tools und an Cypress-E2E-Tests."
+          "Programming came to me through gaming. I set up my own Minecraft modpack server and started writing Mining Turtles in Lua. That was the moment I realised: I want to understand how all of this works under the hood.",
+          "My apprenticeship was IT-systems engineer (Betriebsinformatiker EFZ) at Novartis. I actually wanted to be a developer, but Novartis only offered the systems-engineer track — and you don't pass on a Novartis apprenticeship. Four years of servers, networks, support: solid foundation, but by the end it was clear: I'm applying as a developer. With zvoove since 2021, working on the main product zvoove Core, various API/interface tools, and Cypress E2E tests."
         ]
       },
       {
         "id": "ai-workflow",
-        "heading": "Wie ich mit AI arbeite",
+        "heading": "How I work with AI",
         "body": [
-          "Eine AI ist wie ein Pinsel: ein Werkzeug, das die Kunst nicht alleine macht. Sie ist nur so gut wie der Plan und der Prompt, den man ihr gibt, und sie braucht jemanden mit Geschmack, Kreativität und einem klaren Bild davon, wo es hingehen soll. AI-generierte Websites sehen heute alle gleich aus, weil die meisten Leute der AI die Kreativität überlassen.",
-          "Ich nutze einen tief eingerichteten AI-Workflow: Custom Agents, Hooks, Skills, mehrstufige Prompts, klare Konventions-Dateien. Ich habe bisher zwei komplexe Webapps damit von Null auf produktionsreif gebracht (eine davon ist die Jogge di Balla-Plattform, die andere ist genau diese Seite hier). Die Kombination aus dieser Workflow-Tiefe und meinem visuellen Sinn aus Foto und Grafik ist das, was am Ende den Unterschied macht zwischen noch einer generischen Landing-Page und etwas, das man sich merkt."
+          "AI is like a brush: a tool that doesn't make the art on its own. It's only as good as the plan and the prompt you give it, and it needs someone with taste, creativity, and a clear picture of where this is going. AI-generated websites all look the same today because most people hand the creativity to the AI.",
+          "I run a deeply set-up AI workflow: custom agents, hooks, skills, multi-stage prompts, clear convention files. I've taken two complex web apps from zero to production-ready that way (one is the Jogge di Balla platform, the other is this very site). The combination of that workflow depth and the visual sense from photo and design is what ends up making the difference between yet another generic landing page and something you actually remember."
         ]
       },
       {
         "id": "antrieb",
-        "heading": "Was mich antreibt",
+        "heading": "What drives me",
         "body": [
-          "Ich bin für fast alles zu begeistern und überzeugt: Gerade jetzt im KI-Zeitalter muss man mehr denn je dranbleiben. Wer aufhört zu lernen, ist innerhalb von 12 Monaten abgehängt. Mir macht das Aneignen neuer Skills aber einfach Spass, für mich ist das kein Druck, sondern der Default-Modus."
+          "I get excited about almost everything, and I'm convinced: in the AI era especially you have to stay on it more than ever. Stop learning and you're twelve months away from being left behind. Picking up new skills just feels like fun to me — for me that's not pressure, it's the default mode."
         ]
       },
       {
         "id": "off-screen",
-        "heading": "Ausserhalb vom Bildschirm",
+        "heading": "Off the screen",
         "body": [
-          "Wildlife-Fotografie ist meine grösste Leidenschaft. Ich reise solo nach Costa Rica oder Thailand und stapfe selbst in den Dschungel um Tiere in freier Wildbahn vor die Linse zu bekommen. Daneben Autos (siehe mein Audi-S5-Tuning-Projekt), Ski/Snowboard, Tauchen, und der Verein Jogge di Balla, in dem ich Vize-Präsident, Web-Entwickler, Vereinsfotograf, Kameramann und Social-Media-Manager bin."
+          "Wildlife photography is my biggest passion. I travel solo to Costa Rica or Thailand and trudge into the jungle myself to get animals in the wild in front of the lens. Plus cars (see my Audi S5 tuning project), ski/snowboard, diving, and Jogge di Balla — the club where I'm vice-president, web developer, club photographer, cameraman, and social-media manager all in one."
         ]
       }
     ],
@@ -136,11 +136,11 @@
       "alt": "Portrait photo Manuel Heller, Full-Stack Developer Basel",
       "caption": "St. Moritz · MMXXV",
       "plate": "Plate Nº 03",
-      "label": "Selbstporträt",
+      "label": "Self-portrait",
       "stamps": [
         {
           "label": "Location",
-          "value": "Basel-Region"
+          "value": "Basel region"
         },
         {
           "label": "Year",
@@ -153,15 +153,15 @@
       ]
     },
     "pullQuotes": {
-      "werIchBin": "Die spannenden Sachen passieren genau [[dazwischen]].",
-      "anfangen": "Ich will verstehen, [[wie das alles unter der Haube]] läuft.",
-      "aiWorkflow": "AI-generierte Websites sehen heute alle gleich aus, weil die meisten Leute der AI die [[Kreativität]] überlassen.",
-      "antrieb": "Was mich antreibt? [[Neugier]], ehrlich gesagt."
+      "werIchBin": "The interesting stuff happens exactly [[in-between]].",
+      "anfangen": "I want to understand [[how all of this works under the hood]].",
+      "aiWorkflow": "AI-generated websites all look the same today because most people hand the [[creativity]] to the AI.",
+      "antrieb": "What drives me? [[Curiosity]], honestly."
     },
     "marginalia": {
       "werIchBin": {
         "counter": "01 / 04",
-        "label": "Identität",
+        "label": "Identity",
         "year": "MMXXVI"
       },
       "anfangen": {
@@ -187,37 +187,37 @@
       },
       "antrieb": {
         "counter": "04 / 04",
-        "label": "Antrieb"
+        "label": "Drive"
       }
     },
     "objectGrid": {
       "sectionLabel": "Off the screen",
-      "headline": "Wenn der Bildschirm aus ist.",
-      "currentlyBand": "Snapshot 2026 · Wildlife-Reise in Planung · Wintersaison · Paddle griffbereit",
+      "headline": "When the screen is off.",
+      "currentlyBand": "Snapshot 2026 · Wildlife trip in planning · Winter season · Paddle within reach",
       "tiles": {
         "camera": {
-          "name": "Kamera",
-          "caption": "shooting · Sony α7 IV · Wildlife"
+          "name": "Camera",
+          "caption": "shooting · Sony α7 IV · wildlife"
         },
         "audi": {
           "name": "Audi S5",
-          "caption": "driving · B8.5 · Tuning-Projekt"
+          "caption": "driving · B8.5 · tuning project"
         },
         "joggediballa": {
           "name": "Jogge di Balla",
-          "caption": "co-running · Verein · Vize-Präsident"
+          "caption": "co-running · club · vice-president"
         },
         "schnee": {
-          "name": "Schnee",
-          "caption": "carving · Ski/Snowboard · Wintersaison"
+          "name": "Snow",
+          "caption": "carving · ski/snowboard · winter season"
         },
         "tauchen": {
-          "name": "Tiefe",
+          "name": "Depth",
           "caption": "diving · certified"
         },
         "pingpong": {
-          "name": "Ping-Pong",
-          "caption": "chasing · zvoove-Champion-Titel"
+          "name": "Ping-pong",
+          "caption": "chasing · zvoove champion title"
         }
       }
     }
@@ -227,23 +227,23 @@
     "items": [
       {
         "verb": "working on",
-        "value": "diese Seite hier"
+        "value": "this very site"
       },
       {
         "verb": "learning",
-        "value": "React 19 · R3F 9 · WebGPU-Shader"
+        "value": "React 19 · R3F 9 · WebGPU shaders"
       },
       {
         "verb": "shooting",
-        "value": "Wildlife in Costa Rica & Thailand"
+        "value": "wildlife in Costa Rica & Thailand"
       },
       {
         "verb": "driving",
-        "value": "Audi S5 B8.5 (Tuning-Projekt)"
+        "value": "Audi S5 B8.5 (tuning project)"
       },
       {
         "verb": "chasing",
-        "value": "den zvoove Ping-Pong-Champion-Titel"
+        "value": "the zvoove ping-pong champion title"
       }
     ]
   },
