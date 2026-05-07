@@ -496,35 +496,35 @@
     ]
   },
   "caseStudy": {
-    "headline": "Vom Vereins-Chaos zur eigenen Plattform.",
-    "hook": "Alle Vereine kämpfen alle mit demselben Mist: Excel-Listen, statische Websites, File-/Information-Sharing, isolierte Tools. Für Jogge di Balla habe ich das aufgeräumt — eine massgeschneiderte Plattform, die von Mitgliederverwaltung bis Twitch-Overlay alles abdeckt. Vibecoded, selbst gehostet, übertrieben.",
+    "headline": "From club chaos to a custom platform.",
+    "hook": "All clubs fight the same mess: Excel sheets, static websites, file/info sharing, isolated tools. For Jogge di Balla I cleaned that up — a custom-built platform that covers everything from member management to a Twitch overlay. Vibecoded, self-hosted, over-engineered.",
     "context": {
-      "label": "Was ist Jogge di Balla?",
+      "label": "What is Jogge di Balla?",
       "facts": [
         {
-          "key": "Gegründet",
-          "value": "05.08.2022 in Brislach"
+          "key": "Founded",
+          "value": "2022.08.05 in Brislach"
         },
         {
-          "key": "Aktive Mitglieder",
+          "key": "Active members",
           "value": "9"
         },
         {
-          "key": "Gönner verwaltet",
+          "key": "Sponsors managed",
           "value": "68+"
         },
         {
-          "key": "Events / Jahr",
+          "key": "Events / year",
           "value": "4–8"
         },
         {
-          "key": "Instagram-Reichweite",
-          "value": "1067+ Follower · ~100k Views / 30 Tage"
+          "key": "Instagram reach",
+          "value": "1067+ followers · ~100k views / 30 days"
         }
       ],
       "story": [
-        "Idee zur Coronazeit: vier Freunde, nichts ging, also haben wir ausgefallene Events unter Freunden gemacht. Aus dem wurde dann ein Verein mit öffentlichen Event-Klassikern wie Schlag den Kassier, Silvester 2.0, Harassenlauf oder der beliebten Lotto-Party.",
-        "Meine Rolle: Vize-Präsident, Web-Entwickler, Vereinsfotograf, Kameramann, Social-Media-Manager. Weil ich das Skillset hatte und Perfektionist genug bin, um dem Verein nicht nur ein Gesicht, sondern eine eigene, selbst gehostete Webapp zu verpassen."
+        "Idea during Covid: four friends, nothing was happening, so we threw oddball events for ourselves. That turned into an actual club with public event classics like Schlag den Kassier, Silvester 2.0, Harassenlauf, and the popular Lotto-Party.",
+        "My role: vice-president, web developer, club photographer, cameraman, social-media manager. Because I had the skill set and I'm enough of a perfectionist to give the club not just a face but a custom, self-hosted web app of its own."
       ]
     },
     "platform": {
@@ -535,19 +535,19 @@
         },
         {
           "tech": "TypeScript",
-          "use": "Sprache (Fullstack)"
+          "use": "Language (fullstack)"
         },
         {
           "tech": "tRPC",
-          "use": "API-Layer"
+          "use": "API layer"
         },
         {
           "tech": "Drizzle ORM · MySQL",
-          "use": "Datenbank"
+          "use": "Database"
         },
         {
           "tech": "Tailwind · shadcn/ui",
-          "use": "Styling & Komponenten"
+          "use": "Styling & components"
         }
       ]
     },
@@ -555,67 +555,67 @@
       "items": [
         {
           "id": "admin",
-          "kicker": "Highlight 01 · Tech-Substanz",
-          "title": "Das Admin-Dashboard",
-          "lede": "Für Besucher unsichtbar, für die Website das Herzstück. Hier laufen alle Fäden zusammen.",
+          "kicker": "Highlight 01 · Technical depth",
+          "title": "The admin dashboard",
+          "lede": "Invisible to visitors, the heart of the site. Every thread comes together here.",
           "screenshot": "admin-dashboard",
-          "screenshotAlt": "Admin-Dashboard mit Berechtigungs-Card und Mitgliederliste",
+          "screenshotAlt": "Admin dashboard with permissions card and member list",
           "features": [
             {
-              "title": "Dynamisches Berechtigungssystem",
-              "body": "Granulare Rechte (edit_events, manage_sponsors, edit_shotcounter, …) per Card pro Rolle zuweisbar — ohne Code-Änderung. Backend prüft jeden tRPC-Call durch eine eigene requirePermission()-Middleware."
+              "title": "Dynamic permission system",
+              "body": "Granular rights (edit_events, manage_sponsors, edit_shotcounter, …) assignable per card per role — no code changes needed. Backend checks every tRPC call through a custom requirePermission() middleware."
             },
             {
-              "title": "Anwesenheitsverwaltung mit Statistik",
-              "body": "Pro Event generierbare Anwesenheitsliste, Daten fliessen direkt in eine grafische Statistik. Fördert Übersicht und ein bisschen internen Wettbewerb."
+              "title": "Attendance tracking with statistics",
+              "body": "Per-event attendance lists, data flows straight into a graphical view. Helps with overview and a bit of internal competition."
             },
             {
-              "title": "Gönner-Lifecycle",
-              "body": "Sponsoren über das System. Status (aktiv / abgelaufen / neu) automatisch berechnet mit Finanz- und Adressmanagement für unseren Kassier."
+              "title": "Sponsor lifecycle",
+              "body": "Sponsors managed inside the system. Status (active / expired / new) computed automatically, with finance and address management for our Kassier."
             }
           ]
         },
         {
           "id": "overlay",
-          "kicker": "Highlight 02 · Sichtbarstes Feature",
-          "title": "«Schlag den Kassier» Live-Overlay",
-          "lede": "Custom Twitch-Overlay direkt in die Plattform integriert. Statt teurer externer Dienste: einfach selbst gebaut.",
+          "kicker": "Highlight 02 · Most visible feature",
+          "title": "Schlag den Kassier live overlay",
+          "lede": "Custom Twitch overlay integrated directly into the platform. Instead of expensive external services: just built it myself.",
           "screenshot": "overlay-stream",
-          "screenshotAlt": "Twitch-Overlay im Stream mit Live-Score und Vereinsdesign",
+          "screenshotAlt": "Twitch overlay during stream with live score and club design",
           "features": [
             {
-              "title": "Versteckte URL als Browser-Source",
-              "body": "OBS bindet /overlay/sdk ein, ein Control-Panel auf /overlay/sdk/control steuert den Spielstand live."
+              "title": "Hidden URL as browser source",
+              "body": "OBS embeds /overlay/sdk; a control panel at /overlay/sdk/control drives the score live."
             },
             {
-              "title": "Echtzeit ohne Page-Reload",
-              "body": "tRPC-Polling synchronisiert das Overlay im Stream sofort. Goldener Shimmer-Effekt für Sieger, automatische Berechnung «mathematisch nicht mehr einholbar»."
+              "title": "Realtime without page reloads",
+              "body": "tRPC polling syncs the overlay in the stream instantly. Golden shimmer effect for winners, automatic 'mathematically eliminated' calculation."
             },
             {
-              "title": "Reichweite ehrlich klein",
-              "body": "~15–20 concurrent Viewer, ~100 total. Das Tooling ist trotzdem solide gebaut — und übertragbar."
+              "title": "Reach: honestly small",
+              "body": "~15–20 concurrent viewers, ~100 total. The tooling is solidly built anyway — and reusable."
             }
           ]
         }
       ]
     },
     "publicLayer": {
-      "label": "Öffentliche Schicht"
+      "label": "Public layer"
     },
     "reflection": {
       "label": "Lessons Learned",
-      "body": "Manuelles Testing hat mich damals viel Zeit gekostet. Heute würde ich das Setup von Anfang an mit automatisierten Tests und KI-Tools aufsetzen, um Fehler direkt im Keim zu ersticken und den Fokus voll aufs Deployment zu legen."
+      "body": "Manual testing cost me a lot of time back then. Today I'd set the project up from day one with automated tests and AI tooling, kill bugs at the source, and put the focus entirely on shipping."
     },
     "footerLink": {
-      "label": "Live im Einsatz",
+      "label": "Live in the wild",
       "url": "https://joggediballa.ch",
       "domain": "joggediballa.ch",
-      "external": "öffnet in neuem Tab"
+      "external": "opens in a new tab"
     },
     "lightbox": {
-      "closeLabel": "Lightbox schließen",
-      "previousLabel": "Vorheriges Bild",
-      "nextLabel": "Nächstes Bild",
+      "closeLabel": "Close lightbox",
+      "previousLabel": "Previous image",
+      "nextLabel": "Next image",
       "counterLabel": "{current} / {total}"
     },
     "stations": {
@@ -624,28 +624,28 @@
         "polaroidCaption": "Joggediballa · Mobile · Live"
       },
       "stack": {
-        "heading": "Stack-Notiz"
+        "heading": "Stack note"
       },
       "highlightAdmin": {
         "datestamp": "Admin · v3",
-        "polaroidCaption": "Admin-Dashboard · Daily Driver"
+        "polaroidCaption": "Admin Dashboard · Daily Driver"
       },
       "highlightOverlay": {
-        "datestamp": "Twitch-Overlay",
-        "polaroidCaption": "Schlag-den-Kassier · Live-Stream"
+        "datestamp": "Twitch overlay",
+        "polaroidCaption": "Schlag-den-Kassier · Live stream"
       },
       "publicShots": [
         {
           "datestamp": "Stats",
-          "caption": "Statistik · Mitglieder & Saisons"
+          "caption": "Statistics · Members & seasons"
         },
         {
           "datestamp": "Members",
-          "caption": "Gönnerverwaltung · CRM-Light"
+          "caption": "Sponsor management · CRM-light"
         },
         {
           "datestamp": "Form",
-          "caption": "Anmeldeformular · Mobile"
+          "caption": "Sign-up form · mobile"
         }
       ]
     }
