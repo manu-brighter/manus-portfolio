@@ -435,16 +435,16 @@
   },
   "work": {
     "sectionLabel": "Section 03 · Work",
-    "headline": "Zwei Projekte. Beide vibecoded.",
-    "subhead": "Keine Werkschau, kein Stack-Buffet. Zwei ernsthafte Webapps von Null auf Live.",
+    "headline": "Two projects. Both vibecoded.",
+    "subhead": "No portfolio gallery, no stack buffet. Two serious web apps from zero to live.",
     "vibecodedStamp": "vibecoded",
     "projects": [
       {
         "id": "portfolio",
-        "title": "Manuels Portfolio",
+        "title": "Manuel's portfolio",
         "subtitle": "Toon Fluid",
         "year": "MMXXVI",
-        "role": "Konzept · Design · Entwicklung · Hosting",
+        "role": "Concept · Design · Development · Hosting",
         "stack": [
           "Next.js 16",
           "React 19",
@@ -453,29 +453,29 @@
           "GSAP · ScrollTrigger",
           "Lenis",
           "R3F",
-          "WebGL Shader",
+          "WebGL shaders",
           "next-intl",
-          "zustand · State"
+          "zustand · state"
         ],
-        "description": "Diese Seite. Fullscreen GPU-Fluid-Simulation als Hero, Risograph-inspirierte Editorial-Ästhetik, vibecoded in mehrwöchigen Sessions mit Claude Code.",
-        "metaNote": "Du surfst gerade auf einer GPU-Fluid-Simulation. Kein Iframe, kein Video-Loop, keine Lottie-Datei. Echte Frames.",
-        "ctaLabel": "Du bist schon hier",
+        "description": "This site. Fullscreen GPU fluid simulation as the hero, Risograph-inspired editorial aesthetic, vibecoded over multi-week sessions with Claude Code.",
+        "metaNote": "You're surfing on a GPU fluid simulation right now. No iframe, no video loop, no Lottie file. Real frames.",
+        "ctaLabel": "You're already here",
         "screenshot": {
-          "alt": "Screenshot der Hero-Section von manuelheller.dev",
+          "alt": "Screenshot of the hero section of manuelheller.dev",
           "caption": "manuelheller.dev · hero"
         },
         "reveal": {
           "surname": "Heller,",
           "given": "Manuel.",
-          "ariaAnnouncement": "Vorschau-Animation der Hero-Section"
+          "ariaAnnouncement": "Preview animation of the hero section"
         }
       },
       {
         "id": "joggediballa",
         "title": "Jogge di Balla",
-        "subtitle": "Vereinsplattform",
+        "subtitle": "Club platform",
         "year": "MMXXIV–MMXXVI",
-        "role": "Konzept · Design · Fullstack · Hosting",
+        "role": "Concept · Design · Fullstack · Hosting",
         "stack": [
           "React 19",
           "Vite",
@@ -486,9 +486,9 @@
           "Tailwind",
           "shadcn/ui"
         ],
-        "description": "Eine massgeschneiderte All-in-One-Vereinsplattform: von der Mitgliederverwaltung bis zum Live-Twitch-Overlay, vibecoded mit modernem TypeScript-Stack.",
+        "description": "A custom-built all-in-one club platform: from member management to a live Twitch overlay, vibecoded on a modern TypeScript stack.",
         "screenshot": {
-          "alt": "Screenshot der öffentlichen Startseite von joggediballa.ch",
+          "alt": "Screenshot of the public homepage of joggediballa.ch",
           "caption": "joggediballa.ch · home"
         },
         "ctaLabel": "Case Study"
