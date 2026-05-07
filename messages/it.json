@@ -90,78 +90,78 @@
     "taglineSuffix": "avvio …"
   },
   "about": {
-    "sectionLabel": "Section 01 · About",
-    "headline": "Full-Stack Developer mit künstlerischem Auge.",
-    "subhead": "Code, Foto, Design: alles dasselbe Handwerk in unterschiedlicher Form.",
+    "sectionLabel": "Section 01 · Chi sono",
+    "headline": "Sviluppatore full-stack con un occhio da artista.",
+    "subhead": "Codice, foto, design: stesso mestiere, superficie diversa.",
     "parts": [
       {
         "id": "wer-ich-bin",
-        "heading": "Wer ich bin",
+        "heading": "Chi sono",
         "body": [
-          "Ich bin Manuel, Full-Stack Developer bei zvoove Switzerland AG, seit November 2021. Beruflich tief drin in PHP und Vue, privat eingehend mit Kameras, Photoshop und allem was zwischen Code und Bild Spass macht. Ich glaube nicht an die Trennung von 'technisch' und 'kreativ'; die spannenden Sachen passieren genau dazwischen."
+          "Sono Manuel, sviluppatore full-stack da zvoove Switzerland AG da novembre 2021. PHP e Vue al lavoro, macchine fotografiche e Photoshop la sera, e tutto quello che sta in mezzo, dove il codice incontra l'immagine. Non credo nella separazione tra «tecnico» e «creativo»; le cose interessanti succedono proprio nel mezzo."
         ]
       },
       {
         "id": "wie-angefangen",
-        "heading": "Wie ich angefangen habe",
+        "heading": "Come ci sono arrivato",
         "body": [
-          "Programmieren kam bei mir über Gaming. Ich habe einen eigenen Minecraft-Modpack-Server aufgesetzt und angefangen, Mining-Turtles in Lua zu programmieren. Das war der Moment in dem ich gemerkt habe: ich will verstehen, wie das alles unter der Haube läuft.",
-          "Die Berufslehre habe ich dann als Betriebsinformatiker EFZ bei Novartis gemacht. Eigentlich wollte ich Entwickler werden, aber Novartis bot nur den Betriebsinformatiker-Track, und so einen Ausbildungsplatz lässt man sich nicht entgehen. Vier Jahre Server, Netzwerk, Support: solide Grundlage, aber spätestens am Ende der Lehre war klar, ich bewerbe mich als Developer. Seit 2021 bin ich bei zvoove und arbeite am Hauptprodukt zvoove Core, an diversen Schnittstellen-Tools und an Cypress-E2E-Tests."
+          "La programmazione mi è arrivata tramite il gaming. Ho messo su un mio server Minecraft modpack e ho iniziato a scrivere Mining Turtles in Lua. È il momento in cui ho capito: voglio capire come funziona tutto questo sotto il cofano.",
+          "L'apprendistato l'ho fatto come informatico aziendale (Betriebsinformatiker EFZ) da Novartis. In realtà volevo diventare sviluppatore, ma Novartis offriva solo il percorso da informatico aziendale, e un apprendistato da Novartis non si rifiuta. Quattro anni di server, reti, supporto: una base solida, ma alla fine era chiaro: mi candido come sviluppatore. Da zvoove dal 2021, lavoro sul prodotto principale zvoove Core, su vari strumenti API e di interfaccia, e su test E2E Cypress."
         ]
       },
       {
         "id": "ai-workflow",
-        "heading": "Wie ich mit AI arbeite",
+        "heading": "Come lavoro con l'IA",
         "body": [
-          "Eine AI ist wie ein Pinsel: ein Werkzeug, das die Kunst nicht alleine macht. Sie ist nur so gut wie der Plan und der Prompt, den man ihr gibt, und sie braucht jemanden mit Geschmack, Kreativität und einem klaren Bild davon, wo es hingehen soll. AI-generierte Websites sehen heute alle gleich aus, weil die meisten Leute der AI die Kreativität überlassen.",
-          "Ich nutze einen tief eingerichteten AI-Workflow: Custom Agents, Hooks, Skills, mehrstufige Prompts, klare Konventions-Dateien. Ich habe bisher zwei komplexe Webapps damit von Null auf produktionsreif gebracht (eine davon ist die Jogge di Balla-Plattform, die andere ist genau diese Seite hier). Die Kombination aus dieser Workflow-Tiefe und meinem visuellen Sinn aus Foto und Grafik ist das, was am Ende den Unterschied macht zwischen noch einer generischen Landing-Page und etwas, das man sich merkt."
+          "Un'IA è come un pennello: uno strumento che non fa l'arte da solo. È brava quanto il piano e il prompt che le dai, e ha bisogno di qualcuno con gusto, creatività e un'idea chiara di dove si vuole arrivare. I siti generati con IA oggi si somigliano tutti, perché la maggior parte delle persone lascia la creatività all'IA.",
+          "Uso un workflow IA molto configurato: custom agents, hooks, skills, prompt a più stadi, file di convenzioni chiari. Finora ho portato due web app complesse da zero a produzione con questo workflow (una è la piattaforma Jogge di Balla, l'altra è esattamente questo sito). La combinazione di questa profondità di workflow e del senso visivo che viene da foto e design è ciò che fa la differenza tra l'ennesima landing page generica e qualcosa che ti ricordi davvero."
         ]
       },
       {
         "id": "antrieb",
-        "heading": "Was mich antreibt",
+        "heading": "Cosa mi spinge",
         "body": [
-          "Ich bin für fast alles zu begeistern und überzeugt: Gerade jetzt im KI-Zeitalter muss man mehr denn je dranbleiben. Wer aufhört zu lernen, ist innerhalb von 12 Monaten abgehängt. Mir macht das Aneignen neuer Skills aber einfach Spass, für mich ist das kein Druck, sondern der Default-Modus."
+          "Mi entusiasmo per quasi tutto, e ne sono convinto: proprio nell'era dell'IA bisogna restare sul pezzo più che mai. Smetti di imparare e in dodici mesi sei rimasto indietro. Ma imparare cose nuove, per me, è semplicemente divertente. Per me non è pressione, è la modalità di default."
         ]
       },
       {
         "id": "off-screen",
-        "heading": "Ausserhalb vom Bildschirm",
+        "heading": "Fuori dallo schermo",
         "body": [
-          "Wildlife-Fotografie ist meine grösste Leidenschaft. Ich reise solo nach Costa Rica oder Thailand und stapfe selbst in den Dschungel um Tiere in freier Wildbahn vor die Linse zu bekommen. Daneben Autos (siehe mein Audi-S5-Tuning-Projekt), Ski/Snowboard, Tauchen, und der Verein Jogge di Balla, in dem ich Vize-Präsident, Web-Entwickler, Vereinsfotograf, Kameramann und Social-Media-Manager bin."
+          "La fotografia wildlife è la mia passione più grande. Viaggio in solitaria in Costa Rica o Thailandia e mi addentro io stesso nella giungla per portare animali selvatici davanti all'obiettivo. Accanto ci sono le auto (vedi il mio progetto di tuning Audi S5), sci/snowboard, immersioni, e l'associazione Jogge di Balla, in cui sono vicepresidente, sviluppatore web, fotografo, cameraman e social-media manager insieme."
         ]
       }
     ],
     "portrait": {
-      "alt": "Ritratto Manuel Heller, sviluppatore full-stack Basilea",
+      "alt": "Foto ritratto Manuel Heller, sviluppatore full-stack Basilea",
       "caption": "St. Moritz · MMXXV",
       "plate": "Plate Nº 03",
-      "label": "Selbstporträt",
+      "label": "Autoritratto",
       "stamps": [
         {
-          "label": "Location",
-          "value": "Basel-Region"
+          "label": "Luogo",
+          "value": "Regione di Basilea"
         },
         {
-          "label": "Year",
+          "label": "Anno",
           "value": "MMXXVI"
         },
         {
-          "label": "Signed",
+          "label": "Firmato",
           "value": "manu"
         }
       ]
     },
     "pullQuotes": {
-      "werIchBin": "Die spannenden Sachen passieren genau [[dazwischen]].",
-      "anfangen": "Ich will verstehen, [[wie das alles unter der Haube]] läuft.",
-      "aiWorkflow": "AI-generierte Websites sehen heute alle gleich aus, weil die meisten Leute der AI die [[Kreativität]] überlassen.",
-      "antrieb": "Was mich antreibt? [[Neugier]], ehrlich gesagt."
+      "werIchBin": "Le cose interessanti succedono proprio [[nel mezzo]].",
+      "anfangen": "Voglio capire [[come funziona tutto questo sotto il cofano]].",
+      "aiWorkflow": "I siti generati con IA oggi si somigliano tutti, perché la maggior parte delle persone lascia la [[creatività]] all'IA.",
+      "antrieb": "Cosa mi spinge? La [[curiosità]], a essere onesti."
     },
     "marginalia": {
       "werIchBin": {
         "counter": "01 / 04",
-        "label": "Identität",
+        "label": "Identità",
         "year": "MMXXVI"
       },
       "anfangen": {
@@ -187,37 +187,37 @@
       },
       "antrieb": {
         "counter": "04 / 04",
-        "label": "Antrieb"
+        "label": "Spinta"
       }
     },
     "objectGrid": {
-      "sectionLabel": "Off the screen",
-      "headline": "Wenn der Bildschirm aus ist.",
-      "currentlyBand": "Snapshot 2026 · Wildlife-Reise in Planung · Wintersaison · Paddle griffbereit",
+      "sectionLabel": "Fuori dallo schermo",
+      "headline": "Quando lo schermo è spento.",
+      "currentlyBand": "Snapshot 2026 · Viaggio wildlife in pianificazione · Stagione invernale · Pagaia a portata di mano",
       "tiles": {
         "camera": {
-          "name": "Kamera",
-          "caption": "shooting · Sony α7 IV · Wildlife"
+          "name": "Macchina",
+          "caption": "shooting · Sony α7 IV · wildlife"
         },
         "audi": {
           "name": "Audi S5",
-          "caption": "driving · B8.5 · Tuning-Projekt"
+          "caption": "driving · B8.5 · progetto tuning"
         },
         "joggediballa": {
           "name": "Jogge di Balla",
-          "caption": "co-running · Verein · Vize-Präsident"
+          "caption": "co-running · associazione · vicepresidente"
         },
         "schnee": {
-          "name": "Schnee",
-          "caption": "carving · Ski/Snowboard · Wintersaison"
+          "name": "Neve",
+          "caption": "carving · sci/snowboard · stagione invernale"
         },
         "tauchen": {
-          "name": "Tiefe",
-          "caption": "diving · certified"
+          "name": "Profondità",
+          "caption": "diving · certificato"
         },
         "pingpong": {
-          "name": "Ping-Pong",
-          "caption": "chasing · zvoove-Champion-Titel"
+          "name": "Ping-pong",
+          "caption": "chasing · titolo di campione zvoove"
         }
       }
     }
@@ -227,34 +227,34 @@
     "items": [
       {
         "verb": "working on",
-        "value": "diese Seite hier"
+        "value": "questo sito qui"
       },
       {
         "verb": "learning",
-        "value": "React 19 · R3F 9 · WebGPU-Shader"
+        "value": "React 19 · R3F 9 · shader WebGPU"
       },
       {
         "verb": "shooting",
-        "value": "Wildlife in Costa Rica & Thailand"
+        "value": "wildlife in Costa Rica & Thailandia"
       },
       {
         "verb": "driving",
-        "value": "Audi S5 B8.5 (Tuning-Projekt)"
+        "value": "Audi S5 B8.5 (progetto tuning)"
       },
       {
         "verb": "chasing",
-        "value": "den zvoove Ping-Pong-Champion-Titel"
+        "value": "il titolo di campione di ping-pong da zvoove"
       }
     ]
   },
   "skills": {
     "sectionLabel": "Section 02 · Skills",
-    "headline": "Was ich mitbringe.",
-    "subhead": "Grösse transportiert Gewicht. Keine Jahre, keine Labels.",
+    "headline": "Quello che porto in tavola.",
+    "subhead": "La grandezza porta peso. Niente anni, niente etichette.",
     "heroSkill": {
-      "eyebrow": "Hero-Skill",
-      "name": "AI-Workflow & Vibecoding",
-      "description": "Custom Agents, Hooks, Skills, mehrstufige Prompts. AI ist nicht das Tool, das ich nutze, sondern das Werkzeug, mit dem ich Werkzeuge baue."
+      "eyebrow": "Hero Skill",
+      "name": "AI Workflow & Vibecoding",
+      "description": "Custom agents, hooks, skills, prompt a più stadi. L'IA non è lo strumento che uso — è lo strumento con cui creo strumenti."
     },
     "vibecodedMarker": "vibecoded",
     "tiers": [
@@ -273,7 +273,7 @@
             "name": "MariaDB · MySQL"
           },
           {
-            "name": "HTML · CSS · Webdesign-Eye"
+            "name": "HTML · CSS · occhio web-design"
           }
         ]
       },
@@ -301,14 +301,14 @@
             "name": "OpenAPI · Swagger"
           },
           {
-            "name": "nginx · Linux-Server-Admin"
+            "name": "nginx · admin server Linux"
           }
         ]
       },
       {
         "id": "vibecoded",
         "label": "Vibecoded Stack",
-        "description": "Was ich mit AI-Workflow baue, nicht spontan ohne.",
+        "description": "Quello che costruisco con il workflow IA, non al volo senza.",
         "weight": "l",
         "items": [
           {
@@ -356,11 +356,11 @@
             "vibecoded": true
           },
           {
-            "name": "zustand · State",
+            "name": "zustand · state",
             "vibecoded": true
           },
           {
-            "name": "GLSL · WebGL Shader",
+            "name": "GLSL · shader WebGL",
             "vibecoded": true
           },
           {
@@ -379,8 +379,8 @@
       },
       {
         "id": "occasional",
-        "label": "Im Werkzeugkasten",
-        "description": "Kenne ich, nutze ich nicht täglich.",
+        "label": "Nella cassetta degli attrezzi",
+        "description": "Conosco, non uso ogni giorno.",
         "weight": "m",
         "items": [
           {
@@ -415,19 +415,19 @@
         "weight": "m",
         "items": [
           {
-            "name": "Fotografie"
+            "name": "Fotografia"
           },
           {
-            "name": "Videoschnitt"
+            "name": "Montaggio video"
           },
           {
-            "name": "Grafikdesign"
+            "name": "Graphic design"
           },
           {
             "name": "Live Web Fluid Simulations"
           },
           {
-            "name": "Shader-Spielereien"
+            "name": "Esperimenti shader"
           }
         ]
       }
@@ -435,16 +435,16 @@
   },
   "work": {
     "sectionLabel": "Section 03 · Work",
-    "headline": "Zwei Projekte. Beide vibecoded.",
-    "subhead": "Keine Werkschau, kein Stack-Buffet. Zwei ernsthafte Webapps von Null auf Live.",
+    "headline": "Due progetti. Entrambi vibecoded.",
+    "subhead": "Niente galleria portfolio, niente buffet di stack. Due web app serie, da zero a live.",
     "vibecodedStamp": "vibecoded",
     "projects": [
       {
         "id": "portfolio",
-        "title": "Manuels Portfolio",
+        "title": "Portfolio di Manuel",
         "subtitle": "Toon Fluid",
         "year": "MMXXVI",
-        "role": "Konzept · Design · Entwicklung · Hosting",
+        "role": "Concept · Design · Sviluppo · Hosting",
         "stack": [
           "Next.js 16",
           "React 19",
@@ -453,29 +453,29 @@
           "GSAP · ScrollTrigger",
           "Lenis",
           "R3F",
-          "WebGL Shader",
+          "shader WebGL",
           "next-intl",
-          "zustand · State"
+          "zustand · state"
         ],
-        "description": "Diese Seite. Fullscreen GPU-Fluid-Simulation als Hero, Risograph-inspirierte Editorial-Ästhetik, vibecoded in mehrwöchigen Sessions mit Claude Code.",
-        "metaNote": "Du surfst gerade auf einer GPU-Fluid-Simulation. Kein Iframe, kein Video-Loop, keine Lottie-Datei. Echte Frames.",
-        "ctaLabel": "Du bist schon hier",
+        "description": "Questo sito. Simulazione di fluido GPU a tutto schermo come hero, estetica editoriale ispirata al Risograph, vibecoded in sessioni di più settimane con Claude Code.",
+        "metaNote": "Stai surfando in questo momento su una simulazione di fluido GPU. Niente iframe, niente video in loop, niente file Lottie. Frame veri.",
+        "ctaLabel": "Sei già qui",
         "screenshot": {
-          "alt": "Screenshot der Hero-Section von manuelheller.dev",
+          "alt": "Screenshot della sezione hero di manuelheller.dev",
           "caption": "manuelheller.dev · hero"
         },
         "reveal": {
           "surname": "Heller,",
           "given": "Manuel.",
-          "ariaAnnouncement": "Vorschau-Animation der Hero-Section"
+          "ariaAnnouncement": "Animazione anteprima della sezione hero"
         }
       },
       {
         "id": "joggediballa",
         "title": "Jogge di Balla",
-        "subtitle": "Vereinsplattform",
+        "subtitle": "Piattaforma associativa",
         "year": "MMXXIV–MMXXVI",
-        "role": "Konzept · Design · Fullstack · Hosting",
+        "role": "Concept · Design · Fullstack · Hosting",
         "stack": [
           "React 19",
           "Vite",
@@ -486,9 +486,9 @@
           "Tailwind",
           "shadcn/ui"
         ],
-        "description": "Eine massgeschneiderte All-in-One-Vereinsplattform: von der Mitgliederverwaltung bis zum Live-Twitch-Overlay, vibecoded mit modernem TypeScript-Stack.",
+        "description": "Una piattaforma associativa all-in-one su misura: dalla gestione dei membri all'overlay Twitch live, vibecoded su uno stack TypeScript moderno.",
         "screenshot": {
-          "alt": "Screenshot der öffentlichen Startseite von joggediballa.ch",
+          "alt": "Screenshot della homepage pubblica di joggediballa.ch",
           "caption": "joggediballa.ch · home"
         },
         "ctaLabel": "Case Study"
@@ -496,35 +496,35 @@
     ]
   },
   "caseStudy": {
-    "headline": "Vom Vereins-Chaos zur eigenen Plattform.",
-    "hook": "Alle Vereine kämpfen alle mit demselben Mist: Excel-Listen, statische Websites, File-/Information-Sharing, isolierte Tools. Für Jogge di Balla habe ich das aufgeräumt — eine massgeschneiderte Plattform, die von Mitgliederverwaltung bis Twitch-Overlay alles abdeckt. Vibecoded, selbst gehostet, übertrieben.",
+    "headline": "Dal caos di un'associazione a una piattaforma dedicata.",
+    "hook": "Tutte le associazioni combattono con lo stesso casino: fogli Excel, siti statici, condivisione di file e info, strumenti isolati. Per Jogge di Balla ho messo ordine: una piattaforma su misura che copre tutto, dalla gestione dei membri all'overlay Twitch. Vibecoded, auto-ospitata, esagerata.",
     "context": {
-      "label": "Was ist Jogge di Balla?",
+      "label": "Cos'è Jogge di Balla?",
       "facts": [
         {
-          "key": "Gegründet",
-          "value": "05.08.2022 in Brislach"
+          "key": "Fondata",
+          "value": "05.08.2022 a Brislach"
         },
         {
-          "key": "Aktive Mitglieder",
+          "key": "Membri attivi",
           "value": "9"
         },
         {
-          "key": "Gönner verwaltet",
+          "key": "Donatori gestiti",
           "value": "68+"
         },
         {
-          "key": "Events / Jahr",
+          "key": "Eventi / anno",
           "value": "4–8"
         },
         {
-          "key": "Instagram-Reichweite",
-          "value": "1067+ Follower · ~100k Views / 30 Tage"
+          "key": "Reach Instagram",
+          "value": "1067+ follower · ~100k views / 30 giorni"
         }
       ],
       "story": [
-        "Idee zur Coronazeit: vier Freunde, nichts ging, also haben wir ausgefallene Events unter Freunden gemacht. Aus dem wurde dann ein Verein mit öffentlichen Event-Klassikern wie Schlag den Kassier, Silvester 2.0, Harassenlauf oder der beliebten Lotto-Party.",
-        "Meine Rolle: Vize-Präsident, Web-Entwickler, Vereinsfotograf, Kameramann, Social-Media-Manager. Weil ich das Skillset hatte und Perfektionist genug bin, um dem Verein nicht nur ein Gesicht, sondern eine eigene, selbst gehostete Webapp zu verpassen."
+        "Idea nata durante il Covid: quattro amici, niente da fare, così abbiamo organizzato eventi strani fra noi. Da lì è uscita un'associazione con classici pubblici come Schlag den Kassier, Silvester 2.0, Harassenlauf, o la famosa Lotto-Party.",
+        "Il mio ruolo: vicepresidente, sviluppatore web, fotografo, cameraman, social-media manager. Perché avevo lo skillset e sono abbastanza perfezionista da dare all'associazione non solo una faccia, ma una propria web app auto-ospitata."
       ]
     },
     "platform": {
@@ -535,19 +535,19 @@
         },
         {
           "tech": "TypeScript",
-          "use": "Sprache (Fullstack)"
+          "use": "Linguaggio (fullstack)"
         },
         {
           "tech": "tRPC",
-          "use": "API-Layer"
+          "use": "Layer API"
         },
         {
           "tech": "Drizzle ORM · MySQL",
-          "use": "Datenbank"
+          "use": "Database"
         },
         {
           "tech": "Tailwind · shadcn/ui",
-          "use": "Styling & Komponenten"
+          "use": "Styling & componenti"
         }
       ]
     },
@@ -555,67 +555,67 @@
       "items": [
         {
           "id": "admin",
-          "kicker": "Highlight 01 · Tech-Substanz",
-          "title": "Das Admin-Dashboard",
-          "lede": "Für Besucher unsichtbar, für die Website das Herzstück. Hier laufen alle Fäden zusammen.",
+          "kicker": "Highlight 01 · Sostanza tecnica",
+          "title": "La dashboard admin",
+          "lede": "Invisibile ai visitatori, il cuore del sito. Qui convergono tutti i fili.",
           "screenshot": "admin-dashboard",
-          "screenshotAlt": "Admin-Dashboard mit Berechtigungs-Card und Mitgliederliste",
+          "screenshotAlt": "Dashboard admin con card permessi e lista membri",
           "features": [
             {
-              "title": "Dynamisches Berechtigungssystem",
-              "body": "Granulare Rechte (edit_events, manage_sponsors, edit_shotcounter, …) per Card pro Rolle zuweisbar — ohne Code-Änderung. Backend prüft jeden tRPC-Call durch eine eigene requirePermission()-Middleware."
+              "title": "Sistema di permessi dinamico",
+              "body": "Diritti granulari (edit_events, manage_sponsors, edit_shotcounter, …) assegnabili per card per ruolo, senza modifiche al codice. Il backend verifica ogni chiamata tRPC con un middleware requirePermission() personalizzato."
             },
             {
-              "title": "Anwesenheitsverwaltung mit Statistik",
-              "body": "Pro Event generierbare Anwesenheitsliste, Daten fliessen direkt in eine grafische Statistik. Fördert Übersicht und ein bisschen internen Wettbewerb."
+              "title": "Gestione presenze con statistiche",
+              "body": "Lista presenze generabile per evento, i dati confluiscono direttamente in una vista grafica. Aiuta la visione d'insieme e un po' di competizione interna."
             },
             {
-              "title": "Gönner-Lifecycle",
-              "body": "Sponsoren über das System. Status (aktiv / abgelaufen / neu) automatisch berechnet mit Finanz- und Adressmanagement für unseren Kassier."
+              "title": "Ciclo di vita dei donatori",
+              "body": "Sponsor gestiti dal sistema. Stato (attivo / scaduto / nuovo) calcolato automaticamente, con gestione finanziaria e indirizzi per il nostro Kassier."
             }
           ]
         },
         {
           "id": "overlay",
-          "kicker": "Highlight 02 · Sichtbarstes Feature",
-          "title": "«Schlag den Kassier» Live-Overlay",
-          "lede": "Custom Twitch-Overlay direkt in die Plattform integriert. Statt teurer externer Dienste: einfach selbst gebaut.",
+          "kicker": "Highlight 02 · Feature più visibile",
+          "title": "Overlay live Schlag den Kassier",
+          "lede": "Overlay Twitch personalizzato integrato direttamente nella piattaforma. Invece di servizi esterni costosi: l'ho semplicemente costruito io.",
           "screenshot": "overlay-stream",
-          "screenshotAlt": "Twitch-Overlay im Stream mit Live-Score und Vereinsdesign",
+          "screenshotAlt": "Overlay Twitch in stream con punteggio live e design dell'associazione",
           "features": [
             {
-              "title": "Versteckte URL als Browser-Source",
-              "body": "OBS bindet /overlay/sdk ein, ein Control-Panel auf /overlay/sdk/control steuert den Spielstand live."
+              "title": "URL nascosta come browser source",
+              "body": "OBS incorpora /overlay/sdk, un pannello di controllo su /overlay/sdk/control pilota il punteggio live."
             },
             {
-              "title": "Echtzeit ohne Page-Reload",
-              "body": "tRPC-Polling synchronisiert das Overlay im Stream sofort. Goldener Shimmer-Effekt für Sieger, automatische Berechnung «mathematisch nicht mehr einholbar»."
+              "title": "Tempo reale senza ricaricare",
+              "body": "Il polling tRPC sincronizza l'overlay nello stream all'istante. Effetto shimmer dorato per i vincitori, calcolo automatico «matematicamente eliminato»."
             },
             {
-              "title": "Reichweite ehrlich klein",
-              "body": "~15–20 concurrent Viewer, ~100 total. Das Tooling ist trotzdem solide gebaut — und übertragbar."
+              "title": "Audience onestamente piccola",
+              "body": "~15–20 viewer in concomitanza, ~100 totali. Il tooling resta comunque costruito solidamente, e riutilizzabile."
             }
           ]
         }
       ]
     },
     "publicLayer": {
-      "label": "Öffentliche Schicht"
+      "label": "Strato pubblico"
     },
     "reflection": {
       "label": "Lessons Learned",
-      "body": "Manuelles Testing hat mich damals viel Zeit gekostet. Heute würde ich das Setup von Anfang an mit automatisierten Tests und KI-Tools aufsetzen, um Fehler direkt im Keim zu ersticken und den Fokus voll aufs Deployment zu legen."
+      "body": "Il testing manuale a quel tempo mi è costato molto tempo. Oggi imposterei il progetto fin dall'inizio con test automatici e tool IA, ucciderei i bug sul nascere e metterei il focus completamente sul deployment."
     },
     "footerLink": {
-      "label": "Live im Einsatz",
+      "label": "Live in azione",
       "url": "https://joggediballa.ch",
       "domain": "joggediballa.ch",
-      "external": "öffnet in neuem Tab"
+      "external": "si apre in una nuova scheda"
     },
     "lightbox": {
-      "closeLabel": "Lightbox schließen",
-      "previousLabel": "Vorheriges Bild",
-      "nextLabel": "Nächstes Bild",
+      "closeLabel": "Chiudi lightbox",
+      "previousLabel": "Immagine precedente",
+      "nextLabel": "Immagine successiva",
       "counterLabel": "{current} / {total}"
     },
     "stations": {
@@ -624,28 +624,28 @@
         "polaroidCaption": "Joggediballa · Mobile · Live"
       },
       "stack": {
-        "heading": "Stack-Notiz"
+        "heading": "Nota di stack"
       },
       "highlightAdmin": {
         "datestamp": "Admin · v3",
-        "polaroidCaption": "Admin-Dashboard · Daily Driver"
+        "polaroidCaption": "Dashboard admin · Daily Driver"
       },
       "highlightOverlay": {
-        "datestamp": "Twitch-Overlay",
-        "polaroidCaption": "Schlag-den-Kassier · Live-Stream"
+        "datestamp": "Overlay Twitch",
+        "polaroidCaption": "Schlag-den-Kassier · Live stream"
       },
       "publicShots": [
         {
           "datestamp": "Stats",
-          "caption": "Statistik · Mitglieder & Saisons"
+          "caption": "Statistiche · Membri & stagioni"
         },
         {
           "datestamp": "Members",
-          "caption": "Gönnerverwaltung · CRM-Light"
+          "caption": "Gestione donatori · CRM-light"
         },
         {
           "datestamp": "Form",
-          "caption": "Anmeldeformular · Mobile"
+          "caption": "Modulo iscrizione · mobile"
         }
       ]
     }
@@ -654,248 +654,248 @@
     "sectionLabel": "05 / Photography",
     "eyebrow": "Through the Lens",
     "headline": "Through the Lens.",
-    "lede": "Wildlife und Autos sind meine zwei Welten. Die einen jage ich solo durch den Dschungel von Costa Rica oder Thailand, die anderen finden mich meist näher zuhause. Was beide verbindet: Geduld, Licht, und der eine Moment, der den ganzen Tag rechtfertigt.",
-    "techLabel": "SONY α7 IV · 24–600mm · seit 2023",
-    "ctaLabel": "Volles Portfolio auf manuelheller.myportfolio.com",
+    "lede": "Wildlife e auto, i miei due mondi. Il primo lo inseguo in solitaria nelle giungle del Costa Rica o della Thailandia, il secondo di solito mi trova più vicino a casa. Ciò che li unisce: pazienza, luce, e quel singolo momento che giustifica tutta la giornata.",
+    "techLabel": "SONY α7 IV · 24–600mm · dal 2023",
+    "ctaLabel": "Portfolio completo su manuelheller.myportfolio.com",
     "ctaHref": "https://manuelheller.myportfolio.com/portfolio",
     "ctaCaption": "",
     "slides": {
       "koenigsegg": {
-        "alt": "Koenigsegg-Hypercar unter einem Hotel-Bogen in der Abenddämmerung",
+        "alt": "Hypercar Koenigsegg sotto un arco d'hotel al crepuscolo",
         "stamp": "ST. MORITZ · 2025 · AUTO",
-        "title": "Stillstand bei 30 km/h.",
-        "body": "Manchmal ist das spannendste Bild nicht das mit der höchsten Verschlusszeit, sondern das mit dem Licht das nur fünf Minuten lang da ist."
+        "title": "Freezed a 30 km/h.",
+        "body": "A volte il fotogramma più interessante non è quello con il tempo di otturazione più alto. È quello con la luce che resta lì solo per cinque minuti."
       },
       "panorama": {
-        "alt": "Frachtschiffe vor einer dramatischen Wolkenformation am Horizont",
+        "alt": "Cargo sotto una formazione di nuvole drammatica all'orizzonte",
         "stamp": "COSTA RICA · 2024 · SEASCAPE"
       },
       "treeLake": {
-        "alt": "Einsamer Baum am Ufer eines Sees, Spiegelung im Wasser, Costa Rica",
+        "alt": "Albero solitario sulla riva di un lago, riflesso nell'acqua, Costa Rica",
         "stamp": "LAKE ARENAL · 2024 · LANDSCAPE",
-        "title": "Geduld als Bildkomposition.",
-        "body": "Lake Arenal: anderthalb Stunden auf den Wind gewartet, der die Wasseroberfläche endlich glättet. Reflexion macht das Bild, nicht der Baum."
+        "title": "La pazienza come composizione.",
+        "body": "Lake Arenal: un'ora e mezza ad aspettare che il vento cali e finalmente lisci la superficie. È il riflesso a fare l'immagine, non l'albero."
       },
       "crocodile": {
-        "alt": "Krokodil mit einem Schmetterling auf der Schnauze, Costa Rica",
+        "alt": "Coccodrillo con una farfalla sul muso, Costa Rica",
         "stamp": "TÁRCOLES · 2024 · WILDLIFE"
       },
       "pelican": {
-        "alt": "Pelikan im Anflug über dem Pazifik, Costa Rica",
+        "alt": "Pellicano in volo sopra il Pacifico, Costa Rica",
         "stamp": "MANUEL ANTONIO · 2024 · WILDLIFE"
       }
     }
   },
   "playground": {
     "sectionLabel": "06 · PLAYGROUND",
-    "eyebrow": "OFFENE WERKBANK",
-    "headline": "Wo der Fluid-Sim spielen darf.",
-    "lede": "Zwei Shader-Experimente, beide auf dem Tinte-/Druck-Narrativ verankert. Pure Craft-Demonstration, kein Produkt-Kontext.",
-    "openLabel": "Experiment öffnen",
+    "eyebrow": "BANCO APERTO",
+    "headline": "Dove la simulazione di fluido può giocare.",
+    "lede": "Due esperimenti shader, entrambi ancorati alla narrazione inchiostro/stampa. Pura dimostrazione di craft, nessun contesto di prodotto.",
+    "openLabel": "Apri esperimento",
     "shell": {
-      "back": "ZURÜCK ZUM PLAYGROUND"
+      "back": "TORNA AL PLAYGROUND"
     },
     "experiments": {
       "inkDropStudio": {
         "cardTitle": "Ink Drop Studio",
         "cardKicker": "01 · INK DROP STUDIO",
-        "cardBody": "Leere Paper-Canvas, Klick spawnt Ink-Tropfen in der gewählten Spot-Farbe. Slider für Sim-Parameter, Bomb-Button, Freeze-Button.",
+        "cardBody": "Tela di carta vuota, un click fa nascere gocce di inchiostro nello spot color scelto. Slider per i parametri della simulazione, pulsante bomb, pulsante freeze.",
         "title": "Ink Drop Studio.",
-        "caption": "Spielwiese für die Hero-Simulation. Klick = Ink-Splat, Slider = Sim-Parameter, „Bomb\" wenn dir gerade nach Chaos ist.",
+        "caption": "Sandbox per la simulazione hero. Click = ink splat, slider = parametri di simulazione, «Bomb» se hai voglia di caos.",
         "buttonBomb": "BOMB",
         "buttonFreeze": "FREEZE",
         "buttonResume": "RESUME",
         "buttonReset": "RESET",
-        "reducedMotionNote": "Dieses Experiment ist eine bewegte Spielwiese. Unter prefers-reduced-motion blende ich die laufende Simulation aus — zurück zum Playground für eine ruhigere Section."
+        "reducedMotionNote": "Questo esperimento è un terreno di gioco animato. Sotto prefers-reduced-motion nascondo la simulazione in corso. Torna al Playground per una sezione più tranquilla."
       },
       "typeAsFluid": {
         "cardTitle": "Type-as-Fluid",
         "cardKicker": "02 · TYPE-AS-FLUID",
-        "cardBody": "Tipp ein Wort. Es wird gedruckt, dann von der Tinte verschluckt. Sanft.",
+        "cardBody": "Digita una parola. Viene stampata, poi inghiottita dall'inchiostro. Con dolcezza.",
         "title": "Type-as-Fluid.",
-        "caption": "Tipp ein Wort. Es wird gedruckt, dann von der Tinte verschluckt. Sanft.",
-        "inputLabel": "TIPPE EIN WORT",
+        "caption": "Digita una parola. Viene stampata, poi inghiottita dall'inchiostro. Con dolcezza.",
+        "inputLabel": "DIGITA UNA PAROLA",
         "inputPlaceholder": "Manuel",
-        "triggerLabel": "Wort erneut drucken",
-        "reducedMotionNote": "Dieses Experiment druckt Wörter live in eine laufende Fluid-Simulation. Unter prefers-reduced-motion blende ich die Animation aus — zurück zum Playground für eine ruhigere Section."
+        "triggerLabel": "Stampa di nuovo la parola",
+        "reducedMotionNote": "Questo esperimento stampa parole live in una simulazione di fluido. Sotto prefers-reduced-motion nascondo l'animazione. Torna al Playground per una sezione più tranquilla."
       }
     }
   },
   "contact": {
     "sectionLabel": "Section 07 · Contact",
     "headline": "Let's talk.",
-    "subhead": "Auftrag, Frage, Tipp oder einfach Hallo — die Inbox ist offen.",
+    "subhead": "Richiesta, domanda, idea, o semplicemente un saluto, l'inbox è aperta.",
     "intro": {
-      "label": "Ein paar Worte vorab",
-      "body": "Ich antworte üblicherweise innerhalb von ein bis zwei Tagen. Für Recruiter und Anfragen aus der Vereinswelt: bitte kurz schreiben woher du kommst, das spart die zweite Mail."
+      "label": "Due parole prima",
+      "body": "Di solito rispondo entro uno o due giorni. Per i recruiter e le richieste dal mondo associativo: scrivi brevemente da dove arrivi, risparmia la seconda mail."
     },
     "channels": {
-      "label": "Direkt-Kanäle",
-      "note": "GitHub ist nur semi-aktiv — kein 100-Repo-Glanzfassaden-Account.",
-      "email": "E-Mail",
+      "label": "Canali diretti",
+      "note": "GitHub è solo semi-attivo, non è un account vetrina da 100 repo.",
+      "email": "E-mail",
       "github": "GitHub",
       "linkedin": "LinkedIn",
-      "photos": "Fotos"
+      "photos": "Foto"
     },
     "form": {
       "name": {
-        "label": "Name",
-        "placeholder": "Wie heisst du?"
+        "label": "Nome",
+        "placeholder": "Come ti chiami?"
       },
       "email": {
-        "label": "E-Mail",
-        "placeholder": "deine@adresse.ch"
+        "label": "E-mail",
+        "placeholder": "tuo@indirizzo.ch"
       },
       "message": {
-        "label": "Nachricht",
-        "placeholder": "Was beschäftigt dich? (mind. 10 Zeichen)"
+        "label": "Messaggio",
+        "placeholder": "Cosa ti frulla in testa? (min. 10 caratteri)"
       },
       "honeypot": {
-        "label": "Bitte nicht ausfüllen"
+        "label": "Per favore non compilare"
       },
       "submit": {
-        "label": "Senden",
-        "sending": "Sende …"
+        "label": "Invia",
+        "sending": "Invio …"
       },
       "status": {
-        "fallback": "Form-Versand ist gerade noch nicht verdrahtet. Schreib mir direkt:",
-        "error": "Hat nicht geklappt. Bitte direkt per E-Mail.",
-        "mailSubject": "Anfrage über manuelheller.dev"
+        "fallback": "L'invio del modulo non è ancora collegato. Scrivimi direttamente:",
+        "error": "Non è andato a buon fine. Scrivimi direttamente per e-mail.",
+        "mailSubject": "Richiesta tramite manuelheller.dev"
       }
     }
   },
   "legal": {
     "common": {
-      "lastUpdatedLabel": "Stand",
-      "lastUpdated": "6. Mai 2026",
-      "backLabel": "Zurück zur Startseite"
+      "lastUpdatedLabel": "Aggiornato",
+      "lastUpdated": "6 maggio 2026",
+      "backLabel": "Torna alla home"
     },
     "impressum": {
-      "metaTitle": "Impressum · Manuel Heller",
-      "metaDescription": "Impressum und rechtliche Angaben zu manuelheller.dev.",
-      "sectionLabel": "Legal · Impressum",
-      "headline": "Impressum",
-      "lede": "Diese Website ist ein privates, nicht-kommerzielles Portfolio. Es werden keine entgeltlichen Dienstleistungen angeboten.",
+      "metaTitle": "Note legali · Manuel Heller",
+      "metaDescription": "Note legali e informazioni su manuelheller.dev.",
+      "sectionLabel": "Legal · Note legali",
+      "headline": "Note legali",
+      "lede": "Questo sito è un portfolio privato, non commerciale. Non sono offerti servizi a pagamento.",
       "sections": [
         {
           "id": "responsible",
-          "heading": "Verantwortlich für den Inhalt",
+          "heading": "Responsabile dei contenuti",
           "body": [
             "Manuel Heller",
-            "Martisackerweg 18, 4203 Grellingen, Schweiz",
+            "Martisackerweg 18, 4203 Grellingen, Svizzera",
             "manuelheller@bluewin.ch"
           ]
         },
         {
           "id": "character",
-          "heading": "Charakter dieser Seite",
+          "heading": "Natura di questo sito",
           "body": [
-            "Diese Website dient ausschliesslich der Selbstdarstellung und dem Showcase eigener Arbeit. Es werden keine Produkte verkauft, keine kostenpflichtigen Dienstleistungen angeboten und keine Werbung geschaltet."
+            "Questo sito serve esclusivamente all'autopresentazione e a mostrare i miei lavori. Non vengono venduti prodotti, non sono offerti servizi a pagamento, non viene mostrata pubblicità."
           ]
         },
         {
           "id": "liability",
-          "heading": "Haftungsausschluss",
+          "heading": "Esclusione di responsabilità",
           "body": [
-            "Inhalte werden mit Sorgfalt erstellt, aber ohne Gewähr für Vollständigkeit oder Aktualität. Verweise und Links auf externe Websites erfolgen ohne Verantwortung für deren Inhalte."
+            "I contenuti vengono creati con cura, ma senza garanzia di completezza o attualità. I rinvii e i link a siti esterni avvengono senza responsabilità per i loro contenuti."
           ]
         },
         {
           "id": "copyright",
-          "heading": "Urheberrecht",
+          "heading": "Diritto d'autore",
           "body": [
-            "Alle Texte, Fotos, Grafiken, Code-Beispiele und Shader-Quelltexte unterliegen dem Urheberrecht von Manuel Heller, sofern nicht anders gekennzeichnet. Eine Verwendung ausserhalb dieser Website bedarf der schriftlichen Zustimmung."
+            "Tutti i testi, le foto, i grafici, gli esempi di codice e i sorgenti shader sono soggetti al diritto d'autore di Manuel Heller, salvo diversa indicazione. Un utilizzo al di fuori di questo sito richiede un'autorizzazione scritta."
           ]
         },
         {
           "id": "jurisdiction",
-          "heading": "Gerichtsstand",
+          "heading": "Foro competente",
           "body": [
-            "Schweizer Recht ist anwendbar. Erfüllungsort und Gerichtsstand ist Basel-Stadt, Schweiz."
+            "Si applica il diritto svizzero. Luogo di adempimento e foro competente è Basilea-Città, Svizzera."
           ]
         }
       ]
     },
     "datenschutz": {
-      "metaTitle": "Datenschutz · Manuel Heller",
-      "metaDescription": "Datenschutzerklärung für manuelheller.dev — keine Cookies, kein Analytics, kein Tracking.",
-      "sectionLabel": "Legal · Datenschutz",
-      "headline": "Datenschutzerklärung",
-      "lede": "Kurzfassung: Diese Seite setzt keine Cookies, nutzt kein Tracking und kein Analytics. Es gibt keinen Cookie-Banner, weil es nichts gibt das einer Einwilligung bedürfte.",
+      "metaTitle": "Privacy · Manuel Heller",
+      "metaDescription": "Informativa sulla privacy di manuelheller.dev. Niente cookie, niente analytics, niente tracking.",
+      "sectionLabel": "Legal · Privacy",
+      "headline": "Informativa sulla privacy",
+      "lede": "In breve: questo sito non imposta cookie, non usa né tracking né analytics. Non c'è banner cookie perché non c'è nulla che richieda un consenso.",
       "sections": [
         {
           "id": "responsible",
-          "heading": "Verantwortlicher",
+          "heading": "Titolare del trattamento",
           "body": [
             "Manuel Heller",
-            "Martisackerweg 18, 4203 Grellingen, Schweiz",
+            "Martisackerweg 18, 4203 Grellingen, Svizzera",
             "manuelheller@bluewin.ch"
           ]
         },
         {
           "id": "data",
-          "heading": "Welche Daten erhoben werden",
+          "heading": "Quali dati vengono raccolti",
           "body": [
-            "Diese Website setzt keine Cookies. Es gibt kein Tracking, kein Analytics, keine Werbenetzwerke und keine Social-Media-Pixel. Es werden keine Daten an Dritte zu Werbezwecken weitergegeben.",
-            "Aus rein technischen Gründen wird der LocalStorage des Browsers genutzt: ein anonymer Eintrag merkt sich die GPU-Leistungsklasse deines Geräts (damit die WebGL-Animation beim nächsten Besuch direkt im richtigen Detail-Level startet) und ein Eintrag merkt sich, dass der Lade-Bildschirm bereits gespielt wurde (damit er bei Wechsel der Sprache nicht erneut erscheint). Diese Werte sind nicht personenbezogen, werden nicht an Dritte übermittelt und können jederzeit über die Browser-Einstellungen gelöscht werden."
+            "Questo sito non imposta cookie. Non c'è tracking, non ci sono analytics, network pubblicitari né pixel social-media. Nessun dato viene condiviso con terzi a scopi pubblicitari.",
+            "Per ragioni puramente tecniche viene utilizzato il LocalStorage del browser: una voce anonima ricorda la classe di prestazioni GPU del tuo dispositivo (in modo che l'animazione WebGL parta direttamente al livello di dettaglio giusto alla prossima visita) e una voce ricorda che la schermata di caricamento è già stata mostrata (in modo che non si ripeta cambiando lingua). Questi valori non sono personali, non vengono trasmessi a terzi e possono essere cancellati in qualsiasi momento dalle impostazioni del browser."
           ]
         },
         {
           "id": "logs",
-          "heading": "Server-Logs",
+          "heading": "Log del server",
           "body": [
-            "Der Hosting-Server (Linux mit nginx) wird selbst betrieben und steht beim Anbieter mc-host24.de in Deutschland. Die DNS-Auflösung läuft über Cloudflare (Cloudflare, Inc., USA), das gleichzeitig als Proxy-Schutz vor Bot-Angriffen dient — dabei werden IP-Adressen technisch verarbeitet, jedoch nicht zu Tracking-Zwecken gespeichert. Der Server protokolliert technisch notwendige Zugriffe: IP-Adresse, Zeitstempel, abgerufene URL, Referrer, User-Agent. Diese Logs werden nach 14 Tagen automatisch gelöscht und ausschliesslich zur Fehleranalyse und Sicherheitsüberwachung verwendet (Rechtsgrundlage: berechtigtes Interesse, DSGVO Art. 6 Abs. 1 lit. f, sowie Art. 31 Abs. 2 lit. b DSG).",
-            "Cloudflare ist über Standard-Vertragsklauseln (Art. 46 DSGVO) für Datentransfers in die USA abgesichert."
+            "Il server di hosting (Linux con nginx) è gestito direttamente e si trova presso il provider mc-host24.de in Germania. La risoluzione DNS passa da Cloudflare (Cloudflare, Inc., USA), che funge anche da proxy di protezione contro attacchi bot. Gli indirizzi IP vengono in tale contesto trattati tecnicamente, ma non memorizzati a fini di tracking. Il server registra gli accessi tecnicamente necessari: indirizzo IP, timestamp, URL richiesta, referrer, user-agent. Questi log vengono cancellati automaticamente dopo 14 giorni e utilizzati esclusivamente per analisi degli errori e monitoraggio della sicurezza (base legale: interesse legittimo, art. 6(1)(f) GDPR, e art. 31(2)(b) nLPD).",
+            "Cloudflare è coperto per i trasferimenti di dati verso gli USA tramite Clausole Contrattuali Standard (art. 46 GDPR)."
           ]
         },
         {
           "id": "form",
-          "heading": "Kontaktformular",
+          "heading": "Modulo di contatto",
           "body": [
-            "Bei Nutzung des Kontaktformulars wird aktuell der mailto-Mechanismus deines E-Mail-Clients aktiviert — die Nachricht läuft über deinen E-Mail-Provider, nicht über einen Server unter meiner Kontrolle. Dabei werden ausschliesslich die Daten verarbeitet, die du selbst in deinem Mail-Client eingibst.",
-            "Sollte zu einem späteren Zeitpunkt eine direkte Übermittlung über einen Server-Bridge (Resend.com, Resend, Inc., USA) aktiviert werden, würden Name, E-Mail-Adresse und Nachricht über diesen technischen Mittler an mich übermittelt. Resend wäre über Standard-Vertragsklauseln (Art. 46 DSGVO) abgesichert. Eine entsprechende Anpassung dieser Erklärung erfolgt mit Aktivierung.",
-            "Rechtsgrundlage in beiden Fällen: deine Einwilligung durch das Absenden (Art. 6 Abs. 1 lit. a DSGVO, Art. 31 Abs. 1 DSG). Eingehende Nachrichten werden nach Beantwortung gelöscht, spätestens jedoch nach sechs Monaten. Du kannst jederzeit Auskunft, Berichtigung oder Löschung verlangen — schreib einfach an manuelheller@bluewin.ch."
+            "Quando utilizzi il modulo di contatto viene attualmente attivato il meccanismo mailto del tuo client e-mail. Il messaggio passa dal tuo provider e-mail, non da un server sotto il mio controllo. Vengono trattati esclusivamente i dati che inserisci tu stesso nel tuo client mail.",
+            "Se in futuro venisse attivata una trasmissione diretta tramite un server bridge (Resend.com, Resend, Inc., USA), nome, indirizzo e-mail e messaggio mi verrebbero trasmessi tramite questo intermediario tecnico. Resend sarebbe coperto da Clausole Contrattuali Standard (art. 46 GDPR). Questa dichiarazione verrà aggiornata di conseguenza all'attivazione.",
+            "Base legale in entrambi i casi: il tuo consenso con l'invio (art. 6(1)(a) GDPR, art. 31(1) nLPD). I messaggi in arrivo vengono cancellati dopo la risposta, al più tardi dopo sei mesi. Puoi richiedere accesso, rettifica o cancellazione in qualsiasi momento. Scrivi semplicemente a manuelheller@bluewin.ch."
           ]
         },
         {
           "id": "fonts",
-          "heading": "Schriftarten",
+          "heading": "Font",
           "body": [
-            "Schriftarten (Instrument Serif, Inter, JetBrains Mono) werden lokal vom eigenen Server ausgeliefert. Es bestehen keine Verbindungen zu Google Fonts oder anderen Drittservern."
+            "I font (Instrument Serif, Inter, JetBrains Mono) vengono serviti localmente da questo server. Non ci sono connessioni a Google Fonts né ad altri server di terze parti."
           ]
         },
         {
           "id": "externalLinks",
-          "heading": "Externe Verlinkungen",
+          "heading": "Link esterni",
           "body": [
-            "Diese Website verweist an mehreren Stellen auf externe Plattformen, deren Inhalte ich nicht beeinflussen oder kontrollieren kann. Beim Klick auf einen externen Link verlässt du diese Seite; ab dort gelten die Datenschutzbestimmungen des jeweiligen Anbieters.",
-            "Aktuell verlinkte externe Dienste: GitHub (github.com), LinkedIn (linkedin.com), Instagram (instagram.com), Adobe Portfolio (manuelheller.myportfolio.com), Twitch (twitch.tv), Jogge di Balla (joggediballa.ch). Eine Liste der genauen Anbieter mit Sitzland kann jederzeit per E-Mail bei mir angefragt werden."
+            "Questo sito rimanda in più punti a piattaforme esterne i cui contenuti non posso influenzare né controllare. Cliccando un link esterno lasci questo sito, e da quel momento si applica l'informativa privacy del relativo provider.",
+            "Servizi esterni attualmente collegati: GitHub (github.com), LinkedIn (linkedin.com), Instagram (instagram.com), Adobe Portfolio (manuelheller.myportfolio.com), Twitch (twitch.tv), Jogge di Balla (joggediballa.ch). Una lista esatta dei provider con il loro paese di sede può essere richiesta in qualsiasi momento via e-mail."
           ]
         },
         {
           "id": "security",
-          "heading": "Datensicherheit",
+          "heading": "Sicurezza dei dati",
           "body": [
-            "Sämtliche Verbindungen zur Website werden über TLS 1.3 verschlüsselt. Der Server wird regelmässig aktualisiert und durch Cloudflare-Proxy gegen automatisierte Angriffe abgeschirmt. Diese Massnahmen entsprechen den Anforderungen aus DSGVO Art. 32 und DSG Art. 8."
+            "Tutte le connessioni al sito sono cifrate via TLS 1.3. Il server viene aggiornato regolarmente e protetto dal proxy Cloudflare contro attacchi automatici. Queste misure sono conformi ai requisiti dell'art. 32 GDPR e dell'art. 8 nLPD."
           ]
         },
         {
           "id": "rights",
-          "heading": "Deine Rechte",
+          "heading": "I tuoi diritti",
           "body": [
-            "Nach Schweizer Datenschutzgesetz (revDSG) und EU-DSGVO hast du das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung und Datenportabilität. Wende dich für alle Anfragen an: manuelheller@bluewin.ch.",
-            "Für Beschwerden über die Verarbeitung deiner Daten kannst du dich an die zuständige Aufsichtsbehörde wenden: in der Schweiz an den Eidgenössischen Datenschutzbeauftragten (EDÖB, https://www.edoeb.admin.ch); innerhalb der EU an die Datenschutzbehörde deines Wohnsitzlandes."
+            "Secondo la Legge svizzera sulla protezione dei dati (nLPD) e il GDPR europeo hai il diritto di accesso, rettifica, cancellazione, limitazione del trattamento e portabilità dei dati. Per qualsiasi richiesta scrivi a: manuelheller@bluewin.ch.",
+            "Per reclami sul trattamento dei tuoi dati puoi rivolgerti all'autorità di controllo competente: in Svizzera all'Incaricato federale della protezione dei dati e della trasparenza (IFPDT, https://www.edoeb.admin.ch). Nell'UE, all'autorità per la protezione dei dati del tuo paese di residenza."
           ]
         }
       ]
     }
   },
   "notFound": {
-    "metaTitle": "404 · Im Fluid versickert",
+    "metaTitle": "404 · Persa nel fluido",
     "stamp": "Error 404",
-    "headline": "Diese Seite ist im Fluid versickert.",
-    "body": "Die URL existiert nicht — entweder Tippfehler, alter Link, oder die Tinte hat sie verschluckt. Beides ist möglich.",
-    "backHome": "Zurück zur Startseite",
-    "backWork": "Arbeiten ansehen"
+    "headline": "Questa pagina si è persa nel fluido.",
+    "body": "L'URL non esiste. O è un refuso, un vecchio link, oppure l'inchiostro l'ha inghiottita. Entrambi possibili.",
+    "backHome": "Torna alla home",
+    "backWork": "Vedi i lavori"
   }
 }
