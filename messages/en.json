@@ -766,125 +766,125 @@
   },
   "legal": {
     "common": {
-      "lastUpdatedLabel": "Stand",
-      "lastUpdated": "6. Mai 2026",
-      "backLabel": "Zurück zur Startseite"
+      "lastUpdatedLabel": "Last updated",
+      "lastUpdated": "6 May 2026",
+      "backLabel": "Back to home"
     },
     "impressum": {
-      "metaTitle": "Impressum · Manuel Heller",
-      "metaDescription": "Impressum und rechtliche Angaben zu manuelheller.dev.",
-      "sectionLabel": "Legal · Impressum",
-      "headline": "Impressum",
-      "lede": "Diese Website ist ein privates, nicht-kommerzielles Portfolio. Es werden keine entgeltlichen Dienstleistungen angeboten.",
+      "metaTitle": "Imprint · Manuel Heller",
+      "metaDescription": "Imprint and legal information for manuelheller.dev.",
+      "sectionLabel": "Legal · Imprint",
+      "headline": "Imprint",
+      "lede": "This site is a private, non-commercial portfolio. No paid services are offered.",
       "sections": [
         {
           "id": "responsible",
-          "heading": "Verantwortlich für den Inhalt",
+          "heading": "Responsible for content",
           "body": [
             "Manuel Heller",
-            "Martisackerweg 18, 4203 Grellingen, Schweiz",
+            "Martisackerweg 18, 4203 Grellingen, Switzerland",
             "manuelheller@bluewin.ch"
           ]
         },
         {
           "id": "character",
-          "heading": "Charakter dieser Seite",
+          "heading": "Nature of this site",
           "body": [
-            "Diese Website dient ausschliesslich der Selbstdarstellung und dem Showcase eigener Arbeit. Es werden keine Produkte verkauft, keine kostenpflichtigen Dienstleistungen angeboten und keine Werbung geschaltet."
+            "This site exists solely for self-presentation and showcasing my own work. No products are sold, no paid services are offered, and no advertising is run."
           ]
         },
         {
           "id": "liability",
-          "heading": "Haftungsausschluss",
+          "heading": "Disclaimer",
           "body": [
-            "Inhalte werden mit Sorgfalt erstellt, aber ohne Gewähr für Vollständigkeit oder Aktualität. Verweise und Links auf externe Websites erfolgen ohne Verantwortung für deren Inhalte."
+            "Content is created with care, but without warranty as to completeness or currency. Links and references to external sites are made without responsibility for their content."
           ]
         },
         {
           "id": "copyright",
-          "heading": "Urheberrecht",
+          "heading": "Copyright",
           "body": [
-            "Alle Texte, Fotos, Grafiken, Code-Beispiele und Shader-Quelltexte unterliegen dem Urheberrecht von Manuel Heller, sofern nicht anders gekennzeichnet. Eine Verwendung ausserhalb dieser Website bedarf der schriftlichen Zustimmung."
+            "All text, photos, graphics, code samples, and shader source on this site are copyright Manuel Heller unless otherwise marked. Use outside this site requires written permission."
           ]
         },
         {
           "id": "jurisdiction",
-          "heading": "Gerichtsstand",
+          "heading": "Jurisdiction",
           "body": [
-            "Schweizer Recht ist anwendbar. Erfüllungsort und Gerichtsstand ist Basel-Stadt, Schweiz."
+            "Swiss law applies. Place of performance and jurisdiction is Basel-Stadt, Switzerland."
           ]
         }
       ]
     },
     "datenschutz": {
-      "metaTitle": "Datenschutz · Manuel Heller",
-      "metaDescription": "Datenschutzerklärung für manuelheller.dev — keine Cookies, kein Analytics, kein Tracking.",
-      "sectionLabel": "Legal · Datenschutz",
-      "headline": "Datenschutzerklärung",
-      "lede": "Kurzfassung: Diese Seite setzt keine Cookies, nutzt kein Tracking und kein Analytics. Es gibt keinen Cookie-Banner, weil es nichts gibt das einer Einwilligung bedürfte.",
+      "metaTitle": "Privacy · Manuel Heller",
+      "metaDescription": "Privacy policy for manuelheller.dev. No cookies, no analytics, no tracking.",
+      "sectionLabel": "Legal · Privacy",
+      "headline": "Privacy policy",
+      "lede": "Short version: this site sets no cookies, runs no tracking, no analytics. There's no cookie banner because there's nothing that would need consent.",
       "sections": [
         {
           "id": "responsible",
-          "heading": "Verantwortlicher",
+          "heading": "Data controller",
           "body": [
             "Manuel Heller",
-            "Martisackerweg 18, 4203 Grellingen, Schweiz",
+            "Martisackerweg 18, 4203 Grellingen, Switzerland",
             "manuelheller@bluewin.ch"
           ]
         },
         {
           "id": "data",
-          "heading": "Welche Daten erhoben werden",
+          "heading": "What data is collected",
           "body": [
-            "Diese Website setzt keine Cookies. Es gibt kein Tracking, kein Analytics, keine Werbenetzwerke und keine Social-Media-Pixel. Es werden keine Daten an Dritte zu Werbezwecken weitergegeben.",
-            "Aus rein technischen Gründen wird der LocalStorage des Browsers genutzt: ein anonymer Eintrag merkt sich die GPU-Leistungsklasse deines Geräts (damit die WebGL-Animation beim nächsten Besuch direkt im richtigen Detail-Level startet) und ein Eintrag merkt sich, dass der Lade-Bildschirm bereits gespielt wurde (damit er bei Wechsel der Sprache nicht erneut erscheint). Diese Werte sind nicht personenbezogen, werden nicht an Dritte übermittelt und können jederzeit über die Browser-Einstellungen gelöscht werden."
+            "This site sets no cookies. There's no tracking, no analytics, no advertising networks, no social-media pixels. No data is shared with third parties for advertising purposes.",
+            "For purely technical reasons the browser's LocalStorage is used: one anonymous entry remembers your device's GPU performance class (so the WebGL animation starts at the right detail level on your next visit) and one entry remembers that the loading screen has already played (so it doesn't replay when you switch language). These values are not personal, are not transmitted to third parties, and can be cleared at any time via your browser settings."
           ]
         },
         {
           "id": "logs",
-          "heading": "Server-Logs",
+          "heading": "Server logs",
           "body": [
-            "Der Hosting-Server (Linux mit nginx) wird selbst betrieben und steht beim Anbieter mc-host24.de in Deutschland. Die DNS-Auflösung läuft über Cloudflare (Cloudflare, Inc., USA), das gleichzeitig als Proxy-Schutz vor Bot-Angriffen dient — dabei werden IP-Adressen technisch verarbeitet, jedoch nicht zu Tracking-Zwecken gespeichert. Der Server protokolliert technisch notwendige Zugriffe: IP-Adresse, Zeitstempel, abgerufene URL, Referrer, User-Agent. Diese Logs werden nach 14 Tagen automatisch gelöscht und ausschliesslich zur Fehleranalyse und Sicherheitsüberwachung verwendet (Rechtsgrundlage: berechtigtes Interesse, DSGVO Art. 6 Abs. 1 lit. f, sowie Art. 31 Abs. 2 lit. b DSG).",
-            "Cloudflare ist über Standard-Vertragsklauseln (Art. 46 DSGVO) für Datentransfers in die USA abgesichert."
+            "The hosting server (Linux with nginx) is self-operated and located at the provider mc-host24.de in Germany. DNS resolution runs through Cloudflare (Cloudflare, Inc., USA), which also acts as proxy protection against bot attacks. IP addresses are processed technically in this context but are not stored for tracking purposes. The server logs technically necessary access events: IP address, timestamp, requested URL, referrer, user-agent. These logs are deleted automatically after 14 days and are used exclusively for error analysis and security monitoring (legal basis: legitimate interest, Art. 6(1)(f) GDPR, and Art. 31(2)(b) revFADP).",
+            "Cloudflare is covered for data transfers to the USA via Standard Contractual Clauses (Art. 46 GDPR)."
           ]
         },
         {
           "id": "form",
-          "heading": "Kontaktformular",
+          "heading": "Contact form",
           "body": [
-            "Bei Nutzung des Kontaktformulars wird aktuell der mailto-Mechanismus deines E-Mail-Clients aktiviert — die Nachricht läuft über deinen E-Mail-Provider, nicht über einen Server unter meiner Kontrolle. Dabei werden ausschliesslich die Daten verarbeitet, die du selbst in deinem Mail-Client eingibst.",
-            "Sollte zu einem späteren Zeitpunkt eine direkte Übermittlung über einen Server-Bridge (Resend.com, Resend, Inc., USA) aktiviert werden, würden Name, E-Mail-Adresse und Nachricht über diesen technischen Mittler an mich übermittelt. Resend wäre über Standard-Vertragsklauseln (Art. 46 DSGVO) abgesichert. Eine entsprechende Anpassung dieser Erklärung erfolgt mit Aktivierung.",
-            "Rechtsgrundlage in beiden Fällen: deine Einwilligung durch das Absenden (Art. 6 Abs. 1 lit. a DSGVO, Art. 31 Abs. 1 DSG). Eingehende Nachrichten werden nach Beantwortung gelöscht, spätestens jedoch nach sechs Monaten. Du kannst jederzeit Auskunft, Berichtigung oder Löschung verlangen — schreib einfach an manuelheller@bluewin.ch."
+            "When you use the contact form, your email client's mailto mechanism is currently triggered. The message goes via your email provider, not via a server under my control. Only the data you enter yourself in your mail client is processed.",
+            "Should a direct delivery via a server bridge (Resend.com, Resend, Inc., USA) be activated at a later point, your name, email address, and message would be transmitted to me through that technical intermediary. Resend would be covered via Standard Contractual Clauses (Art. 46 GDPR). This statement will be updated accordingly when activated.",
+            "Legal basis in both cases: your consent by submitting (Art. 6(1)(a) GDPR, Art. 31(1) revFADP). Incoming messages are deleted after they're answered, at the latest after six months. You can request access, correction, or deletion at any time. Just write to manuelheller@bluewin.ch."
           ]
         },
         {
           "id": "fonts",
-          "heading": "Schriftarten",
+          "heading": "Fonts",
           "body": [
-            "Schriftarten (Instrument Serif, Inter, JetBrains Mono) werden lokal vom eigenen Server ausgeliefert. Es bestehen keine Verbindungen zu Google Fonts oder anderen Drittservern."
+            "Fonts (Instrument Serif, Inter, JetBrains Mono) are served locally from this server. There are no connections to Google Fonts or any other third-party servers."
           ]
         },
         {
           "id": "externalLinks",
-          "heading": "Externe Verlinkungen",
+          "heading": "External links",
           "body": [
-            "Diese Website verweist an mehreren Stellen auf externe Plattformen, deren Inhalte ich nicht beeinflussen oder kontrollieren kann. Beim Klick auf einen externen Link verlässt du diese Seite; ab dort gelten die Datenschutzbestimmungen des jeweiligen Anbieters.",
-            "Aktuell verlinkte externe Dienste: GitHub (github.com), LinkedIn (linkedin.com), Instagram (instagram.com), Adobe Portfolio (manuelheller.myportfolio.com), Twitch (twitch.tv), Jogge di Balla (joggediballa.ch). Eine Liste der genauen Anbieter mit Sitzland kann jederzeit per E-Mail bei mir angefragt werden."
+            "This site links to external platforms in several places, whose content I cannot influence or control. When you click an external link you leave this site, and the privacy policy of the respective provider applies from that point.",
+            "Currently linked external services: GitHub (github.com), LinkedIn (linkedin.com), Instagram (instagram.com), Adobe Portfolio (manuelheller.myportfolio.com), Twitch (twitch.tv), Jogge di Balla (joggediballa.ch). A list of the exact providers with their country of residence can be requested at any time via email."
           ]
         },
         {
           "id": "security",
-          "heading": "Datensicherheit",
+          "heading": "Data security",
           "body": [
-            "Sämtliche Verbindungen zur Website werden über TLS 1.3 verschlüsselt. Der Server wird regelmässig aktualisiert und durch Cloudflare-Proxy gegen automatisierte Angriffe abgeschirmt. Diese Massnahmen entsprechen den Anforderungen aus DSGVO Art. 32 und DSG Art. 8."
+            "All connections to this site are encrypted via TLS 1.3. The server is updated regularly and shielded by Cloudflare's proxy against automated attacks. These measures meet the requirements of Art. 32 GDPR and Art. 8 revFADP."
           ]
         },
         {
           "id": "rights",
-          "heading": "Deine Rechte",
+          "heading": "Your rights",
           "body": [
-            "Nach Schweizer Datenschutzgesetz (revDSG) und EU-DSGVO hast du das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung und Datenportabilität. Wende dich für alle Anfragen an: manuelheller@bluewin.ch.",
-            "Für Beschwerden über die Verarbeitung deiner Daten kannst du dich an die zuständige Aufsichtsbehörde wenden: in der Schweiz an den Eidgenössischen Datenschutzbeauftragten (EDÖB, https://www.edoeb.admin.ch); innerhalb der EU an die Datenschutzbehörde deines Wohnsitzlandes."
+            "Under the Swiss Federal Act on Data Protection (revFADP) and the EU GDPR you have the right to access, correction, deletion, restriction of processing, and data portability. For all enquiries write to: manuelheller@bluewin.ch.",
+            "For complaints about the processing of your data, you can contact the competent supervisory authority: in Switzerland the Federal Data Protection and Information Commissioner (FDPIC, https://www.edoeb.admin.ch). Within the EU, the data protection authority of your country of residence."
           ]
         }
       ]
