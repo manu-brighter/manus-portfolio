@@ -121,7 +121,7 @@
         "id": "antrieb",
         "heading": "What drives me",
         "body": [
-          "I get excited about almost everything, and I'm convinced: in the AI era especially you have to stay on it more than ever. Stop learning and you're twelve months away from being left behind. Picking up new skills just feels like fun to me; for me that's not pressure, it's the default mode."
+          "I get excited about almost everything, and I'm convinced: in the AI era especially you have to stay on it more than ever. Stop learning and you're twelve months away from being left behind. Picking up new skills just feels like fun to me. For me that's not pressure, it's the default mode."
         ]
       },
       {
@@ -380,7 +380,7 @@
       {
         "id": "occasional",
         "label": "In the toolbox",
-        "description": "I know it; I don't use it daily.",
+        "description": "I know it. I don't use it daily.",
         "weight": "m",
         "items": [
           {
@@ -585,7 +585,7 @@
           "features": [
             {
               "title": "Hidden URL as browser source",
-              "body": "OBS embeds /overlay/sdk; a control panel at /overlay/sdk/control drives the score live."
+              "body": "OBS embeds /overlay/sdk, a control panel at /overlay/sdk/control drives the score live."
             },
             {
               "title": "Realtime without page reloads",
@@ -688,36 +688,36 @@
   },
   "playground": {
     "sectionLabel": "06 · PLAYGROUND",
-    "eyebrow": "OFFENE WERKBANK",
-    "headline": "Wo der Fluid-Sim spielen darf.",
-    "lede": "Zwei Shader-Experimente, beide auf dem Tinte-/Druck-Narrativ verankert. Pure Craft-Demonstration, kein Produkt-Kontext.",
-    "openLabel": "Experiment öffnen",
+    "eyebrow": "OPEN WORKBENCH",
+    "headline": "Where the fluid sim gets to play.",
+    "lede": "Two shader experiments, both anchored to the ink-and-print narrative. Pure craft demonstration, no product context.",
+    "openLabel": "Open experiment",
     "shell": {
-      "back": "ZURÜCK ZUM PLAYGROUND"
+      "back": "BACK TO PLAYGROUND"
     },
     "experiments": {
       "inkDropStudio": {
         "cardTitle": "Ink Drop Studio",
         "cardKicker": "01 · INK DROP STUDIO",
-        "cardBody": "Leere Paper-Canvas, Klick spawnt Ink-Tropfen in der gewählten Spot-Farbe. Slider für Sim-Parameter, Bomb-Button, Freeze-Button.",
+        "cardBody": "Empty paper canvas, click spawns ink droplets in the chosen spot colour. Sliders for sim parameters, bomb button, freeze button.",
         "title": "Ink Drop Studio.",
-        "caption": "Spielwiese für die Hero-Simulation. Klick = Ink-Splat, Slider = Sim-Parameter, „Bomb\" wenn dir gerade nach Chaos ist.",
+        "caption": "Playground for the hero simulation. Click = ink splat, sliders = sim parameters, 'Bomb' if you're in the mood for chaos.",
         "buttonBomb": "BOMB",
         "buttonFreeze": "FREEZE",
         "buttonResume": "RESUME",
         "buttonReset": "RESET",
-        "reducedMotionNote": "Dieses Experiment ist eine bewegte Spielwiese. Unter prefers-reduced-motion blende ich die laufende Simulation aus — zurück zum Playground für eine ruhigere Section."
+        "reducedMotionNote": "This experiment is a moving playground. Under prefers-reduced-motion I hide the running simulation. Head back to the Playground for a quieter section."
       },
       "typeAsFluid": {
         "cardTitle": "Type-as-Fluid",
         "cardKicker": "02 · TYPE-AS-FLUID",
-        "cardBody": "Tipp ein Wort. Es wird gedruckt, dann von der Tinte verschluckt. Sanft.",
+        "cardBody": "Type a word. It gets printed, then swallowed by the ink. Gently.",
         "title": "Type-as-Fluid.",
-        "caption": "Tipp ein Wort. Es wird gedruckt, dann von der Tinte verschluckt. Sanft.",
-        "inputLabel": "TIPPE EIN WORT",
+        "caption": "Type a word. It gets printed, then swallowed by the ink. Gently.",
+        "inputLabel": "TYPE A WORD",
         "inputPlaceholder": "Manuel",
-        "triggerLabel": "Wort erneut drucken",
-        "reducedMotionNote": "Dieses Experiment druckt Wörter live in eine laufende Fluid-Simulation. Unter prefers-reduced-motion blende ich die Animation aus — zurück zum Playground für eine ruhigere Section."
+        "triggerLabel": "Print word again",
+        "reducedMotionNote": "This experiment prints words live into a running fluid simulation. Under prefers-reduced-motion I hide the animation. Head back to the Playground for a quieter section."
       }
     }
   },
