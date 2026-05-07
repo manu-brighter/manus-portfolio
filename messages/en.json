@@ -249,12 +249,12 @@
   },
   "skills": {
     "sectionLabel": "Section 02 · Skills",
-    "headline": "Was ich mitbringe.",
-    "subhead": "Grösse transportiert Gewicht. Keine Jahre, keine Labels.",
+    "headline": "What I bring to the table.",
+    "subhead": "Size carries weight. No years, no labels.",
     "heroSkill": {
-      "eyebrow": "Hero-Skill",
-      "name": "AI-Workflow & Vibecoding",
-      "description": "Custom Agents, Hooks, Skills, mehrstufige Prompts. AI ist nicht das Tool, das ich nutze, sondern das Werkzeug, mit dem ich Werkzeuge baue."
+      "eyebrow": "Hero Skill",
+      "name": "AI Workflow & Vibecoding",
+      "description": "Custom agents, hooks, skills, multi-stage prompts. AI isn't the tool I use — it's the thing I use to create tools."
     },
     "vibecodedMarker": "vibecoded",
     "tiers": [
@@ -273,7 +273,7 @@
             "name": "MariaDB · MySQL"
           },
           {
-            "name": "HTML · CSS · Webdesign-Eye"
+            "name": "HTML · CSS · web-design eye"
           }
         ]
       },
@@ -301,14 +301,14 @@
             "name": "OpenAPI · Swagger"
           },
           {
-            "name": "nginx · Linux-Server-Admin"
+            "name": "nginx · Linux server admin"
           }
         ]
       },
       {
         "id": "vibecoded",
         "label": "Vibecoded Stack",
-        "description": "Was ich mit AI-Workflow baue, nicht spontan ohne.",
+        "description": "What I build with the AI workflow, not casually without.",
         "weight": "l",
         "items": [
           {
@@ -360,7 +360,7 @@
             "vibecoded": true
           },
           {
-            "name": "GLSL · WebGL Shader",
+            "name": "GLSL · WebGL shaders",
             "vibecoded": true
           },
           {
@@ -379,8 +379,8 @@
       },
       {
         "id": "occasional",
-        "label": "Im Werkzeugkasten",
-        "description": "Kenne ich, nutze ich nicht täglich.",
+        "label": "In the toolbox",
+        "description": "I know it; I don't use it daily.",
         "weight": "m",
         "items": [
           {
@@ -415,19 +415,19 @@
         "weight": "m",
         "items": [
           {
-            "name": "Fotografie"
+            "name": "Photography"
           },
           {
-            "name": "Videoschnitt"
+            "name": "Video editing"
           },
           {
-            "name": "Grafikdesign"
+            "name": "Graphic design"
           },
           {
             "name": "Live Web Fluid Simulations"
           },
           {
-            "name": "Shader-Spielereien"
+            "name": "Shader experiments"
           }
         ]
       }

@@ -254,7 +254,7 @@
     "heroSkill": {
       "eyebrow": "Hero-Skill",
       "name": "AI-Workflow & Vibecoding",
-      "description": "Custom Agents, Hooks, Skills, mehrstufige Prompts. AI ist nicht das Tool, das ich nutze, sondern das Werkzeug, mit dem ich Werkzeuge baue."
+      "description": "Custom Agents, Hooks, Skills, mehrstufige Prompts. AI ist nicht das Tool, das ich nutze, sondern das Werkzeug, mit dem ich Tools baue."
     },
     "vibecodedMarker": "vibecoded",
     "tiers": [
