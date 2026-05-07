@@ -14,10 +14,8 @@ import { useCallback } from "react";
  */
 export function useViewTransition() {
   return useCallback((callback: () => void) => {
-    // biome-ignore lint/suspicious/noExplicitAny: View Transitions API is partially typed in DOM lib
-    const startViewTransition = (document as any).startViewTransition?.bind(document);
-    if (typeof startViewTransition === "function") {
-      startViewTransition(callback);
+    if (typeof document.startViewTransition === "function") {
+      document.startViewTransition(callback);
     } else {
       callback();
     }
