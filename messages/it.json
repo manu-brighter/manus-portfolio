@@ -69,7 +69,8 @@
   },
   "scrollProgress": {
     "ariaLabel": "Navigazione sezioni",
-    "heroLabel": "Hero"
+    "heroLabel": "Hero",
+    "aboutObjectsLabel": "Off the Screen"
   },
   "hero": {
     "statusStamps": {
@@ -343,7 +344,7 @@
             "vibecoded": true
           },
           {
-            "name": "Three.js · React Three Fiber",
+            "name": "Three.js · R3F · Drei · Postprocessing",
             "vibecoded": true
           },
           {
@@ -360,6 +361,18 @@
           },
           {
             "name": "GLSL · WebGL Shader",
+            "vibecoded": true
+          },
+          {
+            "name": "Biome · Lint & Format",
+            "vibecoded": true
+          },
+          {
+            "name": "Playwright · E2E + Axe + Visual",
+            "vibecoded": true
+          },
+          {
+            "name": "Sharp · Asset Pipeline",
             "vibecoded": true
           }
         ]
