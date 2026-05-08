@@ -253,6 +253,14 @@ export class FluidOrchestrator {
   // after the loader+hero-reveal cadence; studio mode can flip it
   // through setAmbientEnabled.
   private ambientReady = false;
+  // Warmup gate: step() short-circuits while false so the full sim
+  // pipeline (8 passes incl. pressure-N-iter) doesn't burn GPU during
+  // the loader+hero-reveal window — that warmup work was eating the
+  // OverprintReveal animation. Flipped true by `triggerAmbient()`;
+  // FluidSim's RAF subscriber also reads `isStarted()` to skip the
+  // measuring path so tier auto-tune samples capture real workload,
+  // not the empty warmup window.
+  private started = false;
   // Studio-mode toggles. Default behaviour matches the hero rig (ambient
   // wandering points on, rotating Riso colours per splat, auto pointer
   // splat from the PointerState). Playground's Ink Drop Studio disables
@@ -356,11 +364,25 @@ export class FluidOrchestrator {
     return this.paused;
   }
 
+  isStarted(): boolean {
+    return this.started;
+  }
+
+  /** Open the warmup gate so step() runs the full pipeline. Hero rig
+   *  goes through `triggerAmbient()` which calls this; studio /
+   *  TypeAsFluid call this directly because they manage ambient
+   *  themselves and just need the sim to begin. Idempotent. */
+  start(): void {
+    this.started = true;
+  }
+
   /** Kick ambient motion immediately (called when loader finishes
-   *  + hero-reveal settle window — see FluidSim.tsx). Also opens the
-   *  auto-ambient gate so the in-step idle timer can re-kick ambient
-   *  if the user goes idle later. */
+   *  + hero-reveal settle window — see FluidSim.tsx). Opens the warmup
+   *  gate so step() runs the full pipeline, opens the auto-ambient
+   *  gate so the in-step idle timer can re-kick ambient if the user
+   *  goes idle later. */
   triggerAmbient(): void {
+    this.start();
     this.ambientReady = true;
     this.ambientStrength = 1.0;
     this.ambientActive = true;
@@ -777,6 +799,23 @@ export class FluidOrchestrator {
 
     const gl = this.gl;
     this.frameCount++;
+
+    // Pre-warmup gate: while !started, skip all expensive sim passes
+    // (curl + vorticity + 2 advects + divergence + N-iter pressure +
+    // gradient-subtract) and only paint render-toon so the canvas shows
+    // paper + grain instead of WebGL's opaque-black default-clear (the
+    // R3F Canvas is `alpha: false`). Splat queue drains on the first
+    // started step so any buffered Work-card clicks during the loader
+    // don't dump as a glitch when ambient kicks in.
+    if (!this.started) {
+      this.pendingSplats.length = 0;
+      gl.bindVertexArray(this.emptyVAO);
+      gl.disable(gl.BLEND);
+      this.runRenderToon(elapsed);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      gl.bindVertexArray(null);
+      return;
+    }
 
     // Update ambient timer — starts after 3s idle, ramps up over 2s.
     // When pointer is active, reduce ambient but don't kill it entirely —

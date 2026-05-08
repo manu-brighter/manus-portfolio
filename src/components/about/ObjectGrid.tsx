@@ -7,6 +7,7 @@ import { JoggediballaStamp } from "./stamps/JoggediballaStamp";
 import { PingPongStamp } from "./stamps/PingPongStamp";
 import { SchneeStamp } from "./stamps/SchneeStamp";
 import { TauchenStamp } from "./stamps/TauchenStamp";
+import { TileFigure } from "./TileFigure";
 
 /**
  * ObjectGrid — Block 06 of the rewritten About. Replaces the old
@@ -79,7 +80,11 @@ export function ObjectGrid() {
         <h3 id="about-objects-heading" className="type-h2 mt-2 italic text-ink">
           {t("headline")}
         </h3>
-        <p className="mt-3 type-label-stamp">{t("currentlyBand")}</p>
+        {/* Full band on desktop; truncated to a stamp on mobile because
+            the long mono string with letter-spacing 0.22em + nowrap
+            blows past the viewport edge on narrow screens. */}
+        <p className="mt-3 type-label-stamp hidden md:inline-flex">{t("currentlyBand")}</p>
+        <p className="mt-3 type-label-stamp md:hidden">{t("currentlyBandShort")}</p>
       </header>
 
       <ul className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6">
@@ -87,14 +92,18 @@ export function ObjectGrid() {
           const cssVars = { "--tile-spot": SPOT_VAR[tile.spot] } as CSSProperties;
           return (
             <li key={tile.key} className="list-none">
-              <figure
-                className="group relative flex h-full flex-col gap-3 border-[1.5px] border-ink bg-paper-tint p-4 transition-transform duration-[280ms] ease-out hover:rotate-[-1.5deg] md:p-5"
+              {/* TileFigure adds `data-active=true` on coarse-pointer
+                  viewport-entry. The data-[active=true]:* variants
+                  below mirror the hover: variants so the same
+                  choreography fires on scroll-into-view on mobile. */}
+              <TileFigure
+                className="group relative flex h-full flex-col gap-3 border-[1.5px] border-ink bg-paper-tint p-4 transition-transform duration-[280ms] ease-out hover:rotate-[-1.5deg] data-[active=true]:rotate-[-1.5deg] md:p-5"
                 style={cssVars}
               >
                 {/* Hover-flood: spot-color sweeps from top-left corner. */}
                 <span
                   aria-hidden="true"
-                  className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-[280ms] ease-out group-hover:opacity-30"
+                  className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-[280ms] ease-out group-hover:opacity-30 group-data-[active=true]:opacity-30"
                   style={{
                     background:
                       "radial-gradient(circle at 0% 0%, var(--tile-spot) 0%, transparent 65%)",
@@ -103,13 +112,13 @@ export function ObjectGrid() {
                 <div className="relative flex h-[6.25rem] items-center justify-center">
                   <TileStamp k={tile.key} spotVar={SPOT_VAR[tile.spot]} />
                 </div>
-                <figcaption className="relative mt-1 transition-transform duration-[280ms] ease-out group-hover:translate-x-[2px]">
+                <figcaption className="relative mt-1 transition-transform duration-[280ms] ease-out group-hover:translate-x-[2px] group-data-[active=true]:translate-x-[2px]">
                   <p className="type-label-stamp inline-flex">{t(`tiles.${tile.i18nKey}.name`)}</p>
                   <p className="mt-2 type-body-sm text-ink-soft">
                     {t(`tiles.${tile.i18nKey}.caption`)}
                   </p>
                 </figcaption>
-              </figure>
+              </TileFigure>
             </li>
           );
         })}

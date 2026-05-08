@@ -62,6 +62,11 @@ export function Nav() {
   const router = useRouter();
   const startTransition = useViewTransition();
   const [activeSection, setActiveSection] = useState<string | null>(null);
+  // Mobile-only: locale switcher starts collapsed (current locale only).
+  // Desktop ignores this via md:* overrides. Resets on every mount, which
+  // means a locale-switch (full page reload) lands the user back at
+  // collapsed — exactly the requested cycle.
+  const [localeOpen, setLocaleOpen] = useState(false);
 
   // Hash-anchors only resolve on the home route, since the sections live
   // there. On sub-routes (/playground/[slug], /impressum, /datenschutz)
@@ -177,10 +182,18 @@ export function Nav() {
             })}
           </ul>
 
-          {/* TODO(phase 3): `usePathname` strips query + hash. Once real
-              in-page sections exist, compose `href` from `usePathname()`
-              + `window.location.hash` so `#work`-anchored users don't
-              lose position when switching locale. */}
+          {/* Locale switcher.
+              Desktop: all 4 locales visible inline (md:* overrides win).
+              Mobile: only the current locale is visible; click expands
+              the inactive ones inline, growing the right cluster
+              leftward (the burger sibling shifts left via flex reflow
+              over the same 300ms window). After locale-switch the
+              router replaces + the page reloads, resetting state to
+              collapsed automatically.
+              TODO: `usePathname` strips query + hash. If `#work`-anchored
+              users switch locale they lose position; compose href from
+              `usePathname()` + `window.location.hash` once that's a
+              real complaint. */}
           <ul aria-label={t("localeSwitcher.ariaLabel")} className="flex items-center gap-1.5">
             {routing.locales.map((locale) => {
               const isActive = locale === currentLocale;
@@ -188,14 +201,36 @@ export function Nav() {
               const label = isActive
                 ? t("localeSwitcher.currentLabel", { name })
                 : t("localeSwitcher.switchLabel", { name });
+              const visible = isActive || localeOpen;
 
               return (
-                <li key={locale}>
+                <li
+                  key={locale}
+                  // Mobile: max-w + opacity transition collapses inactive
+                  // items. Desktop: md:max-w-none + md:opacity-100 force
+                  // all visible regardless of state.
+                  className={`overflow-hidden transition-[max-width,opacity] duration-300 ease-out md:max-w-none md:opacity-100 ${
+                    visible ? "max-w-[3rem] opacity-100" : "max-w-0 opacity-0"
+                  }`}
+                  aria-hidden={visible ? undefined : true}
+                >
                   <button
                     type="button"
-                    onClick={() => startTransition(() => router.replace(pathname, { locale }))}
+                    onClick={() => {
+                      // Click on current = toggle expand (mobile-only
+                      // affordance; harmless on desktop where CSS
+                      // overrides the visibility). Click on inactive
+                      // switches locale and reloads the page.
+                      if (isActive) {
+                        setLocaleOpen((v) => !v);
+                        return;
+                      }
+                      startTransition(() => router.replace(pathname, { locale }));
+                    }}
                     aria-current={isActive ? "true" : undefined}
+                    aria-expanded={isActive ? localeOpen : undefined}
                     aria-label={label}
+                    tabIndex={visible ? 0 : -1}
                     className={`type-label no-underline transition-colors ${
                       isActive ? "text-ink" : "text-ink-muted hover:text-ink-soft"
                     }`}

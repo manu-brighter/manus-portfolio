@@ -148,6 +148,9 @@ function InkDropStudioCanvas() {
       splatRadius: params["Splat Radius"] * BASE_SPLAT_RADIUS,
     });
     orchestrator.setAmbientEnabled(false);
+    // Studio doesn't trigger ambient (it's an interactive canvas) but
+    // still needs the warmup gate open so step() runs.
+    orchestrator.start();
     // Hover-trail uses the orchestrator's built-in auto-pointer-splat
     // with the rotating Riso-spot cycle (override stays null). Click-
     // burst + bomb layer additional splats on top via injectSplat().

@@ -70,6 +70,9 @@ export function TypeAsFluidMiniSim({ paused }: Props) {
       confinement: 8,
     });
     orchestrator.setAmbientEnabled(false);
+    // Open the warmup gate so step() runs — TypeAsFluid drives the
+    // dye field via TextStamper, no ambient kick needed.
+    orchestrator.start();
     orchestratorRef.current = orchestrator;
     stamperRef.current = new TextStamper(gl, orchestrator);
 

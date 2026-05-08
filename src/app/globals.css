@@ -105,6 +105,20 @@
     }
   }
 
+  /* Route-scoped scrollbar suppression — added by `<HideScrollbar />`
+     in /playground/[slug], /impressum, /datenschutz layouts. Higher
+     specificity than the reduced-motion restore above so those routes
+     stay scrollbar-free for AT users too. The pages have no horizontal
+     scroll affordance to communicate (playground is fixed-frame; legal
+     pages are short prose) so the indicator just adds visual noise. */
+  html.scrollbar-hidden {
+    scrollbar-width: none;
+  }
+
+  html.scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+  }
+
   body {
     min-height: 100dvh;
   }

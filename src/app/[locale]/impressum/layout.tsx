@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { SceneVisibilityGate } from "@/components/playground/SceneVisibilityGate";
+import { HideScrollbar } from "@/components/ui/HideScrollbar";
 
 /**
  * Legal-page (Impressum) layout.
@@ -20,6 +21,7 @@ export default function ImpressumLayout({ children }: { children: ReactNode }) {
   return (
     <>
       <SceneVisibilityGate />
+      <HideScrollbar />
       {children}
     </>
   );

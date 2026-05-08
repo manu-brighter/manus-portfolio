@@ -122,6 +122,34 @@ export function WorkCard(props: WorkCardProps) {
 
   const [hovered, setHovered] = useState(false);
 
+  // Coarse-pointer (mobile/touch): the pills cascade fires on viewport
+  // entry instead of hover. The cursor-driven parallax + magnetic and
+  // the ambient splat dispatch are skipped entirely (no cursor + sim
+  // interaction is mobile-disabled per Phase 13 deviations).
+  const [isCoarse] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches,
+  );
+
+  useEffect(() => {
+    if (!isCoarse || reducedMotion) return;
+    const root = rootRef.current;
+    if (!root) return;
+    // rootMargin -25/0/-25 carves out the central 50% horizontal band
+    // of the viewport. Element fires `isIntersecting` only when its box
+    // overlaps that band — so the hover-replacement animation kicks in
+    // when the card is mid-screen, not the moment it peeks in.
+    const obs = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (!entry) return;
+        setHovered(entry.isIntersecting);
+      },
+      { threshold: 0, rootMargin: "-25% 0px -25% 0px" },
+    );
+    obs.observe(root);
+    return () => obs.disconnect();
+  }, [isCoarse, reducedMotion]);
+
   // Hover-enter / hover-leave choreography. GSAP timeline is rebuilt
   // each direction so we can reverse with the same easing.
   useEffect(() => {
@@ -152,8 +180,9 @@ export function WorkCard(props: WorkCardProps) {
 
   // Pointer-driven magnetic + parallax. Bound only while hovered to
   // avoid global listeners burning cycles when the user is far away.
+  // Skipped on coarse-pointer (no cursor to track).
   useEffect(() => {
-    if (reducedMotion || !hovered) return;
+    if (reducedMotion || !hovered || isCoarse) return;
     const card = cardRef.current;
     const backing = backingRef.current;
     const mediaEl = mediaRef.current;
@@ -219,7 +248,7 @@ export function WorkCard(props: WorkCardProps) {
         ease: "power3.out",
       });
     };
-  }, [hovered, offsetY, reducedMotion]);
+  }, [hovered, offsetY, reducedMotion, isCoarse]);
 
   // Set initial offsetY without animation (positions card pre-hover)
   useEffect(() => {
@@ -239,9 +268,11 @@ export function WorkCard(props: WorkCardProps) {
   // Hover-enter: fire one ambient splat in the card's color. Lands in
   // the FluidOrchestrator queue; if hero is out of viewport it's
   // discarded silently. Cheap pulse for "card is alive".
+  // Coarse-pointer skips this — sim interaction is mobile-disabled and
+  // the IO above already handles the visual "wake up" via setHovered.
   const onPointerEnter = () => {
     setHovered(true);
-    if (reducedMotion) return;
+    if (reducedMotion || isCoarse) return;
     const card = cardRef.current;
     if (!card) return;
     const rect = card.getBoundingClientRect();

@@ -35,8 +35,13 @@ export function ExperimentChrome({ i18nKey, children, toolbar }: ExperimentChrom
 
       {/* Chrome layer */}
       <div className="pointer-events-none absolute inset-0 z-10">
-        {/* Top-left: back + title */}
-        <div className="container-page absolute top-6 left-0 right-0 flex items-start justify-between gap-6">
+        {/* Top-left: back + title.
+            Mobile uses top-20 to clear the sticky navbar (which extends
+            from y=0 to ~64px on mobile); desktop keeps top-6.
+            Caption renders inline below the title on mobile to free
+            the bottom edge for experiment-specific controls (Ink Drop's
+            ButtonRow, Type-as-Fluid's input bar). */}
+        <div className="container-page absolute top-20 left-0 right-0 flex items-start justify-between gap-6 md:top-6">
           <div className="pointer-events-auto flex flex-col gap-1">
             <Link
               href="/#playground"
@@ -48,12 +53,15 @@ export function ExperimentChrome({ i18nKey, children, toolbar }: ExperimentChrom
             <h1 className="type-h2 mt-3 text-ink" style={{ fontStyle: "italic" }}>
               {t("title")}
             </h1>
+            <p className="type-body-sm mt-3 max-w-[36ch] text-ink-soft md:hidden">{t("caption")}</p>
           </div>
           {toolbar ? <div className="pointer-events-auto">{toolbar}</div> : null}
         </div>
 
-        {/* Bottom-left: caption */}
-        <div className="container-page absolute bottom-6 left-0 right-0">
+        {/* Bottom-left: caption — desktop only. Mobile renders the
+            caption inline below the title (above) since the bottom
+            edge is occupied by experiment controls on small screens. */}
+        <div className="container-page absolute bottom-6 left-0 right-0 hidden md:block">
           <p className="type-body-sm max-w-[60ch] text-ink-soft">{t("caption")}</p>
         </div>
       </div>

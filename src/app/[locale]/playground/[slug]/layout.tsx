@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { SceneVisibilityGate } from "@/components/playground/SceneVisibilityGate";
+import { HideScrollbar } from "@/components/ui/HideScrollbar";
 
 /**
  * Playground experiment layout.
@@ -19,6 +20,7 @@ export default function PlaygroundExperimentLayout({ children }: { children: Rea
   return (
     <>
       <SceneVisibilityGate />
+      <HideScrollbar />
       {children}
     </>
   );
