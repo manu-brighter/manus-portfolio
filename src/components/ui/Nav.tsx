@@ -74,11 +74,16 @@ export function Nav() {
   // `tabIndex={-1}` + `aria-hidden=true` are JS-driven and would
   // otherwise lock keyboard / SR users out of the inactive locales
   // until they clicked the active one.
-  const [isDesktop, setIsDesktop] = useState(
-    () => typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches,
-  );
+  //
+  // Initial state must match SSR (`false` — no window). The effect
+  // below flips it to the real value after hydration, so on desktop
+  // there's a brief one-frame window where inactive locale buttons
+  // are tabIndex=-1. Acceptable — keyboard users only hit it in the
+  // very first frame, before the effect can fire.
+  const [isDesktop, setIsDesktop] = useState(false);
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 768px)");
+    setIsDesktop(mq.matches);
     const onChange = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
     mq.addEventListener("change", onChange);
     return () => mq.removeEventListener("change", onChange);
