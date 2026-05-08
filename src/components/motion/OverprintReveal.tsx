@@ -259,64 +259,99 @@ export function OverprintReveal({
   // Ink carries layout (document flow); ghosts are absolutely positioned
   // over it so the row's width is authored by ink alone and doesn't
   // jitter during the animation.
+  //
+  // Word grouping: consecutive non-whitespace chars are wrapped in an
+  // `inline-block` word atom so the browser treats each word as a
+  // single unit for line-breaking. Without this, every per-char
+  // inline-block became its own break opportunity and a long string
+  // could wrap *inside* a word. Whitespace between words renders as a
+  // plain inline span containing a regular space \u2014 the break
+  // opportunity now lives between word atoms, not inside them.
+  type WordItem = { kind: "word"; chars: typeof chars; key: string };
+  type WsItem = { kind: "ws"; char: string; key: string };
+  const items: (WordItem | WsItem)[] = [];
+  let wordBuffer: typeof chars = [];
+  for (const r of chars) {
+    if (r.isWhitespace) {
+      if (wordBuffer.length > 0) {
+        const first = wordBuffer[0];
+        if (first) {
+          items.push({ kind: "word", chars: wordBuffer, key: `${uid}-w-${first.index}` });
+        }
+        wordBuffer = [];
+      }
+      items.push({ kind: "ws", char: r.char, key: `${uid}-s-${r.index}` });
+    } else {
+      wordBuffer.push(r);
+    }
+  }
+  if (wordBuffer.length > 0) {
+    const first = wordBuffer[0];
+    if (first) {
+      items.push({ kind: "word", chars: wordBuffer, key: `${uid}-w-${first.index}` });
+    }
+  }
+
   return (
     <span ref={rootRef} className={className} style={style}>
       <span className="sr-only">{text}</span>
       <span aria-hidden="true" className="inline">
-        {chars.map((r) => {
-          const key = `${uid}-${r.index}`;
-          if (r.isWhitespace) {
-            return (
-              <span key={key} className="whitespace-pre">
-                {"\u00A0"}
-              </span>
-            );
+        {items.map((item) => {
+          if (item.kind === "ws") {
+            return <span key={item.key}>{item.char}</span>;
           }
-
           return (
-            <span key={key} className="relative inline-block" style={{ overflow: "visible" }}>
-              {/* Ink layer — in document flow, carries accessible name. */}
-              <span
-                data-layer="ink"
-                data-char={r.char}
-                data-index={r.index}
-                className="relative z-10 block text-ink"
-                style={{ willChange: "opacity" }}
-              >
-                {r.char}
-              </span>
-              {/* Rose ghost — absolutely positioned over the ink glyph. */}
-              <span
-                data-layer="rose"
-                data-char={r.char}
-                data-index={r.index}
-                aria-hidden="true"
-                className="absolute inset-0 block"
-                style={{
-                  color: "var(--color-spot-rose)",
-                  mixBlendMode: "multiply",
-                  pointerEvents: "none",
-                  willChange: "transform, opacity",
-                }}
-              >
-                {r.char}
-              </span>
-              {/* Mint ghost — absolutely positioned over the ink glyph. */}
-              <span
-                data-layer="mint"
-                data-char={r.char}
-                data-index={r.index}
-                aria-hidden="true"
-                className="absolute inset-0 block"
-                style={{
-                  color: "var(--color-spot-mint)",
-                  mixBlendMode: "multiply",
-                  pointerEvents: "none",
-                  willChange: "transform, opacity",
-                }}
-              >
-                {r.char}
-              </span>
+            <span key={item.key} className="inline-block">
+              {item.chars.map((r) => (
+                <span
+                  key={`${uid}-${r.index}`}
+                  className="relative inline-block"
+                  style={{ overflow: "visible" }}
+                >
+                  {/* Ink layer — in document flow, carries accessible name. */}
+                  <span
+                    data-layer="ink"
+                    data-char={r.char}
+                    data-index={r.index}
+                    className="relative z-10 block text-ink"
+                    style={{ willChange: "opacity" }}
+                  >
+                    {r.char}
+                  </span>
+                  {/* Rose ghost — absolutely positioned over the ink glyph. */}
+                  <span
+                    data-layer="rose"
+                    data-char={r.char}
+                    data-index={r.index}
+                    aria-hidden="true"
+                    className="absolute inset-0 block"
+                    style={{
+                      color: "var(--color-spot-rose)",
+                      mixBlendMode: "multiply",
+                      pointerEvents: "none",
+                      willChange: "transform, opacity",
+                    }}
+                  >
+                    {r.char}
+                  </span>
+                  {/* Mint ghost — absolutely positioned over the ink glyph. */}
+                  <span
+                    data-layer="mint"
+                    data-char={r.char}
+                    data-index={r.index}
+                    aria-hidden="true"
+                    className="absolute inset-0 block"
+                    style={{
+                      color: "var(--color-spot-mint)",
+                      mixBlendMode: "multiply",
+                      pointerEvents: "none",
+                      willChange: "transform, opacity",
+                    }}
+                  >
+                    {r.char}
+                  </span>
+                </span>
+              ))}
             </span>
           );
         })}
