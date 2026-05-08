@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { type MouseEvent, useEffect, useState } from "react";
+import { type MouseEvent, useEffect, useRef, useState } from "react";
 import { useViewTransition } from "@/components/motion/useViewTransition";
 import { NavMobileMenu } from "@/components/ui/NavMobileMenu";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
@@ -62,32 +62,35 @@ export function Nav() {
   const router = useRouter();
   const startTransition = useViewTransition();
   const [activeSection, setActiveSection] = useState<string | null>(null);
-  // Mobile-only: locale switcher starts collapsed (current locale only).
-  // Desktop ignores this via md:* overrides. Resets on every mount, which
-  // means a locale-switch (full page reload) lands the user back at
-  // collapsed — exactly the requested cycle.
+  // Locale switcher starts collapsed (current locale only) on every
+  // viewport. Click on the active locale expands; click on an inactive
+  // locale switches (which reloads the page and resets state); click
+  // outside or Esc collapses. Desktop and mobile share the same UX —
+  // the previous md:* CSS-overrides + isDesktop matchMedia escape hatch
+  // were dropped in favour of unified JS-driven visibility.
   const [localeOpen, setLocaleOpen] = useState(false);
-  // Desktop matches md: breakpoint — used to force `visible = true` on
-  // the inactive locale buttons so keyboard / AT users on desktop can
-  // still tab to them. The CSS `md:max-w-none md:opacity-100` shows the
-  // buttons visually on desktop regardless of `localeOpen`, but
-  // `tabIndex={-1}` + `aria-hidden=true` are JS-driven and would
-  // otherwise lock keyboard / SR users out of the inactive locales
-  // until they clicked the active one.
-  //
-  // Initial state must match SSR (`false` — no window). The effect
-  // below flips it to the real value after hydration, so on desktop
-  // there's a brief one-frame window where inactive locale buttons
-  // are tabIndex=-1. Acceptable — keyboard users only hit it in the
-  // very first frame, before the effect can fire.
-  const [isDesktop, setIsDesktop] = useState(false);
+  const localeSwitcherRef = useRef<HTMLUListElement>(null);
+
+  // Click outside / Esc closes the open switcher. Listeners only attach
+  // while open so we don't pay for them in the resting state.
   useEffect(() => {
-    const mq = window.matchMedia("(min-width: 768px)");
-    setIsDesktop(mq.matches);
-    const onChange = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
+    if (!localeOpen) return;
+    const onPointerDown = (e: PointerEvent) => {
+      const root = localeSwitcherRef.current;
+      if (!root) return;
+      if (e.target instanceof Node && root.contains(e.target)) return;
+      setLocaleOpen(false);
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLocaleOpen(false);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [localeOpen]);
 
   // Hash-anchors only resolve on the home route, since the sections live
   // there. On sub-routes (/playground/[slug], /impressum, /datenschutz)
@@ -203,34 +206,35 @@ export function Nav() {
             })}
           </ul>
 
-          {/* Locale switcher.
-              Desktop: all 4 locales visible inline (md:* overrides win).
-              Mobile: only the current locale is visible; click expands
-              the inactive ones inline, growing the right cluster
-              leftward (the burger sibling shifts left via flex reflow
-              over the same 300ms window). After locale-switch the
-              router replaces + the page reloads, resetting state to
-              collapsed automatically.
-              TODO: `usePathname` strips query + hash. If `#work`-anchored
-              users switch locale they lose position; compose href from
-              `usePathname()` + `window.location.hash` once that's a
-              real complaint. */}
-          <ul aria-label={t("localeSwitcher.ariaLabel")} className="flex items-center gap-1.5">
+          {/* Locale switcher — unified mobile + desktop UX.
+              Closed state: only the current locale is visible (single
+              tab stop, only it is announced). Click on it expands the
+              inactive locales inline with a max-width transition;
+              clicking outside, hitting Esc, or clicking the active
+              locale again collapses. Click on an inactive locale
+              switches via router.replace which reloads the page and
+              naturally lands the user back at the collapsed state.
+              TODO: `usePathname` strips query + hash. If `#work`-
+              anchored users switch locale they lose position; compose
+              href from `usePathname()` + `window.location.hash` once
+              that's a real complaint. */}
+          <ul
+            ref={localeSwitcherRef}
+            aria-label={t("localeSwitcher.ariaLabel")}
+            className="flex items-center gap-1.5"
+          >
             {routing.locales.map((locale) => {
               const isActive = locale === currentLocale;
               const name = t(`localeSwitcher.locales.${locale satisfies Locale}`);
               const label = isActive
                 ? t("localeSwitcher.currentLabel", { name })
                 : t("localeSwitcher.switchLabel", { name });
-              const visible = isActive || localeOpen || isDesktop;
+              const visible = isActive || localeOpen;
 
               return (
                 <li
                   key={locale}
-                  // Mobile: max-w + opacity transition collapses inactive
-                  // items. Desktop: md:max-w-none + md:opacity-100 force
-                  // all visible regardless of state.
-                  className={`overflow-hidden transition-[max-width,opacity] duration-300 ease-out md:max-w-none md:opacity-100 ${
+                  className={`overflow-hidden transition-[max-width,opacity] duration-300 ease-out ${
                     visible ? "max-w-[3rem] opacity-100" : "max-w-0 opacity-0"
                   }`}
                   aria-hidden={visible ? undefined : true}
@@ -238,10 +242,8 @@ export function Nav() {
                   <button
                     type="button"
                     onClick={() => {
-                      // Click on current = toggle expand (mobile-only
-                      // affordance; harmless on desktop where CSS
-                      // overrides the visibility). Click on inactive
-                      // switches locale and reloads the page.
+                      // Click on current = toggle expand. Click on
+                      // inactive switches locale + reloads.
                       if (isActive) {
                         setLocaleOpen((v) => !v);
                         return;
