@@ -118,7 +118,7 @@
       main {
         position: relative;
         z-index: 1;
-        max-width: 640px;
+        max-width: 720px;
         width: 100%;
         text-align: left;
       }
@@ -166,6 +166,12 @@
         text-shadow: none;
         color: var(--ink-muted);
         margin-top: 1.2rem;
+        /* Keep "Currently re-inking." on a single line — without this the
+           hyphen in "re-inking" gets picked as a soft-break opportunity
+           on desktop where the line edges close to main's max-width.
+           Combined with the non-breaking hyphen in the markup as a
+           belt-and-suspenders. */
+        white-space: nowrap;
       }
 
       .lede {
@@ -194,7 +200,7 @@
         position: relative;
         z-index: 1;
         margin-top: 2rem;
-        max-width: 640px;
+        max-width: 720px;
         width: 100%;
         display: flex;
         flex-wrap: wrap;
@@ -252,7 +258,7 @@
         <span class="stamp">Status · 503 · Off the press</span>
       </div>
       <h1>
-        Off the press.<span class="small">Currently re-inking.</span>
+        Off the press.<span class="small">Currently re&#8209;inking.</span>
       </h1>
       <p class="lede">
         Site's down for a moment. The Riso plates drifted, and someone has to

@@ -284,7 +284,11 @@ export function Photography() {
       {/* Slot 2 · Koenigsegg · right-60% with left meta-text */}
       <div className="container-page grid-12 mb-32 items-center gap-y-8 md:mb-40">
         <div className="col-span-12 md:col-span-4 md:pr-8">
-          <p className="type-label-stamp mb-6 inline-flex">
+          {/* Hidden on mobile: the photo's own figcaption already
+              shows "02 / 5" — duplicating the index above the title
+              text reads as redundant on a single column. Desktop keeps
+              it as the editorial pair-stamp. */}
+          <p className="type-label-stamp mb-6 hidden md:inline-flex">
             {String(2).padStart(2, "0")} / {SLIDES.length}
           </p>
           <h3 className="type-h2 text-ink" style={{ fontStyle: "italic" }}>
@@ -310,7 +314,9 @@ export function Photography() {
           <PhotoFrame slide={SLIDES[3]} index={3} total={SLIDES.length} />
         </div>
         <div className="col-span-12 md:col-span-4 md:col-start-9 md:pl-8">
-          <p className="type-label-stamp mb-6 inline-flex">
+          {/* Hidden on mobile (see Slot 2 above) — photo's figcaption
+              already carries "04 / 5". */}
+          <p className="type-label-stamp mb-6 hidden md:inline-flex">
             {String(4).padStart(2, "0")} / {SLIDES.length}
           </p>
           <h3 className="type-h2 text-ink" style={{ fontStyle: "italic" }}>

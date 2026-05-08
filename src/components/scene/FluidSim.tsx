@@ -1,7 +1,7 @@
 "use client";
 
 import { useThree } from "@react-three/fiber";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { isLoaderComplete } from "@/components/ui/Loader";
 import { subscribeToSplats } from "@/lib/fluidBus";
 import type { TierConfig } from "@/lib/gpu";
@@ -32,6 +32,18 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
   const onFrametimeRef = useRef(onFrametime);
   onFrametimeRef.current = onFrametime;
 
+  // Coarse-pointer (mobile/touch) disables sim interactivity. The hero
+  // showcase moves to playgrounds; on the long-scroll only ambient
+  // wandering points run. Pointer listeners aren't attached at all so
+  // touch-scroll doesn't fight pointermove polyfills, and the orchestrator
+  // is told explicitly via setPointerSplatEnabled(false) as a safety net.
+  // Lazy-init useState so the value is computed synchronously during the
+  // first render — must be available before the orchestrator init effect
+  // reads it on the same commit.
+  const [isCoarsePointer] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches,
+  );
+
   // Mount + config-change: init orchestrator, dispose on cleanup.
   // The `config` dep handles the auto-tuner's tier swap — first effect
   // cleanup (dispose) runs before the next mount (init with new config),
@@ -46,13 +58,16 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
 
     const orchestrator = new FluidOrchestrator();
     orchestrator.init(context, config);
+    if (isCoarsePointer) {
+      orchestrator.setPointerSplatEnabled(false);
+    }
     orchestratorRef.current = orchestrator;
 
     return () => {
       orchestrator.dispose();
       orchestratorRef.current = null;
     };
-  }, [gl, onGLReady, config]);
+  }, [gl, onGLReady, config, isCoarsePointer]);
 
   useEffect(() => {
     const dpr = gl.getPixelRatio();
@@ -63,6 +78,13 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
   // gl.finish() readback so SceneProvider's tier auto-tuner gets a
   // real GPU frametime sample; outside that window the loop is
   // overhead-free.
+  //
+  // step() is always called so render-toon paints paper-color + grain
+  // (the orchestrator short-circuits sim passes internally while the
+  // warmup gate is closed — see `step()`). The measuring path however
+  // is gated on `isStarted()` because frametime samples taken during
+  // the warmup window only capture render-toon (~1ms) and would
+  // mis-tier first-time visitors as `high`.
   useEffect(() => {
     return subscribe((deltaMs, elapsedMs) => {
       const orchestrator = orchestratorRef.current;
@@ -73,7 +95,7 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
 
       orchestrator.step(dt, elapsedMs, pointerRef.current);
 
-      if (measuringRef.current) {
+      if (measuringRef.current && orchestrator.isStarted()) {
         const gl2 = gl.getContext() as WebGL2RenderingContext;
         gl2.finish();
         onFrametimeRef.current(performance.now() - t0);
@@ -86,8 +108,14 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
   }, [gl]);
 
   // Pointer events on document — canvas is behind HTML content,
-  // so we listen globally to track the cursor everywhere.
+  // so we listen globally to track the cursor everywhere. Skipped
+  // entirely on coarse-pointer: iOS Safari fires pointermove during
+  // momentum scroll and each event runs getBoundingClientRect, which
+  // contributed to the scroll-time stutter Manuel reported. Mobile
+  // sim is ambient-only; interaction lives in the playground routes.
   useEffect(() => {
+    if (isCoarsePointer) return;
+
     const canvas = gl.domElement;
 
     const onMove = (e: PointerEvent) => {
@@ -118,20 +146,18 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
       document.removeEventListener("pointerdown", onDown);
       document.removeEventListener("pointerup", onUp);
     };
-  }, [gl]);
+  }, [gl, isCoarsePointer]);
 
-  // Kick ambient motion AFTER the hero reveal — the hero `OverprintReveal`
-  // has a 350ms loader-settle window plus ~1.1s of reveal cadence (per-
-  // char stagger + ink fade-in), so we wait ~1500ms after the loader
-  // before the 3 ambient wandering points appear. That preserves the
-  // start-up dramaturgy (loader → hero text settles → fluid wakes up)
-  // and stops the simultaneous "everything moves at once" jank that
-  // smothered the smooth open.
+  // Kick ambient motion shortly after FluidSim mounts. The long wait
+  // (matching the loader+hero-reveal cadence) lives in SceneProvider's
+  // deferred-mount path — by the time FluidSim is alive, the hero is
+  // done and the user is looking at static paper. This residual delay
+  // covers orchestrator init + first frame settle.
   //
   // Guard against race: if the loader already fired before this
   // component mounted, schedule immediately (with the same delay).
   useEffect(() => {
-    const HERO_REVEAL_MS = 1500;
+    const HERO_REVEAL_MS = 100;
     let timer: number | null = null;
 
     const scheduleAmbient = () => {

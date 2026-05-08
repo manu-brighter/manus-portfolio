@@ -6,15 +6,19 @@
  *
  * Parent must have `position: relative` (or use the `.plate-corners`
  * helper class). The marks are absolutely positioned to the parent's
- * 4 corners with a 12px outset so they sit just outside the visible
- * frame.
+ * 4 corners with a 6px outset so they sit just outside the visible
+ * frame on desktop. On mobile the outset is dropped (marks sit at
+ * the edge instead of poking past it) — sections like About don't
+ * have a max-width on small viewports, so a -6px outset on the right
+ * mark would extend past the viewport edge and create a horizontal
+ * scroll gutter that html's `overflow-x: clip` doesn't always catch
+ * reliably on mobile Safari.
  *
  * Decorative — `aria-hidden`. Pure SVG, no JS, no animation.
  */
 
 const SIZE = 12;
 const STROKE = 1.5;
-const OUTSET = 6; // half the size, places the centre at the corner
 
 function Cross() {
   return (
@@ -53,29 +57,25 @@ export function PlateCornerMarks() {
     <>
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute"
-        style={{ top: -OUTSET, left: -OUTSET }}
+        className="pointer-events-none absolute top-0 left-0 md:-top-[6px] md:-left-[6px]"
       >
         <Cross />
       </span>
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute"
-        style={{ top: -OUTSET, right: -OUTSET }}
+        className="pointer-events-none absolute top-0 right-0 md:-top-[6px] md:-right-[6px]"
       >
         <Cross />
       </span>
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute"
-        style={{ bottom: -OUTSET, left: -OUTSET }}
+        className="pointer-events-none absolute bottom-0 left-0 md:-bottom-[6px] md:-left-[6px]"
       >
         <Cross />
       </span>
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute"
-        style={{ bottom: -OUTSET, right: -OUTSET }}
+        className="pointer-events-none absolute bottom-0 right-0 md:-bottom-[6px] md:-right-[6px]"
       >
         <Cross />
       </span>

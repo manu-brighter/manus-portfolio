@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { type MouseEvent, useEffect, useState } from "react";
+import { type MouseEvent, useEffect, useRef, useState } from "react";
 import { useViewTransition } from "@/components/motion/useViewTransition";
 import { NavMobileMenu } from "@/components/ui/NavMobileMenu";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
@@ -62,6 +62,35 @@ export function Nav() {
   const router = useRouter();
   const startTransition = useViewTransition();
   const [activeSection, setActiveSection] = useState<string | null>(null);
+  // Locale switcher starts collapsed (current locale only) on every
+  // viewport. Click on the active locale expands; click on an inactive
+  // locale switches (which reloads the page and resets state); click
+  // outside or Esc collapses. Desktop and mobile share the same UX —
+  // the previous md:* CSS-overrides + isDesktop matchMedia escape hatch
+  // were dropped in favour of unified JS-driven visibility.
+  const [localeOpen, setLocaleOpen] = useState(false);
+  const localeSwitcherRef = useRef<HTMLUListElement>(null);
+
+  // Click outside / Esc closes the open switcher. Listeners only attach
+  // while open so we don't pay for them in the resting state.
+  useEffect(() => {
+    if (!localeOpen) return;
+    const onPointerDown = (e: PointerEvent) => {
+      const root = localeSwitcherRef.current;
+      if (!root) return;
+      if (e.target instanceof Node && root.contains(e.target)) return;
+      setLocaleOpen(false);
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLocaleOpen(false);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [localeOpen]);
 
   // Hash-anchors only resolve on the home route, since the sections live
   // there. On sub-routes (/playground/[slug], /impressum, /datenschutz)
@@ -177,25 +206,54 @@ export function Nav() {
             })}
           </ul>
 
-          {/* TODO(phase 3): `usePathname` strips query + hash. Once real
-              in-page sections exist, compose `href` from `usePathname()`
-              + `window.location.hash` so `#work`-anchored users don't
-              lose position when switching locale. */}
-          <ul aria-label={t("localeSwitcher.ariaLabel")} className="flex items-center gap-1.5">
+          {/* Locale switcher — unified mobile + desktop UX.
+              Closed state: only the current locale is visible (single
+              tab stop, only it is announced). Click on it expands the
+              inactive locales inline with a max-width transition;
+              clicking outside, hitting Esc, or clicking the active
+              locale again collapses. Click on an inactive locale
+              switches via router.replace which reloads the page and
+              naturally lands the user back at the collapsed state.
+              TODO: `usePathname` strips query + hash. If `#work`-
+              anchored users switch locale they lose position; compose
+              href from `usePathname()` + `window.location.hash` once
+              that's a real complaint. */}
+          <ul
+            ref={localeSwitcherRef}
+            aria-label={t("localeSwitcher.ariaLabel")}
+            className="flex items-center gap-1.5"
+          >
             {routing.locales.map((locale) => {
               const isActive = locale === currentLocale;
               const name = t(`localeSwitcher.locales.${locale satisfies Locale}`);
               const label = isActive
                 ? t("localeSwitcher.currentLabel", { name })
                 : t("localeSwitcher.switchLabel", { name });
+              const visible = isActive || localeOpen;
 
               return (
-                <li key={locale}>
+                <li
+                  key={locale}
+                  className={`overflow-hidden transition-[max-width,opacity] duration-300 ease-out ${
+                    visible ? "max-w-[3rem] opacity-100" : "max-w-0 opacity-0"
+                  }`}
+                  aria-hidden={visible ? undefined : true}
+                >
                   <button
                     type="button"
-                    onClick={() => startTransition(() => router.replace(pathname, { locale }))}
+                    onClick={() => {
+                      // Click on current = toggle expand. Click on
+                      // inactive switches locale + reloads.
+                      if (isActive) {
+                        setLocaleOpen((v) => !v);
+                        return;
+                      }
+                      startTransition(() => router.replace(pathname, { locale }));
+                    }}
                     aria-current={isActive ? "true" : undefined}
+                    aria-expanded={isActive ? localeOpen : undefined}
                     aria-label={label}
+                    tabIndex={visible ? 0 : -1}
                     className={`type-label no-underline transition-colors ${
                       isActive ? "text-ink" : "text-ink-muted hover:text-ink-soft"
                     }`}

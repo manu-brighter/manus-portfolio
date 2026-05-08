@@ -5,6 +5,7 @@ import { useGPUCapability } from "@/hooks/useGPUCapability";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import type { GPUTier, TierConfig } from "@/lib/gpu";
 import { useSceneVisibility } from "@/lib/sceneVisibility";
+import { isLoaderComplete } from "../ui/Loader";
 import { SceneCanvas } from "./Canvas";
 import { FluidSim } from "./FluidSim";
 import { StaticFallback } from "./StaticFallback";
@@ -70,14 +71,57 @@ export function SceneProvider({ children }: SceneProviderProps) {
   // without competing for GPU time. Stays false on the home long-scroll.
   const sceneHidden = useSceneVisibility((s) => s.hidden);
 
+  // Universal SceneCanvas defer: the WebGL2 context creation, 9 shader
+  // program compilations, FBO allocation, and the first per-frame
+  // render-toon dispatch all compete with the loader animation + hero
+  // reveal for GPU time on every device — mobile especially, but also
+  // measurable on mid-range desktop GPUs. The body bg is already
+  // `--color-paper`, identical to what render-toon paints with empty
+  // dye, so deferring the mount has zero visual cost: no flash when
+  // the canvas appears later.
+  //
+  // Two defer windows:
+  //   • FRESH_LOAD_DEFER (1700ms) — loader played, ambient should land
+  //     after the OverprintReveal hero choreography completes
+  //   • RETURNING_DEFER (200ms) — loader skipped (sessionStorage flag
+  //     fires loader-complete immediately on locale-switch / repeat
+  //     visit). Just enough time for hydration to settle.
+  const [canvasMounted, setCanvasMounted] = useState(false);
+
+  useEffect(() => {
+    if (canvasMounted) return;
+    const FRESH_LOAD_DEFER = 1700;
+    const RETURNING_DEFER = 200;
+    let timer: number | null = null;
+
+    if (isLoaderComplete()) {
+      timer = window.setTimeout(() => setCanvasMounted(true), RETURNING_DEFER);
+      return () => {
+        if (timer !== null) window.clearTimeout(timer);
+      };
+    }
+
+    const onLoaderComplete = () => {
+      timer = window.setTimeout(() => setCanvasMounted(true), FRESH_LOAD_DEFER);
+    };
+    window.addEventListener("loader-complete", onLoaderComplete, { once: true });
+    return () => {
+      window.removeEventListener("loader-complete", onLoaderComplete);
+      if (timer !== null) window.clearTimeout(timer);
+    };
+  }, [canvasMounted]);
+
   const isStatic = reducedMotion || capability.tier === "static" || !webgl2;
   const config = capability.config;
 
   return (
     <SceneContext.Provider value={{ tier: capability.tier, config }}>
       {sceneHidden ? null : isStatic || !config ? (
+        // Static fallback (reduced-motion / static tier / no-WebGL2) renders
+        // immediately — no GPU cost to defer. Only the WebGL Canvas path
+        // is gated on `canvasMounted` to skip mobile first-paint contention.
         <StaticFallback />
-      ) : (
+      ) : !canvasMounted ? null : (
         <SceneErrorBoundary fallback={<StaticFallback />}>
           <SceneCanvas>
             <FluidSim

@@ -15,10 +15,17 @@ import { type MouseEvent, useEffect, useState } from "react";
  * A11y when open:
  * - aria-modal="true" on the panel (signals to AT that content behind
  *   the overlay is inert)
- * - `inert` attribute on <main id="main"> blocks keyboard/AT reach
- *   into the backgrounded page content
- * - document.body overflow:hidden prevents scroll-behind
- * All three are cleaned up symmetrically on close / resize / unmount.
+ * - `inert` on <main> traps keyboard / AT focus inside the menu
+ *   (aria-modal alone is documentation, not behaviour)
+ * - Esc-to-close + tap-link-to-close handle the dismiss paths.
+ *
+ * Earlier versions also locked `document.body { overflow: hidden }`.
+ * That was dropped after iOS Safari was observed to occasionally lose
+ * the sticky navbar (panel + bar both disappeared, page felt "frozen")
+ * when toggling body overflow. `inert` on <main> doesn't touch body
+ * scroll context and doesn't trigger that bug — it stays. The dropdown
+ * is small and anchored under the navbar; full scroll-lock isn't
+ * load-bearing UX-wise.
  */
 
 type NavItem = { href: string; key: string };
@@ -56,22 +63,20 @@ export function NavMobileMenu({ items, activeSection, buildHref, onAnchorClick }
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [open]);
 
-  // Focus trap + scroll lock when menu is open.
-  // - inert on <main> blocks keyboard/AT from reaching behind the overlay
-  // - overflow:hidden on body prevents scroll-behind
+  // `inert` on <main> traps keyboard / AT focus inside the open menu.
+  // No body overflow lock — see the file header for the iOS Safari
+  // sticky-navbar bug that motivated dropping it. The `inert` attribute
+  // doesn't touch body scroll context, so it doesn't trigger that bug.
   useEffect(() => {
     const main = document.getElementById("main");
+    if (!main) return;
     if (open) {
-      if (main) main.setAttribute("inert", "");
-      document.body.style.overflow = "hidden";
+      main.setAttribute("inert", "");
     } else {
-      if (main) main.removeAttribute("inert");
-      document.body.style.overflow = "";
+      main.removeAttribute("inert");
     }
-    // Cleanup runs on unmount regardless of open state.
     return () => {
-      if (main) main.removeAttribute("inert");
-      document.body.style.overflow = "";
+      main.removeAttribute("inert");
     };
   }, [open]);
 

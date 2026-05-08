@@ -74,6 +74,37 @@ export function PlaygroundCard({ slug, i18nKey, cardSpot, visual, LiveSim }: Pla
   const [hovered, setHovered] = useState(false);
   const [activated, setActivated] = useState(false);
   const navTimerRef = useRef<number | null>(null);
+  const linkRef = useRef<HTMLAnchorElement>(null);
+
+  // Coarse-pointer: hover state is driven by viewport visibility instead
+  // of mouseenter/leave. Card entering viewport activates + unpauses the
+  // mini-sim; leaving pauses it (orchestrator state preserved).
+  const [isCoarse] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches,
+  );
+
+  useEffect(() => {
+    if (!isCoarse || reducedMotion) return;
+    const root = linkRef.current;
+    if (!root) return;
+    // Middle-50% band: mini-sim wakes when the card is mid-screen,
+    // not the moment it scrolls into view. Pauses on exit.
+    const obs = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (!entry) return;
+        if (entry.isIntersecting) {
+          setActivated(true);
+          setHovered(true);
+        } else {
+          setHovered(false);
+        }
+      },
+      { threshold: 0, rootMargin: "-25% 0px -25% 0px" },
+    );
+    obs.observe(root);
+    return () => obs.disconnect();
+  }, [isCoarse, reducedMotion]);
 
   // Cancel a pending router.push if the card unmounts before the wipe
   // completes (e.g. user navigates via the locale switcher mid-grow).
@@ -138,6 +169,7 @@ export function PlaygroundCard({ slug, i18nKey, cardSpot, visual, LiveSim }: Pla
 
   return (
     <Link
+      ref={linkRef}
       href={`/playground/${slug}`}
       className="group block focus:outline-none focus-visible:outline-none"
       style={cssVars}

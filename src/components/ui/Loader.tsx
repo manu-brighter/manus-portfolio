@@ -35,8 +35,21 @@ export function Loader() {
   const dropRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const [visible, setVisible] = useState(true);
+  // Grain SVG-filter is expensive on mobile GPUs (feTurbulence runs per
+  // pixel every paint). Drop it on coarse-pointer devices to keep the
+  // first-paint window from stuttering. Initial state must match SSR
+  // (`true` — grain ships in the static HTML), so the effect below
+  // flips it after hydration on coarse-pointer. One-frame grain flash
+  // on mobile fresh-load; the loader is on screen for ~2.4s anyway.
+  const [grainOn, setGrainOn] = useState(true);
   const reducedMotion = useReducedMotion();
   const t = useTranslations("loader");
+
+  useEffect(() => {
+    if (window.matchMedia("(pointer: coarse)").matches) {
+      setGrainOn(false);
+    }
+  }, []);
 
   useEffect(() => {
     // Locale switches re-mount this component (Next reconciles a new
@@ -157,22 +170,28 @@ export function Loader() {
       aria-label={t("srStatus")}
       className="fixed inset-0 z-[9999] flex items-center justify-center bg-paper"
     >
-      {/* SVG grain filter — mimics the sim's paper texture */}
-      <svg className="absolute size-0" aria-hidden="true">
-        <filter id="loader-grain">
-          <feTurbulence
-            type="fractalNoise"
-            baseFrequency="0.65"
-            numOctaves="3"
-            stitchTiles="stitch"
+      {/* SVG grain filter — mimics the sim's paper texture. Skipped on
+          coarse-pointer because feTurbulence is paint-bound and creates
+          mobile-GPU jank during the loader+hero-reveal window. */}
+      {grainOn ? (
+        <>
+          <svg className="absolute size-0" aria-hidden="true">
+            <filter id="loader-grain">
+              <feTurbulence
+                type="fractalNoise"
+                baseFrequency="0.65"
+                numOctaves="3"
+                stitchTiles="stitch"
+              />
+              <feColorMatrix type="saturate" values="0" />
+            </filter>
+          </svg>
+          <div
+            className="pointer-events-none absolute inset-0 opacity-[0.05]"
+            style={{ filter: "url(#loader-grain)" }}
           />
-          <feColorMatrix type="saturate" values="0" />
-        </filter>
-      </svg>
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.05]"
-        style={{ filter: "url(#loader-grain)" }}
-      />
+        </>
+      ) : null}
 
       {/* Ink drop — organic shape with soft blurred edges */}
       <div

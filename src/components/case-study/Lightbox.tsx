@@ -231,11 +231,15 @@ export function Lightbox() {
         >
           <span aria-hidden="true">×</span>
         </button>
+        {/* Prev/next buttons hidden on coarse-pointer — touch users
+            navigate via the swipe gesture (pointerdown/up tracking
+            above). Buttons stay for mouse + keyboard parity (arrow
+            keys also work via the keydown listener). */}
         <button
           type="button"
           onClick={prev}
           aria-label={t("previousLabel")}
-          className="-translate-y-1/2 absolute top-1/2 left-6 grid size-12 place-items-center border-[1.5px] border-ink bg-paper text-ink text-2xl leading-none shadow-[3px_3px_0_var(--color-ink)] transition-[transform,box-shadow] hover:translate-x-[-2px] hover:translate-y-[calc(-50%+2px)] hover:shadow-[5px_3px_0_var(--color-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper motion-reduce:transition-none"
+          className="-translate-y-1/2 absolute top-1/2 left-6 hidden size-12 place-items-center border-[1.5px] border-ink bg-paper text-ink text-2xl leading-none shadow-[3px_3px_0_var(--color-ink)] transition-[transform,box-shadow] hover:translate-x-[-2px] hover:translate-y-[calc(-50%+2px)] hover:shadow-[5px_3px_0_var(--color-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper motion-reduce:transition-none [@media(pointer:fine)]:grid"
         >
           <span aria-hidden="true">‹</span>
         </button>
@@ -243,7 +247,7 @@ export function Lightbox() {
           type="button"
           onClick={next}
           aria-label={t("nextLabel")}
-          className="-translate-y-1/2 absolute top-1/2 right-6 grid size-12 place-items-center border-[1.5px] border-ink bg-paper text-ink text-2xl leading-none shadow-[3px_3px_0_var(--color-ink)] transition-[transform,box-shadow] hover:translate-x-[2px] hover:translate-y-[calc(-50%+2px)] hover:shadow-[1px_3px_0_var(--color-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper motion-reduce:transition-none"
+          className="-translate-y-1/2 absolute top-1/2 right-6 hidden size-12 place-items-center border-[1.5px] border-ink bg-paper text-ink text-2xl leading-none shadow-[3px_3px_0_var(--color-ink)] transition-[transform,box-shadow] hover:translate-x-[2px] hover:translate-y-[calc(-50%+2px)] hover:shadow-[1px_3px_0_var(--color-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper motion-reduce:transition-none [@media(pointer:fine)]:grid"
         >
           <span aria-hidden="true">›</span>
         </button>

@@ -54,6 +54,38 @@ export function PortfolioCardReveal({
   const [revealCount, setRevealCount] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
 
+  // Coarse-pointer: replace hover with viewport-based IO so the reveal
+  // plays automatically when the card scrolls into view. Re-entering
+  // viewport bumps revealCount → OverprintReveal re-fires.
+  const [isCoarse] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches,
+  );
+
+  useEffect(() => {
+    if (!isCoarse || reducedMotion) return;
+    const root = containerRef.current;
+    if (!root) return;
+    // Middle-50% band: fires when the card is mid-screen, not the
+    // moment it peeks in from below. Same heuristic across the four
+    // hover→scroll-trigger replacements (WorkCard, PortfolioCardReveal,
+    // PlaygroundCard, TileFigure) for a consistent feel.
+    const obs = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (!entry) return;
+        if (entry.isIntersecting) {
+          setRevealCount((c) => c + 1);
+          setIsHovered(true);
+        } else {
+          setIsHovered(false);
+        }
+      },
+      { threshold: 0, rootMargin: "-25% 0px -25% 0px" },
+    );
+    obs.observe(root);
+    return () => obs.disconnect();
+  }, [isCoarse, reducedMotion]);
+
   // Imperative GSAP for the screenshot blur/dim + stage opacity. Uses
   // refs not state — keeps the tweens cancellable and frame-stable.
   useEffect(() => {

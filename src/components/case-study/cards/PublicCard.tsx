@@ -56,19 +56,28 @@ export function PublicCard({
           // the coffee mug above-left; second at top, third halfway down —
           // creates a fan-out cascade.
           const offsetTopVh = [18, 0, 5][i] ?? 0;
+          // Mobile-only horizontal compression: i=1 (Gönnerverwaltung,
+          // 39% wide) and i=2 (Anmeldeformular phone-shot, 22% wide)
+          // shift left aggressively to compress the trio inside the
+          // narrow viewport. Statistics (i=0) stays put. Combined with
+          // negative margin-left to also collapse the flex gap so the
+          // shifts actually overlap into the prior polaroid's territory
+          // rather than just bumping the rightmost off-screen.
+          // Rotation moves into Polaroid's `rotate` prop so the wrapper's
+          // transform property is free for Tailwind's translate-x classes.
+          const mobileShift = i === 1 ? "-ml-10 md:ml-0" : i === 2 ? "-ml-16 md:ml-0" : "";
           return (
             <div
               key={s.slug}
-              className="flex-shrink-0"
+              className={`flex-shrink-0 ${mobileShift}`}
               style={{
                 width: s.aspect === "9/16" ? "22%" : "39%",
                 marginTop: `${offsetTopVh}vh`,
-                transform: `rotate(${s.rotate}deg)`,
               }}
             >
               <Polaroid
                 aspect={s.aspect}
-                rotate={0}
+                rotate={s.rotate}
                 spot={s.spot}
                 datestamp={s.datestamp}
                 caption={s.caption}
