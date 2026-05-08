@@ -15,16 +15,17 @@ import { type MouseEvent, useEffect, useState } from "react";
  * A11y when open:
  * - aria-modal="true" on the panel (signals to AT that content behind
  *   the overlay is inert)
+ * - `inert` on <main> traps keyboard / AT focus inside the menu
+ *   (aria-modal alone is documentation, not behaviour)
  * - Esc-to-close + tap-link-to-close handle the dismiss paths.
  *
- * Earlier versions also locked `document.body { overflow: hidden }` and
- * applied `inert` on <main>. Both were dropped after iOS Safari was
- * observed to occasionally lose the sticky navbar (panel + bar both
- * disappeared, page felt "frozen") when toggling overflow on body. The
- * dropdown is a small panel anchored under the navbar; not a fullscreen
- * modal — neither the scroll-lock nor the inert are load-bearing for
- * the UX, only for strict modal semantics, and the cost (ghost-stuck
- * navbar on real devices) outweighs the benefit.
+ * Earlier versions also locked `document.body { overflow: hidden }`.
+ * That was dropped after iOS Safari was observed to occasionally lose
+ * the sticky navbar (panel + bar both disappeared, page felt "frozen")
+ * when toggling body overflow. `inert` on <main> doesn't touch body
+ * scroll context and doesn't trigger that bug — it stays. The dropdown
+ * is small and anchored under the navbar; full scroll-lock isn't
+ * load-bearing UX-wise.
  */
 
 type NavItem = { href: string; key: string };
@@ -62,12 +63,22 @@ export function NavMobileMenu({ items, activeSection, buildHref, onAnchorClick }
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [open]);
 
-  // No body scroll-lock and no `inert` on <main>: see the file header
-  // for context. iOS Safari was glitching the sticky navbar when body
-  // overflow flipped, manifesting as a "navbar disappeared, page hangs"
-  // on burger-tap. Dropdown stays anchored under the nav via sticky +
-  // absolute positioning regardless of scroll, so the lock was never
-  // load-bearing UX-wise.
+  // `inert` on <main> traps keyboard / AT focus inside the open menu.
+  // No body overflow lock — see the file header for the iOS Safari
+  // sticky-navbar bug that motivated dropping it. The `inert` attribute
+  // doesn't touch body scroll context, so it doesn't trigger that bug.
+  useEffect(() => {
+    const main = document.getElementById("main");
+    if (!main) return;
+    if (open) {
+      main.setAttribute("inert", "");
+    } else {
+      main.removeAttribute("inert");
+    }
+    return () => {
+      main.removeAttribute("inert");
+    };
+  }, [open]);
 
   // Close menu on anchor-click so the user lands on the section without
   // the dropdown obscuring it. Also delegate to the parent's sub-route

@@ -37,18 +37,16 @@ export function Loader() {
   const [visible, setVisible] = useState(true);
   // Grain SVG-filter is expensive on mobile GPUs (feTurbulence runs per
   // pixel every paint). Drop it on coarse-pointer devices to keep the
-  // first-paint window from stuttering. Default true for SSR; flipped
-  // on mount via matchMedia. Brief grain flash on mobile during hydration
-  // is acceptable — the loader is on screen for ~2.4s anyway.
-  const [grainOn, setGrainOn] = useState(true);
+  // first-paint window from stuttering. Lazy-init via matchMedia during
+  // first render so the SSR HTML and the first client commit agree —
+  // no grain flash on mobile fresh-load. SSR returns true (the SVG
+  // ships in the static HTML), client computes the real value before
+  // first paint.
+  const [grainOn] = useState(
+    () => typeof window === "undefined" || !window.matchMedia("(pointer: coarse)").matches,
+  );
   const reducedMotion = useReducedMotion();
   const t = useTranslations("loader");
-
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches) {
-      setGrainOn(false);
-    }
-  }, []);
 
   useEffect(() => {
     // Locale switches re-mount this component (Next reconciles a new

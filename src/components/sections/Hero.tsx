@@ -39,10 +39,7 @@ export function Hero() {
           indicator overlays the rightmost ~5px during scroll. The
           extra 0.5rem inset keeps the glyph edges clear. Desktop
           (md:pr-0) keeps the hero composition flush to the grid. */}
-      <h1
-        id="hero-heading"
-        className="type-display col-span-12 pr-2 text-ink md:col-span-12 md:pr-0"
-      >
+      <h1 id="hero-heading" className="type-display col-span-12 pr-2 text-ink md:pr-0">
         <OverprintReveal text={t("heading.family")} className="inline-block" waitForLoader />
         {/* Slash fades in alongside the reveal — mirroring delay 0.12s
             puts it between the two halves so it reads as the bridge,

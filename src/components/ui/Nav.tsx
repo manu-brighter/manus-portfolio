@@ -67,6 +67,22 @@ export function Nav() {
   // means a locale-switch (full page reload) lands the user back at
   // collapsed — exactly the requested cycle.
   const [localeOpen, setLocaleOpen] = useState(false);
+  // Desktop matches md: breakpoint — used to force `visible = true` on
+  // the inactive locale buttons so keyboard / AT users on desktop can
+  // still tab to them. The CSS `md:max-w-none md:opacity-100` shows the
+  // buttons visually on desktop regardless of `localeOpen`, but
+  // `tabIndex={-1}` + `aria-hidden=true` are JS-driven and would
+  // otherwise lock keyboard / SR users out of the inactive locales
+  // until they clicked the active one.
+  const [isDesktop, setIsDesktop] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches,
+  );
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const onChange = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
 
   // Hash-anchors only resolve on the home route, since the sections live
   // there. On sub-routes (/playground/[slug], /impressum, /datenschutz)
@@ -201,7 +217,7 @@ export function Nav() {
               const label = isActive
                 ? t("localeSwitcher.currentLabel", { name })
                 : t("localeSwitcher.switchLabel", { name });
-              const visible = isActive || localeOpen;
+              const visible = isActive || localeOpen || isDesktop;
 
               return (
                 <li
