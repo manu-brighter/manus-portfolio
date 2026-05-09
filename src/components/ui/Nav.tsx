@@ -4,6 +4,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { type MouseEvent, useEffect, useRef, useState } from "react";
 import { useViewTransition } from "@/components/motion/useViewTransition";
 import { NavMobileMenu } from "@/components/ui/NavMobileMenu";
+import { useLenis } from "@/hooks/useLenis";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { routing } from "@/i18n/routing";
@@ -61,6 +63,8 @@ export function Nav() {
   const pathname = usePathname();
   const router = useRouter();
   const startTransition = useViewTransition();
+  const lenis = useLenis();
+  const reducedMotion = useReducedMotion();
   const [activeSection, setActiveSection] = useState<string | null>(null);
   // Locale switcher starts collapsed (current locale only) on every
   // viewport. Click on the active locale expands; click on an inactive
@@ -101,10 +105,13 @@ export function Nav() {
   const buildHref = (hash: string) => (onHome ? hash : `/${currentLocale}/${hash}`);
 
   // Anchor navigation handler. Two flows:
-  //   - On home: preventDefault + scrollIntoView({ behavior: "smooth" })
-  //     so the user gets the same animated travel they get when arriving
-  //     from a sub-route. Native hash-scroll is instant — feels jarring
-  //     compared with the sub-route arrival flow.
+  //   - On home: preventDefault + Lenis-aware smooth scroll. Native
+  //     `scrollIntoView` was being silently swallowed by Lenis on the
+  //     first click after mount — Lenis owns the document scroll, so
+  //     native scroll calls compete with its internal target tracking
+  //     and sometimes lose. Routing through `lenis.scrollTo()` keeps
+  //     scroll authority in one place and lands the target reliably
+  //     on every click.
   //   - On sub-route (/playground/[slug] etc): stash the target id in
   //     sessionStorage and let next-intl's router push us home. The
   //     browser's native hash-scroll fires before GSAP ScrollTrigger
@@ -116,7 +123,15 @@ export function Nav() {
     e.preventDefault();
     const target = hash.startsWith("#") ? hash.slice(1) : hash;
     if (onHome) {
-      document.getElementById(target)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      const el = document.getElementById(target);
+      if (!el) return;
+      if (lenis && !reducedMotion) {
+        // Offset clears the sticky navbar (~64px). Same offset
+        // pattern as WorkCard's anchor scroll.
+        lenis.scrollTo(el, { offset: -64 });
+      } else {
+        el.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
+      }
       return;
     }
     sessionStorage.setItem("scrollToOnLoad", target);
