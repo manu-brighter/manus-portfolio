@@ -34,12 +34,14 @@ export function Hero() {
         <span className="type-label">{t("statusStamps.status")}</span>
       </div>
 
-      {/* Mobile pr-2: italic Instrument Serif overhangs visually past
-          the type's bounding box, and iOS Safari's transient scroll
-          indicator overlays the rightmost ~5px during scroll. The
-          extra 0.5rem inset keeps the glyph edges clear. Desktop
-          (md:pr-0) keeps the hero composition flush to the grid. */}
-      <h1 id="hero-heading" className="type-display col-span-12 pr-2 text-ink md:pr-0">
+      {/* Mobile pr-4: italic Instrument Serif overhangs visually past
+          the type's bounding box, the OverprintReveal rose ghost
+          translates +2px past the ink, and iOS Safari's transient
+          scroll indicator overlays the rightmost ~5px during scroll.
+          1rem inset comfortably clears all three on iPhone Pro Max
+          widths (430px). Desktop (md:pr-0) keeps the hero composition
+          flush to the grid. */}
+      <h1 id="hero-heading" className="type-display col-span-12 pr-4 text-ink md:pr-0">
         <OverprintReveal text={t("heading.family")} className="inline-block" waitForLoader />
         {/* Slash fades in alongside the reveal — mirroring delay 0.12s
             puts it between the two halves so it reads as the bridge,

@@ -87,8 +87,8 @@ export function PlaygroundCard({ slug, i18nKey, cardSpot, visual, LiveSim }: Pla
     if (!isCoarse || reducedMotion) return;
     const root = linkRef.current;
     if (!root) return;
-    // Middle-50% band: mini-sim wakes when the card is mid-screen,
-    // not the moment it scrolls into view. Pauses on exit.
+    // Middle-35% band: mini-sim wakes when the card is genuinely
+    // mid-screen, not just past the upper third. Pauses on exit.
     const obs = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
@@ -100,7 +100,7 @@ export function PlaygroundCard({ slug, i18nKey, cardSpot, visual, LiveSim }: Pla
           setHovered(false);
         }
       },
-      { threshold: 0, rootMargin: "-25% 0px -25% 0px" },
+      { threshold: 0, rootMargin: "-32.5% 0px -32.5% 0px" },
     );
     obs.observe(root);
     return () => obs.disconnect();

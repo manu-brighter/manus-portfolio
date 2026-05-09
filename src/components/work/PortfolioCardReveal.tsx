@@ -65,8 +65,8 @@ export function PortfolioCardReveal({
     if (!isCoarse || reducedMotion) return;
     const root = containerRef.current;
     if (!root) return;
-    // Middle-50% band: fires when the card is mid-screen, not the
-    // moment it peeks in from below. Same heuristic across the four
+    // Middle-35% band: fires when the card is genuinely mid-screen,
+    // not just past the upper third. Same heuristic across the four
     // hover→scroll-trigger replacements (WorkCard, PortfolioCardReveal,
     // PlaygroundCard, TileFigure) for a consistent feel.
     const obs = new IntersectionObserver(
@@ -80,7 +80,7 @@ export function PortfolioCardReveal({
           setIsHovered(false);
         }
       },
-      { threshold: 0, rootMargin: "-25% 0px -25% 0px" },
+      { threshold: 0, rootMargin: "-32.5% 0px -32.5% 0px" },
     );
     obs.observe(root);
     return () => obs.disconnect();

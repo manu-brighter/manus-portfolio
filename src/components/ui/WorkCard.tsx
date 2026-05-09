@@ -134,17 +134,18 @@ export function WorkCard(props: WorkCardProps) {
     if (!isCoarse || reducedMotion) return;
     const root = rootRef.current;
     if (!root) return;
-    // rootMargin -25/0/-25 carves out the central 50% horizontal band
+    // rootMargin -32.5/0/-32.5 carves out the central 35% vertical band
     // of the viewport. Element fires `isIntersecting` only when its box
-    // overlaps that band — so the hover-replacement animation kicks in
-    // when the card is mid-screen, not the moment it peeks in.
+    // overlaps that band — tighter than the original 50% band so the
+    // hover-replacement animation only kicks in when the card is
+    // genuinely centred, not just past the upper third.
     const obs = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
         if (!entry) return;
         setHovered(entry.isIntersecting);
       },
-      { threshold: 0, rootMargin: "-25% 0px -25% 0px" },
+      { threshold: 0, rootMargin: "-32.5% 0px -32.5% 0px" },
     );
     obs.observe(root);
     return () => obs.disconnect();

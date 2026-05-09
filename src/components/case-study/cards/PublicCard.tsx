@@ -56,22 +56,26 @@ export function PublicCard({
           // the coffee mug above-left; second at top, third halfway down —
           // creates a fan-out cascade.
           const offsetTopVh = [18, 0, 5][i] ?? 0;
-          // Mobile-only horizontal compression: i=1 (Gönnerverwaltung,
-          // 39% wide) and i=2 (Anmeldeformular phone-shot, 22% wide)
-          // shift left aggressively to compress the trio inside the
-          // narrow viewport. Statistics (i=0) stays put. Combined with
-          // negative margin-left to also collapse the flex gap so the
-          // shifts actually overlap into the prior polaroid's territory
-          // rather than just bumping the rightmost off-screen.
-          // Rotation moves into Polaroid's `rotate` prop so the wrapper's
-          // transform property is free for Tailwind's translate-x classes.
-          const mobileShift = i === 1 ? "-ml-10 md:ml-0" : i === 2 ? "-ml-16 md:ml-0" : "";
+          // Mobile layout: slightly bigger polaroids (42% / 24% vs
+          // desktop's 39% / 22%) and a vertically-stacked composition
+          // where Gönnerverwaltung sits ABOVE Statistics. Gönner
+          // pulls -ml-44 (-176px) via flex cascade — that puts its
+          // horizontal range entirely above the Statistics
+          // screenshot. Formular gets a positive `ml-8` (+32px) to
+          // counter Gönner's extra cascade so its absolute position
+          // stays where the previous iteration placed it.
+          // Desktop layout (md:* overrides) is unchanged.
+          const widthClass = s.aspect === "9/16" ? "w-[24%] md:w-[22%]" : "w-[42%] md:w-[39%]";
+          // Statistics (i=0) gets `ml-6` (24px) on mobile so the whole
+          // trio shifts right together — Gönner + Formular cascade by
+          // the same 24px via flex layout.
+          const mobileShift =
+            i === 0 ? "ml-6 md:ml-0" : i === 1 ? "-ml-44 md:ml-0" : i === 2 ? "ml-8 md:ml-0" : "";
           return (
             <div
               key={s.slug}
-              className={`flex-shrink-0 ${mobileShift}`}
+              className={`flex-shrink-0 ${widthClass} ${mobileShift}`}
               style={{
-                width: s.aspect === "9/16" ? "22%" : "39%",
                 marginTop: `${offsetTopVh}vh`,
               }}
             >

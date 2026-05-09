@@ -563,4 +563,26 @@
       }
     }
   }
+
+  /* Hero-Skill ambient halo — conic-gradient through all 4 Riso inks
+     that slowly rotates + gently breathes. Replaces the earlier
+     opacity-pulse that read as a colour blink in peripheral vision.
+     28s per rotation = slow enough that the motion barely registers
+     as motion, but the section never feels static. */
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-skill-aura {
+      animation: hero-skill-aura-drift 28s linear infinite;
+    }
+    @keyframes hero-skill-aura-drift {
+      0% {
+        transform: rotate(0deg) scale(1);
+      }
+      50% {
+        transform: rotate(180deg) scale(1.06);
+      }
+      100% {
+        transform: rotate(360deg) scale(1);
+      }
+    }
+  }
 }

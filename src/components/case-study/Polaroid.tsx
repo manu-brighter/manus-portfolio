@@ -65,7 +65,14 @@ export function Polaroid({
   const cssVars = { "--polaroid-spot": SPOT_VAR[spot] } as CSSProperties;
   return (
     <figure
-      className={`plate-corners relative inline-block bg-paper-tint p-[clamp(0.5rem,1.2vh,1rem)] ${className ?? ""}`}
+      // pt has its own clamp with a 1rem floor so the absolutely-
+      // positioned datestamp (top-1 right-2, ~12px tall) doesn't clip
+      // into the image. The shared `p-[clamp(0.5rem,1.2vh,1rem)]`
+      // resolved to 8-11px on mobile heights, leaving the datestamp's
+      // bottom edge overlapping the inner image div. Split into
+      // explicit px / pb / pt so the pt floor doesn't depend on
+      // Tailwind's CSS source order beating the shorthand `p-*`.
+      className={`plate-corners relative inline-block bg-paper-tint px-[clamp(0.5rem,1.2vh,1rem)] pt-[clamp(1rem,1.5vh,1.25rem)] pb-[clamp(0.5rem,1.2vh,1rem)] ${className ?? ""}`}
       style={{
         ...cssVars,
         transform: `rotate(${effectiveRotate}deg)`,
@@ -114,7 +121,17 @@ export function Polaroid({
         </span>
       ) : null}
       {caption ? (
-        <figcaption className="mt-2 font-mono text-[clamp(0.5625rem,0.75vh,0.7rem)] tracking-[0.18em] text-ink-muted uppercase">
+        // Mono uppercase + tracking-0.18em pushes the caption past
+        // narrow mobile polaroid widths. Force break-anywhere via
+        // inline style — Tailwind's arbitrary `[overflow-wrap:...]`
+        // wasn't reliably picking up on the Anmeldeformular shot, so
+        // the caption was leaking out of the card. Inline style
+        // guarantees the property gets applied regardless of utility-
+        // class compilation. Tighter tracking on mobile too.
+        <figcaption
+          className="mt-2 font-mono text-[clamp(0.5rem,0.75vh,0.7rem)] tracking-[0.12em] text-ink-muted uppercase md:tracking-[0.18em]"
+          style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}
+        >
           {caption}
         </figcaption>
       ) : null}

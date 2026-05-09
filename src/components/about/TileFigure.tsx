@@ -28,8 +28,8 @@ export function TileFigure({ className, style, children }: Props) {
     if (!isCoarse) return;
     const el = ref.current;
     if (!el) return;
-    // Middle-50% band: tile activates when it's mid-screen, not the
-    // moment it scrolls into view. Matches the other coarse-pointer
+    // Middle-35% band: tile activates when it's genuinely mid-screen,
+    // not just past the upper third. Matches the other coarse-pointer
     // hover→scroll replacements.
     const obs = new IntersectionObserver(
       (entries) => {
@@ -37,7 +37,7 @@ export function TileFigure({ className, style, children }: Props) {
         if (!entry) return;
         setActive(entry.isIntersecting);
       },
-      { threshold: 0, rootMargin: "-25% 0px -25% 0px" },
+      { threshold: 0, rootMargin: "-32.5% 0px -32.5% 0px" },
     );
     obs.observe(el);
     return () => obs.disconnect();

@@ -85,7 +85,7 @@ export function VibecodedStamp({ children, delay = 0 }: Props) {
         className="pointer-events-none absolute inset-0 -z-10 rounded-sm"
         style={{ backgroundColor: "var(--color-spot-rose)", filter: "blur(6px)" }}
       />
-      <span className="type-label inline-block border-[1.5px] border-ink bg-paper px-1 py-0.5 text-ink">
+      <span className="type-label inline-block border-[1.5px] border-ink bg-paper px-[0.4em] py-[0.2em] text-[0.55rem] text-ink md:text-[0.75rem]">
         {children}
       </span>
     </span>
