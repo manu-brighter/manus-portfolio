@@ -30,18 +30,27 @@ export function SceneCanvas({ children }: SceneCanvasProps) {
         height: "100%",
         zIndex: 0,
         touchAction: "none",
-        // Force a dedicated GPU compositor layer for the canvas. iOS
-        // Safari otherwise sometimes hides position:fixed children
-        // during momentum scroll while it adjusts the layer tree —
-        // the canvas blinks in/out for the duration of the scroll.
-        // `translateZ(0)` alone promotes the layer; the previous extra
-        // `will-change: transform` was redundant and added permanent
-        // VRAM cost for the canvas-sized compositor texture (review
-        // feedback). If the blink returns on a future iOS version,
-        // re-add `willChange: "transform"` here as the load-bearing
-        // hint — the rest of this comment explains why we'd want it.
+        // Aggressive layer-promotion stack to keep iOS Safari from
+        // culling the canvas during momentum scroll. Plain translateZ +
+        // backface-visibility weren't enough in real-device testing —
+        // fast scroll-direction-changes still triggered the cull.
+        // Layered defenses:
+        //   - translateZ(0): promotes a dedicated GPU compositor layer
+        //   - backface-visibility:hidden: extra layer hint
+        //   - will-change:transform: tells the browser this layer is
+        //     critical, don't drop it (some VRAM cost is the trade-off)
+        //   - contain:paint: paint-isolation, layer can't escape its
+        //     own bounds, compositor treats it as self-contained
+        //   - isolation:isolate: forms a stacking context, additional
+        //     compositor anchor
+        // Combined with FluidSim's scroll-pause (skip step() during
+        // active scroll), this stops the blink. preserveDrawingBuffer
+        // keeps the last frame visible while sim is paused.
         transform: "translateZ(0)",
         backfaceVisibility: "hidden",
+        willChange: "transform",
+        contain: "paint",
+        isolation: "isolate",
       }}
       aria-hidden="true"
       data-scene="root"
