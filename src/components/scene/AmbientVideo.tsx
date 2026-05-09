@@ -1,0 +1,51 @@
+"use client";
+
+/**
+ * Mobile fallback for the live FluidSim canvas — plays a pre-recorded
+ * loop of the ambient sim instead of running the WebGL pipeline live.
+ *
+ * Why: iOS Safari's tile compositor culls position:fixed WebGL layers
+ * during momentum scroll under GPU pressure, causing a visible blink.
+ * `<video>` elements get composited via the platform media path which
+ * survives scroll without cull. The trade-off is that mobile loses
+ * pointer interactivity, but that was already disabled on coarse-
+ * pointer (the hero/long-scroll showcase); interaction lives in the
+ * playground experiment routes which run their own per-experiment
+ * WebGL contexts.
+ *
+ * The loop asset is generated once via `<AmbientRecorder />` (see
+ * that file's header comment) and committed to public/. The video
+ * has paper-bg + grain + ink baked in (render-toon writes opaque
+ * paper-bg under the ink), so the visible result matches what the
+ * live canvas was painting.
+ *
+ * If the asset is missing (initial bootstrap), the <video> element
+ * silently fails to load — body bg-paper shows through and the page
+ * still works (just no animated bg on mobile).
+ */
+export function AmbientVideo() {
+  return (
+    // biome-ignore lint/a11y/useMediaCaption: ambient bg has no audio + no semantic content
+    <video
+      autoPlay
+      loop
+      muted
+      playsInline
+      preload="auto"
+      aria-hidden="true"
+      tabIndex={-1}
+      data-scene="root"
+      className="pointer-events-none"
+      style={{
+        position: "fixed",
+        inset: 0,
+        width: "100%",
+        height: "100%",
+        zIndex: 0,
+        objectFit: "cover",
+      }}
+    >
+      <source src="/ambient-loop.webm" type="video/webm" />
+    </video>
+  );
+}
