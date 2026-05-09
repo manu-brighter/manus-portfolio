@@ -27,6 +27,12 @@
 //
 // Variants generated:
 //   src/app/icon.png            32x32 TRANSPARENT (browser tab favicon)
+//   src/app/favicon.ico         32x32 TRANSPARENT, served as /favicon.ico
+//                               for legacy direct-requests (bots / very
+//                               old browsers). Modern browsers use the
+//                               linked /icon endpoint via <link rel="icon">.
+//                               Stored as PNG bytes with .ico extension —
+//                               browsers mime-sniff and render correctly.
 //   src/app/apple-icon.png      180x180 paper-bg (iOS clipped icon)
 //   public/icon-192.png         192x192 paper-bg (Android Chrome)
 //   public/icon-512.png         512x512 paper-bg (Android splash)
@@ -146,6 +152,16 @@ await generate(
   { size: 32, masked: false, outName: "icon.png", outDir: appDir, bg: "transparent" },
   transparentSquareBuf,
 );
+
+// Legacy /favicon.ico — same 32x32 transparent PNG bytes, served with
+// .ico extension for browsers / bots that request it directly. Next 16
+// recognises src/app/favicon.ico as a file convention.
+await writeFile(
+  resolve(appDir, "favicon.ico"),
+  await readFile(resolve(appDir, "icon.png")),
+);
+// biome-ignore lint/suspicious/noConsole: CLI script
+console.log("  favicon.ico (32x32, transparent — copied from icon.png)");
 
 // iOS home-screen icon (paper-bg, src/app/apple-icon.png)
 await generate(

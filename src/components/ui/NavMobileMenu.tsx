@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { type MouseEvent, useEffect, useState } from "react";
+import { type MouseEvent, useEffect, useRef, useState } from "react";
 
 /**
  * Mobile hamburger menu — only mounts the dropdown subtree on mobile
@@ -42,6 +42,7 @@ type Props = {
 export function NavMobileMenu({ items, activeSection, buildHref, onAnchorClick }: Props) {
   const t = useTranslations();
   const [open, setOpen] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   // Close on viewport-resize past md breakpoint.
   useEffect(() => {
@@ -64,19 +65,26 @@ export function NavMobileMenu({ items, activeSection, buildHref, onAnchorClick }
   }, [open]);
 
   // `inert` on <main> traps keyboard / AT focus inside the open menu.
+  // Same toggle on the panel itself in the inverse direction so the
+  // panel is non-focusable / AT-hidden while it's animating-out at
+  // opacity 0 (the panel is always-rendered now for smooth open/close
+  // transitions instead of conditionally mounted).
   // No body overflow lock — see the file header for the iOS Safari
   // sticky-navbar bug that motivated dropping it. The `inert` attribute
   // doesn't touch body scroll context, so it doesn't trigger that bug.
   useEffect(() => {
     const main = document.getElementById("main");
-    if (!main) return;
+    const panel = panelRef.current;
     if (open) {
-      main.setAttribute("inert", "");
+      main?.setAttribute("inert", "");
+      panel?.removeAttribute("inert");
     } else {
-      main.removeAttribute("inert");
+      main?.removeAttribute("inert");
+      panel?.setAttribute("inert", "");
     }
     return () => {
-      main.removeAttribute("inert");
+      main?.removeAttribute("inert");
+      panel?.removeAttribute("inert");
     };
   }, [open]);
 
@@ -114,14 +122,26 @@ export function NavMobileMenu({ items, activeSection, buildHref, onAnchorClick }
         />
       </button>
 
-      {open ? (
-        <div
-          aria-modal="true"
-          role="dialog"
-          aria-label={t("nav.mobileMenu.open")}
-          className="absolute top-full right-0 left-0 border-paper-line border-b bg-paper shadow-lg"
-        >
-          <ul id="mobile-nav-list" className="flex flex-col gap-3 px-6 py-6">
+      {/* Panel is always rendered (absolute positioned, no layout cost
+          when invisible). Opacity + translateY transition between
+          closed (-y-2 / opacity-0) and open (0 / 1) gives a smoother
+          drop-in feel than the previous instant mount. `inert` toggle
+          (effect above) keeps the closed panel non-tabbable / AT-
+          hidden so the always-rendered DOM doesn't pollute focus
+          order. */}
+      <div
+        ref={panelRef}
+        aria-modal={open ? "true" : undefined}
+        aria-hidden={open ? undefined : true}
+        role="dialog"
+        aria-label={t("nav.mobileMenu.open")}
+        className={`absolute top-full right-0 left-0 border-paper-line border-b bg-paper shadow-lg transition-[opacity,transform] duration-300 ease-out ${
+          open
+            ? "translate-y-0 opacity-100"
+            : "pointer-events-none -translate-y-2 opacity-0"
+        }`}
+      >
+        <ul id="mobile-nav-list" className="flex flex-col gap-3 px-6 py-6">
             {items.map((item) => {
               const sectionId = item.href.replace("#", "");
               const isActive = activeSection === sectionId;
@@ -156,7 +176,6 @@ export function NavMobileMenu({ items, activeSection, buildHref, onAnchorClick }
             })}
           </ul>
         </div>
-      ) : null}
     </div>
   );
 }
