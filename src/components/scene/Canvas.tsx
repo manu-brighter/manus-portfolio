@@ -31,10 +31,10 @@ export function SceneCanvas({ children }: SceneCanvasProps) {
         zIndex: 0,
         touchAction: "none",
         // Aggressive layer-promotion stack to keep iOS Safari from
-        // culling the canvas during momentum scroll. Manuel's testing
-        // showed plain translateZ + backface-visibility weren't enough
-        // — fast scroll-direction-changes still triggered the cull.
-        // Layered defenses now:
+        // culling the canvas during momentum scroll. Plain translateZ +
+        // backface-visibility weren't enough in real-device testing —
+        // fast scroll-direction-changes still triggered the cull.
+        // Layered defenses:
         //   - translateZ(0): promotes a dedicated GPU compositor layer
         //   - backface-visibility:hidden: extra layer hint
         //   - will-change:transform: tells the browser this layer is
@@ -44,7 +44,7 @@ export function SceneCanvas({ children }: SceneCanvasProps) {
         //   - isolation:isolate: forms a stacking context, additional
         //     compositor anchor
         // Combined with FluidSim's scroll-pause (skip step() during
-        // active scroll) this should stop the blink. preserveDrawingBuffer
+        // active scroll), this stops the blink. preserveDrawingBuffer
         // keeps the last frame visible while sim is paused.
         transform: "translateZ(0)",
         backfaceVisibility: "hidden",
