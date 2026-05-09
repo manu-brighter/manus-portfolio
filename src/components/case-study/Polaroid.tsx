@@ -120,9 +120,16 @@ export function Polaroid({
       ) : null}
       {caption ? (
         // Mono uppercase + tracking-0.18em pushes the caption past
-        // narrow mobile polaroid widths. Allow break-anywhere wrap +
-        // tighter tracking on mobile so it stays inside the card.
-        <figcaption className="mt-2 break-words font-mono text-[clamp(0.5rem,0.75vh,0.7rem)] tracking-[0.12em] text-ink-muted uppercase md:tracking-[0.18em] [overflow-wrap:anywhere]">
+        // narrow mobile polaroid widths. Force break-anywhere via
+        // inline style — Tailwind's arbitrary `[overflow-wrap:...]`
+        // wasn't reliably picking up on the Anmeldeformular shot, so
+        // the caption was leaking out of the card. Inline style
+        // guarantees the property gets applied regardless of utility-
+        // class compilation. Tighter tracking on mobile too.
+        <figcaption
+          className="mt-2 font-mono text-[clamp(0.5rem,0.75vh,0.7rem)] tracking-[0.12em] text-ink-muted uppercase md:tracking-[0.18em]"
+          style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}
+        >
           {caption}
         </figcaption>
       ) : null}

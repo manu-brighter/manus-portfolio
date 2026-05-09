@@ -58,16 +58,15 @@ export function PublicCard({
           const offsetTopVh = [18, 0, 5][i] ?? 0;
           // Mobile layout: slightly bigger polaroids (42% / 24% vs
           // desktop's 39% / 22%) and a vertically-stacked composition
-          // where Gönnerverwaltung + Anmeldeformular cluster ABOVE
-          // Statistics (which has marginTop 18vh, sitting visually
-          // lower). The big -ml-32 on i=1 pulls the gönner+formular
-          // pair ~128px left via flex cascade, putting them on top of
-          // the statistics screenshot's horizontal range. Formular
-          // keeps its small -ml-4 to lightly overlap gönner inside
-          // the cluster (relative position preserved). Desktop layout
-          // (md:* overrides) is unchanged.
+          // where Gönnerverwaltung sits ABOVE Statistics. Gönner
+          // pulls -ml-44 (-176px) via flex cascade — that puts its
+          // horizontal range entirely above the Statistics
+          // screenshot. Formular gets a positive `ml-8` (+32px) to
+          // counter Gönner's extra cascade so its absolute position
+          // stays where the previous iteration placed it.
+          // Desktop layout (md:* overrides) is unchanged.
           const widthClass = s.aspect === "9/16" ? "w-[24%] md:w-[22%]" : "w-[42%] md:w-[39%]";
-          const mobileShift = i === 1 ? "-ml-32 md:ml-0" : i === 2 ? "-ml-4 md:ml-0" : "";
+          const mobileShift = i === 1 ? "-ml-44 md:ml-0" : i === 2 ? "ml-8 md:ml-0" : "";
           return (
             <div
               key={s.slug}
