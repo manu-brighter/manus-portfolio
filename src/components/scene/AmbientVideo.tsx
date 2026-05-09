@@ -45,7 +45,11 @@ export function AmbientVideo() {
         objectFit: "cover",
       }}
     >
-      <source src="/ambient-loop.webm" type="video/webm" />
+      {/* MP4 / H.264 — universal browser support, including older
+          iOS Safari. The earlier WebM/VP9 attempt rendered as a still
+          image on iOS 18 (codec was technically supported but only the
+          first frame decoded reliably). */}
+      <source src="/ambient-loop.mp4" type="video/mp4" />
     </video>
   );
 }
