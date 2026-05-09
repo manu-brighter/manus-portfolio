@@ -65,12 +65,14 @@ export function Polaroid({
   const cssVars = { "--polaroid-spot": SPOT_VAR[spot] } as CSSProperties;
   return (
     <figure
-      // pt is overridden to a 1rem floor so the absolutely-positioned
-      // datestamp (top-1 right-2, ~12px tall) doesn't clip into the
-      // image. The shared `p-[clamp(0.5rem,1.2vh,1rem)]` resolved to
-      // 8-11px on mobile heights, leaving the datestamp's bottom edge
-      // overlapping the inner image div.
-      className={`plate-corners relative inline-block bg-paper-tint p-[clamp(0.5rem,1.2vh,1rem)] pt-[clamp(1rem,1.5vh,1.25rem)] ${className ?? ""}`}
+      // pt has its own clamp with a 1rem floor so the absolutely-
+      // positioned datestamp (top-1 right-2, ~12px tall) doesn't clip
+      // into the image. The shared `p-[clamp(0.5rem,1.2vh,1rem)]`
+      // resolved to 8-11px on mobile heights, leaving the datestamp's
+      // bottom edge overlapping the inner image div. Split into
+      // explicit px / pb / pt so the pt floor doesn't depend on
+      // Tailwind's CSS source order beating the shorthand `p-*`.
+      className={`plate-corners relative inline-block bg-paper-tint px-[clamp(0.5rem,1.2vh,1rem)] pt-[clamp(1rem,1.5vh,1.25rem)] pb-[clamp(0.5rem,1.2vh,1rem)] ${className ?? ""}`}
       style={{
         ...cssVars,
         transform: `rotate(${effectiveRotate}deg)`,

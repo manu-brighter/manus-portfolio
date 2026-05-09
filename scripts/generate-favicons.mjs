@@ -63,7 +63,19 @@ const PAPER_BG = "#F0E8D7"; // matches --color-paper
 // source + pad to a square so the drop isn't squashed by subsequent
 // resizes. Returns the square-aspect transparent buffer.
 async function buildTransparentSource() {
-  const srcBuf = await readFile(transparentSrcPath);
+  let srcBuf;
+  try {
+    srcBuf = await readFile(transparentSrcPath);
+  } catch (err) {
+    if (err && typeof err === "object" && "code" in err && err.code === "ENOENT") {
+      throw new Error(
+        `Missing source: ${transparentSrcPath}\n` +
+          `Provide a transparent-bg PNG of the brand mark at public/brand/icon-source-transparent.png before running this script. ` +
+          `If you only have a paper-bg variant, save it as icon-source.png alongside as the archival reference.`,
+      );
+    }
+    throw err;
+  }
 
   // Trim transparent borders.
   const trimmedBuf = await sharp(srcBuf).ensureAlpha().trim().png().toBuffer();
