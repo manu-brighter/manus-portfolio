@@ -100,8 +100,20 @@ export function SceneProvider({ children }: SceneProviderProps) {
   // below flips it on mount; one-frame mismatch is invisible since
   // the whole scene is gated on `canvasMounted` for the deferred
   // mount path anyway.
+  //
+  // The `?record-bg` query param (consumed by AmbientRecorder)
+  // bypasses the coarse-pointer branch — recording requires the
+  // live WebGL canvas to be present. Lets Manuel record at mobile-
+  // portrait viewport via DevTools resize without DevTools also
+  // flipping pointer:coarse and routing to the video path.
   const [isCoarsePointer, setIsCoarsePointer] = useState(false);
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("record-bg")) {
+      setIsCoarsePointer(false);
+      return;
+    }
     setIsCoarsePointer(window.matchMedia("(pointer: coarse)").matches);
   }, []);
 
