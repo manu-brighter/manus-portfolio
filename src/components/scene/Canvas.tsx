@@ -13,7 +13,16 @@ export function SceneCanvas({ children }: SceneCanvasProps) {
       frameloop="never"
       gl={{
         antialias: false,
-        alpha: false,
+        // alpha: true so when iOS Safari culls this WebGL layer during
+        // momentum scroll (its tile compositor drops position:fixed
+        // layers under GPU pressure), the body's `--color-paper`
+        // background shows through. The body bg matches the
+        // render-toon shader's `uPaperColor` exactly (#f0e8dc), so the
+        // cull → un-cull transition only affects the ink + grain
+        // overlay rather than the entire canvas. The blink is still
+        // there but visually goes from "everything disappears" to
+        // "ink fades momentarily" — far less jarring.
+        alpha: true,
         powerPreference: "high-performance",
         // Preserve the drawing buffer so the canvas keeps its last
         // frame visible during iOS Safari's momentum-scroll repaint
