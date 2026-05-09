@@ -66,7 +66,17 @@ export function PublicCard({
           // stays where the previous iteration placed it.
           // Desktop layout (md:* overrides) is unchanged.
           const widthClass = s.aspect === "9/16" ? "w-[24%] md:w-[22%]" : "w-[42%] md:w-[39%]";
-          const mobileShift = i === 1 ? "-ml-44 md:ml-0" : i === 2 ? "ml-8 md:ml-0" : "";
+          // Statistics (i=0) gets a small `ml-3` (12px) on mobile so
+          // the whole trio shifts right together — Gönner + Formular
+          // cascade by the same 12px via flex layout.
+          const mobileShift =
+            i === 0
+              ? "ml-3 md:ml-0"
+              : i === 1
+                ? "-ml-44 md:ml-0"
+                : i === 2
+                  ? "ml-8 md:ml-0"
+                  : "";
           return (
             <div
               key={s.slug}
