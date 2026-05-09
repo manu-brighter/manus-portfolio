@@ -34,11 +34,14 @@ export function SceneCanvas({ children }: SceneCanvasProps) {
         // Safari otherwise sometimes hides position:fixed children
         // during momentum scroll while it adjusts the layer tree —
         // the canvas blinks in/out for the duration of the scroll.
-        // translateZ(0) + backfaceVisibility:hidden + will-change
-        // pin it to its own layer that survives compositor work.
+        // `translateZ(0)` alone promotes the layer; the previous extra
+        // `will-change: transform` was redundant and added permanent
+        // VRAM cost for the canvas-sized compositor texture (review
+        // feedback). If the blink returns on a future iOS version,
+        // re-add `willChange: "transform"` here as the load-bearing
+        // hint — the rest of this comment explains why we'd want it.
         transform: "translateZ(0)",
         backfaceVisibility: "hidden",
-        willChange: "transform",
       }}
       aria-hidden="true"
       data-scene="root"

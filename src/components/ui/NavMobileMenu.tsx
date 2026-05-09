@@ -136,46 +136,44 @@ export function NavMobileMenu({ items, activeSection, buildHref, onAnchorClick }
         role="dialog"
         aria-label={t("nav.mobileMenu.open")}
         className={`absolute top-full right-0 left-0 border-paper-line border-b bg-paper shadow-lg transition-[opacity,transform] duration-300 ease-out ${
-          open
-            ? "translate-y-0 opacity-100"
-            : "pointer-events-none -translate-y-2 opacity-0"
+          open ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-2 opacity-0"
         }`}
       >
         <ul id="mobile-nav-list" className="flex flex-col gap-3 px-6 py-6">
-            {items.map((item) => {
-              const sectionId = item.href.replace("#", "");
-              const isActive = activeSection === sectionId;
-              return (
-                <li key={item.href}>
-                  {/* `<a>` stays block-level so the entire menu row is a
+          {items.map((item) => {
+            const sectionId = item.href.replace("#", "");
+            const isActive = activeSection === sectionId;
+            return (
+              <li key={item.href}>
+                {/* `<a>` stays block-level so the entire menu row is a
                       tap target. The underline uses native
                       `text-decoration` on an inner span so it
                       automatically matches the rendered word width —
                       the previous ::after + inline-block + scale-x
                       dance was unreliable on Tailwind v4 / mobile. */}
-                  <a
-                    href={buildHref(item.href)}
-                    onClick={(e) => onItemClick(e, item.href)}
-                    aria-current={isActive ? "true" : undefined}
-                    className={`block py-2 type-label transition-colors active:scale-[0.97] active:duration-100 ${
-                      isActive ? "text-ink" : "text-ink-soft hover:text-ink"
-                    }`}
+                <a
+                  href={buildHref(item.href)}
+                  onClick={(e) => onItemClick(e, item.href)}
+                  aria-current={isActive ? "true" : undefined}
+                  className={`block py-2 type-label transition-colors active:scale-[0.97] active:duration-100 ${
+                    isActive ? "text-ink" : "text-ink-soft hover:text-ink"
+                  }`}
+                >
+                  <span
+                    className={
+                      isActive
+                        ? "underline decoration-ink decoration-[1.5px] underline-offset-[6px]"
+                        : ""
+                    }
                   >
-                    <span
-                      className={
-                        isActive
-                          ? "underline decoration-ink decoration-[1.5px] underline-offset-[6px]"
-                          : ""
-                      }
-                    >
-                      {t(`nav.items.${item.key}`)}
-                    </span>
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
+                    {t(`nav.items.${item.key}`)}
+                  </span>
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
     </div>
   );
 }

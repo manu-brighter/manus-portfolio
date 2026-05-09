@@ -70,13 +70,7 @@ export function PublicCard({
           // trio shifts right together — Gönner + Formular cascade by
           // the same 24px via flex layout.
           const mobileShift =
-            i === 0
-              ? "ml-6 md:ml-0"
-              : i === 1
-                ? "-ml-44 md:ml-0"
-                : i === 2
-                  ? "ml-8 md:ml-0"
-                  : "";
+            i === 0 ? "ml-6 md:ml-0" : i === 1 ? "-ml-44 md:ml-0" : i === 2 ? "ml-8 md:ml-0" : "";
           return (
             <div
               key={s.slug}
