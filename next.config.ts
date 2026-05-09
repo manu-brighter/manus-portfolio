@@ -11,6 +11,13 @@ const nextConfig: NextConfig = {
   trailingSlash: true,
   reactStrictMode: true,
   poweredByHeader: false,
+  // Cross-origin allowlist for `next dev` — needed when accessing the
+  // dev server from another device on the LAN (iPhone testing during
+  // mobile bug-hunts). Without this, the HMR WebSocket fails with a
+  // cross-origin block even though the HTTP page loads fine. Glob
+  // patterns are supported; wildcards keep it working across IP
+  // changes from the router. No effect on production builds.
+  allowedDevOrigins: ["192.168.*.*", "10.*.*.*"],
   experimental: {
     optimizePackageImports: [
       "three",

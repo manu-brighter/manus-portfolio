@@ -6,6 +6,7 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 import type { GPUTier, TierConfig } from "@/lib/gpu";
 import { useSceneVisibility } from "@/lib/sceneVisibility";
 import { isLoaderComplete } from "../ui/Loader";
+import { AmbientVideo } from "./AmbientVideo";
 import { SceneCanvas } from "./Canvas";
 import { FluidSim } from "./FluidSim";
 import { StaticFallback } from "./StaticFallback";
@@ -88,6 +89,34 @@ export function SceneProvider({ children }: SceneProviderProps) {
   //     visit). Just enough time for hydration to settle.
   const [canvasMounted, setCanvasMounted] = useState(false);
 
+  // Coarse-pointer (mobile/touch) plays a pre-recorded loop video
+  // instead of running the WebGL pipeline live. iOS Safari was
+  // culling the position:fixed WebGL layer during momentum scroll
+  // (visible blink); <video> elements use the platform media
+  // compositor which handles scroll without cull. Trade-off is
+  // mobile loses pointer-driven sim interactivity, but that was
+  // already disabled on coarse-pointer per earlier UX decisions.
+  // Initial state must match SSR (false — no window). The effect
+  // below flips it on mount; one-frame mismatch is invisible since
+  // the whole scene is gated on `canvasMounted` for the deferred
+  // mount path anyway.
+  //
+  // The `?record-bg` query param (consumed by AmbientRecorder)
+  // bypasses the coarse-pointer branch — recording requires the
+  // live WebGL canvas to be present. Lets Manuel record at mobile-
+  // portrait viewport via DevTools resize without DevTools also
+  // flipping pointer:coarse and routing to the video path.
+  const [isCoarsePointer, setIsCoarsePointer] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("record-bg")) {
+      setIsCoarsePointer(false);
+      return;
+    }
+    setIsCoarsePointer(window.matchMedia("(pointer: coarse)").matches);
+  }, []);
+
   useEffect(() => {
     if (canvasMounted) return;
     const FRESH_LOAD_DEFER = 1700;
@@ -121,7 +150,13 @@ export function SceneProvider({ children }: SceneProviderProps) {
         // immediately — no GPU cost to defer. Only the WebGL Canvas path
         // is gated on `canvasMounted` to skip mobile first-paint contention.
         <StaticFallback />
-      ) : !canvasMounted ? null : (
+      ) : !canvasMounted ? null : isCoarsePointer ? (
+        // Mobile / coarse-pointer: pre-recorded video loop instead of
+        // live WebGL. Video element survives iOS Safari's tile-
+        // compositor cull during momentum scroll where the WebGL
+        // canvas does not.
+        <AmbientVideo />
+      ) : (
         <SceneErrorBoundary fallback={<StaticFallback />}>
           <SceneCanvas>
             <FluidSim

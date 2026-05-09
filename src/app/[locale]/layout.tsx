@@ -4,6 +4,7 @@ import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import type { ReactNode } from "react";
 import { MotionProvider } from "@/components/motion/MotionProvider";
+import { AmbientRecorder } from "@/components/scene/AmbientRecorder";
 import { InkWipeOverlay } from "@/components/scene/InkWipeOverlay";
 import { SceneProvider } from "@/components/scene/SceneProvider";
 import { Footer } from "@/components/ui/Footer";
@@ -75,6 +76,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
               <ScrollProgress />
               <Loader />
               <InkWipeOverlay />
+              <AmbientRecorder />
             </SceneProvider>
           </MotionProvider>
         </NextIntlClientProvider>
