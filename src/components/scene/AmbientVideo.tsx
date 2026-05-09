@@ -35,7 +35,6 @@ export function AmbientVideo() {
   const [loaded, setLoaded] = useState(false);
 
   return (
-    // biome-ignore lint/a11y/useMediaCaption: ambient bg has no audio + no semantic content
     <video
       autoPlay
       loop

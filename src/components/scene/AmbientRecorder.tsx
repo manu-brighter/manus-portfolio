@@ -63,7 +63,7 @@ export function AmbientRecorder() {
       const canvas = document.querySelector<HTMLCanvasElement>('[data-scene="root"] canvas');
       if (!canvas) {
         // biome-ignore lint/suspicious/noConsole: debug tool
-        console.error("[ambient-recorder] no [data-scene=\"root\"] canvas found");
+        console.error('[ambient-recorder] no [data-scene="root"] canvas found');
         return;
       }
 
