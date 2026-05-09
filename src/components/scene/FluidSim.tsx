@@ -74,6 +74,45 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
     orchestratorRef.current?.resize(Math.floor(size.width * dpr), Math.floor(size.height * dpr));
   }, [size, gl]);
 
+  // Coarse-pointer scroll-pause: iOS Safari's tile-based compositor
+  // briefly drops position:fixed WebGL layers during fast scrolling
+  // (especially direction-changes) when the GPU is busy with other
+  // work. The 8-pass sim pipeline running every frame during scroll
+  // is enough load to trigger the cull → canvas blinks in/out. The
+  // CSS hints (`translateZ`, `backface-visibility`) didn't survive
+  // heavy compositor stress in real-device testing.
+  //
+  // Fix: skip orchestrator.step() entirely while a scroll is in
+  // progress. `preserveDrawingBuffer: true` (Canvas.tsx) keeps the
+  // last frame visible, so the canvas stays composited with the
+  // previous content while iOS handles the scroll. Sim resumes 150ms
+  // after the last scroll event.
+  const scrollingRef = useRef(false);
+  const scrollTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!isCoarsePointer) return;
+    const onScroll = () => {
+      scrollingRef.current = true;
+      if (scrollTimeoutRef.current !== null) {
+        window.clearTimeout(scrollTimeoutRef.current);
+      }
+      scrollTimeoutRef.current = window.setTimeout(() => {
+        scrollingRef.current = false;
+        scrollTimeoutRef.current = null;
+      }, 150);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (scrollTimeoutRef.current !== null) {
+        window.clearTimeout(scrollTimeoutRef.current);
+        scrollTimeoutRef.current = null;
+      }
+      scrollingRef.current = false;
+    };
+  }, [isCoarsePointer]);
+
   // RAF loop: run sim + render to screen. `measuring` triggers a
   // gl.finish() readback so SceneProvider's tier auto-tuner gets a
   // real GPU frametime sample; outside that window the loop is
@@ -85,10 +124,16 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
   // is gated on `isStarted()` because frametime samples taken during
   // the warmup window only capture render-toon (~1ms) and would
   // mis-tier first-time visitors as `high`.
+  //
+  // step() is skipped during active scroll on coarse-pointer (see
+  // scrollingRef above) — preserves the last frame in the buffer so
+  // iOS's compositor sees a static canvas + doesn't cull the layer.
   useEffect(() => {
     return subscribe((deltaMs, elapsedMs) => {
       const orchestrator = orchestratorRef.current;
       if (!orchestrator) return;
+
+      if (scrollingRef.current) return;
 
       const dt = Math.min(deltaMs * 0.001, 0.033);
       const t0 = performance.now();
