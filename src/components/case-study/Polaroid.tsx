@@ -65,7 +65,12 @@ export function Polaroid({
   const cssVars = { "--polaroid-spot": SPOT_VAR[spot] } as CSSProperties;
   return (
     <figure
-      className={`plate-corners relative inline-block bg-paper-tint p-[clamp(0.5rem,1.2vh,1rem)] ${className ?? ""}`}
+      // pt is overridden to a 1rem floor so the absolutely-positioned
+      // datestamp (top-1 right-2, ~12px tall) doesn't clip into the
+      // image. The shared `p-[clamp(0.5rem,1.2vh,1rem)]` resolved to
+      // 8-11px on mobile heights, leaving the datestamp's bottom edge
+      // overlapping the inner image div.
+      className={`plate-corners relative inline-block bg-paper-tint p-[clamp(0.5rem,1.2vh,1rem)] pt-[clamp(1rem,1.5vh,1.25rem)] ${className ?? ""}`}
       style={{
         ...cssVars,
         transform: `rotate(${effectiveRotate}deg)`,
@@ -114,7 +119,10 @@ export function Polaroid({
         </span>
       ) : null}
       {caption ? (
-        <figcaption className="mt-2 font-mono text-[clamp(0.5625rem,0.75vh,0.7rem)] tracking-[0.18em] text-ink-muted uppercase">
+        // Mono uppercase + tracking-0.18em pushes the caption past
+        // narrow mobile polaroid widths. Allow break-anywhere wrap +
+        // tighter tracking on mobile so it stays inside the card.
+        <figcaption className="mt-2 break-words font-mono text-[clamp(0.5rem,0.75vh,0.7rem)] tracking-[0.12em] text-ink-muted uppercase md:tracking-[0.18em] [overflow-wrap:anywhere]">
           {caption}
         </figcaption>
       ) : null}
