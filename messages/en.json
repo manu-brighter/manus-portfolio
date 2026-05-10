@@ -326,7 +326,7 @@
           },
           {
             "name": "Tailwind CSS",
-            "vibecoded": true
+            "vibecoded": false
           },
           {
             "name": "tRPC",
