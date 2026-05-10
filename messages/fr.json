@@ -325,10 +325,6 @@
             "vibecoded": true
           },
           {
-            "name": "Tailwind CSS",
-            "vibecoded": false
-          },
-          {
             "name": "tRPC",
             "vibecoded": true
           },
@@ -398,6 +394,9 @@
           },
           {
             "name": "Git"
+          },
+          {
+            "name": "Tailwind CSS"
           },
           {
             "name": "Lightroom"
