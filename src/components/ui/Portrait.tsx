@@ -50,16 +50,16 @@ export function Portrait({
         <picture className="relative block aspect-[2/3] overflow-hidden border-[2px] border-ink bg-paper-shade">
           <source
             type="image/avif"
-            srcSet="/profile/portrait-480w.avif 480w, /profile/portrait-800w.avif 800w, /profile/portrait-1200w.avif 1200w"
+            srcSet="/profile/manuel-heller-portrait-480w.avif 480w, /profile/manuel-heller-portrait-800w.avif 800w, /profile/manuel-heller-portrait-1200w.avif 1200w"
             sizes={sizes}
           />
           <source
             type="image/webp"
-            srcSet="/profile/portrait-480w.webp 480w, /profile/portrait-800w.webp 800w, /profile/portrait-1200w.webp 1200w"
+            srcSet="/profile/manuel-heller-portrait-480w.webp 480w, /profile/manuel-heller-portrait-800w.webp 800w, /profile/manuel-heller-portrait-1200w.webp 1200w"
             sizes={sizes}
           />
           <img
-            src="/profile/portrait-800w.jpg"
+            src="/profile/manuel-heller-portrait-800w.jpg"
             alt={alt}
             width={800}
             height={1200}

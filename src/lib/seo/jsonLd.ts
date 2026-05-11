@@ -21,8 +21,8 @@ export function buildJsonLd(locale: Locale, description: string) {
     url: SITE.url,
     image: {
       "@type": "ImageObject",
-      contentUrl: `${SITE.url}/profile/portrait-1200w.jpg`,
-      url: `${SITE.url}/profile/portrait-1200w.jpg`,
+      contentUrl: `${SITE.url}/profile/manuel-heller-portrait-1200w.jpg`,
+      url: `${SITE.url}/profile/manuel-heller-portrait-1200w.jpg`,
       width: 800,
       height: 1200,
       caption: "Portraitfoto Manuel Heller, Full-Stack Developer Basel",
