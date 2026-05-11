@@ -117,7 +117,12 @@ function rasterizeText(
 
   // Apply clip range if specified (calligraphy-reveal strips).
   if (clipFrom > 0 || clipTo < 1) {
-    const textLeft = (width - metrics.width) / 2;
+    // `textLeft` can drift slightly negative when font-size auto-fit
+    // brings metrics.width close to but not exactly within `width * 0.88`
+    // due to float precision. Clamp so the clip rect never has a
+    // negative x (which would invisibly skip the leading slice on
+    // certain GPUs / Canvas implementations).
+    const textLeft = Math.max(0, (width - metrics.width) / 2);
     const left = textLeft + metrics.width * clipFrom;
     const right = textLeft + metrics.width * clipTo;
     ctx.save();
