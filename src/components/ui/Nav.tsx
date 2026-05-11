@@ -127,8 +127,11 @@ export function Nav() {
       if (!el) return;
       if (lenis && !reducedMotion) {
         // Offset clears the sticky navbar (~64px). Same offset
-        // pattern as WorkCard's anchor scroll.
-        lenis.scrollTo(el, { offset: -64 });
+        // pattern as WorkCard's anchor scroll. `immediate` mirrors
+        // reducedMotion so a runtime preference flip between
+        // MotionProvider's Lenis-dispose and this click doesn't
+        // smooth-scroll past the user's choice.
+        lenis.scrollTo(el, { offset: -64, immediate: reducedMotion });
       } else {
         el.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
       }

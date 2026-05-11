@@ -65,26 +65,23 @@ export function NavMobileMenu({ items, activeSection, buildHref, onAnchorClick }
   }, [open]);
 
   // `inert` on <main> traps keyboard / AT focus inside the open menu.
-  // Same toggle on the panel itself in the inverse direction so the
-  // panel is non-focusable / AT-hidden while it's animating-out at
-  // opacity 0 (the panel is always-rendered now for smooth open/close
-  // transitions instead of conditionally mounted).
+  // Set via effect because <main> is rendered by the parent layout, not
+  // this component. The panel's own `inert` lives as a JSX attribute on
+  // the render below — setting it in an effect would leave a first-paint
+  // window where the closed panel is focusable / AT-visible before the
+  // effect fires.
   // No body overflow lock — see the file header for the iOS Safari
   // sticky-navbar bug that motivated dropping it. The `inert` attribute
   // doesn't touch body scroll context, so it doesn't trigger that bug.
   useEffect(() => {
     const main = document.getElementById("main");
-    const panel = panelRef.current;
     if (open) {
       main?.setAttribute("inert", "");
-      panel?.removeAttribute("inert");
     } else {
       main?.removeAttribute("inert");
-      panel?.setAttribute("inert", "");
     }
     return () => {
       main?.removeAttribute("inert");
-      panel?.removeAttribute("inert");
     };
   }, [open]);
 
@@ -133,6 +130,12 @@ export function NavMobileMenu({ items, activeSection, buildHref, onAnchorClick }
         ref={panelRef}
         aria-modal={open ? "true" : undefined}
         aria-hidden={open ? undefined : true}
+        // `inert` as a JSX attribute (not via useEffect) so the closed
+        // panel is non-tabbable / AT-hidden from the very first paint.
+        // The previous effect-based toggle had a render → paint → effect
+        // window where keyboard focus from address-bar Tab could land
+        // inside the hidden panel.
+        {...(open ? {} : { inert: "" })}
         role="dialog"
         aria-label={t("nav.mobileMenu.open")}
         className={`absolute top-full right-0 left-0 border-paper-line border-b bg-paper shadow-lg transition-[opacity,transform] duration-300 ease-out ${
