@@ -4,12 +4,17 @@ import { useEffect } from "react";
 
 /**
  * One-shot recording tool — captures the live FluidSim canvas as a
- * webm via MediaRecorder + downloads it. Used to generate the
- * `public/ambient-loop.webm` asset that the mobile path plays back
+ * VP9 webm via MediaRecorder + downloads it. Used to generate the
+ * `public/ambient-loop.mp4` asset that the mobile path plays back
  * instead of running the WebGL pipeline live (iOS Safari was culling
  * the position:fixed WebGL layer during momentum scroll, causing a
  * visible blink — pre-rendered video is composited differently and
- * doesn't hit that path).
+ * doesn't hit that path). MediaRecorder outputs webm; we transcode
+ * to H.264 mp4 for universal iOS Safari support.
+ *
+ * Dev-only: gated in `[locale]/layout.tsx` via NODE_ENV + next/dynamic
+ * so the chunk is tree-shaken from production bundles entirely. The
+ * MediaRecorder glue here never ships to prod users.
  *
  * Usage (one-time, from Manuel's dev environment):
  *
@@ -24,10 +29,14 @@ import { useEffect } from "react";
  *      ~4 seconds for the sim's ambient warmup. The recorder waits
  *      automatically, but visual feedback helps you confirm.
  *   4. After `record-bg` seconds the browser auto-downloads
- *      `ambient-loop-Ns.webm`. Save it to `public/ambient-loop.webm`.
- *      Optionally re-encode with ffmpeg for size:
- *        ffmpeg -i ambient-loop.webm -c:v libvpx-vp9 -crf 35 -b:v 0 \
- *          -an public/ambient-loop.webm
+ *      `ambient-loop-Ns.webm`. Transcode to H.264 mp4 for iOS
+ *      Safari compatibility (VP9 mp4 plays as a still on iOS):
+ *        ffmpeg -i ambient-loop-Ns.webm -c:v libx264 -crf 30 \
+ *          -movflags +faststart -an public/ambient-loop.mp4
+ *      Optionally boomerang for a seamless loop:
+ *        ffmpeg -i ambient-loop.mp4 \
+ *          -filter_complex "[0:v]reverse[r];[0:v][r]concat=n=2:v=1:a=0" \
+ *          -c:v libx264 -crf 30 -movflags +faststart public/ambient-loop.mp4
  *
  * Inactive when no query param. Returns null in all cases — pure
  * side-effect component.

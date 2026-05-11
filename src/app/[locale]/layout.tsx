@@ -1,12 +1,28 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import type { ReactNode } from "react";
 import { MotionProvider } from "@/components/motion/MotionProvider";
-import { AmbientRecorder } from "@/components/scene/AmbientRecorder";
 import { InkWipeOverlay } from "@/components/scene/InkWipeOverlay";
 import { SceneProvider } from "@/components/scene/SceneProvider";
+
+// AmbientRecorder is the `?record-bg=N` dev tool that captured the
+// ambient-loop.mp4 used by AmbientVideo on coarse-pointer. It carries
+// MediaRecorder glue + UI scaffolding that nobody on prod needs. Gate
+// it behind NODE_ENV: dynamic() + a build-time-constant conditional
+// means the chunk is tree-shaken from production bundles entirely.
+const AmbientRecorder =
+  process.env.NODE_ENV === "production"
+    ? null
+    : dynamic(
+        () =>
+          import("@/components/scene/AmbientRecorder").then((m) => ({
+            default: m.AmbientRecorder,
+          })),
+        { ssr: false },
+      );
 import { Footer } from "@/components/ui/Footer";
 import { Loader } from "@/components/ui/Loader";
 import { Nav } from "@/components/ui/Nav";
@@ -76,7 +92,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
               <ScrollProgress />
               <Loader />
               <InkWipeOverlay />
-              <AmbientRecorder />
+              {AmbientRecorder ? <AmbientRecorder /> : null}
             </SceneProvider>
           </MotionProvider>
         </NextIntlClientProvider>

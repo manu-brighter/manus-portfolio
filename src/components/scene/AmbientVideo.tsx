@@ -40,7 +40,12 @@ export function AmbientVideo() {
       loop
       muted
       playsInline
-      preload="auto"
+      // `metadata` not `auto` — the asset is ~5MB and `preload="auto"`
+      // tells the UA to fetch the whole thing eagerly even before any
+      // interaction. On cellular that's real bandwidth. `metadata` is
+      // enough for the UA to start playback at first paint while
+      // streaming the rest progressively. autoplay still works.
+      preload="metadata"
       aria-hidden="true"
       tabIndex={-1}
       data-scene="root"
