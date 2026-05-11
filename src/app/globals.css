@@ -126,12 +126,15 @@
        Safari occasionally allows a few px of horizontal scroll when
        a descendant creates its own stacking / scroll context (the
        persistent fixed FluidSim canvas + Lenis scroll + sticky nav
-       all together). Mirroring `overflow-x: clip` and capping
-       `max-width: 100vw` on body stops the body box itself from
-       expanding past viewport. `clip` (vs `hidden`) doesn't create a
-       scroll containing block, so position:fixed children stay
-       viewport-bound — the same reasoning as the html rule. */
-    max-width: 100vw;
+       all together). `clip` (vs `hidden`) doesn't create a scroll
+       containing block, so position:fixed children stay viewport-
+       bound — the same reasoning as the html rule.
+       Note: deliberately NOT `max-width: 100vw` — on platforms where
+       a scrollbar is reserved (reduced-motion path restores the
+       scrollbar) 100vw exceeds the body content area by the scrollbar
+       width, shifting right-edge content past the visible viewport.
+       `overflow-x: clip` alone solves the iOS case without that
+       regression. */
     overflow-x: clip;
   }
 
