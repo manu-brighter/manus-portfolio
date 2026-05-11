@@ -46,15 +46,50 @@ Aktuell keine. Audio-Loop wurde gestrichen, weil das ursprünglich geplante Audi
 
 ---
 
-## Build-Pipeline (kommt später)
+## Build-Pipeline
 
-Phase 9 des Plans (`docs/plan.md`) bringt ein Script `scripts/optimize-assets.ts`, das:
+Live in `scripts/optimize-assets.mjs` (`.mjs`, nicht `.ts` — kein ts-runner installiert). Deklarative Tasks pro Asset-Gruppe.
 
-1. Fotos aus `photography/source/` → AVIF (mehrere Sizes) + WebP-Fallback → `public/photos/`
-2. Screenshots aus `joggediballa/screenshots/` → optimiertes WebP → `public/projects/joggediballa/`
-3. Profilfoto → AVIF + responsive sizes → `public/profile/`
+```bash
+# Alle Gruppen
+node scripts/optimize-assets.mjs
 
-Nur die `public/`-Outputs werden gecommittet. Die Roh-Inputs hier in `content-input/` bleiben lokal.
+# Nur eine Gruppe
+node scripts/optimize-assets.mjs photography
+node scripts/optimize-assets.mjs profile
+node scripts/optimize-assets.mjs joggediballa
+node scripts/optimize-assets.mjs portfolio
+```
+
+Tasks ohne vorhandene Source-Datei werden mit `⊘ skipped` geloggt, nicht gefehlt — pratisch wenn nur eine einzelne Gruppe regeneriert werden soll.
+
+### Portrait-Workflow (`profile`)
+
+Wenn das Original wieder verfügbar ist:
+
+1. Datei ablegen unter `content-input/profile/profile-picture.jpg`
+2. Ausführen: `node scripts/optimize-assets.mjs profile`
+3. Generiert in `public/profile/`:
+   - 3× AVIF (480w, 800w, 1200w) @ q=60
+   - 3× WebP (480w, 800w, 1200w) @ q=80
+   - 2× JPG (800w für `<img>`-Fallback in `Portrait.tsx`, 1200w für JSON-LD `Person.image.contentUrl` und Image-Sitemap) @ q=90 mozjpeg
+   - Alle mit EXIF Copyright + Artist
+   - Naming: `manuel-heller-portrait-{width}w.{ext}` — Filename trägt das SEO-Keyword für Google Image Search
+
+Aktuell ist das 1200w JPG aus dem WebP rekonstruiert (Original ging verloren). Sobald das Original wieder da ist, ersetzt ein Lauf des Scripts alle Varianten in einem Rutsch durch frische High-Fidelity-Encodes.
+
+### Was wird wo eingelesen
+
+| Gruppe | Source-Pfad | Output-Dir |
+|---|---|---|
+| `photography` | `content-input/photography/source/DSC*.jpg` | `public/photography/` |
+| `profile` | `content-input/profile/profile-picture.jpg` | `public/profile/` |
+| `portfolio` | `public/projects/portfolio/source/homepage-landscape.png` | `public/projects/portfolio/` |
+| `joggediballa` | `public/projects/joggediballa/source/*-lightmode-*.png` | `public/projects/joggediballa/` |
+
+Photography + profile-Sources sind gitignored (große Originale, semi-private Inhalte). Portfolio + joggediballa-Sources liegen im Repo, weil's kleinere PNG-Screenshots sind und Re-Generierbarkeit wichtiger ist als Größe.
+
+Nur die `public/`-Outputs werden gecommittet.
 
 ---
 
