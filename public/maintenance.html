@@ -25,12 +25,14 @@
     error_page 503 /maintenance.html;
     location = /maintenance.html {
       internal;
-      add_header Cache-Control "no-store, must-revalidate";
+      add_header Cache-Control "no-store, must-revalidate" always;
     }
 
   The internal = directive prevents direct GET /maintenance.html (only the
-  503 error_page handler can serve it). Cache-Control prevents Cloudflare
-  + browsers from caching the maintenance state past the toggle-off.
+  503 error_page handler can serve it). The `always` flag on Cache-Control
+  is REQUIRED — without it nginx only emits the header on 2xx/3xx, and
+  this page ships as 503, so Cloudflare could otherwise cache the 503
+  at edge nodes and leave the site stuck on maintenance after toggle-off.
 
   Returns proper HTTP 503 so search engines treat the outage as
   temporary and don't deindex.
@@ -235,6 +237,15 @@
       footer a:hover {
         color: var(--rose);
         border-bottom-color: var(--rose);
+      }
+      /* Keyboard focus — mint ring matches the rest of the site's
+         focus-visible convention. Tab onto the mailto without this
+         and the visible affordance is just the border-bottom which
+         can look like text-underline rather than active focus. */
+      footer a:focus-visible {
+        outline: 2px solid var(--mint);
+        outline-offset: 3px;
+        border-radius: 1px;
       }
 
       @media (prefers-reduced-motion: no-preference) {

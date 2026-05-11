@@ -19,7 +19,10 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
  * that the motion reads as "alive" without ever pulling the eye to
  * it. Pure CSS — no JS, no GSAP timeline, no cleanup races.
  *
- * Reduced-motion: render nothing (component returns null).
+ * Reduced-motion: same halo rendered without the rotation keyframe.
+ * Keeping the visual presence (static gradient) is the fair compromise
+ * — strip the motion, keep the ambient colour bloom that's part of
+ * the section's visual identity.
  *
  * Place inside the hero-skill container (parent must provide
  * `position: relative isolate` for proper stacking context).
@@ -27,12 +30,15 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 export function HeroSkillPulse() {
   const reducedMotion = useReducedMotion();
-  if (reducedMotion) return null;
 
   return (
     <div
       aria-hidden="true"
-      className="hero-skill-aura pointer-events-none absolute"
+      className={
+        reducedMotion
+          ? "pointer-events-none absolute"
+          : "hero-skill-aura pointer-events-none absolute"
+      }
       style={{
         top: "10%",
         left: "-10%",
@@ -43,7 +49,10 @@ export function HeroSkillPulse() {
         opacity: 0.22,
         background:
           "conic-gradient(from 0deg at 50% 50%, var(--color-spot-rose), var(--color-spot-amber), var(--color-spot-mint), var(--color-spot-violet), var(--color-spot-rose))",
-        willChange: "transform",
+        // `willChange` dropped — browser auto-promotes layers for
+        // active CSS animations; declaring it permanently held VRAM
+        // for this decorative element even when off-screen. Same
+        // logic that drove the Canvas.tsx willChange removal.
       }}
     />
   );

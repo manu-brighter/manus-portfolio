@@ -74,6 +74,14 @@ function TypeAsFluidCanvas() {
   // of idle before stamping a default word.
   const lastTypedAtRef = useRef(0);
 
+  // Active stamp-reveal timers. `stampWord` schedules ~23 setTimeouts
+  // per call (20 strips + 3 wave bursts); each registers its ID here
+  // so cleanup can clear them and stop them firing against a disposed
+  // GL context. Also doubles as an in-flight count for the idle-
+  // rotation race-prevention check below.
+  const stampTimersRef = useRef<Set<number>>(new Set<number>());
+  const disposedRef = useRef(false);
+
   // ---- Mount: build orchestrator + stamper ----
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -141,7 +149,7 @@ function TypeAsFluidCanvas() {
       TYPE_AS_FLUID_DEFAULTS.defaultWords[
         Math.floor(Math.random() * TYPE_AS_FLUID_DEFAULTS.defaultWords.length)
       ] ?? "MANUEL";
-    stampWord(stamperRef.current, orchestrator, initial);
+    stampWord(stamperRef.current, orchestrator, initial, stampTimersRef.current, disposedRef);
 
     const onResize = () => {
       const ratio = Math.min(window.devicePixelRatio || 1, 2);
@@ -155,6 +163,14 @@ function TypeAsFluidCanvas() {
 
     return () => {
       window.removeEventListener("resize", onResize);
+      // Flip disposed flag FIRST so any callback that's already
+      // executing (race between clear + fire) early-returns instead
+      // of touching disposed GL handles.
+      disposedRef.current = true;
+      for (const id of stampTimersRef.current) {
+        window.clearTimeout(id);
+      }
+      stampTimersRef.current.clear();
       stamperRef.current?.dispose();
       stamperRef.current = null;
       orchestrator.dispose();
@@ -210,7 +226,7 @@ function TypeAsFluidCanvas() {
       const stamper = stamperRef.current;
       const orchestrator = orchestratorRef.current;
       if (!stamper || !orchestrator) return;
-      stampWord(stamper, orchestrator, text);
+      stampWord(stamper, orchestrator, text, stampTimersRef.current, disposedRef);
     }, 250);
     return () => window.clearTimeout(handle);
   }, [text]);
@@ -219,12 +235,18 @@ function TypeAsFluidCanvas() {
   // whichever word is currently most relevant. If the user has typed
   // something into the input, the rotation re-stamps THAT word (in a
   // fresh random Riso ink each time); otherwise pulls the next default
-  // from TYPE_AS_FLUID_DEFAULTS. 3s idle gate avoids racing the
-  // debounced typing-stamp (which fires 250ms after each keystroke).
+  // from TYPE_AS_FLUID_DEFAULTS.
+  //
+  // Race protection: skip if a stamp-reveal is already in flight
+  // (stampTimersRef non-empty). Without this, the 5s interval could
+  // fire 4.75s into a typing-debounce reveal that itself runs ~2.45s,
+  // producing two overlapping 23-timer animations with cross-color
+  // bleed. The size check is cheap and exact.
   useEffect(() => {
     const handle = window.setInterval(() => {
       const sinceTyped = performance.now() - lastTypedAtRef.current;
       if (lastTypedAtRef.current !== 0 && sinceTyped < 3000) return;
+      if (stampTimersRef.current.size > 0) return;
       const stamper = stamperRef.current;
       const orchestrator = orchestratorRef.current;
       if (!stamper || !orchestrator) return;
@@ -234,7 +256,7 @@ function TypeAsFluidCanvas() {
           : (TYPE_AS_FLUID_DEFAULTS.defaultWords[
               Math.floor(Math.random() * TYPE_AS_FLUID_DEFAULTS.defaultWords.length)
             ] ?? "MANUEL");
-      stampWord(stamper, orchestrator, word);
+      stampWord(stamper, orchestrator, word, stampTimersRef.current, disposedRef);
     }, 5000);
     return () => window.clearInterval(handle);
   }, []);
@@ -281,7 +303,7 @@ function TypeAsFluidCanvas() {
                   : (TYPE_AS_FLUID_DEFAULTS.defaultWords[
                       Math.floor(Math.random() * TYPE_AS_FLUID_DEFAULTS.defaultWords.length)
                     ] ?? "MANUEL");
-              stampWord(stamper, orchestrator, word);
+              stampWord(stamper, orchestrator, word, stampTimersRef.current, disposedRef);
             }}
             className="grid aspect-square shrink-0 min-w-[4.5rem] place-items-center border-[1.5px] border-ink bg-paper text-ink text-2xl leading-none shadow-[3px_3px_0_var(--color-ink)] transition-[transform,box-shadow] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[1px_1px_0_var(--color-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
           >
@@ -297,6 +319,26 @@ function randomSpot(): "rose" | "amber" | "mint" | "violet" {
   return SPOT_KEYS[Math.floor(Math.random() * SPOT_KEYS.length)] ?? "rose";
 }
 
+// Stamp-pipeline tunables — module-level so they're shared across all
+// calls instead of allocated per-invocation. The values fit a hot loop
+// (5s idle re-stamp × overlapping typing debounce) without churn.
+const STAMP_STRIPS = 20;
+const STAMP_TOTAL_MS = 1200;
+// Ease-in-out cubic: pen accelerates from a soft start, races through
+// the middle of the word, decelerates into a calm finish. Classic
+// handwriting motion feel — slow → fast → slow.
+const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2);
+
+// Per-splat radius overrides — global splatRadius (0.005) is tuned
+// for the delicate cursor trail; word-bloom velocity injections need
+// far bigger spatial extent to actually sweep the dye field around
+// instead of poking pinpoint holes that the sim shrugs off.
+const RADIUS_WET_PEN = 0.018;
+const RADIUS_BLOOM = 0.055;
+const RADIUS_STIR = 0.04;
+
+const TRANSPARENT = [0, 0, 0] as const;
+
 /**
  * Stamp a word calligraphy-style: progressive left→right strip-reveal,
  * then nudge gently into motion.
@@ -305,44 +347,49 @@ function randomSpot(): "rose" | "amber" | "mint" | "violet" {
  *   - Pick one Riso ink for the whole word (random spot). All strips
  *     paint the same color so the result reads as "one continuous
  *     stroke" rather than rainbow letters.
- *   - Schedule N=14 strips over ~850ms. Each strip stamps only the
+ *   - Schedule 20 strips over 1200ms. Each strip stamps only the
  *     `[clipFrom..clipTo]` slice of the word's bounding box — the
  *     freshly-revealed slice, never the part that's already inked.
- *   - Clip range advances on ease-out cubic so the visual "pen tip"
- *     races through the start of the word and decelerates into a
- *     trailing flourish at the end — fancy-calligraphy feel.
+ *   - Clip range advances on ease-in-out cubic so the visual "pen tip"
+ *     starts slow, races through the middle, and decelerates at the
+ *     end — classic handwriting cadence.
  *   - Strip stamps run with strength 1.4 + 1 blur iter, same as the
  *     prior instant stamp — each slice is a small area so it doesn't
  *     compound.
- *   - At ~end of reveal, 8 velocity-only splats nudge the now-finished
- *     word into gentle motion (velocity dissipation 0.95 carries this
- *     for ~1s before the slow-fade takes over). No storms — magnitudes
- *     stay at 0.10..0.25 like the previous instant-stamp version.
+ *   - 3 post-write waves nudge the now-finished word into motion:
+ *     radial bloom at +60ms, turbulence stir at +550ms, late swirl
+ *     at +1250ms. With confinement: 25 + velocity dissipation 0.975
+ *     these carry for ~2s before the slow-fade takes over.
+ *
+ * Timer discipline: every setTimeout registers its ID in `timers` so
+ * the component's unmount cleanup can clear them and short-circuit
+ * the disposed-flag check inside each callback. Without this, a fast
+ * unmount (route change while a stamp is running) would fire the
+ * remaining timers ~2.5s later against a disposed GL context.
  */
-function stampWord(stamper: TextStamper, orchestrator: FluidOrchestrator, word: string) {
+function stampWord(
+  stamper: TextStamper,
+  orchestrator: FluidOrchestrator,
+  word: string,
+  timers: Set<number>,
+  disposedRef: { current: boolean },
+) {
   const color = randomSpot();
-  const STRIPS = 20;
-  const TOTAL_MS = 1200;
-  // Ease-in-out cubic: pen accelerates from a soft start, races
-  // through the middle of the word, decelerates into a calm finish.
-  // Classic handwriting motion feel — slow→fast→slow.
-  const ease = (t: number) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2);
 
-  const transparent = [0, 0, 0] as const;
+  const schedule = (fn: () => void, delayMs: number) => {
+    const id = window.setTimeout(() => {
+      timers.delete(id);
+      if (disposedRef.current) return;
+      fn();
+    }, delayMs);
+    timers.add(id);
+  };
 
-  // Per-splat radius overrides — global splatRadius (0.005) is tuned
-  // for the delicate cursor trail; word-bloom velocity injections need
-  // far bigger spatial extent to actually sweep the dye field around
-  // instead of poking pinpoint holes that the sim shrugs off.
-  const RADIUS_WET_PEN = 0.018;
-  const RADIUS_BLOOM = 0.055;
-  const RADIUS_STIR = 0.04;
-
-  for (let i = 1; i <= STRIPS; i++) {
-    const clipFrom = ease((i - 1) / STRIPS);
-    const clipTo = ease(i / STRIPS);
-    const at = (i / STRIPS) * TOTAL_MS;
-    window.setTimeout(() => {
+  for (let i = 1; i <= STAMP_STRIPS; i++) {
+    const clipFrom = easeInOutCubic((i - 1) / STAMP_STRIPS);
+    const clipTo = easeInOutCubic(i / STAMP_STRIPS);
+    const at = (i / STAMP_STRIPS) * STAMP_TOTAL_MS;
+    schedule(() => {
       stamper.stampText(word, color, 1.4, 1, clipFrom, clipTo);
 
       // Wet-pen-tip nudge — velocity splat trailing the freshly inked
@@ -356,7 +403,7 @@ function stampWord(stamper: TextStamper, orchestrator: FluidOrchestrator, word: 
       orchestrator.injectSplat(
         x,
         y,
-        transparent,
+        TRANSPARENT,
         Math.cos(angle) * speed,
         Math.sin(angle) * speed,
         RADIUS_WET_PEN,
@@ -364,12 +411,11 @@ function stampWord(stamper: TextStamper, orchestrator: FluidOrchestrator, word: 
     }, at);
   }
 
-  // Wave 1: radial bloom — 16 large velocity splats arranged on a ring
-  // around the word's center, each pushing strongly outward. With
-  // RADIUS_BLOOM ~ 11× the global splatRadius these create real
-  // sweeping currents that pull the dye into long tendrils, not
-  // pinpoint dimples.
-  window.setTimeout(() => {
+  // Wave 1: radial bloom — 16 large velocity splats on a ring around
+  // the word's center pushing outward. RADIUS_BLOOM ~ 11× global
+  // splatRadius creates real sweeping currents that pull the dye into
+  // long tendrils, not pinpoint dimples.
+  schedule(() => {
     const N = 16;
     for (let i = 0; i < N; i++) {
       const angle = (i / N) * Math.PI * 2 + (Math.random() - 0.5) * 0.7;
@@ -380,19 +426,18 @@ function stampWord(stamper: TextStamper, orchestrator: FluidOrchestrator, word: 
       orchestrator.injectSplat(
         x,
         y,
-        transparent,
+        TRANSPARENT,
         Math.cos(angle) * speed,
         Math.sin(angle) * speed,
         RADIUS_BLOOM,
       );
     }
-  }, TOTAL_MS + 60);
+  }, STAMP_TOTAL_MS + 60);
 
   // Wave 2: secondary turbulence ~500ms after the bloom — keeps the
-  // dye moving organically instead of coasting back to rest. Scattered
-  // positions + random angles. Sized between wet-pen and bloom so it
-  // stirs without re-exploding.
-  window.setTimeout(() => {
+  // dye moving organically instead of coasting back to rest. Sized
+  // between wet-pen and bloom so it stirs without re-exploding.
+  schedule(() => {
     for (let i = 0; i < 14; i++) {
       const x = 0.15 + Math.random() * 0.7;
       const y = 0.2 + Math.random() * 0.6;
@@ -401,18 +446,17 @@ function stampWord(stamper: TextStamper, orchestrator: FluidOrchestrator, word: 
       orchestrator.injectSplat(
         x,
         y,
-        transparent,
+        TRANSPARENT,
         Math.cos(angle) * speed,
         Math.sin(angle) * speed,
         RADIUS_STIR,
       );
     }
-  }, TOTAL_MS + 550);
+  }, STAMP_TOTAL_MS + 550);
 
   // Wave 3: late slow swirl ~1200ms after Wave 1 — tiny pull/push so
-  // the dye keeps drifting even into the tail of the dissipation
-  // window. Soft so it doesn't reset the calm.
-  window.setTimeout(() => {
+  // the dye keeps drifting into the tail of the dissipation window.
+  schedule(() => {
     for (let i = 0; i < 8; i++) {
       const x = 0.2 + Math.random() * 0.6;
       const y = 0.25 + Math.random() * 0.5;
@@ -421,11 +465,11 @@ function stampWord(stamper: TextStamper, orchestrator: FluidOrchestrator, word: 
       orchestrator.injectSplat(
         x,
         y,
-        transparent,
+        TRANSPARENT,
         Math.cos(angle) * speed,
         Math.sin(angle) * speed,
         RADIUS_STIR,
       );
     }
-  }, TOTAL_MS + 1250);
+  }, STAMP_TOTAL_MS + 1250);
 }

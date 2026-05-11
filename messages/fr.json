@@ -2,7 +2,7 @@
   "meta": {
     "title": "Manuel Heller — Portfolio",
     "titleTemplate": "%s · Manuel Heller",
-    "description": "Développeur full-stack avec un œil d'artiste. Code, photo, design : même artisanat, surface différente.",
+    "description": "Développeur full-stack avec un œil d'artiste. Code, photo, design : même artisanat, surface différente. — Manuel Heller, développeur full-stack à Bâle.",
     "keywords": [
       "Manuel Heller",
       "Portfolio",
@@ -90,7 +90,7 @@
     "taglineSuffix": "démarrage …"
   },
   "about": {
-    "sectionLabel": "Section 01 · À propos",
+    "sectionLabel": "Section 01 · About",
     "headline": "Développeur full-stack avec un œil d'artiste.",
     "subhead": "Code, photo, design : même artisanat, surface différente.",
     "parts": [
@@ -663,7 +663,7 @@
       "koenigsegg": {
         "alt": "Hypercar Koenigsegg sous une arche d'hôtel au crépuscule",
         "stamp": "ST. MORITZ · 2025 · AUTO",
-        "title": "Freezed à 30 km/h.",
+        "title": "Arrêt à 30 km/h.",
         "body": "Parfois, l'image la plus intéressante n'est pas celle avec la vitesse d'obturation la plus élevée. C'est celle avec la lumière qui n'est là que cinq minutes."
       },
       "panorama": {
