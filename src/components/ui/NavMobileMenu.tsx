@@ -135,7 +135,7 @@ export function NavMobileMenu({ items, activeSection, buildHref, onAnchorClick }
         // The previous effect-based toggle had a render → paint → effect
         // window where keyboard focus from address-bar Tab could land
         // inside the hidden panel.
-        {...(open ? {} : { inert: "" })}
+        inert={!open}
         role="dialog"
         aria-label={t("nav.mobileMenu.open")}
         className={`absolute top-full right-0 left-0 border-paper-line border-b bg-paper shadow-lg transition-[opacity,transform] duration-300 ease-out ${
