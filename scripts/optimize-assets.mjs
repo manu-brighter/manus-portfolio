@@ -38,7 +38,7 @@ const COPYRIGHT_EXIF = {
  *   outName: string,
  *   widths: number[],
  *   codecs?: ("avif" | "webp" | "jpg")[],
- *   jpgFallbackWidth?: number,
+ *   jpgFallbackWidth?: number | number[],
  *   resize?: { width?: number, height?: number, fit?: "cover" | "inside" },
  *   quality?: { avif?: number, webp?: number, jpg?: number },
  *   copyright?: boolean,
@@ -106,6 +106,31 @@ const TASKS = [
     quality: { avif: 42, webp: 70 },
     copyright: true,
   },
+  // — Phase 6 · Profile portrait —
+  // Drop the original portrait at `content-input/profile/profile-picture.jpg`
+  // (gitignored), then run:
+  //   node scripts/optimize-assets.mjs profile
+  // Emits the same 480/800/1200w AVIF + WebP set plus JPG fallbacks
+  // at both 800w (display srcset fallback) and 1200w (canonical URL
+  // referenced by JSON-LD Person.image and the home-page image-sitemap).
+  // The 1200w JPG carries EXIF Copyright + Artist via `copyright: true`.
+  // Naming uses the manuel-heller- prefix so the canonical filename
+  // carries the primary SEO keyword for image search.
+  {
+    group: "profile",
+    source: "content-input/profile/profile-picture.jpg",
+    outDir: "public/profile",
+    outName: "manuel-heller-portrait",
+    widths: [480, 800, 1200],
+    codecs: ["avif", "webp"],
+    // Two JPG fallbacks: 800w as the Portrait.tsx <img> srcset
+    // fallback (rare clients without AVIF/WebP support) and 1200w as
+    // the canonical URL referenced by JSON-LD Person.image.contentUrl
+    // and the home-page <image:image> sitemap entry.
+    jpgFallbackWidth: [800, 1200],
+    quality: { avif: 60, webp: 80, jpg: 90 },
+    copyright: true,
+  },
   // — Phase 12 · Work-Section Portfolio + Case Study Joggediballa screenshots —
   {
     group: "portfolio",
@@ -170,7 +195,12 @@ for (const task of tasks) {
   ensureDir(outDir);
 
   const codecs = task.codecs ?? ["avif", "webp"];
-  const fallbackW = task.jpgFallbackWidth ?? task.widths[0];
+  // Accept either a single fallback width or an array of widths (e.g.
+  // portrait wants both 800w for the <img> srcset fallback and 1200w
+  // for the JSON-LD canonical URL).
+  const fallbackWidths = Array.isArray(task.jpgFallbackWidth)
+    ? task.jpgFallbackWidth
+    : [task.jpgFallbackWidth ?? task.widths[0]];
   const q = { ...QUALITY, ...(task.quality ?? {}) };
 
   for (const w of task.widths) {
@@ -191,17 +221,19 @@ for (const task of tasks) {
     }
   }
 
-  let jpgBase = sharp(src);
-  if (task.resize) {
-    jpgBase = jpgBase.resize(task.resize);
+  for (const fallbackW of fallbackWidths) {
+    let jpgBase = sharp(src);
+    if (task.resize) {
+      jpgBase = jpgBase.resize(task.resize);
+    }
+    if (task.copyright) {
+      jpgBase = jpgBase.withMetadata(COPYRIGHT_EXIF);
+    }
+    await jpgBase
+      .resize({ width: fallbackW, withoutEnlargement: true })
+      .jpeg({ quality: q.jpg, mozjpeg: true })
+      .toFile(`${outDir}/${task.outName}-${fallbackW}w.jpg`);
   }
-  if (task.copyright) {
-    jpgBase = jpgBase.withMetadata(COPYRIGHT_EXIF);
-  }
-  await jpgBase
-    .resize({ width: fallbackW, withoutEnlargement: true })
-    .jpeg({ quality: q.jpg })
-    .toFile(`${outDir}/${task.outName}-${fallbackW}w.jpg`);
 
   // biome-ignore lint/suspicious/noConsole: CLI script
   console.log(`✓ ${task.group} · ${task.outName}`);
