@@ -37,18 +37,26 @@ const COPYRIGHT_EXIF = {
 };
 
 // Quality settings per filename pattern, mirroring optimize-assets.mjs.
-// The photography group uses per-photo overrides; portrait uses defaults.
-const DEFAULT_QUALITY = { avif: 60, webp: 80, jpg: 82 };
+// The photography group uses per-photo overrides; portrait uses higher
+// JPG quality + mozjpeg to match the optimize-assets profile task.
+const DEFAULT_QUALITY = { avif: 60, webp: 80, jpg: 82, mozjpeg: false };
 
 /** Return quality settings for a given file path based on its basename. */
 function qualityFor(filePath) {
   const name = filePath.split(/[\\/]/).pop() ?? "";
-  if (name.startsWith("03-panorama")) return { avif: 50, webp: 75, jpg: 82 };
-  if (name.startsWith("04-tree-lake")) return { avif: 38, webp: 65, jpg: 82 };
-  // All other photography slots + portrait use these values
+  if (name.startsWith("03-panorama")) return { avif: 50, webp: 75, jpg: 82, mozjpeg: false };
+  if (name.startsWith("04-tree-lake")) return { avif: 38, webp: 65, jpg: 82, mozjpeg: false };
+  // All other photography slots — same q=82, no mozjpeg (matches the
+  // optimize-assets.mjs photography tasks).
   if (name.startsWith("01-") || name.startsWith("02-") || name.startsWith("05-"))
-    return { avif: 42, webp: 70, jpg: 82 };
-  // portrait-* → defaults
+    return { avif: 42, webp: 70, jpg: 82, mozjpeg: false };
+  // Portrait — match the optimize-assets profile task: q=90 + mozjpeg
+  // so a re-run of embed-copyright doesn't silently downgrade the 1200w
+  // canonical JPG (which JSON-LD + image-sitemap reference). Filename
+  // prefix is `manuel-heller-portrait-*` since the SEO rename pass.
+  if (name.startsWith("manuel-heller-portrait")) {
+    return { avif: 60, webp: 80, jpg: 90, mozjpeg: true };
+  }
   return DEFAULT_QUALITY;
 }
 
@@ -89,7 +97,10 @@ async function processFile(filePath) {
   } else if (ext === ".webp") {
     buf = await sharp(inputBuf).withMetadata(COPYRIGHT_EXIF).webp({ quality: q.webp }).toBuffer();
   } else if (ext === ".jpg") {
-    buf = await sharp(inputBuf).withMetadata(COPYRIGHT_EXIF).jpeg({ quality: q.jpg }).toBuffer();
+    buf = await sharp(inputBuf)
+      .withMetadata(COPYRIGHT_EXIF)
+      .jpeg({ quality: q.jpg, mozjpeg: q.mozjpeg })
+      .toBuffer();
   } else {
     return { skipped: true };
   }
