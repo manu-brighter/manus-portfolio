@@ -79,6 +79,20 @@ export function buildJsonLd(locale: Locale, description: string) {
     url: SITE.url,
     description,
     inLanguage: locale,
+    // `image` powers Google's "site logo next to result" feature
+    // (the way joggediballa.ch gets its big square logo beside
+    // search snippets). 512×512 paper-bg PNG — square shape and
+    // paper-bg both important: square so Google doesn't crop, paper
+    // bg so it looks clean against Google's dark search surfaces
+    // (transparent variant would show whatever bg color Google
+    // chose underneath).
+    image: {
+      "@type": "ImageObject",
+      url: `${SITE.url}/icon-512.png`,
+      contentUrl: `${SITE.url}/icon-512.png`,
+      width: 512,
+      height: 512,
+    },
     author: {
       "@type": "Person",
       name: SITE.author.name,

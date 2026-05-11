@@ -15,7 +15,7 @@ export const SITE = {
   shortName: "Manuel Heller",
   tagline: "Full-Stack Developer · Visual Tinkerer",
   description:
-    "Portfolio von Manuel Heller, Full-Stack Developer (PHP/Vue) bei zvoove Switzerland mit künstlerischem Auge für Webdesign, Fotografie und Shader. Vibecoded mit Claude Code.",
+    "Full-Stack Developer mit künstlerischem Auge. Code, Foto, Design: alles dasselbe Handwerk in unterschiedlicher Form.",
   author: {
     name: "Manuel Heller",
     region: "Basel-Region, Schweiz",
