@@ -104,16 +104,17 @@ function TypeAsFluidCanvas() {
     // paper, not float in turbulent ink.
     orchestrator.init(gl, {
       ...getTierConfig("medium"),
-      // velocity decays in ~1s of no input — gentle motion windows after
-      // each stamp, no accumulating storms.
-      velocityDissipation: 0.95,
+      // velocity lingers ~2× longer than the prior 0.95 (~565ms
+      // half-life vs ~225ms) so the post-write swirl doesn't settle
+      // before the second turbulence wave lands.
+      velocityDissipation: 0.975,
       // text-density slow-fade: ~70% at 1s, ~40% at 3s, gone by ~10s.
       dyeDissipation: 0.995,
-      // Bumped 8 → 18: more pronounced curl/vorticity so the typed
-      // word develops visible swirling motion as it dissipates.
-      // Still tasteful — 18 gives noticeable dynamism without
-      // tearing the letterforms apart before they're readable.
-      confinement: 18,
+      // Bumped 18 → 25: more pronounced curl/vorticity so the typed
+      // word develops big swirling motion as it dissipates outward.
+      // Approaching the "tears letterforms" ceiling (~30) but staying
+      // under so the word is still readable during the reveal.
+      confinement: 25,
       // Smaller hover-trail splats. Medium tier's 0.015 was tuned
       // for the home page hero where cursor ink is a feature; in
       // type-as-fluid the typed word is the star and the cursor
@@ -297,27 +298,134 @@ function randomSpot(): "rose" | "amber" | "mint" | "violet" {
 }
 
 /**
- * Stamp a word, then nudge it gently into motion.
+ * Stamp a word calligraphy-style: progressive left→right strip-reveal,
+ * then nudge gently into motion.
  *
- *   - 1 blur iteration (~3px softening) so letters keep their shape
- *     instead of blurring into blobs (the previous 3 iterations were
- *     much too aggressive for 256² sim grids — sigma was ~12px,
- *     bigger than half the stem-width of typical letterforms).
- *   - 8 velocity-only splats at random points around the canvas with
- *     low force (0.10..0.25). Velocity dissipation 0.95 means this
- *     flow window lasts ~1s, so the text gets a gentle ride and
- *     then settles to slow-fade. No storms because the splat magnitude
- *     is much smaller than the previous 0.4..0.5 perturbation pass.
+ * Pipeline per call:
+ *   - Pick one Riso ink for the whole word (random spot). All strips
+ *     paint the same color so the result reads as "one continuous
+ *     stroke" rather than rainbow letters.
+ *   - Schedule N=14 strips over ~850ms. Each strip stamps only the
+ *     `[clipFrom..clipTo]` slice of the word's bounding box — the
+ *     freshly-revealed slice, never the part that's already inked.
+ *   - Clip range advances on ease-out cubic so the visual "pen tip"
+ *     races through the start of the word and decelerates into a
+ *     trailing flourish at the end — fancy-calligraphy feel.
+ *   - Strip stamps run with strength 1.4 + 1 blur iter, same as the
+ *     prior instant stamp — each slice is a small area so it doesn't
+ *     compound.
+ *   - At ~end of reveal, 8 velocity-only splats nudge the now-finished
+ *     word into gentle motion (velocity dissipation 0.95 carries this
+ *     for ~1s before the slow-fade takes over). No storms — magnitudes
+ *     stay at 0.10..0.25 like the previous instant-stamp version.
  */
 function stampWord(stamper: TextStamper, orchestrator: FluidOrchestrator, word: string) {
-  stamper.stampText(word, randomSpot(), 1.4, 1);
+  const color = randomSpot();
+  const STRIPS = 20;
+  const TOTAL_MS = 1200;
+  // Ease-in-out cubic: pen accelerates from a soft start, races
+  // through the middle of the word, decelerates into a calm finish.
+  // Classic handwriting motion feel — slow→fast→slow.
+  const ease = (t: number) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2);
 
   const transparent = [0, 0, 0] as const;
-  for (let i = 0; i < 8; i++) {
-    const x = 0.15 + Math.random() * 0.7;
-    const y = 0.15 + Math.random() * 0.7;
-    const angle = Math.random() * Math.PI * 2;
-    const speed = 0.1 + Math.random() * 0.15;
-    orchestrator.injectSplat(x, y, transparent, Math.cos(angle) * speed, Math.sin(angle) * speed);
+
+  // Per-splat radius overrides — global splatRadius (0.005) is tuned
+  // for the delicate cursor trail; word-bloom velocity injections need
+  // far bigger spatial extent to actually sweep the dye field around
+  // instead of poking pinpoint holes that the sim shrugs off.
+  const RADIUS_WET_PEN = 0.018;
+  const RADIUS_BLOOM = 0.055;
+  const RADIUS_STIR = 0.04;
+
+  for (let i = 1; i <= STRIPS; i++) {
+    const clipFrom = ease((i - 1) / STRIPS);
+    const clipTo = ease(i / STRIPS);
+    const at = (i / STRIPS) * TOTAL_MS;
+    window.setTimeout(() => {
+      stamper.stampText(word, color, 1.4, 1, clipFrom, clipTo);
+
+      // Wet-pen-tip nudge — velocity splat trailing the freshly inked
+      // strip, angled down + outward, so the ink drips behind the
+      // moving pen instead of sitting frozen.
+      const stripCenter = (clipFrom + clipTo) * 0.5;
+      const x = 0.15 + stripCenter * 0.7;
+      const y = 0.5 + (Math.random() - 0.5) * 0.08;
+      const angle = -Math.PI / 2 + (Math.random() - 0.5) * 1.4;
+      const speed = 0.15 + Math.random() * 0.15;
+      orchestrator.injectSplat(
+        x,
+        y,
+        transparent,
+        Math.cos(angle) * speed,
+        Math.sin(angle) * speed,
+        RADIUS_WET_PEN,
+      );
+    }, at);
   }
+
+  // Wave 1: radial bloom — 16 large velocity splats arranged on a ring
+  // around the word's center, each pushing strongly outward. With
+  // RADIUS_BLOOM ~ 11× the global splatRadius these create real
+  // sweeping currents that pull the dye into long tendrils, not
+  // pinpoint dimples.
+  window.setTimeout(() => {
+    const N = 16;
+    for (let i = 0; i < N; i++) {
+      const angle = (i / N) * Math.PI * 2 + (Math.random() - 0.5) * 0.7;
+      const radius = 0.1 + Math.random() * 0.15;
+      const x = 0.5 + Math.cos(angle) * radius * 1.2;
+      const y = 0.5 + Math.sin(angle) * radius * 0.9;
+      const speed = 0.7 + Math.random() * 0.6;
+      orchestrator.injectSplat(
+        x,
+        y,
+        transparent,
+        Math.cos(angle) * speed,
+        Math.sin(angle) * speed,
+        RADIUS_BLOOM,
+      );
+    }
+  }, TOTAL_MS + 60);
+
+  // Wave 2: secondary turbulence ~500ms after the bloom — keeps the
+  // dye moving organically instead of coasting back to rest. Scattered
+  // positions + random angles. Sized between wet-pen and bloom so it
+  // stirs without re-exploding.
+  window.setTimeout(() => {
+    for (let i = 0; i < 14; i++) {
+      const x = 0.15 + Math.random() * 0.7;
+      const y = 0.2 + Math.random() * 0.6;
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 0.35 + Math.random() * 0.35;
+      orchestrator.injectSplat(
+        x,
+        y,
+        transparent,
+        Math.cos(angle) * speed,
+        Math.sin(angle) * speed,
+        RADIUS_STIR,
+      );
+    }
+  }, TOTAL_MS + 550);
+
+  // Wave 3: late slow swirl ~1200ms after Wave 1 — tiny pull/push so
+  // the dye keeps drifting even into the tail of the dissipation
+  // window. Soft so it doesn't reset the calm.
+  window.setTimeout(() => {
+    for (let i = 0; i < 8; i++) {
+      const x = 0.2 + Math.random() * 0.6;
+      const y = 0.25 + Math.random() * 0.5;
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 0.18 + Math.random() * 0.18;
+      orchestrator.injectSplat(
+        x,
+        y,
+        transparent,
+        Math.cos(angle) * speed,
+        Math.sin(angle) * speed,
+        RADIUS_STIR,
+      );
+    }
+  }, TOTAL_MS + 1250);
 }
