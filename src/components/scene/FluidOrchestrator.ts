@@ -279,6 +279,7 @@ export class FluidOrchestrator {
     dx: number;
     dy: number;
     color: readonly [number, number, number];
+    radius?: number;
   }> = [];
 
   // Uniform cache: WebGLProgram -> (uniform name -> location)
@@ -632,6 +633,7 @@ export class FluidOrchestrator {
     dx: number,
     dy: number,
     color: readonly [number, number, number],
+    radiusOverride?: number,
   ): void {
     const p = this.programs.splat;
     this.activateProgram(p);
@@ -640,7 +642,7 @@ export class FluidOrchestrator {
     this.bindTexture(p, "uTarget", this.velocity.read.texture, 0);
     this.setFloat(p, "uAspectRatio", this.canvasWidth / this.canvasHeight);
     this.setVec2(p, "uPoint", x, y);
-    this.setFloat(p, "uRadius", this.config.splatRadius);
+    this.setFloat(p, "uRadius", radiusOverride ?? this.config.splatRadius);
     this.setVec3(p, "uColor", dx * 10.0, dy * 10.0, 0.0);
     this.renderToFBO(this.velocity.write);
     this.drawQuad();
@@ -784,9 +786,10 @@ export class FluidOrchestrator {
     color: keyof typeof SPOT_COLORS | readonly [number, number, number],
     dx = 0,
     dy = 0,
+    radius?: number,
   ): void {
     const resolved = typeof color === "string" ? SPOT_COLORS[color] : color;
-    this.pendingSplats.push({ x, y, dx, dy, color: resolved });
+    this.pendingSplats.push({ x, y, dx, dy, color: resolved, radius });
   }
 
   step(dt: number, elapsed: number, pointer: PointerState): void {
@@ -859,7 +862,7 @@ export class FluidOrchestrator {
       // bursts land here on the next step after dispatch.
       if (this.pendingSplats.length > 0) {
         for (const s of this.pendingSplats) {
-          this.runSplat(s.x, s.y, s.dx, s.dy, s.color);
+          this.runSplat(s.x, s.y, s.dx, s.dy, s.color, s.radius);
         }
         this.pendingSplats.length = 0;
       }

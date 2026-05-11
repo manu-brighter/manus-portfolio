@@ -73,8 +73,21 @@ function createR8FBO(gl: WebGL2RenderingContext, w: number, h: number): FBO {
  * stamped text feels like it belongs to the same Riso world. Falls back
  * to system serif if the webfont isn't loaded yet (won't happen in
  * practice, by the time the playground route loads, fonts are cached).
+ *
+ * Optional clip range `(clipFrom, clipTo)` in [0..1] of the rendered
+ * text's bounding box. Default (0, 1) = full word. The calligraphy
+ * reveal animation in TypeAsFluid uses this to stamp progressive
+ * horizontal strips — clipFrom=prev, clipTo=current — so each step
+ * paints only the newly-revealed slice instead of re-painting the
+ * already-stamped portion.
  */
-function rasterizeText(text: string, width: number, height: number): Uint8Array {
+function rasterizeText(
+  text: string,
+  width: number,
+  height: number,
+  clipFrom = 0,
+  clipTo = 1,
+): Uint8Array {
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
@@ -101,7 +114,21 @@ function rasterizeText(text: string, width: number, height: number): Uint8Array 
   ctx.fillStyle = "#fff";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(text, width / 2, height / 2);
+
+  // Apply clip range if specified (calligraphy-reveal strips).
+  if (clipFrom > 0 || clipTo < 1) {
+    const textLeft = (width - metrics.width) / 2;
+    const left = textLeft + metrics.width * clipFrom;
+    const right = textLeft + metrics.width * clipTo;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(left, 0, right - left, height);
+    ctx.clip();
+    ctx.fillText(text, width / 2, height / 2);
+    ctx.restore();
+  } else {
+    ctx.fillText(text, width / 2, height / 2);
+  }
 
   // Pull the red channel — same as luminance for B/W fill, and that's
   // what the upload + blur path expects.
@@ -168,14 +195,22 @@ export class TextStamper {
    *
    * iterations: how many H+V blur pairs to run. 3 is comfortable;
    * higher values widen the falloff but eat fill rate.
+   *
+   * clipFrom/clipTo: optional [0..1] slice of the text bounding box
+   * along its width — calligraphy-reveal animation passes successive
+   * (prev, current) strips so each step paints only the freshly-
+   * revealed slice.
    */
   stampText(
     text: string,
     color: "rose" | "amber" | "mint" | "violet" | readonly [number, number, number],
     strength = 0.9,
     iterations = 3,
+    clipFrom = 0,
+    clipTo = 1,
   ): void {
     if (!text || text.length === 0) return;
+    if (clipTo <= clipFrom) return;
     const gl = this.gl;
 
     // ---- CPU rasterize + GPU upload ----
@@ -184,7 +219,7 @@ export class TextStamper {
     // vUv.y=0 (which corresponds to gl_Position.y=-1, the bottom of
     // the screen) samples the bottom of the text. Without this flip
     // letters render upside-down (Canvas2D is Y-down, GL UV is Y-up).
-    const pixels = rasterizeText(text, this.width, this.height);
+    const pixels = rasterizeText(text, this.width, this.height, clipFrom, clipTo);
     gl.bindTexture(gl.TEXTURE_2D, this.uploadTex);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.texSubImage2D(
