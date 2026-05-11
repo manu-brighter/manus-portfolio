@@ -109,9 +109,22 @@ function TypeAsFluidCanvas() {
       velocityDissipation: 0.95,
       // text-density slow-fade: ~70% at 1s, ~40% at 3s, gone by ~10s.
       dyeDissipation: 0.995,
-      confinement: 8,
+      // Bumped 8 → 18: more pronounced curl/vorticity so the typed
+      // word develops visible swirling motion as it dissipates.
+      // Still tasteful — 18 gives noticeable dynamism without
+      // tearing the letterforms apart before they're readable.
+      confinement: 18,
     });
     orchestrator.setAmbientEnabled(false);
+    // Open the warmup gate so step() runs the full sim pipeline
+    // (advect, vorticity, pressure-solve, etc.). Without this the
+    // gate stays closed and step() short-circuits to render-toon
+    // only — text gets stamped directly into the dye FBO via
+    // injectDensityTexture but never advects or dissipates.
+    // InkDropStudio + TypeAsFluidMiniSim already call start() at
+    // their init sites; this was the missing-case after the warmup
+    // gate landed.
+    orchestrator.start();
     orchestratorRef.current = orchestrator;
 
     stamperRef.current = new TextStamper(gl, orchestrator);
