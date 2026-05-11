@@ -214,21 +214,27 @@ function TypeAsFluidCanvas() {
     return () => window.clearTimeout(handle);
   }, [text]);
 
-  // ---- Idle rotation: default-word stamp every 7s when user hasn't typed ----
+  // ---- Idle re-stamp: every 5s after the last keystroke, refresh
+  // whichever word is currently most relevant. If the user has typed
+  // something into the input, the rotation re-stamps THAT word (in a
+  // fresh random Riso ink each time); otherwise pulls the next default
+  // from TYPE_AS_FLUID_DEFAULTS. 3s idle gate avoids racing the
+  // debounced typing-stamp (which fires 250ms after each keystroke).
   useEffect(() => {
     const handle = window.setInterval(() => {
-      if (textRef.current.length > 0) return;
       const sinceTyped = performance.now() - lastTypedAtRef.current;
-      if (lastTypedAtRef.current !== 0 && sinceTyped < 5000) return;
+      if (lastTypedAtRef.current !== 0 && sinceTyped < 3000) return;
       const stamper = stamperRef.current;
       const orchestrator = orchestratorRef.current;
       if (!stamper || !orchestrator) return;
       const word =
-        TYPE_AS_FLUID_DEFAULTS.defaultWords[
-          Math.floor(Math.random() * TYPE_AS_FLUID_DEFAULTS.defaultWords.length)
-        ] ?? "MANUEL";
+        textRef.current.length > 0
+          ? textRef.current
+          : (TYPE_AS_FLUID_DEFAULTS.defaultWords[
+              Math.floor(Math.random() * TYPE_AS_FLUID_DEFAULTS.defaultWords.length)
+            ] ?? "MANUEL");
       stampWord(stamper, orchestrator, word);
-    }, 7000);
+    }, 5000);
     return () => window.clearInterval(handle);
   }, []);
 
