@@ -44,12 +44,20 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
     () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches,
   );
 
-  // Mount + config-change: init orchestrator, dispose on cleanup.
-  // The `config` dep handles the auto-tuner's tier swap — first effect
-  // cleanup (dispose) runs before the next mount (init with new config),
-  // which means a separate "if config changed" effect (previously here)
-  // would always short-circuit. Single effect = single source of truth
-  // for orchestrator lifecycle.
+  // Mount + config-change: init orchestrator, dispose on cleanup,
+  // and schedule the ambient warmup-trigger inline so the trigger is
+  // always tied to the orchestrator that's currently alive.
+  //
+  // The `config` dep handles the auto-tuner's tier swap. Previously
+  // `triggerAmbient` was scheduled in a separate `[]` effect that
+  // didn't re-run on config change, which created a race: if the
+  // setTimeout fired between `setCapability(new tier)` and the React
+  // commit that disposes the old orchestrator + creates the new one,
+  // `triggerAmbient` ran on the about-to-be-disposed orchestrator
+  // → new orchestrator stayed at warmup-gate-closed → sim never woke
+  // → only fixed by a full page reload (cached tier, no swap, no
+  // re-init). Coupling the trigger to the orchestrator's own effect
+  // lifecycle means every fresh-init schedules a fresh trigger.
   useEffect(() => {
     const context = gl.getContext() as WebGL2RenderingContext;
     if (!context || !(context instanceof WebGL2RenderingContext)) return;
@@ -63,7 +71,29 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
     }
     orchestratorRef.current = orchestrator;
 
+    // Ambient warmup-trigger — short residual settle (~100ms) after
+    // init. The long wait (matching the loader+hero-reveal cadence)
+    // already lives in SceneProvider's deferred-mount path.
+    const HERO_REVEAL_MS = 100;
+    let ambientTimer: number | null = null;
+    let ambientListener: (() => void) | null = null;
+    const scheduleAmbient = () => {
+      ambientTimer = window.setTimeout(() => {
+        orchestratorRef.current?.triggerAmbient();
+      }, HERO_REVEAL_MS);
+    };
+    if (isLoaderComplete()) {
+      scheduleAmbient();
+    } else {
+      ambientListener = () => scheduleAmbient();
+      window.addEventListener("loader-complete", ambientListener, { once: true });
+    }
+
     return () => {
+      if (ambientTimer !== null) window.clearTimeout(ambientTimer);
+      if (ambientListener) {
+        window.removeEventListener("loader-complete", ambientListener);
+      }
       orchestrator.dispose();
       orchestratorRef.current = null;
     };
@@ -147,41 +177,6 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
       document.removeEventListener("pointerup", onUp);
     };
   }, [gl, isCoarsePointer]);
-
-  // Kick ambient motion shortly after FluidSim mounts. The long wait
-  // (matching the loader+hero-reveal cadence) lives in SceneProvider's
-  // deferred-mount path — by the time FluidSim is alive, the hero is
-  // done and the user is looking at static paper. This residual delay
-  // covers orchestrator init + first frame settle.
-  //
-  // Guard against race: if the loader already fired before this
-  // component mounted, schedule immediately (with the same delay).
-  useEffect(() => {
-    const HERO_REVEAL_MS = 100;
-    let timer: number | null = null;
-
-    const scheduleAmbient = () => {
-      timer = window.setTimeout(() => {
-        orchestratorRef.current?.triggerAmbient();
-      }, HERO_REVEAL_MS);
-    };
-
-    if (isLoaderComplete()) {
-      scheduleAmbient();
-      return () => {
-        if (timer !== null) window.clearTimeout(timer);
-      };
-    }
-
-    const onLoaderComplete = () => {
-      scheduleAmbient();
-    };
-    window.addEventListener("loader-complete", onLoaderComplete, { once: true });
-    return () => {
-      window.removeEventListener("loader-complete", onLoaderComplete);
-      if (timer !== null) window.clearTimeout(timer);
-    };
-  }, []);
 
   // External splat bus — Work-cards (and future callers) dispatch
   // colored bursts via `dispatchSplat()` from src/lib/fluidBus.ts.
