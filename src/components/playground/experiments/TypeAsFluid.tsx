@@ -114,6 +114,11 @@ function TypeAsFluidCanvas() {
       // Still tasteful — 18 gives noticeable dynamism without
       // tearing the letterforms apart before they're readable.
       confinement: 18,
+      // Smaller hover-trail splats. Medium tier's 0.015 was tuned
+      // for the home page hero where cursor ink is a feature; in
+      // type-as-fluid the typed word is the star and the cursor
+      // should be a delicate accent rather than competing with it.
+      splatRadius: 0.005,
     });
     orchestrator.setAmbientEnabled(false);
     // Open the warmup gate so step() runs the full sim pipeline
