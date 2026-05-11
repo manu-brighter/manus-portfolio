@@ -1,6 +1,20 @@
 import type { Locale } from "@/i18n/routing";
 import { SITE } from "@/lib/site";
 
+// Per-locale image captions — mirror the translated alt-text in
+// messages/{locale}.json so Google's per-language Rich Results surface
+// the right description for /en/, /fr/, /it/ visitors instead of the
+// German fallback. Kept here (one map) rather than reading from the
+// next-intl JSON because jsonLd builds at module-eval time and the
+// next-intl client store isn't available in a server-component / build
+// context.
+const PORTRAIT_CAPTION: Record<Locale, string> = {
+  de: "Portraitfoto Manuel Heller, Full-Stack Developer Basel",
+  en: "Portrait photo Manuel Heller, Full-Stack Developer Basel",
+  fr: "Photo portrait Manuel Heller, développeur full-stack Bâle",
+  it: "Foto ritratto Manuel Heller, sviluppatore full-stack Basilea",
+};
+
 /**
  * JSON-LD structured data — Person + WebSite schema. Embedded as a
  * single <script type="application/ld+json"> tag in the locale layout.
@@ -23,9 +37,9 @@ export function buildJsonLd(locale: Locale, description: string) {
       "@type": "ImageObject",
       contentUrl: `${SITE.url}/profile/manuel-heller-portrait-1200w.jpg`,
       url: `${SITE.url}/profile/manuel-heller-portrait-1200w.jpg`,
-      width: 800,
-      height: 1200,
-      caption: "Portraitfoto Manuel Heller, Full-Stack Developer Basel",
+      width: 1200,
+      height: 1800,
+      caption: PORTRAIT_CAPTION[locale],
       creator: {
         "@type": "Person",
         name: SITE.author.name,
