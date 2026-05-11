@@ -327,8 +327,7 @@ const STAMP_TOTAL_MS = 1200;
 // Ease-in-out cubic: pen accelerates from a soft start, races through
 // the middle of the word, decelerates into a calm finish. Classic
 // handwriting motion feel — slow → fast → slow.
-const easeInOutCubic = (t: number) =>
-  t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2;
+const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2);
 
 // Per-splat radius overrides — global splatRadius (0.005) is tuned
 // for the delicate cursor trail; word-bloom velocity injections need

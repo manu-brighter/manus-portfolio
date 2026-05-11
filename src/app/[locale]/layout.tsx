@@ -7,6 +7,13 @@ import type { ReactNode } from "react";
 import { MotionProvider } from "@/components/motion/MotionProvider";
 import { InkWipeOverlay } from "@/components/scene/InkWipeOverlay";
 import { SceneProvider } from "@/components/scene/SceneProvider";
+import { Footer } from "@/components/ui/Footer";
+import { Loader } from "@/components/ui/Loader";
+import { Nav } from "@/components/ui/Nav";
+import { ScrollProgress } from "@/components/ui/ScrollProgress";
+import { type Locale, routing } from "@/i18n/routing";
+import { buildJsonLd } from "@/lib/seo/jsonLd";
+import { buildLocaleMetadata } from "@/lib/seo/metadata";
 
 // AmbientRecorder is the `?record-bg=N` dev tool that captured the
 // ambient-loop.mp4 used by AmbientVideo on coarse-pointer. It carries
@@ -23,13 +30,6 @@ const AmbientRecorder =
           })),
         { ssr: false },
       );
-import { Footer } from "@/components/ui/Footer";
-import { Loader } from "@/components/ui/Loader";
-import { Nav } from "@/components/ui/Nav";
-import { ScrollProgress } from "@/components/ui/ScrollProgress";
-import { type Locale, routing } from "@/i18n/routing";
-import { buildJsonLd } from "@/lib/seo/jsonLd";
-import { buildLocaleMetadata } from "@/lib/seo/metadata";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
