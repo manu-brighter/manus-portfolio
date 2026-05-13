@@ -28,7 +28,7 @@ export const GROW_MS = 420;
 export const HOLD_MS = 120;
 export const RETRACT_MS = 520;
 
-export type InkWipePhase = "idle" | "growing" | "covered" | "retracting";
+type InkWipePhase = "idle" | "growing" | "covered" | "retracting";
 
 type InkWipeState = {
   phase: InkWipePhase;

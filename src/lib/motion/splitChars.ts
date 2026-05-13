@@ -15,7 +15,7 @@
  * strings are Latin-only so this is future-proofing, not a current need.
  */
 
-export type CharRecord = {
+type CharRecord = {
   /** The char (or grapheme cluster) to render. */
   char: string;
   /** Sequential index across the full string (whitespace inclusive). */

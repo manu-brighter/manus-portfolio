@@ -21,7 +21,7 @@ export type ExperimentSlug = "ink-drop-studio" | "type-as-fluid";
 // type-check without touching every call site.
 export type { SpotColor };
 
-export type InkDropStudioParams = {
+type InkDropStudioParams = {
   /** Velocity dissipation factor (per simulation step, 0..1). Lower
    *  = ink stops sooner; higher = lingers/streaks. */
   velocityDissipation: number;
@@ -37,15 +37,13 @@ export type InkDropStudioParams = {
   splatRadius: number;
 };
 
-export type TypeAsFluidParams = {
+type TypeAsFluidParams = {
   /** Words rotated through as the demo seed. User input overrides
    *  these once they type. */
   defaultWords: readonly string[];
-  /** Seconds the ink lingers before dissipating to invisible. */
-  inkLingerSeconds: number;
 };
 
-export type Experiment = {
+type Experiment = {
   slug: ExperimentSlug;
   /** i18n namespace under `playground.experiments.{key}`. */
   i18nKey: "inkDropStudio" | "typeAsFluid";
@@ -94,5 +92,4 @@ export const INK_DROP_STUDIO_DEFAULTS: InkDropStudioParams = {
 
 export const TYPE_AS_FLUID_DEFAULTS: TypeAsFluidParams = {
   defaultWords: ["MANUEL", "JOGGE DI BALLA", "TOON FLUID", "RISO INK"],
-  inkLingerSeconds: 4.5,
 };

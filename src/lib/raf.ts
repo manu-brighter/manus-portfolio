@@ -20,7 +20,7 @@
 
 import gsap from "gsap";
 
-export type TickFn = (deltaMs: number, elapsedMs: number) => void;
+type TickFn = (deltaMs: number, elapsedMs: number) => void;
 
 type Subscriber = {
   fn: TickFn;

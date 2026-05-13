@@ -6,7 +6,7 @@
  * Durations are seconds.
  */
 
-export type CubicBezier = readonly [number, number, number, number];
+type CubicBezier = readonly [number, number, number, number];
 
 export const ease = {
   standard: [0.25, 0.1, 0.25, 1] satisfies CubicBezier,
@@ -30,11 +30,5 @@ export const dur = {
   epic: 2.2,
 } as const;
 
-export type EaseToken = keyof typeof ease;
-export type DurToken = keyof typeof dur;
-
-/** Convenience: convert a cubic-bezier tuple to the CSS `cubic-bezier(...)` string. */
-export const cssEase = (token: EaseToken): string => {
-  const [a, b, c, d] = ease[token];
-  return `cubic-bezier(${a}, ${b}, ${c}, ${d})`;
-};
+type EaseToken = keyof typeof ease;
+type DurToken = keyof typeof dur;
