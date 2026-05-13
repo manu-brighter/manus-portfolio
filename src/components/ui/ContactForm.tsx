@@ -36,6 +36,8 @@ export function ContactForm() {
   const messageId = useId();
   const trapId = useId();
 
+  const requiredNoteId = useId();
+
   const [status, setStatus] = useState<"idle" | "sending" | "fallback" | "error">("idle");
   const fallbackTimerRef = useRef<number | null>(null);
   const nameValueRef = useRef<string>("");
@@ -110,6 +112,13 @@ export function ContactForm() {
       className="grid grid-cols-1 gap-5"
       aria-describedby={status !== "idle" ? "contact-status" : undefined}
     >
+      {/* Required-fields note — visible to sighted and AT users alike.
+          Each input references this via aria-describedby so SR users
+          hear it when entering a field (WCAG 3.3.2). */}
+      <p id={requiredNoteId} className="type-body-sm text-ink-muted">
+        {t("requiredNote")}
+      </p>
+
       <div className="flex flex-col gap-2">
         <label htmlFor={nameId} className="type-label text-ink">
           {t("name.label")}
@@ -122,6 +131,7 @@ export function ContactForm() {
           autoComplete="name"
           disabled={isSending}
           placeholder={t("name.placeholder")}
+          aria-describedby={requiredNoteId}
           className="riso-input"
         />
       </div>
@@ -138,6 +148,7 @@ export function ContactForm() {
           autoComplete="email"
           disabled={isSending}
           placeholder={t("email.placeholder")}
+          aria-describedby={requiredNoteId}
           className="riso-input"
         />
       </div>
@@ -154,6 +165,7 @@ export function ContactForm() {
           rows={6}
           disabled={isSending}
           placeholder={t("message.placeholder")}
+          aria-describedby={requiredNoteId}
           className="riso-input resize-y"
         />
       </div>

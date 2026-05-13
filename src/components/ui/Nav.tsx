@@ -205,7 +205,7 @@ export function Nav() {
                   <a
                     href={buildHref(item.href)}
                     onClick={(e) => handleAnchor(e, item.href)}
-                    aria-current={isActive ? "true" : undefined}
+                    aria-current={isActive ? "location" : undefined}
                     className={`type-label relative inline-block transition-colors active:scale-[0.94] active:duration-100 after:pointer-events-none after:absolute after:bottom-[-3px] after:left-0 after:h-[1.5px] after:w-full after:origin-left after:bg-ink after:transition-transform after:duration-300 after:ease-out after:content-[''] hover:after:scale-x-100 ${
                       isActive
                         ? "text-ink after:scale-x-100"

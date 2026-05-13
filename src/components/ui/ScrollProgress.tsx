@@ -194,7 +194,7 @@ export function ScrollProgress() {
               type="button"
               onClick={() => scrollTo(i)}
               aria-label={getLabel(section)}
-              aria-current={i === activeIndex ? "true" : undefined}
+              aria-current={i === activeIndex ? "location" : undefined}
               className="group relative flex size-8 items-center justify-center"
               style={{ opacity: i === activeIndex ? 1 : 0.45 }}
             >

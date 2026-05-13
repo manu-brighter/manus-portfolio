@@ -219,7 +219,7 @@ export function PlaygroundCard({ slug, i18nKey, cardSpot, visual, LiveSim }: Pla
           aria-hidden="true"
         >
           <span>{tCommon("openLabel")}</span>
-          <span>→</span>
+          <span aria-hidden="true">→</span>
         </p>
       </div>
     </Link>

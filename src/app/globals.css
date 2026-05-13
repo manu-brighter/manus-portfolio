@@ -428,16 +428,19 @@
     line-height: 0.85;
     float: left;
     margin: 0.05em 0.08em -0.15em 0;
-    color: var(--block-spot);
+    /* A11y (F-accessibility-1): spot-color glyph fill fails WCAG AA (rose
+     * 2.19:1, amber 1.28:1). Letter is ink; spot-color framing is the
+     * 8-direction text-shadow outline below — spot-color stays decorative. */
+    color: var(--color-ink);
     text-shadow:
-      2px 0 0 var(--color-ink),
-      -2px 0 0 var(--color-ink),
-      0 2px 0 var(--color-ink),
-      0 -2px 0 var(--color-ink),
-      1.5px 1.5px 0 var(--color-ink),
-      -1.5px -1.5px 0 var(--color-ink),
-      1.5px -1.5px 0 var(--color-ink),
-      -1.5px 1.5px 0 var(--color-ink);
+      2px 0 0 var(--block-spot),
+      -2px 0 0 var(--block-spot),
+      0 2px 0 var(--block-spot),
+      0 -2px 0 var(--block-spot),
+      1.5px 1.5px 0 var(--block-spot),
+      -1.5px -1.5px 0 var(--block-spot),
+      1.5px -1.5px 0 var(--block-spot),
+      -1.5px 1.5px 0 var(--block-spot);
   }
 
   /* Pull-quote primitive — editorial italic Instrument Serif sized
@@ -459,15 +462,17 @@
   }
 
   /* Word-highlight inside a pull-quote. The keyword span carries
-   * .pull-highlight + the parent block's --block-spot. The
-   * descendant rule re-asserts spot-color on OverprintReveal's
-   * ink layer (which sets `text-ink` Tailwind directly and would
-   * otherwise override the inherited highlight). The rose/mint
-   * ghost layers stay on their own spot inks via inline style. */
+   * .pull-highlight + the parent block's --block-spot.
+   *
+   * A11y (F-accessibility-1/F-accessibility-9): spot colors fail WCAG AA
+   * as text (rose 2.19:1, amber 1.28:1). Text color is forced to ink;
+   * spot color remains visible as the SVG underline and the OverprintReveal
+   * misregistration ghost layers (which use inline style and are
+   * aria-hidden — purely decorative). */
 
   .pull-highlight,
   .pull-highlight [data-layer="ink"] {
-    color: var(--block-spot);
+    color: var(--color-ink);
   }
 
   /* Hover-misregistration: pseudo-element ghost layers around any

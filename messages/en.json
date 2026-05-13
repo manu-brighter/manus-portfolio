@@ -758,6 +758,7 @@
         "label": "Send",
         "sending": "Sending …"
       },
+      "requiredNote": "All fields required",
       "status": {
         "fromLabel": "From:",
         "fallback": "Currently being set up — write me directly:",

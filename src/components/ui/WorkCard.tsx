@@ -437,7 +437,7 @@ export function WorkCard(props: WorkCardProps) {
             {/* CTA stamp. */}
             <span className="mt-6 inline-block rounded-[2px] border-[1.5px] border-ink bg-paper px-4 py-2 font-mono text-xs uppercase tracking-[0.18em] text-ink transition-transform group-hover:translate-x-1 group-hover:translate-y-1 group-hover:shadow-[3px_3px_0_var(--color-ink)]">
               {ctaLabel}
-              {click.kind !== "scroll-hero" ? " →" : null}
+              {click.kind !== "scroll-hero" ? <span aria-hidden="true"> →</span> : null}
             </span>
           </div>
         </div>

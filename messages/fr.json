@@ -758,6 +758,7 @@
         "label": "Envoyer",
         "sending": "Envoi …"
       },
+      "requiredNote": "Tous les champs sont obligatoires",
       "status": {
         "fromLabel": "De :",
         "fallback": "En cours de configuration — écris-moi directement :",
