@@ -4,15 +4,13 @@ import gsap from "gsap";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { isLoaderComplete, markLoaderComplete } from "@/lib/loaderSession";
+import { SPOT_HEX } from "@/lib/palette";
 
-/** Module-level flag so FluidSim + OverprintReveal can check if loader
- *  already fired in this session. Survives component re-mounts; only
- *  resets on full page reload (sessionStorage handles cross-mount
- *  persistence inside the same tab session — see useEffect below). */
-let loaderFired = false;
-export function isLoaderComplete(): boolean {
-  return loaderFired;
-}
+// Re-exported so existing consumers that imported `isLoaderComplete`
+// from this file keep working. The canonical implementation lives in
+// `@/lib/loaderSession` together with the typed pub/sub.
+export { isLoaderComplete };
 
 /** sessionStorage key — survives locale switches that re-mount the
  *  whole locale layout subtree (Next swaps `<html lang>` between /de
@@ -27,8 +25,9 @@ const LOADER_SESSION_KEY = "manuelheller:loader-shown";
  * that pulses through the 4 Riso spot colors, shows the brand mark,
  * then expands to fill the viewport before fading away.
  *
- * On exit, dispatches a `loader-complete` CustomEvent so FluidSim
- * can trigger ambient motion immediately.
+ * On exit, calls `markLoaderComplete()` (`@/lib/loaderSession`) so
+ * FluidSim, SceneProvider, OverprintReveal and FadeIn can trigger
+ * their ambient/reveal cadences immediately.
  */
 export function Loader() {
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -74,11 +73,10 @@ export function Loader() {
       }
     }
     if (alreadyShown) {
-      loaderFired = true;
       setVisible(false);
-      // Dispatch immediately so OverprintReveal's loader gate clears
-      // and the Hero animation runs on this navigation too.
-      window.dispatchEvent(new CustomEvent("loader-complete"));
+      // Mark immediately so OverprintReveal's loader gate clears and
+      // the Hero animation runs on this navigation too.
+      markLoaderComplete();
       return;
     }
 
@@ -88,14 +86,13 @@ export function Loader() {
     if (!overlay || !drop || !text) return;
 
     const onComplete = () => {
-      loaderFired = true;
       try {
         sessionStorage.setItem(LOADER_SESSION_KEY, "1");
       } catch {
         // ignore — flag is a perf optimisation, not load-bearing.
       }
       setVisible(false);
-      window.dispatchEvent(new CustomEvent("loader-complete"));
+      markLoaderComplete();
     };
 
     // Reduced motion: brief hold, then simple fade
@@ -106,13 +103,10 @@ export function Loader() {
       return () => clearTimeout(timer);
     }
 
-    // Spot color hex values — must stay in sync with globals.css @theme.
-    // GSAP animates backgroundColor directly; CSS custom properties can't
-    // be interpolated by GSAP without a plugin.
-    const rose = "#ff6ba0";
-    const amber = "#ffc474";
-    const mint = "#7ce8c4";
-    const violet = "#b89aff";
+    // Spot color hex values from `@/lib/palette` — GSAP animates
+    // backgroundColor directly and CSS custom properties can't be
+    // interpolated without a plugin, so we feed the raw hex.
+    const { rose, amber, mint, violet } = SPOT_HEX;
 
     const tl = gsap.timeline({ onComplete });
 

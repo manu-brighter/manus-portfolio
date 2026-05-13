@@ -2,9 +2,9 @@
 
 import { useThree } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
-import { isLoaderComplete } from "@/components/ui/Loader";
 import { subscribeToSplats } from "@/lib/fluidBus";
 import type { TierConfig } from "@/lib/gpu";
+import { subscribeToLoaderComplete } from "@/lib/loaderSession";
 import { subscribe } from "@/lib/raf";
 import { FluidOrchestrator, type PointerState } from "./FluidOrchestrator";
 
@@ -76,24 +76,18 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
     // already lives in SceneProvider's deferred-mount path.
     const HERO_REVEAL_MS = 100;
     let ambientTimer: number | null = null;
-    let ambientListener: (() => void) | null = null;
     const scheduleAmbient = () => {
       ambientTimer = window.setTimeout(() => {
         orchestratorRef.current?.triggerAmbient();
       }, HERO_REVEAL_MS);
     };
-    if (isLoaderComplete()) {
-      scheduleAmbient();
-    } else {
-      ambientListener = () => scheduleAmbient();
-      window.addEventListener("loader-complete", ambientListener, { once: true });
-    }
+    // subscribeToLoaderComplete fires synchronously if the loader has
+    // already completed, otherwise queues until markLoaderComplete().
+    const unsubLoader = subscribeToLoaderComplete(scheduleAmbient);
 
     return () => {
       if (ambientTimer !== null) window.clearTimeout(ambientTimer);
-      if (ambientListener) {
-        window.removeEventListener("loader-complete", ambientListener);
-      }
+      unsubLoader();
       orchestrator.dispose();
       orchestratorRef.current = null;
     };

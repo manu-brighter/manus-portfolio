@@ -4,8 +4,9 @@ import gsap from "gsap";
 import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from "react";
 import { useLenis } from "@/hooks/useLenis";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { dispatchSplat, type SplatColorName } from "@/lib/fluidBus";
+import { dispatchSplat } from "@/lib/fluidBus";
 import { dur, ease } from "@/lib/motion/tokens";
+import type { SpotColor } from "@/lib/palette";
 
 /**
  * WorkCard — the editorial flex unit of Section 03.
@@ -52,7 +53,7 @@ export type WorkCardProps = {
   /** CTA stamp text. */
   ctaLabel: string;
   /** Spot-color seed used for the hover splat + accent. */
-  splatColor: SplatColorName;
+  splatColor: SpotColor;
   /** Whether to show the [vibecoded] stamp. */
   vibecoded?: boolean;
   /** Marker label (i18n). */

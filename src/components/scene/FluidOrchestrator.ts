@@ -1,6 +1,9 @@
 // src/components/scene/FluidOrchestrator.ts
 
+import { compileShader } from "@/lib/gl/compileShader";
+import { createProgram as linkProgram } from "@/lib/gl/createProgram";
 import type { TierConfig } from "@/lib/gpu";
+import { INK_COLOR, PAPER_COLOR, SPOT_RGB, type SpotColor } from "@/lib/palette";
 import noiseSrc from "@/shaders/common/noise.glsl";
 import posterizeSrc from "@/shaders/common/posterize.glsl";
 import quadVert from "@/shaders/common/quad.vert.glsl";
@@ -54,18 +57,14 @@ type Programs = {
 };
 
 // ---------------------------------------------------------------------------
-// Color constants (normalised RGB)
+// Color constants
 // ---------------------------------------------------------------------------
 
-const SPOT_COLORS = {
-  rose: [1.0, 0.42, 0.627],
-  amber: [1.0, 0.769, 0.455],
-  mint: [0.486, 0.91, 0.769],
-  violet: [0.722, 0.604, 1.0],
-} as const;
-
-const PAPER_COLOR = [0.941, 0.91, 0.863] as const; // #f0e8dc
-const INK_COLOR = [0.039, 0.024, 0.031] as const; // #0a0608
+// Spot/paper/ink colours live in `@/lib/palette` as the canonical source
+// (mirrors the `--color-*` design tokens in globals.css). Local alias
+// keeps the call sites below readable while making the dependency
+// explicit at import time.
+const SPOT_COLORS = SPOT_RGB;
 
 // Ambient motion: 3 wandering points that splat fluid when no pointer input.
 // Extracted for future Leva-dev tuning. Time-scale governs the whole rig;
@@ -118,35 +117,19 @@ const AMBIENT_PARAMS = {
 // GL utility functions
 // ---------------------------------------------------------------------------
 
-function createShader(gl: WebGL2RenderingContext, type: number, source: string): WebGLShader {
-  const shader = gl.createShader(type);
-  if (!shader) throw new Error("Failed to create shader");
-  gl.shaderSource(shader, source);
-  gl.compileShader(shader);
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    const info = gl.getShaderInfoLog(shader);
-    gl.deleteShader(shader);
-    throw new Error(`Shader compile error: ${info}`);
-  }
-  return shader;
-}
-
-function createProgram(gl: WebGL2RenderingContext, vertSrc: string, fragSrc: string): WebGLProgram {
-  const vert = createShader(gl, gl.VERTEX_SHADER, vertSrc);
-  const frag = createShader(gl, gl.FRAGMENT_SHADER, fragSrc);
-  const program = gl.createProgram();
-  if (!program) throw new Error("Failed to create program");
-  gl.attachShader(program, vert);
-  gl.attachShader(program, frag);
-  gl.linkProgram(program);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    const info = gl.getProgramInfoLog(program);
-    gl.deleteProgram(program);
-    throw new Error(`Program link error: ${info}`);
-  }
-  gl.deleteShader(vert);
-  gl.deleteShader(frag);
-  return program;
+// Program builder for the fluid pipeline — wraps the shared shader +
+// program helpers (`@/lib/gl/compileShader`, `@/lib/gl/createProgram`)
+// so source strings flow through the BOM/`#version` cleanup path that
+// protects against Windows ANGLE / Turbopack HMR cache poisoning.
+function createProgram(
+  gl: WebGL2RenderingContext,
+  vertSrc: string,
+  fragSrc: string,
+  label = "fluid",
+): WebGLProgram {
+  const vert = compileShader(gl, gl.VERTEX_SHADER, vertSrc, `${label}.vert`);
+  const frag = compileShader(gl, gl.FRAGMENT_SHADER, fragSrc, `${label}.frag`);
+  return linkProgram(gl, vert, frag, label);
 }
 
 function injectIncludes(source: string, includes: Record<string, string>): string {
@@ -310,15 +293,15 @@ export class FluidOrchestrator {
     });
 
     this.programs = {
-      splat: createProgram(gl, quadVert, splatFrag),
-      curl: createProgram(gl, quadVert, curlFrag),
-      vorticity: createProgram(gl, quadVert, vorticityFrag),
-      advect: createProgram(gl, quadVert, advectFrag),
-      divergence: createProgram(gl, quadVert, divergenceFrag),
-      pressure: createProgram(gl, quadVert, pressureFrag),
-      gradientSub: createProgram(gl, quadVert, gradientSubFrag),
-      renderToon: createProgram(gl, quadVert, toonFrag),
-      injectDensity: createProgram(gl, quadVert, injectDensityFrag),
+      splat: createProgram(gl, quadVert, splatFrag, "fluid.splat"),
+      curl: createProgram(gl, quadVert, curlFrag, "fluid.curl"),
+      vorticity: createProgram(gl, quadVert, vorticityFrag, "fluid.vorticity"),
+      advect: createProgram(gl, quadVert, advectFrag, "fluid.advect"),
+      divergence: createProgram(gl, quadVert, divergenceFrag, "fluid.divergence"),
+      pressure: createProgram(gl, quadVert, pressureFrag, "fluid.pressure"),
+      gradientSub: createProgram(gl, quadVert, gradientSubFrag, "fluid.gradient-sub"),
+      renderToon: createProgram(gl, quadVert, toonFrag, "fluid.render-toon"),
+      injectDensity: createProgram(gl, quadVert, injectDensityFrag, "fluid.inject-density"),
     };
 
     this.emptyVAO = gl.createVertexArray();
@@ -421,7 +404,7 @@ export class FluidOrchestrator {
    * queued splats via injectSplat() still use their own colour — only
    * the pointer/ambient rotation is affected.
    */
-  setSplatColor(color: keyof typeof SPOT_COLORS | null): void {
+  setSplatColor(color: SpotColor | null): void {
     this.splatColorOverride = color ? SPOT_COLORS[color] : null;
   }
 
@@ -482,7 +465,7 @@ export class FluidOrchestrator {
    */
   injectDensityTexture(
     stamp: WebGLTexture,
-    color: keyof typeof SPOT_COLORS | readonly [number, number, number],
+    color: SpotColor | readonly [number, number, number],
     strength = 1.0,
   ): void {
     const gl = this.gl;
@@ -516,7 +499,7 @@ export class FluidOrchestrator {
    * field saturates and the velocity field gets a real shockwave
    * outward, not just a single small dot. `color` is the active ink.
    */
-  injectBomb(x: number, y: number, color: keyof typeof SPOT_COLORS): void {
+  injectBomb(x: number, y: number, color: SpotColor): void {
     const resolved = SPOT_COLORS[color];
     // 8 outward-pointing impulses around the centre + a stationary
     // dump at the centre itself = an explosion that radiates while
@@ -783,7 +766,7 @@ export class FluidOrchestrator {
   injectSplat(
     x: number,
     y: number,
-    color: keyof typeof SPOT_COLORS | readonly [number, number, number],
+    color: SpotColor | readonly [number, number, number],
     dx = 0,
     dy = 0,
     radius?: number,

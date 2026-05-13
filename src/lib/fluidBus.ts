@@ -13,7 +13,7 @@
  * `splatAtViewport()` below.
  */
 
-export type SplatColorName = "rose" | "amber" | "mint" | "violet";
+import type { SpotColor } from "@/lib/palette";
 
 export type SplatRequest = {
   /** 0..1 normalised, origin at canvas bottom-left. */
@@ -21,7 +21,7 @@ export type SplatRequest = {
   /** 0..1 normalised, origin at canvas bottom-left. */
   y: number;
   /** Riso spot-color name OR raw normalised RGB tuple. */
-  color: SplatColorName | readonly [number, number, number];
+  color: SpotColor | readonly [number, number, number];
   /** Velocity-x injected into the splat (default 0 = stationary dye dump). */
   dx?: number;
   /** Velocity-y injected into the splat (default 0). */

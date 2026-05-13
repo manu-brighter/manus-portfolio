@@ -5,6 +5,7 @@ import { FluidOrchestrator, type PointerState } from "@/components/scene/FluidOr
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { TYPE_AS_FLUID_DEFAULTS } from "@/lib/content/playground";
 import { getTierConfig } from "@/lib/gpu";
+import { randomSpot } from "@/lib/palette";
 import { subscribe } from "@/lib/raf";
 import { TextStamper } from "@/lib/textStamp";
 
@@ -12,11 +13,6 @@ type Props = {
   /** True while the parent card is NOT hovered/focused. */
   paused: boolean;
 };
-
-const SPOT_KEYS = ["rose", "amber", "mint", "violet"] as const;
-function randomSpot(): "rose" | "amber" | "mint" | "violet" {
-  return SPOT_KEYS[Math.floor(Math.random() * SPOT_KEYS.length)] ?? "rose";
-}
 
 /**
  * Tiny self-driven Type-as-Fluid demo for the home-card hover state.

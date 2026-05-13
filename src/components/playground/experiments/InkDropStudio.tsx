@@ -5,8 +5,9 @@ import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { FluidOrchestrator, type PointerState } from "@/components/scene/FluidOrchestrator";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { INK_DROP_STUDIO_DEFAULTS, type SpotColor } from "@/lib/content/playground";
+import { INK_DROP_STUDIO_DEFAULTS } from "@/lib/content/playground";
 import { getTierConfig } from "@/lib/gpu";
+import { randomSpot } from "@/lib/palette";
 import { subscribe } from "@/lib/raf";
 import { ExperimentChrome } from "../ExperimentChrome";
 
@@ -32,16 +33,12 @@ import { ExperimentChrome } from "../ExperimentChrome";
 // number scale-readable while leaving the tier baseline intact.
 const BASE_SPLAT_RADIUS = 0.015;
 
-const SPOT_COLOR_KEYS = ["rose", "amber", "mint", "violet"] as const satisfies readonly SpotColor[];
-
 // The toon render shader (render-toon.frag.glsl) maps dye *magnitude*
 // to a fixed mint→amber→rose→violet ladder rather than reading the
 // dye RGB itself — so a single-colour override can't show through the
 // layered Riso look. Studio embraces that: every splat picks a random
-// Riso spot and the visual feel is layered ink, just like the hero.
-function randomSpot(): SpotColor {
-  return SPOT_COLOR_KEYS[Math.floor(Math.random() * SPOT_COLOR_KEYS.length)] ?? "rose";
-}
+// Riso spot via the shared `randomSpot()` helper and the visual feel
+// is layered ink, just like the hero.
 
 export function InkDropStudio() {
   const reducedMotion = useReducedMotion();

@@ -6,6 +6,7 @@ import { FluidOrchestrator, type PointerState } from "@/components/scene/FluidOr
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { TYPE_AS_FLUID_DEFAULTS } from "@/lib/content/playground";
 import { getTierConfig } from "@/lib/gpu";
+import { randomSpot } from "@/lib/palette";
 import { subscribe } from "@/lib/raf";
 import { TextStamper } from "@/lib/textStamp";
 import { ExperimentChrome } from "../ExperimentChrome";
@@ -29,8 +30,6 @@ import { ExperimentChrome } from "../ExperimentChrome";
  *
  * Reduced motion: instant-fade replacement (no sim, no stamp pipeline).
  */
-
-const SPOT_KEYS = ["rose", "amber", "mint", "violet"] as const;
 
 export function TypeAsFluid() {
   const reducedMotion = useReducedMotion();
@@ -313,10 +312,6 @@ function TypeAsFluidCanvas() {
       </div>
     </ExperimentChrome>
   );
-}
-
-function randomSpot(): "rose" | "amber" | "mint" | "violet" {
-  return SPOT_KEYS[Math.floor(Math.random() * SPOT_KEYS.length)] ?? "rose";
 }
 
 // Stamp-pipeline tunables — module-level so they're shared across all

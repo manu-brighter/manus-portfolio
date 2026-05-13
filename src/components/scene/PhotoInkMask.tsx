@@ -30,21 +30,18 @@
 import { useEffect, useRef } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { compileShader } from "@/lib/gl/compileShader";
+import { PAPER_COLOR, SPOT_RGB, type SpotColor } from "@/lib/palette";
 import { subscribe } from "@/lib/raf";
 import quadVertSrc from "@/shaders/common/quad.vert.glsl";
 import advectFragSrc from "@/shaders/ink-mask/advect.frag.glsl";
 import maskFragSrc from "@/shaders/ink-mask/mask.frag.glsl";
 import splatFragSrc from "@/shaders/ink-mask/splat.frag.glsl";
 
-const PAPER_COLOR: [number, number, number] = [0.941, 0.91, 0.863];
-const SPOT_COLORS = {
-  rose: [1.0, 0.42, 0.627],
-  amber: [1.0, 0.769, 0.455],
-  mint: [0.486, 0.91, 0.769],
-  violet: [0.722, 0.604, 1.0],
-} as const;
-
-export type SpotColor = keyof typeof SPOT_COLORS;
+// Re-export so `Photography.tsx`'s `import { type SpotColor } from
+// "@/components/scene/PhotoInkMask"` keeps working — the canonical
+// definition now lives in `@/lib/palette` but the prop-side import
+// stays component-local for readability.
+export type { SpotColor };
 
 const DENSITY_RES = 256;
 // Total reveal duration. The wavefront covers ~0.5 texture units of
@@ -361,7 +358,7 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
       gl.uniform1i(maskU.density, 0);
       gl.uniform2f(maskU.resolution, canvas.width, canvas.height);
       gl.uniform3f(maskU.paper, ...PAPER_COLOR);
-      gl.uniform3f(maskU.spot, ...(SPOT_COLORS[spotColorRef.current] as [number, number, number]));
+      gl.uniform3f(maskU.spot, ...(SPOT_RGB[spotColorRef.current] as [number, number, number]));
       gl.uniform1f(maskU.time, time);
       gl.bindVertexArray(vao);
       gl.drawArrays(gl.TRIANGLES, 0, 3);

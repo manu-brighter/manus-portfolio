@@ -2,9 +2,9 @@
 
 import { useEffect, useRef } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import type { SpotColor } from "@/lib/content/playground";
 import { compileShader } from "@/lib/gl/compileShader";
 import { GROW_MS, HOLD_MS, RETRACT_MS, useInkWipeStore } from "@/lib/inkWipeStore";
+import { SPOT_RGB } from "@/lib/palette";
 import { subscribe } from "@/lib/raf";
 import quadVertSrc from "@/shaders/common/quad.vert.glsl";
 import wipeFragSrc from "@/shaders/ink-wipe/wipe.frag.glsl";
@@ -28,13 +28,6 @@ import wipeFragSrc from "@/shaders/ink-wipe/wipe.frag.glsl";
  * Pointer-events: none always — the overlay is decorative and must
  * never block keyboard or pointer interaction with the page under it.
  */
-
-const SPOT_RGB: Record<SpotColor, [number, number, number]> = {
-  rose: [1.0, 0.42, 0.627],
-  amber: [1.0, 0.769, 0.455],
-  mint: [0.486, 0.91, 0.769],
-  violet: [0.722, 0.604, 1.0],
-};
 
 function link(gl: WebGL2RenderingContext, vert: WebGLShader, frag: WebGLShader): WebGLProgram {
   const p = gl.createProgram();

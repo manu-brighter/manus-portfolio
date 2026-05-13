@@ -11,9 +11,15 @@
  * (sitemaps, OG cards, share-links).
  */
 
+import type { SpotColor } from "@/lib/palette";
+
 export type ExperimentSlug = "ink-drop-studio" | "type-as-fluid";
 
-export type SpotColor = "rose" | "amber" | "mint" | "violet";
+// Re-exported from `@/lib/palette` (the canonical home for the Riso
+// palette types). Kept exported here so existing consumers that
+// `import type { SpotColor } from "@/lib/content/playground"` still
+// type-check without touching every call site.
+export type { SpotColor };
 
 export type InkDropStudioParams = {
   /** Velocity dissipation factor (per simulation step, 0..1). Lower

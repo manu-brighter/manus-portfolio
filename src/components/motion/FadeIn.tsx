@@ -2,8 +2,8 @@
 
 import gsap from "gsap";
 import { type ReactNode, useEffect, useRef } from "react";
-import { isLoaderComplete } from "@/components/ui/Loader";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { subscribeToLoaderComplete } from "@/lib/loaderSession";
 import { dur } from "@/lib/motion/tokens";
 
 /**
@@ -64,7 +64,7 @@ export function FadeIn({
     let fired = false;
     let tween: gsap.core.Tween | null = null;
     let settleTimer: number | null = null;
-    let pendingLoaderListener: (() => void) | null = null;
+    let unsubLoader: (() => void) | null = null;
 
     const start = () => {
       tween = gsap.to(el, {
@@ -80,18 +80,11 @@ export function FadeIn({
         start();
         return;
       }
-      const launch = () => {
+      // subscribeToLoaderComplete fires synchronously if the loader
+      // already finished, otherwise queues until markLoaderComplete().
+      unsubLoader = subscribeToLoaderComplete(() => {
         settleTimer = window.setTimeout(start, LOADER_SETTLE_MS);
-      };
-      if (isLoaderComplete()) {
-        launch();
-      } else {
-        pendingLoaderListener = () => {
-          pendingLoaderListener = null;
-          launch();
-        };
-        window.addEventListener("loader-complete", pendingLoaderListener, { once: true });
-      }
+      });
     };
 
     const io = new IntersectionObserver(
@@ -111,8 +104,7 @@ export function FadeIn({
       io.disconnect();
       tween?.kill();
       if (settleTimer !== null) window.clearTimeout(settleTimer);
-      if (pendingLoaderListener)
-        window.removeEventListener("loader-complete", pendingLoaderListener);
+      unsubLoader?.();
     };
   }, [reducedMotion, delay, duration, threshold, waitForLoader]);
 

@@ -4,8 +4,8 @@ import { Component, createContext, type ReactNode, useContext, useEffect, useSta
 import { useGPUCapability } from "@/hooks/useGPUCapability";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import type { GPUTier, TierConfig } from "@/lib/gpu";
+import { isLoaderComplete, subscribeToLoaderComplete } from "@/lib/loaderSession";
 import { useSceneVisibility } from "@/lib/sceneVisibility";
-import { isLoaderComplete } from "../ui/Loader";
 import { AmbientVideo } from "./AmbientVideo";
 import { SceneCanvas } from "./Canvas";
 import { FluidSim } from "./FluidSim";
@@ -26,12 +26,15 @@ export function useScene() {
 }
 
 function probeWebGL2(): boolean {
+  // The detached probe canvas is GC'd naturally once `supported` is
+  // recorded. Don't call `WEBGL_lose_context.loseContext()` here — the
+  // documented StrictMode trap (see `.claude/CLAUDE.md` "Never do")
+  // is that a lost-context canvas surfaces a dead context on the next
+  // `getContext()`, which silently fails every shader compile from
+  // the React re-mount onward.
   try {
     const canvas = document.createElement("canvas");
     const gl = canvas.getContext("webgl2");
-    if (gl) {
-      gl.getExtension("WEBGL_lose_context")?.loseContext();
-    }
     return gl !== null;
   } catch {
     return false;
@@ -123,19 +126,20 @@ export function SceneProvider({ children }: SceneProviderProps) {
     const RETURNING_DEFER = 200;
     let timer: number | null = null;
 
-    if (isLoaderComplete()) {
-      timer = window.setTimeout(() => setCanvasMounted(true), RETURNING_DEFER);
-      return () => {
-        if (timer !== null) window.clearTimeout(timer);
-      };
-    }
+    // Capture the loader-complete state at effect-entry so we choose
+    // the right defer window. subscribeToLoaderComplete fires the
+    // callback synchronously if the loader already finished — that
+    // branch wants the short RETURNING_DEFER; the queued branch wants
+    // the long FRESH_LOAD_DEFER that lets the hero choreography land
+    // before the WebGL canvas elbows into the GPU.
+    const wasComplete = isLoaderComplete();
+    const unsub = subscribeToLoaderComplete(() => {
+      const defer = wasComplete ? RETURNING_DEFER : FRESH_LOAD_DEFER;
+      timer = window.setTimeout(() => setCanvasMounted(true), defer);
+    });
 
-    const onLoaderComplete = () => {
-      timer = window.setTimeout(() => setCanvasMounted(true), FRESH_LOAD_DEFER);
-    };
-    window.addEventListener("loader-complete", onLoaderComplete, { once: true });
     return () => {
-      window.removeEventListener("loader-complete", onLoaderComplete);
+      unsub();
       if (timer !== null) window.clearTimeout(timer);
     };
   }, [canvasMounted]);

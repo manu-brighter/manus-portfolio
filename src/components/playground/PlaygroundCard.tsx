@@ -13,8 +13,9 @@ import {
 } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { Link, useRouter } from "@/i18n/navigation";
-import type { ExperimentSlug, SpotColor } from "@/lib/content/playground";
+import type { ExperimentSlug } from "@/lib/content/playground";
 import { GROW_MS, useInkWipeStore } from "@/lib/inkWipeStore";
+import { SPOT_BG_CLASS, SPOT_CSS_VAR, type SpotColor } from "@/lib/palette";
 
 type PlaygroundCardProps = {
   slug: ExperimentSlug;
@@ -29,22 +30,11 @@ type PlaygroundCardProps = {
   LiveSim?: ComponentType<{ paused: boolean }>;
 };
 
-// Tailwind v4's class scanner can't see runtime-built class names, so
-// dynamic spot bg-classes come from a static map. The shadow uses a
-// per-card `--card-spot` CSS variable so :hover / :focus-visible can
-// drive the shadow without imperative handlers.
-const SPOT_BG_CLASS: Record<SpotColor, string> = {
-  rose: "bg-spot-rose",
-  amber: "bg-spot-amber",
-  mint: "bg-spot-mint",
-  violet: "bg-spot-violet",
-};
-const SPOT_CSS_VAR: Record<SpotColor, string> = {
-  rose: "var(--color-spot-rose)",
-  amber: "var(--color-spot-amber)",
-  mint: "var(--color-spot-mint)",
-  violet: "var(--color-spot-violet)",
-};
+// `SPOT_BG_CLASS` + `SPOT_CSS_VAR` come from `@/lib/palette`. The shadow
+// uses a per-card `--card-spot` CSS variable so :hover / :focus-visible
+// can drive it without imperative handlers. Tailwind v4's class scanner
+// can't see runtime-built names, so the bg-class lookup goes through
+// the static map.
 
 /**
  * Playground card on the home page.
