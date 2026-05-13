@@ -29,6 +29,3 @@ export const dur = {
   /** Loader, hero one-time choreography. */
   epic: 2.2,
 } as const;
-
-type EaseToken = keyof typeof ease;
-type DurToken = keyof typeof dur;

@@ -2,10 +2,10 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { type MouseEvent, useEffect, useRef, useState } from "react";
-import { useViewTransition } from "@/hooks/useViewTransition";
 import { NavMobileMenu } from "@/components/ui/NavMobileMenu";
 import { useLenis } from "@/hooks/useLenis";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useViewTransition } from "@/hooks/useViewTransition";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { routing } from "@/i18n/routing";

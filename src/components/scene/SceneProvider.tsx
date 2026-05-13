@@ -7,8 +7,8 @@ import type { GPUTier, TierConfig } from "@/lib/gpu";
 import { isLoaderComplete, subscribeToLoaderComplete } from "@/lib/loaderSession";
 import { useSceneVisibilityStore } from "@/lib/sceneVisibilityStore";
 import { AmbientVideo } from "./AmbientVideo";
-import { SceneCanvas } from "./SceneCanvas";
 import { FluidSim } from "./FluidSim";
+import { SceneCanvas } from "./SceneCanvas";
 import { StaticFallback } from "./StaticFallback";
 
 type SceneContextValue = {

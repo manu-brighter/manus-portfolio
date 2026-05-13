@@ -896,7 +896,6 @@
     "stamp": "Error 404",
     "headline": "Questa pagina si è persa nel fluido.",
     "body": "L'URL non esiste. O è un refuso, un vecchio link, oppure l'inchiostro l'ha inghiottita. Entrambi possibili.",
-    "backHome": "Torna alla home",
-    "backWork": "Vedi i lavori"
+    "backHome": "Torna alla home"
   }
 }

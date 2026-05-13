@@ -896,7 +896,6 @@
     "stamp": "Error 404",
     "headline": "Diese Seite ist im Fluid versickert.",
     "body": "Die URL existiert nicht — entweder Tippfehler, alter Link, oder die Tinte hat sie verschluckt. Beides ist möglich.",
-    "backHome": "Zurück zur Startseite",
-    "backWork": "Arbeiten ansehen"
+    "backHome": "Zurück zur Startseite"
   }
 }
