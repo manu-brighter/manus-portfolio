@@ -12,6 +12,7 @@ import { Loader } from "@/components/ui/Loader";
 import { Nav } from "@/components/ui/Nav";
 import { ScrollProgress } from "@/components/ui/ScrollProgress";
 import { type Locale, routing } from "@/i18n/routing";
+import { escapeForScript } from "@/lib/seo/escapeForScript";
 import { buildJsonLd } from "@/lib/seo/jsonLd";
 import { buildLocaleMetadata } from "@/lib/seo/metadata";
 
@@ -60,7 +61,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
         <script
           type="application/ld+json"
           // biome-ignore lint/security/noDangerouslySetInnerHtml: ld+json must be raw, not text
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: escapeForScript(jsonLd) }}
         />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <MotionProvider>

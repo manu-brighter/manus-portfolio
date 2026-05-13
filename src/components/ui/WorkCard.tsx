@@ -336,7 +336,6 @@ export function WorkCard(props: WorkCardProps) {
   };
 
   const href = click.kind === "anchor" ? click.target : "#hero";
-  const isExternal = false;
 
   return (
     <article
@@ -354,7 +353,7 @@ export function WorkCard(props: WorkCardProps) {
         onFocus={() => setHovered(true)}
         onBlur={() => setHovered(false)}
         className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-4 focus-visible:ring-offset-paper"
-        rel={isExternal ? "noreferrer external" : undefined}
+        {...(href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       >
         <div ref={cardRef} className="relative will-change-transform">
           {/* Backing block — riso underlay shifted bottom-right. */}
