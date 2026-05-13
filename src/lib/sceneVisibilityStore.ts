@@ -22,7 +22,7 @@ type SceneVisibilityStore = {
   setHidden: (next: boolean) => void;
 };
 
-export const useSceneVisibility = create<SceneVisibilityStore>((set) => ({
+export const useSceneVisibilityStore = create<SceneVisibilityStore>((set) => ({
   hidden: false,
   setHidden: (next) => set({ hidden: next }),
 }));
