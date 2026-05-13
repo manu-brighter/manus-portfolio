@@ -11,13 +11,34 @@
 // suggests) because the project ships no ts-runner; ESM JS keeps the
 // pipeline a single `node` invocation away.
 
-import { existsSync, mkdirSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { existsSync, mkdirSync, readdirSync, statSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "../node_modules/.pnpm/sharp@0.34.5/node_modules/sharp/lib/index.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, "..");
+
+// CI assertion: source/unused asset directories must never live inside public/.
+// Masters belong in content-input/ (gitignored) so they are not served to the web.
+(function assertNoSourceInPublic() {
+  const publicDir = join(root, "public");
+  function walk(dir) {
+    for (const entry of readdirSync(dir)) {
+      const full = join(dir, entry);
+      if (statSync(full).isDirectory()) {
+        if (entry === "source" || entry === "_unused") {
+          throw new Error(
+            `Source/unused asset dir found inside public/: ${full}\n` +
+              "Move it to content-input/ so it is not served to the web.",
+          );
+        }
+        walk(full);
+      }
+    }
+  }
+  walk(publicDir);
+})();
 
 const QUALITY = { avif: 60, webp: 80, jpg: 82 };
 
@@ -134,7 +155,7 @@ const TASKS = [
   // — Phase 12 · Work-Section Portfolio + Case Study Joggediballa screenshots —
   {
     group: "portfolio",
-    source: "public/projects/portfolio/source/homepage-landscape.png",
+    source: "content-input/projects/portfolio/source/homepage-landscape.png",
     outDir: "public/projects/portfolio",
     outName: "homepage",
     widths: [480, 800, 1200],
@@ -151,7 +172,7 @@ const TASKS = [
     "twitchoverlay-lightmode-landscape",
   ].map((slug) => ({
     group: "joggediballa",
-    source: `public/projects/joggediballa/source/${slug}.png`,
+    source: `content-input/projects/joggediballa/source/${slug}.png`,
     outDir: "public/projects/joggediballa",
     outName: slug.replace("-lightmode-landscape", ""),
     widths: [480, 800, 1200],
@@ -162,7 +183,7 @@ const TASKS = [
   // Joggediballa phone screenshots — 9:16 portrait
   ...["formular-lightmode-phone", "homepage-lightmode-phone"].map((slug) => ({
     group: "joggediballa",
-    source: `public/projects/joggediballa/source/${slug}.png`,
+    source: `content-input/projects/joggediballa/source/${slug}.png`,
     outDir: "public/projects/joggediballa",
     outName: slug.replace("-lightmode-phone", "-phone"),
     widths: [360, 540, 720],
