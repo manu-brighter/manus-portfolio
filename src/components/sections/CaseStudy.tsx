@@ -2,9 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo } from "react";
-import { AdminHighlightCard } from "@/components/case-study/cards/AdminHighlightCard";
+import { HighlightCard } from "@/components/case-study/cards/HighlightCard";
 import { HookCard } from "@/components/case-study/cards/HookCard";
-import { OverlayHighlightCard } from "@/components/case-study/cards/OverlayHighlightCard";
 import { PublicCard } from "@/components/case-study/cards/PublicCard";
 import { StackCard } from "@/components/case-study/cards/StackCard";
 import { WhatCard } from "@/components/case-study/cards/WhatCard";
@@ -13,6 +12,7 @@ import { DioramaIllustration } from "@/components/case-study/DioramaIllustration
 import { DioramaLupe } from "@/components/case-study/DioramaLupe";
 import { DioramaTrack } from "@/components/case-study/DioramaTrack";
 import { Lightbox } from "@/components/case-study/Lightbox";
+import { buildPublicShotImage, LIGHTBOX_IMAGES } from "@/components/case-study/lightboxConfig";
 import { type LightboxImage, useLightboxStore } from "@/lib/lightboxStore";
 import type {
   CaseStudyFacts,
@@ -71,47 +71,34 @@ export function CaseStudy() {
   );
 
   // Image set for the lightbox — fixed order: hook (0), admin (1),
-  // overlay (2), public shots 3/4/5. Each entry uses the largest
-  // available width as the lightbox source.
+  // overlay (2), public shots 3/4/5. Each entry merges the static
+  // LIGHTBOX_IMAGES manifest (paths + aspect ratios) with the
+  // per-locale alt + caption strings.
   const lightboxImages = useMemo<LightboxImage[]>(() => {
     const out: LightboxImage[] = [
       {
-        fullSrc: "/projects/joggediballa/homepage-phone-720w.jpg",
-        avifSrc: "/projects/joggediballa/homepage-phone-720w.avif",
-        webpSrc: "/projects/joggediballa/homepage-phone-720w.webp",
-        aspect: 540 / 960,
+        ...LIGHTBOX_IMAGES.hook,
         alt: "Joggediballa Homepage Mobile",
         caption: hookStation.polaroidCaption ?? "",
       },
     ];
     if (adminHighlight) {
       out.push({
-        fullSrc: "/projects/joggediballa/admin-1200w.jpg",
-        avifSrc: "/projects/joggediballa/admin-1200w.avif",
-        webpSrc: "/projects/joggediballa/admin-1200w.webp",
-        aspect: 800 / 450,
+        ...LIGHTBOX_IMAGES.admin,
         alt: adminHighlight.screenshotAlt,
         caption: highlightAdmin.polaroidCaption ?? "",
       });
     }
     if (overlayHighlight) {
       out.push({
-        fullSrc: "/projects/joggediballa/twitchoverlay-1200w.jpg",
-        avifSrc: "/projects/joggediballa/twitchoverlay-1200w.avif",
-        webpSrc: "/projects/joggediballa/twitchoverlay-1200w.webp",
-        aspect: 800 / 450,
+        ...LIGHTBOX_IMAGES.overlay,
         alt: overlayHighlight.screenshotAlt,
         caption: highlightOverlay.polaroidCaption ?? "",
       });
     }
     publicShots.forEach((s) => {
-      const isPortrait = s.aspect === "9/16";
-      const fallbackW = isPortrait ? 720 : 1200;
       out.push({
-        fullSrc: `/projects/joggediballa/${s.slug}-${fallbackW}w.jpg`,
-        avifSrc: `/projects/joggediballa/${s.slug}-${fallbackW}w.avif`,
-        webpSrc: `/projects/joggediballa/${s.slug}-${fallbackW}w.webp`,
-        aspect: isPortrait ? 540 / 960 : 800 / 450,
+        ...buildPublicShotImage(s.slug, s.aspect),
         alt: s.alt,
         caption: s.caption,
       });
@@ -160,7 +147,9 @@ export function CaseStudy() {
       <WhatCard label={t("context.label")} facts={facts} storyParas={storyParas} />
       <StackCard heading={stackStation.heading} stack={stack} />
       {adminHighlight ? (
-        <AdminHighlightCard
+        <HighlightCard
+          slug="admin"
+          spot="rose"
           kicker={adminHighlight.kicker}
           title={adminHighlight.title}
           lede={adminHighlight.lede}
@@ -173,7 +162,9 @@ export function CaseStudy() {
         />
       ) : null}
       {overlayHighlight ? (
-        <OverlayHighlightCard
+        <HighlightCard
+          slug="twitchoverlay"
+          spot="amber"
           kicker={overlayHighlight.kicker}
           title={overlayHighlight.title}
           lede={overlayHighlight.lede}
@@ -209,36 +200,46 @@ export function CaseStudy() {
         <DioramaIllustration />
         {adminHighlight && overlayHighlight ? (
           <DioramaCards
-            hookText={t("hook")}
-            hookStation={hookStation}
-            storyParas={storyParas}
-            whatLabel={t("context.label")}
-            facts={facts}
-            stackHeading={stackStation.heading}
-            stack={stack}
-            adminKicker={adminHighlight.kicker}
-            adminTitle={adminHighlight.title}
-            adminLede={adminHighlight.lede}
-            adminFeatures={adminHighlight.features}
-            adminScreenshotAlt={adminHighlight.screenshotAlt}
-            adminStation={highlightAdmin}
-            overlayKicker={overlayHighlight.kicker}
-            overlayTitle={overlayHighlight.title}
-            overlayLede={overlayHighlight.lede}
-            overlayFeatures={overlayHighlight.features}
-            overlayScreenshotAlt={overlayHighlight.screenshotAlt}
-            overlayStation={highlightOverlay}
-            publicShots={publicShots}
-            reflectionLabel={t("reflection.label")}
-            reflectionBody={t("reflection.body")}
-            footerLabel={t("footerLink.label")}
-            footerDomain={t("footerLink.domain")}
-            footerUrl={t("footerLink.url")}
-            footerExternal={t("footerLink.external")}
-            hookOnClick={handleOpen(0)}
-            adminOnClick={handleOpen(1)}
-            overlayOnClick={handleOpen(2)}
-            publicOnShotClick={(i) => handleOpen(3 + i)()}
+            hook={{
+              hookText: t("hook"),
+              station: hookStation,
+              onClick: handleOpen(0),
+            }}
+            context={{
+              whatLabel: t("context.label"),
+              facts,
+              storyParas,
+              stackHeading: stackStation.heading,
+              stack,
+            }}
+            admin={{
+              kicker: adminHighlight.kicker,
+              title: adminHighlight.title,
+              lede: adminHighlight.lede,
+              features: adminHighlight.features,
+              screenshotAlt: adminHighlight.screenshotAlt,
+              station: highlightAdmin,
+              onClick: handleOpen(1),
+            }}
+            overlay={{
+              kicker: overlayHighlight.kicker,
+              title: overlayHighlight.title,
+              lede: overlayHighlight.lede,
+              features: overlayHighlight.features,
+              screenshotAlt: overlayHighlight.screenshotAlt,
+              station: highlightOverlay,
+              onClick: handleOpen(2),
+            }}
+            public={{
+              shots: publicShots,
+              reflectionLabel: t("reflection.label"),
+              reflectionBody: t("reflection.body"),
+              footerLabel: t("footerLink.label"),
+              footerDomain: t("footerLink.domain"),
+              footerUrl: t("footerLink.url"),
+              footerExternal: t("footerLink.external"),
+              onShotClick: (i) => handleOpen(3 + i)(),
+            }}
           />
         ) : null}
         <DioramaLupe />

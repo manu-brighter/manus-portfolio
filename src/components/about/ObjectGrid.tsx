@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 import type { CSSProperties } from "react";
-import { PlateCornerMarks } from "./PlateCornerMarks";
+import { PlateCornerMarks } from "@/components/ui/PlateCornerMarks";
 import { AudiStamp } from "./stamps/AudiStamp";
 import { CameraStamp } from "./stamps/CameraStamp";
 import { JoggediballaStamp } from "./stamps/JoggediballaStamp";

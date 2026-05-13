@@ -4,6 +4,7 @@ import gsap from "gsap";
 import { useEffect, useRef, useState } from "react";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { OverprintReveal } from "@/components/motion/OverprintReveal";
+import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 /**
@@ -57,9 +58,7 @@ export function PortfolioCardReveal({
   // Coarse-pointer: replace hover with viewport-based IO so the reveal
   // plays automatically when the card scrolls into view. Re-entering
   // viewport bumps revealCount → OverprintReveal re-fires.
-  const [isCoarse] = useState(
-    () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches,
-  );
+  const isCoarse = useCoarsePointer();
 
   useEffect(() => {
     if (!isCoarse || reducedMotion) return;

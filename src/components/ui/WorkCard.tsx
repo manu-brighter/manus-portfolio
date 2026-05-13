@@ -2,6 +2,8 @@
 
 import gsap from "gsap";
 import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from "react";
+import { useCoarsePointer } from "@/hooks/useCoarsePointer";
+import { useHoverOrCenterViewport } from "@/hooks/useHoverOrCenterViewport";
 import { useLenis } from "@/hooks/useLenis";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { dispatchSplat } from "@/lib/fluidBus";
@@ -114,12 +116,29 @@ export function WorkCard(props: WorkCardProps) {
   const reducedMotion = useReducedMotion();
   const lenis = useLenis();
 
-  const rootRef = useRef<HTMLElement>(null);
+  // Coarse-pointer hover replacement — viewport-center band IO.
+  const { ref: rootRef, active: coarseHovered } = useHoverOrCenterViewport<HTMLElement>();
   const cardRef = useRef<HTMLDivElement>(null);
   const backingRef = useRef<HTMLDivElement>(null);
   const mediaRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
   const pillsRef = useRef<HTMLUListElement>(null);
+  // Tracks the cascade of setTimeout IDs fired by the scroll-hero
+  // click handler (1 base + 3 cluster splats). Mirrors the project-
+  // wide setTimeout-discipline convention (see TypeAsFluid's
+  // stampTimersRef): every scheduled handle registers here on
+  // creation, removes itself on fire, and unmount cleanup clears the
+  // set so route-changes mid-cascade don't fire splats against a
+  // disposed sim.
+  const splatTimersRef = useRef<Set<number>>(new Set());
+
+  useEffect(() => {
+    const timers = splatTimersRef.current;
+    return () => {
+      for (const id of timers) window.clearTimeout(id);
+      timers.clear();
+    };
+  }, []);
 
   const [hovered, setHovered] = useState(false);
 
@@ -127,30 +146,16 @@ export function WorkCard(props: WorkCardProps) {
   // entry instead of hover. The cursor-driven parallax + magnetic and
   // the ambient splat dispatch are skipped entirely (no cursor + sim
   // interaction is mobile-disabled per Phase 13 deviations).
-  const [isCoarse] = useState(
-    () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches,
-  );
+  const isCoarse = useCoarsePointer();
 
+  // Mirror coarse-pointer viewport-IO active state into the unified
+  // `hovered` state that drives the pill cascade + parallax. Desktop
+  // path still flips hovered via onPointerEnter/Leave below — the IO
+  // path only contributes on coarse pointers.
   useEffect(() => {
-    if (!isCoarse || reducedMotion) return;
-    const root = rootRef.current;
-    if (!root) return;
-    // rootMargin -32.5/0/-32.5 carves out the central 35% vertical band
-    // of the viewport. Element fires `isIntersecting` only when its box
-    // overlaps that band — tighter than the original 50% band so the
-    // hover-replacement animation only kicks in when the card is
-    // genuinely centred, not just past the upper third.
-    const obs = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (!entry) return;
-        setHovered(entry.isIntersecting);
-      },
-      { threshold: 0, rootMargin: "-32.5% 0px -32.5% 0px" },
-    );
-    obs.observe(root);
-    return () => obs.disconnect();
-  }, [isCoarse, reducedMotion]);
+    if (!isCoarse) return;
+    setHovered(coarseHovered);
+  }, [isCoarse, coarseHovered]);
 
   // Hover-enter / hover-leave choreography. GSAP timeline is rebuilt
   // each direction so we can reverse with the same easing.
@@ -298,7 +303,9 @@ export function WorkCard(props: WorkCardProps) {
       // so the sim has resumed when the splat lands. 0.55s matches the
       // typical smooth-scroll easing tail.
       if (!reducedMotion) {
-        window.setTimeout(() => {
+        const timers = splatTimersRef.current;
+        const baseId = window.setTimeout(() => {
+          timers.delete(baseId);
           dispatchSplat({
             x: 0.5,
             y: 0.5,
@@ -310,15 +317,18 @@ export function WorkCard(props: WorkCardProps) {
           });
           // Three more in a tight cluster for a stamp-like cascade
           for (let i = 1; i <= 3; i++) {
-            window.setTimeout(() => {
+            const id = window.setTimeout(() => {
+              timers.delete(id);
               dispatchSplat({
                 x: 0.5 + (Math.random() - 0.5) * 0.1,
                 y: 0.5 + (Math.random() - 0.5) * 0.1,
                 color: splatColor,
               });
             }, i * 80);
+            timers.add(id);
           }
         }, 350);
+        timers.add(baseId);
       }
       return;
     }

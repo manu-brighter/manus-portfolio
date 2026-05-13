@@ -1,4 +1,4 @@
-// src/components/scene/FluidOrchestrator.ts
+// src/lib/gl/fluidOrchestrator.ts
 
 import { compileShader } from "@/lib/gl/compileShader";
 import { createProgram as linkProgram } from "@/lib/gl/createProgram";
@@ -226,6 +226,11 @@ export class FluidOrchestrator {
   private frameCount = 0;
   private paused = false;
   private lastPointerTime = 0;
+  // Grace deadline (performance.now() ms): while `performance.now()` is
+  // below this, pointer movement does NOT reset `lastPointerTime`, so
+  // ambient strength holds at full while the cursor passes by during
+  // the warm-in window. Set by `triggerAmbient()` to ~5s ahead.
+  private ambientGraceUntil = 0;
   private ambientStrength = 0;
   private splatColorIndex = 0;
   private ambientActive = false;
@@ -370,9 +375,14 @@ export class FluidOrchestrator {
     this.ambientReady = true;
     this.ambientStrength = 1.0;
     this.ambientActive = true;
-    // Set idle timer far into the future so ambient stays at full
-    // strength for a 5s grace period even if the cursor moves.
-    this.lastPointerTime = performance.now() + 5000;
+    // 5s grace window: pointer movement during this window does NOT
+    // reset `lastPointerTime` (see step()), so ambient stays at full
+    // strength while the user's cursor flies past the freshly-revealed
+    // hero. Previously this was done by setting `lastPointerTime =
+    // performance.now() + 5000` directly, which broke as soon as the
+    // first `pointer.moved` tick wrote `performance.now()` back over it.
+    this.ambientGraceUntil = performance.now() + 5000;
+    this.lastPointerTime = performance.now();
   }
 
   /**
@@ -807,7 +817,13 @@ export class FluidOrchestrator {
     // When pointer is active, reduce ambient but don't kill it entirely —
     // keep 2 wandering points alive so cursor sim interacts with them.
     if (pointer.moved) {
-      this.lastPointerTime = performance.now();
+      // Skip the lastPointerTime reset while inside the post-
+      // `triggerAmbient()` grace window — otherwise pointer movement
+      // right after the loader finishes would re-arm the 3s idle
+      // gate, suppressing ambient before the hero-reveal even settles.
+      if (performance.now() > this.ambientGraceUntil) {
+        this.lastPointerTime = performance.now();
+      }
       // Fade ambient down to a floor of 0.3 (keeps 2 points alive)
       if (this.ambientActive) {
         this.ambientStrength = Math.max(0.3, this.ambientStrength - dt / 0.8);

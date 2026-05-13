@@ -11,6 +11,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { Link, useRouter } from "@/i18n/navigation";
 import type { ExperimentSlug } from "@/lib/content/playground";
@@ -69,9 +70,7 @@ export function PlaygroundCard({ slug, i18nKey, cardSpot, visual, LiveSim }: Pla
   // Coarse-pointer: hover state is driven by viewport visibility instead
   // of mouseenter/leave. Card entering viewport activates + unpauses the
   // mini-sim; leaving pauses it (orchestrator state preserved).
-  const [isCoarse] = useState(
-    () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches,
-  );
+  const isCoarse = useCoarsePointer();
 
   useEffect(() => {
     if (!isCoarse || reducedMotion) return;
@@ -144,12 +143,17 @@ export function PlaygroundCard({ slug, i18nKey, cardSpot, visual, LiveSim }: Pla
     startGrow({ x, y, color: cardSpot });
     navTimerRef.current = window.setTimeout(
       () => {
-        // Revert ALL ScrollTrigger pin spacers BEFORE the route change
+        // Revert ScrollTrigger pin spacers BEFORE the route change
         // unmounts the home page. Otherwise React's removeChild fails
         // because pin-spacer divs are now between <main> and the pinned
         // <section>, so the section is no longer a direct child of main.
-        // kill(true) restores the original DOM hierarchy.
-        for (const t of ScrollTrigger.getAll()) t.kill(true);
+        // kill(true) restores the original DOM hierarchy. Filter to
+        // pin-only triggers — the previous unscoped kill also tore
+        // down GSAP's hidden internal triggers that have nothing to do
+        // with the unmount race.
+        for (const t of ScrollTrigger.getAll()) {
+          if (t.vars.pin === true) t.kill(true);
+        }
         router.push(`/playground/${slug}`);
         navTimerRef.current = null;
       },

@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { compileShader } from "@/lib/gl/compileShader";
+import { capDPR, DPR_FULL } from "@/lib/gpu";
 import { GROW_MS, HOLD_MS, RETRACT_MS, useInkWipeStore } from "@/lib/inkWipeStore";
 import { SPOT_RGB } from "@/lib/palette";
 import { subscribe } from "@/lib/raf";
@@ -46,6 +47,12 @@ function link(gl: WebGL2RenderingContext, vert: WebGLShader, frag: WebGLShader):
 export function InkWipeOverlay() {
   const reducedMotion = useReducedMotion();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  // Local fail state — if shader compile or program link throws, the
+  // overlay cannot ever render and would otherwise leave the inkWipe
+  // store stuck in `growing` (overlay subscribers never fire), trapping
+  // the page behind opaque ink. Catch path resets the store + flips
+  // this flag so the route navigates cleanly.
+  const [initFailed, setInitFailed] = useState(false);
 
   useEffect(() => {
     if (reducedMotion) return;
@@ -62,12 +69,32 @@ export function InkWipeOverlay() {
       preserveDrawingBuffer: false,
       powerPreference: "low-power",
     }) as WebGL2RenderingContext | null;
-    if (!gl) return;
+    if (!gl) {
+      useInkWipeStore.getState().reset();
+      setInitFailed(true);
+      return;
+    }
 
-    const vert = compileShader(gl, gl.VERTEX_SHADER, quadVertSrc, "ink-wipe.vert");
-    const frag = compileShader(gl, gl.FRAGMENT_SHADER, wipeFragSrc, "ink-wipe.frag");
-    const program = link(gl, vert, frag);
-    const vao = gl.createVertexArray();
+    let vert: WebGLShader;
+    let frag: WebGLShader;
+    let program: WebGLProgram;
+    let vao: WebGLVertexArrayObject | null;
+    try {
+      vert = compileShader(gl, gl.VERTEX_SHADER, quadVertSrc, "ink-wipe.vert");
+      frag = compileShader(gl, gl.FRAGMENT_SHADER, wipeFragSrc, "ink-wipe.frag");
+      program = link(gl, vert, frag);
+      vao = gl.createVertexArray();
+    } catch (err) {
+      // biome-ignore lint/suspicious/noConsole: init failure is a dev signal
+      console.error("[InkWipeOverlay] init failed", err);
+      // Reset the store FIRST so any in-flight transition unsticks —
+      // otherwise the page is trapped behind opaque ink for the rest
+      // of the session. setInitFailed then null-renders so a hot-
+      // reload doesn't keep retrying the broken pipeline.
+      useInkWipeStore.getState().reset();
+      setInitFailed(true);
+      return;
+    }
 
     const u = {
       phase: gl.getUniformLocation(program, "uPhase"),
@@ -79,7 +106,7 @@ export function InkWipeOverlay() {
     };
 
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = capDPR(DPR_FULL);
       const w = Math.floor(window.innerWidth * dpr);
       const h = Math.floor(window.innerHeight * dpr);
       if (canvas.width !== w || canvas.height !== h) {
@@ -193,7 +220,7 @@ export function InkWipeOverlay() {
     };
   }, [reducedMotion]);
 
-  if (reducedMotion) return null;
+  if (reducedMotion || initFailed) return null;
 
   return (
     <canvas

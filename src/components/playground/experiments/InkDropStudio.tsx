@@ -3,12 +3,12 @@
 import { Leva, useControls } from "leva";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
-import { FluidOrchestrator, type PointerState } from "@/components/scene/FluidOrchestrator";
+import { useOrchestratorRAF } from "@/hooks/useOrchestratorRAF";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { INK_DROP_STUDIO_DEFAULTS } from "@/lib/content/playground";
-import { getTierConfig } from "@/lib/gpu";
+import { FluidOrchestrator, type PointerState } from "@/lib/gl/fluidOrchestrator";
+import { capDPR, DPR_FULL, getTierConfig } from "@/lib/gpu";
 import { randomSpot } from "@/lib/palette";
-import { subscribe } from "@/lib/raf";
 import { ExperimentChrome } from "../ExperimentChrome";
 
 /**
@@ -128,7 +128,7 @@ function InkDropStudioCanvas() {
     }) as WebGL2RenderingContext | null;
     if (!gl) return;
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = capDPR(DPR_FULL);
     canvas.width = Math.floor(window.innerWidth * dpr);
     canvas.height = Math.floor(window.innerHeight * dpr);
 
@@ -154,17 +154,21 @@ function InkDropStudioCanvas() {
     orchestratorRef.current = orchestrator;
 
     const onResize = () => {
-      const ratio = Math.min(window.devicePixelRatio || 1, 2);
+      const ratio = capDPR(DPR_FULL);
       const w = Math.floor(window.innerWidth * ratio);
       const h = Math.floor(window.innerHeight * ratio);
       canvas.width = w;
       canvas.height = h;
       orchestrator.resize(w, h);
     };
-    window.addEventListener("resize", onResize);
+    // ResizeObserver on the canvas's parent so the sim adapts to
+    // container reflow (e.g. Leva panel toggling, ExperimentChrome
+    // chrome density change) rather than only viewport changes.
+    const ro = new ResizeObserver(onResize);
+    ro.observe(canvas.parentElement ?? canvas);
 
     return () => {
-      window.removeEventListener("resize", onResize);
+      ro.disconnect();
       orchestrator.dispose();
       orchestratorRef.current = null;
     };
@@ -187,17 +191,7 @@ function InkDropStudioCanvas() {
   // pointer-splat handles the hover trail (and any click-and-drag
   // sustain) since `pointer.moved || pointer.down` covers both cases.
   // The click-burst is fired in the pointerdown handler below.
-  useEffect(() => {
-    return subscribe((deltaMs, elapsedMs) => {
-      const orchestrator = orchestratorRef.current;
-      if (!orchestrator) return;
-      const dt = Math.min(deltaMs * 0.001, 0.033);
-      orchestrator.step(dt, elapsedMs, pointerRef.current);
-      pointerRef.current.dx = 0;
-      pointerRef.current.dy = 0;
-      pointerRef.current.moved = false;
-    }, 15);
-  }, []);
+  useOrchestratorRAF(orchestratorRef, pointerRef, 15);
 
   // Document-level pointer wiring. Hover (move without click held) is
   // the trail; click is a wavy multi-splat burst. Pointer state goes

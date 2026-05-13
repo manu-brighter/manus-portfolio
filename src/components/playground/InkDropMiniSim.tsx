@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { FluidOrchestrator, type PointerState } from "@/components/scene/FluidOrchestrator";
+import { useEffect, useRef, useState } from "react";
+import { useOrchestratorRAF } from "@/hooks/useOrchestratorRAF";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { getTierConfig } from "@/lib/gpu";
-import { subscribe } from "@/lib/raf";
+import { FluidOrchestrator, type PointerState } from "@/lib/gl/fluidOrchestrator";
+import { capDPR, DPR_MINI, getTierConfig } from "@/lib/gpu";
 
 type Props = {
   /** True while the parent card is NOT hovered/focused — orchestrator
@@ -39,6 +39,11 @@ export function InkDropMiniSim({ paused }: Props) {
     down: false,
     moved: false,
   });
+  // Local init-failure flag — flipped if the orchestrator throws during
+  // setup (most commonly EXT_color_buffer_float missing on the older
+  // mobile drivers we target). Rendering null in that case lets the
+  // parent card's static SVG visual remain visible underneath.
+  const [initFailed, setInitFailed] = useState(false);
 
   useEffect(() => {
     if (reducedMotion) return;
@@ -50,22 +55,33 @@ export function InkDropMiniSim({ paused }: Props) {
       powerPreference: "high-performance",
       preserveDrawingBuffer: false,
     }) as WebGL2RenderingContext | null;
-    if (!gl) return;
+    if (!gl) {
+      setInitFailed(true);
+      return;
+    }
 
     // DPR capped at 1.5 — these mini-frames are tiny on screen, no
-    // need to push 2× pixels through the toon shader's posterize pass.
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    // need to push 2x pixels through the toon shader's posterize pass.
+    const dpr = capDPR(DPR_MINI);
     canvas.width = Math.floor(canvas.clientWidth * dpr);
     canvas.height = Math.floor(canvas.clientHeight * dpr);
 
-    const orchestrator = new FluidOrchestrator();
-    orchestrator.init(gl, getTierConfig("minimal"));
-    orchestrator.setAmbientEnabled(true);
-    orchestrator.triggerAmbient();
+    let orchestrator: FluidOrchestrator;
+    try {
+      orchestrator = new FluidOrchestrator();
+      orchestrator.init(gl, getTierConfig("minimal"));
+      orchestrator.setAmbientEnabled(true);
+      orchestrator.triggerAmbient();
+    } catch (err) {
+      // biome-ignore lint/suspicious/noConsole: init failure is a dev signal
+      console.error("[InkDropMiniSim] orchestrator init failed", err);
+      setInitFailed(true);
+      return;
+    }
     orchestratorRef.current = orchestrator;
 
     const onResize = () => {
-      const ratio = Math.min(window.devicePixelRatio || 1, 1.5);
+      const ratio = capDPR(DPR_MINI);
       const w = Math.floor(canvas.clientWidth * ratio);
       const h = Math.floor(canvas.clientHeight * ratio);
       canvas.width = w;
@@ -91,20 +107,9 @@ export function InkDropMiniSim({ paused }: Props) {
   }, [paused]);
 
   // RAF loop — gsap.ticker shared. Pausing happens inside step().
-  useEffect(() => {
-    if (reducedMotion) return;
-    return subscribe((deltaMs, elapsedMs) => {
-      const orchestrator = orchestratorRef.current;
-      if (!orchestrator) return;
-      const dt = Math.min(deltaMs * 0.001, 0.033);
-      orchestrator.step(dt, elapsedMs, pointerRef.current);
-      pointerRef.current.dx = 0;
-      pointerRef.current.dy = 0;
-      pointerRef.current.moved = false;
-    }, 25);
-  }, [reducedMotion]);
+  useOrchestratorRAF(orchestratorRef, pointerRef, 25, !reducedMotion);
 
-  if (reducedMotion) return null;
+  if (reducedMotion || initFailed) return null;
 
   return (
     <canvas

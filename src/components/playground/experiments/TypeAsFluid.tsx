@@ -2,12 +2,12 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
-import { FluidOrchestrator, type PointerState } from "@/components/scene/FluidOrchestrator";
+import { useOrchestratorRAF } from "@/hooks/useOrchestratorRAF";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { TYPE_AS_FLUID_DEFAULTS } from "@/lib/content/playground";
-import { getTierConfig } from "@/lib/gpu";
+import { FluidOrchestrator, type PointerState } from "@/lib/gl/fluidOrchestrator";
+import { capDPR, DPR_FULL, getTierConfig } from "@/lib/gpu";
 import { randomSpot } from "@/lib/palette";
-import { subscribe } from "@/lib/raf";
 import { TextStamper } from "@/lib/textStamp";
 import { ExperimentChrome } from "../ExperimentChrome";
 
@@ -93,7 +93,7 @@ function TypeAsFluidCanvas() {
     }) as WebGL2RenderingContext | null;
     if (!gl) return;
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = capDPR(DPR_FULL);
     canvas.width = Math.floor(window.innerWidth * dpr);
     canvas.height = Math.floor(window.innerHeight * dpr);
 
@@ -151,17 +151,21 @@ function TypeAsFluidCanvas() {
     stampWord(stamperRef.current, orchestrator, initial, stampTimersRef.current, disposedRef);
 
     const onResize = () => {
-      const ratio = Math.min(window.devicePixelRatio || 1, 2);
+      const ratio = capDPR(DPR_FULL);
       const w = Math.floor(window.innerWidth * ratio);
       const h = Math.floor(window.innerHeight * ratio);
       canvas.width = w;
       canvas.height = h;
       orchestrator.resize(w, h);
     };
-    window.addEventListener("resize", onResize);
+    // ResizeObserver on the canvas's parent so the sim adapts to
+    // container reflow rather than only viewport changes (parity with
+    // the mini-sims).
+    const ro = new ResizeObserver(onResize);
+    ro.observe(canvas.parentElement ?? canvas);
 
     return () => {
-      window.removeEventListener("resize", onResize);
+      ro.disconnect();
       // Flip disposed flag FIRST so any callback that's already
       // executing (race between clear + fire) early-returns instead
       // of touching disposed GL handles.
@@ -178,17 +182,7 @@ function TypeAsFluidCanvas() {
   }, []);
 
   // ---- RAF loop ----
-  useEffect(() => {
-    return subscribe((deltaMs, elapsedMs) => {
-      const orchestrator = orchestratorRef.current;
-      if (!orchestrator) return;
-      const dt = Math.min(deltaMs * 0.001, 0.033);
-      orchestrator.step(dt, elapsedMs, pointerRef.current);
-      pointerRef.current.dx = 0;
-      pointerRef.current.dy = 0;
-      pointerRef.current.moved = false;
-    }, 15);
-  }, []);
+  useOrchestratorRAF(orchestratorRef, pointerRef, 15);
 
   // ---- Document pointer wiring (hover trail only — no clicks) ----
   useEffect(() => {
@@ -230,22 +224,31 @@ function TypeAsFluidCanvas() {
     return () => window.clearTimeout(handle);
   }, [text]);
 
-  // ---- Idle re-stamp: every 5s after the last keystroke, refresh
-  // whichever word is currently most relevant. If the user has typed
-  // something into the input, the rotation re-stamps THAT word (in a
-  // fresh random Riso ink each time); otherwise pulls the next default
-  // from TYPE_AS_FLUID_DEFAULTS.
+  // ---- Idle re-stamp: 5s after the last keystroke (reset on every
+  // keystroke), refresh whichever word is currently most relevant. If
+  // the user has typed something, the rotation re-stamps THAT word (in
+  // a fresh random Riso ink each time); otherwise pulls the next
+  // default from TYPE_AS_FLUID_DEFAULTS.
   //
-  // Race protection: skip if a stamp-reveal is already in flight
-  // (stampTimersRef non-empty). Without this, the 5s interval could
-  // fire 4.75s into a typing-debounce reveal that itself runs ~2.45s,
-  // producing two overlapping 23-timer animations with cross-color
-  // bleed. The size check is cheap and exact.
+  // setTimeout + per-keystroke reset (vs the previous setInterval +
+  // inline elapsed-check) matches the documented intent: the comment
+  // for years claimed "every 5s after the last keystroke", but the
+  // interval-with-gate path could fire ~5s of one steady cadence
+  // regardless of typing rhythm. Now `text` change re-runs this
+  // effect, the cleanup clears the prior timer, and a new 5s window
+  // starts from the current keystroke.
+  //
+  // Race protection: skip the stamp if a stamp-reveal is already in
+  // flight (stampTimersRef non-empty). Without this, the typing-
+  // debounce reveal that runs ~2.45s could collide with the idle
+  // re-stamp and produce two overlapping 23-timer animations with
+  // cross-colour bleed.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `text` is the reset trigger — each keystroke re-runs the effect, the cleanup clears the prior timer, and a fresh 5s window starts. The effect body reads textRef so the rotation always sees the latest input even if it fires mid-typing.
   useEffect(() => {
-    const handle = window.setInterval(() => {
-      const sinceTyped = performance.now() - lastTypedAtRef.current;
-      if (lastTypedAtRef.current !== 0 && sinceTyped < 3000) return;
-      if (stampTimersRef.current.size > 0) return;
+    const timers = stampTimersRef.current;
+    const id = window.setTimeout(() => {
+      timers.delete(id);
+      if (timers.size > 0) return;
       const stamper = stamperRef.current;
       const orchestrator = orchestratorRef.current;
       if (!stamper || !orchestrator) return;
@@ -255,10 +258,14 @@ function TypeAsFluidCanvas() {
           : (TYPE_AS_FLUID_DEFAULTS.defaultWords[
               Math.floor(Math.random() * TYPE_AS_FLUID_DEFAULTS.defaultWords.length)
             ] ?? "MANUEL");
-      stampWord(stamper, orchestrator, word, stampTimersRef.current, disposedRef);
+      stampWord(stamper, orchestrator, word, timers, disposedRef);
     }, 5000);
-    return () => window.clearInterval(handle);
-  }, []);
+    timers.add(id);
+    return () => {
+      window.clearTimeout(id);
+      timers.delete(id);
+    };
+  }, [text]);
 
   return (
     <ExperimentChrome i18nKey="typeAsFluid">

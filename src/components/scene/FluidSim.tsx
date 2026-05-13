@@ -1,12 +1,13 @@
 "use client";
 
 import { useThree } from "@react-three/fiber";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { subscribeToSplats } from "@/lib/fluidBus";
+import { FluidOrchestrator, type PointerState } from "@/lib/gl/fluidOrchestrator";
 import type { TierConfig } from "@/lib/gpu";
 import { subscribeToLoaderComplete } from "@/lib/loaderSession";
-import { subscribe } from "@/lib/raf";
-import { FluidOrchestrator, type PointerState } from "./FluidOrchestrator";
+import { MAX_DT_S, subscribe } from "@/lib/raf";
 
 type FluidSimProps = {
   config: TierConfig;
@@ -37,12 +38,7 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
   // wandering points run. Pointer listeners aren't attached at all so
   // touch-scroll doesn't fight pointermove polyfills, and the orchestrator
   // is told explicitly via setPointerSplatEnabled(false) as a safety net.
-  // Lazy-init useState so the value is computed synchronously during the
-  // first render — must be available before the orchestrator init effect
-  // reads it on the same commit.
-  const [isCoarsePointer] = useState(
-    () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches,
-  );
+  const isCoarsePointer = useCoarsePointer();
 
   // Mount + config-change: init orchestrator, dispose on cleanup,
   // and schedule the ambient warmup-trigger inline so the trigger is
@@ -114,7 +110,7 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
       const orchestrator = orchestratorRef.current;
       if (!orchestrator) return;
 
-      const dt = Math.min(deltaMs * 0.001, 0.033);
+      const dt = Math.min(deltaMs * 0.001, MAX_DT_S);
       const t0 = performance.now();
 
       orchestrator.step(dt, elapsedMs, pointerRef.current);

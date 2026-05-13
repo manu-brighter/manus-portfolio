@@ -1,5 +1,31 @@
 // src/lib/gpu.ts
 
+/**
+ * Standard device-pixel-ratio caps used across the GL canvases.
+ *
+ * `DPR_FULL` — fullscreen canvases (Hero FluidSim, InkDropStudio,
+ *   TypeAsFluid, InkWipeOverlay, PhotoInkMask). Caps Retina/4K at
+ *   2x so the toon shader's posterize pass doesn't waste cycles
+ *   resolving pixels that compress back to the spot palette anyway.
+ * `DPR_MINI` — small-card mini-sims (InkDropMiniSim,
+ *   TypeAsFluidMiniSim). Cards measure <300px on screen so 1.5x is
+ *   enough; 2x is invisible to the eye + the mini orchestrators run
+ *   at the "minimal" tier (96^2 grid) where backpressure shows up
+ *   quickly on integrated GPUs.
+ */
+export const DPR_FULL = 2;
+export const DPR_MINI = 1.5;
+
+/**
+ * Clamp `window.devicePixelRatio` against a max. SSR-safe — returns 1
+ * when no window is present. Replaces inline
+ * `Math.min(window.devicePixelRatio || 1, X)` repetitions.
+ */
+export function capDPR(max: number = DPR_FULL): number {
+  if (typeof window === "undefined") return 1;
+  return Math.min(window.devicePixelRatio || 1, max);
+}
+
 export type GPUTier = "high" | "medium" | "low" | "minimal" | "static";
 
 export type TierConfig = {

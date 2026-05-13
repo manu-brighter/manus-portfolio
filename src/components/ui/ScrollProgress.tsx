@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLenis } from "@/hooks/useLenis";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { SECTIONS } from "@/lib/content/sections";
+import { SPOT_CSS_VAR } from "@/lib/palette";
 
 /**
  * Ink Bleed Dots — section-aware scroll progress indicator.
@@ -20,7 +22,10 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 type SectionDef = {
   id: string;
-  labelKey: string;
+  /** `nav.items.*` key, or `null` for sections without a nav label
+   *  (hero, about-objects — those get dedicated `scrollProgress.*`
+   *  strings via `getLabel` below). */
+  labelKey: string | null;
   color: string;
 };
 
@@ -30,21 +35,13 @@ type SectionDef = {
 // the topmost-intersecting entry wins via the sort step in the IO
 // callback below. If you put dots out-of-order, the active state will
 // flicker between non-adjacent indices and the connecting line will
-// run backwards.
-//
-// Riso 4-spot rotation cycles mint → rose → amber → violet across the
-// 9 dots so each adjacent pair has distinct colour identity.
-const SECTION_DEFS: SectionDef[] = [
-  { id: "hero", labelKey: "hero", color: "var(--color-spot-mint)" },
-  { id: "about", labelKey: "about", color: "var(--color-spot-rose)" },
-  { id: "about-objects", labelKey: "aboutObjects", color: "var(--color-spot-amber)" },
-  { id: "skills", labelKey: "skills", color: "var(--color-spot-violet)" },
-  { id: "work", labelKey: "work", color: "var(--color-spot-mint)" },
-  { id: "case-study", labelKey: "casestudy", color: "var(--color-spot-rose)" },
-  { id: "photography", labelKey: "photography", color: "var(--color-spot-amber)" },
-  { id: "playground", labelKey: "playground", color: "var(--color-spot-violet)" },
-  { id: "contact", labelKey: "contact", color: "var(--color-spot-mint)" },
-];
+// run backwards. The list is derived from the shared `SECTIONS` source
+// of truth so reorders only happen in one place.
+const SECTION_DEFS: SectionDef[] = SECTIONS.filter((s) => s.showInScrollProgress).map((s) => ({
+  id: s.id,
+  labelKey: s.navLabelKey,
+  color: SPOT_CSS_VAR[s.color],
+}));
 
 type ActiveSection = SectionDef & { el: HTMLElement };
 
@@ -75,18 +72,24 @@ export function ScrollProgress() {
   useEffect(() => {
     if (sections.length === 0) return;
 
-    // Pick the topmost intersecting section (matches Nav.tsx scroll-spy).
-    // Iterating entries blindly + setActiveIndex per-entry produces a
-    // race when adjacent sections briefly overlap during scroll: the
-    // last entry "wins" rather than the visually-active one. Filter →
-    // sort by viewport-top → take first. rootMargin "-20% 0px -70%"
-    // treats a section as active when its top crosses into the
-    // 20–30% viewport strip, identical to Nav for handoff consistency.
+    // Pick the most-visible intersecting section (matches Nav.tsx
+    // scroll-spy). Sort key 1: highest `intersectionRatio` wins, so the
+    // section actually filling the 20-30% viewport strip is preferred
+    // over a neighbouring section that has only just clipped in by a
+    // pixel. Sort key 2 (tiebreaker): topmost in viewport — keeps the
+    // active state stable when two adjacent sections have identical
+    // ratios. rootMargin "-20% 0px -70%" matches Nav for handoff
+    // consistency.
     const observer = new IntersectionObserver(
       (entries) => {
         const [topmost] = entries
           .filter((e) => e.isIntersecting)
-          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+          .sort((a, b) => {
+            if (b.intersectionRatio !== a.intersectionRatio) {
+              return b.intersectionRatio - a.intersectionRatio;
+            }
+            return a.boundingClientRect.top - b.boundingClientRect.top;
+          });
         if (!topmost) return;
         const idx = sections.findIndex((s) => s.el === topmost.target);
         if (idx >= 0) setActiveIndex(idx);
@@ -148,12 +151,13 @@ export function ScrollProgress() {
   if (sections.length < 1) return null;
 
   // Section label for ARIA — hero + about-objects don't exist in nav.items
-  // (they're not top-level nav destinations), so they get dedicated keys
-  // under scrollProgress.*. Everything else maps to the existing nav label.
+  // (they're not top-level nav destinations, `labelKey === null`), so they
+  // get dedicated keys under scrollProgress.*. Everything else maps to
+  // the existing nav label.
   const getLabel = (s: ActiveSection) => {
     if (s.id === "hero") return t("heroLabel");
     if (s.id === "about-objects") return t("aboutObjectsLabel");
-    return navT(s.labelKey);
+    return s.labelKey ? navT(s.labelKey) : s.id;
   };
 
   return (

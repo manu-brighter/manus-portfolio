@@ -2,10 +2,10 @@ import { useTranslations } from "next-intl";
 import type { CSSProperties } from "react";
 import { AboutBlock } from "@/components/about/AboutBlock";
 import { ObjectGrid } from "@/components/about/ObjectGrid";
-import { PlateCornerMarks } from "@/components/about/PlateCornerMarks";
 import { PullQuote } from "@/components/about/PullQuote";
 import { StampDivider } from "@/components/about/StampDivider";
 import { FadeIn } from "@/components/motion/FadeIn";
+import { PlateCornerMarks } from "@/components/ui/PlateCornerMarks";
 import { Portrait } from "@/components/ui/Portrait";
 import type { AboutAnfangenStamps, AboutParts, CurrentlyItems } from "@/types/i18n-shapes";
 

@@ -50,6 +50,12 @@ export function AmbientVideo() {
       tabIndex={-1}
       data-scene="root"
       onLoadedData={() => setLoaded(true)}
+      onError={() =>
+        // biome-ignore lint/suspicious/noConsole: missing asset is a dev signal for fresh checkouts
+        console.warn(
+          "[AmbientVideo] /ambient-loop.mp4 failed to load — mobile background will be static paper",
+        )
+      }
       className="pointer-events-none transition-opacity duration-700 ease-out"
       style={{
         position: "fixed",

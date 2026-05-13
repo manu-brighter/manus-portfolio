@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
+import { PlateCornerMarks } from "@/components/ui/PlateCornerMarks";
 import { SPOT_CSS_VAR, type SpotColor } from "@/lib/palette";
-import { PlateCornerMarks } from "./PlateCornerMarks";
 
 /**
  * AboutBlock — generic block container for the rewritten About

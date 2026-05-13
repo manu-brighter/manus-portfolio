@@ -11,7 +11,7 @@
 import type Lenis from "lenis";
 import { useContext } from "react";
 
-import { MotionContext } from "@/components/motion/MotionProvider";
+import { MotionContext } from "@/lib/motion/context";
 
 export function useLenis(): Lenis | null {
   return useContext(MotionContext).lenis;

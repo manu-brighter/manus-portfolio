@@ -30,8 +30,9 @@
 import { useEffect, useRef } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { compileShader } from "@/lib/gl/compileShader";
+import { capDPR, DPR_FULL } from "@/lib/gpu";
 import { PAPER_COLOR, SPOT_RGB, type SpotColor } from "@/lib/palette";
-import { subscribe } from "@/lib/raf";
+import { MAX_DT_S, subscribe } from "@/lib/raf";
 import quadVertSrc from "@/shaders/common/quad.vert.glsl";
 import advectFragSrc from "@/shaders/ink-mask/advect.frag.glsl";
 import maskFragSrc from "@/shaders/ink-mask/mask.frag.glsl";
@@ -169,27 +170,77 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
     }) as WebGL2RenderingContext | null;
     if (!gl) return;
 
-    // Compile programs
-    const vert = compile(gl, gl.VERTEX_SHADER, quadVertSrc);
-    if (!vert) return;
-    const advectFrag = compile(gl, gl.FRAGMENT_SHADER, advectFragSrc);
-    const splatFrag = compile(gl, gl.FRAGMENT_SHADER, splatFragSrc);
-    const maskFrag = compile(gl, gl.FRAGMENT_SHADER, maskFragSrc);
-    if (!advectFrag || !splatFrag || !maskFrag) return;
+    // Resource tracking — every GL handle allocated below registers
+    // here so the catch block can release them on partial-init failure.
+    // Without this, an EXT_color_buffer_float-less browser (or a
+    // shader-compile failure mid-setup) would leak everything up to the
+    // failure point, which on Iris Xe × 5 photo slides adds up fast.
+    const shaders: WebGLShader[] = [];
+    const programs: WebGLProgram[] = [];
+    const framebuffers: WebGLFramebuffer[] = [];
+    const textures: WebGLTexture[] = [];
+    const vaos: WebGLVertexArrayObject[] = [];
 
-    const advectProg = link(gl, vert, advectFrag);
-    const splatProg = link(gl, vert, splatFrag);
-    const maskProg = link(gl, vert, maskFrag);
-    if (!advectProg || !splatProg || !maskProg) return;
+    let vert: WebGLShader;
+    let advectFrag: WebGLShader;
+    let splatFrag: WebGLShader;
+    let maskFrag: WebGLShader;
+    let advectProg: WebGLProgram;
+    let splatProg: WebGLProgram;
+    let maskProg: WebGLProgram;
+    let vao: WebGLVertexArrayObject;
+    let read: FBO;
+    let write: FBO;
 
-    // Empty VAO — quad.vert builds the fullscreen triangle from gl_VertexID.
-    const vao = gl.createVertexArray();
-    gl.bindVertexArray(vao);
+    try {
+      // Compile programs
+      const v = compile(gl, gl.VERTEX_SHADER, quadVertSrc);
+      if (!v) throw new Error("ink-mask vert compile failed");
+      vert = v;
+      shaders.push(vert);
+      const af = compile(gl, gl.FRAGMENT_SHADER, advectFragSrc);
+      const sf = compile(gl, gl.FRAGMENT_SHADER, splatFragSrc);
+      const mf = compile(gl, gl.FRAGMENT_SHADER, maskFragSrc);
+      if (!af || !sf || !mf) throw new Error("ink-mask frag compile failed");
+      advectFrag = af;
+      splatFrag = sf;
+      maskFrag = mf;
+      shaders.push(advectFrag, splatFrag, maskFrag);
 
-    // Density ping-pong FBOs
-    let read = makeFBO(gl, DENSITY_RES, DENSITY_RES);
-    let write = makeFBO(gl, DENSITY_RES, DENSITY_RES);
-    if (!read || !write) return;
+      const ap = link(gl, vert, advectFrag);
+      const sp = link(gl, vert, splatFrag);
+      const mp = link(gl, vert, maskFrag);
+      if (!ap || !sp || !mp) throw new Error("ink-mask link failed");
+      advectProg = ap;
+      splatProg = sp;
+      maskProg = mp;
+      programs.push(advectProg, splatProg, maskProg);
+
+      // Empty VAO — quad.vert builds the fullscreen triangle from gl_VertexID.
+      const v2 = gl.createVertexArray();
+      if (!v2) throw new Error("ink-mask VAO create failed");
+      vao = v2;
+      vaos.push(vao);
+      gl.bindVertexArray(vao);
+
+      // Density ping-pong FBOs
+      const r = makeFBO(gl, DENSITY_RES, DENSITY_RES);
+      const w = makeFBO(gl, DENSITY_RES, DENSITY_RES);
+      if (!r || !w) throw new Error("ink-mask FBO create failed");
+      read = r;
+      write = w;
+      framebuffers.push(read.fb, write.fb);
+      textures.push(read.tex, write.tex);
+    } catch (err) {
+      // biome-ignore lint/suspicious/noConsole: init failure is a dev signal
+      console.error("[PhotoInkMask]", err);
+      for (const s of shaders) gl.deleteShader(s);
+      for (const p of programs) gl.deleteProgram(p);
+      for (const fb of framebuffers) gl.deleteFramebuffer(fb);
+      for (const tex of textures) gl.deleteTexture(tex);
+      for (const v of vaos) gl.deleteVertexArray(v);
+      return;
+    }
     // Initialise both to zero (the FBO factory leaves them undefined)
     gl.bindFramebuffer(gl.FRAMEBUFFER, read.fb);
     gl.clearColor(0, 0, 0, 0);
@@ -198,9 +249,9 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
-    // Resize canvas backing store to its CSS size × DPR (capped at 2)
+    // Resize canvas backing store to its CSS size x DPR (capped at 2)
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = capDPR(DPR_FULL);
       const w = Math.floor(canvas.clientWidth * dpr);
       const h = Math.floor(canvas.clientHeight * dpr);
       if (canvas.width !== w || canvas.height !== h) {
@@ -399,7 +450,7 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
       // burst the speed is 0 — the curl-noise term in the shader still
       // swirls density gently, so cursor wakes drift instead of staying
       // pinned in place.
-      const dt = Math.min(deltaMs * 0.001, 0.033);
+      const dt = Math.min(deltaMs * 0.001, MAX_DT_S);
       runAdvect(dt, elapsedMs * 0.001, outwardSpeedAt(progress));
 
       // Fade-in phase: tiny per-frame splats with linearly-growing

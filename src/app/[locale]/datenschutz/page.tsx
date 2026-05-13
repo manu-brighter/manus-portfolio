@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { use } from "react";
-import { LegalDocument } from "@/components/sections/LegalDocument";
+import { LegalDocument } from "@/components/legal/LegalDocument";
 import { routing } from "@/i18n/routing";
 
 export function generateStaticParams() {

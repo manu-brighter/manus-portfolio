@@ -1,6 +1,7 @@
 "use client";
 
 import { Component, createContext, type ReactNode, useContext, useEffect, useState } from "react";
+import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useGPUCapability } from "@/hooks/useGPUCapability";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import type { GPUTier, TierConfig } from "@/lib/gpu";
@@ -57,6 +58,11 @@ class SceneErrorBoundary extends Component<EBProps, EBState> {
   static getDerivedStateFromError(): EBState {
     return { hasError: true };
   }
+  componentDidCatch(error: Error, info: React.ErrorInfo): void {
+    // biome-ignore lint/suspicious/noConsole: boundary catch is a real-user signal
+    console.error("[SceneErrorBoundary]", error, info);
+    // When Sentry is wired up: Sentry.captureException(error, { extra: info });
+  }
   render() {
     return this.state.hasError ? this.props.fallback : this.props.children;
   }
@@ -99,26 +105,20 @@ export function SceneProvider({ children }: SceneProviderProps) {
   // compositor which handles scroll without cull. Trade-off is
   // mobile loses pointer-driven sim interactivity, but that was
   // already disabled on coarse-pointer per earlier UX decisions.
-  // Initial state must match SSR (false — no window). The effect
-  // below flips it on mount; one-frame mismatch is invisible since
-  // the whole scene is gated on `canvasMounted` for the deferred
-  // mount path anyway.
   //
   // The `?record-bg` query param (consumed by AmbientRecorder)
   // bypasses the coarse-pointer branch — recording requires the
   // live WebGL canvas to be present. Lets Manuel record at mobile-
   // portrait viewport via DevTools resize without DevTools also
   // flipping pointer:coarse and routing to the video path.
-  const [isCoarsePointer, setIsCoarsePointer] = useState(false);
+  const rawCoarsePointer = useCoarsePointer();
+  const [recordOverride, setRecordOverride] = useState(false);
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
-    if (params.has("record-bg")) {
-      setIsCoarsePointer(false);
-      return;
-    }
-    setIsCoarsePointer(window.matchMedia("(pointer: coarse)").matches);
+    setRecordOverride(params.has("record-bg"));
   }, []);
+  const isCoarsePointer = recordOverride ? false : rawCoarsePointer;
 
   useEffect(() => {
     if (canvasMounted) return;

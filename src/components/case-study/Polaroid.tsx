@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties, ReactNode } from "react";
-import { PlateCornerMarks } from "@/components/about/PlateCornerMarks";
+import { PlateCornerMarks } from "@/components/ui/PlateCornerMarks";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 /**

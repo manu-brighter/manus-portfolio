@@ -3,6 +3,7 @@
 import gsap from "gsap";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
+import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { isLoaderComplete, markLoaderComplete } from "@/lib/loaderSession";
 import { SPOT_HEX } from "@/lib/palette";
@@ -36,19 +37,15 @@ export function Loader() {
   const [visible, setVisible] = useState(true);
   // Grain SVG-filter is expensive on mobile GPUs (feTurbulence runs per
   // pixel every paint). Drop it on coarse-pointer devices to keep the
-  // first-paint window from stuttering. Initial state must match SSR
-  // (`true` — grain ships in the static HTML), so the effect below
-  // flips it after hydration on coarse-pointer. One-frame grain flash
-  // on mobile fresh-load; the loader is on screen for ~2.4s anyway.
-  const [grainOn, setGrainOn] = useState(true);
+  // first-paint window from stuttering. useCoarsePointer's
+  // useSyncExternalStore returns `false` on SSR, so the static HTML
+  // ships with grainOn=true; the post-hydration tick flips it on
+  // mobile. One-frame grain flash on mobile fresh-load; the loader is
+  // on screen for ~2.4s anyway.
+  const isCoarse = useCoarsePointer();
+  const grainOn = !isCoarse;
   const reducedMotion = useReducedMotion();
   const t = useTranslations("loader");
-
-  useEffect(() => {
-    if (window.matchMedia("(pointer: coarse)").matches) {
-      setGrainOn(false);
-    }
-  }, []);
 
   useEffect(() => {
     // Locale switches re-mount this component (Next reconciles a new
@@ -97,10 +94,10 @@ export function Loader() {
 
     // Reduced motion: brief hold, then simple fade
     if (reducedMotion) {
-      const timer = setTimeout(() => {
+      const timer = window.setTimeout(() => {
         gsap.to(overlay, { opacity: 0, duration: 0.3, onComplete });
       }, 600);
-      return () => clearTimeout(timer);
+      return () => window.clearTimeout(timer);
     }
 
     // Spot color hex values from `@/lib/palette` — GSAP animates
