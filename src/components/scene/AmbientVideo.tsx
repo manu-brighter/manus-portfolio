@@ -64,7 +64,23 @@ export function AmbientVideo() {
       {/* MP4 / H.264 — universal browser support, including older
           iOS Safari. The earlier WebM/VP9 attempt rendered as a still
           image on iOS 18 (codec was technically supported but only the
-          first frame decoded reliably). */}
+          first frame decoded reliably).
+
+          TODO (Manuel — ffmpeg pass on the master recording): generate
+          three size variants and gate them via <source media="..."> so
+          phones don't download the 1080p master:
+
+            <source media="(max-width: 480px)"  src="/ambient-loop-480.mp4"  type="video/mp4" />
+            <source media="(max-width: 1024px)" src="/ambient-loop-1024.mp4" type="video/mp4" />
+            <source src="/ambient-loop.mp4" type="video/mp4" />
+
+          The browser picks the first matching <source>; <video> media
+          queries are evaluated at element-creation time (not resize),
+          which is fine — the ambient loop never re-mounts. Suggested
+          ffmpeg recipe lives in docs/server-handoff.md once the master
+          is recorded; do NOT add the <source> entries here pointing at
+          files that don't exist yet (would 404 + fall through to the
+          full-size master anyway, but it's noisy in DevTools). */}
       <source src="/ambient-loop.mp4" type="video/mp4" />
     </video>
   );

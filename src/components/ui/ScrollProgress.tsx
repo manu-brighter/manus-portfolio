@@ -196,7 +196,7 @@ export function ScrollProgress() {
             >
               {/* Outer ring (visible on active) */}
               <span
-                className="absolute rounded-full transition-all duration-300"
+                className="absolute rounded-full transition-[background-color,width,height,opacity] duration-300"
                 style={{
                   width: i === activeIndex ? "18px" : "0px",
                   height: i === activeIndex ? "18px" : "0px",
@@ -206,7 +206,7 @@ export function ScrollProgress() {
               />
               {/* Inner dot */}
               <span
-                className="rounded-full transition-all duration-300"
+                className="rounded-full transition-[background-color,width,height] duration-300"
                 style={{
                   width: i === activeIndex ? "8px" : "6px",
                   height: i === activeIndex ? "8px" : "6px",

@@ -57,12 +57,22 @@ export function CaseStudy() {
   const adminHighlight = highlights.find((h) => h.id === "admin");
   const overlayHighlight = highlights.find((h) => h.id === "overlay");
 
-  const publicShots = PUBLIC_SHOT_CONFIG.map((cfg, i) => ({
-    ...cfg,
-    alt: `${t("publicLayer.label")} ${i + 1}`,
-    datestamp: publicShotsI18n[i]?.datestamp ?? "",
-    caption: publicShotsI18n[i]?.caption ?? "",
-  }));
+  // Wrap in useMemo so the array reference is stable across renders.
+  // Without this the downstream `lightboxImages` memo would never hit
+  // (its `publicShots` dep is a freshly-allocated array every render),
+  // re-firing the `useEffect([lightboxImages, setLightboxImages])`
+  // and re-rendering the Lightbox subscriber on every parent render.
+  const publicLayerLabel = t("publicLayer.label");
+  const publicShots = useMemo(
+    () =>
+      PUBLIC_SHOT_CONFIG.map((cfg, i) => ({
+        ...cfg,
+        alt: `${publicLayerLabel} ${i + 1}`,
+        datestamp: publicShotsI18n[i]?.datestamp ?? "",
+        caption: publicShotsI18n[i]?.caption ?? "",
+      })),
+    [publicShotsI18n, publicLayerLabel],
+  );
 
   // Image set for the lightbox — fixed order: hook (0), admin (1),
   // overlay (2), public shots 3/4/5. Each entry uses the largest
