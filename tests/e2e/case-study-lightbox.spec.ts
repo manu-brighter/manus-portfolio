@@ -75,8 +75,14 @@ test.describe("@case-study lightbox", () => {
     // Wait past the loader (~2.2s) + hydration settle, THEN locate
     // and click in one fluent call so Playwright's auto-wait + auto-
     // scroll handles whatever DOM state we end up in.
+    // Wait for the loader overlay to disappear — deterministic signal that
+    // the epic ~2.2s loader animation finished and DioramaTrack has had time
+    // to swap desktop↔fallback branches on hydration. Replaces the brittle
+    // waitForTimeout(3500) (F-testing-coverage-8).
     await page.waitForLoadState("networkidle");
-    await page.waitForTimeout(3500);
+    await page
+      .locator('[data-testid="loader-overlay"]')
+      .waitFor({ state: "hidden", timeout: 8000 });
     await page
       .locator("section#case-study [aria-haspopup='dialog']")
       .first()

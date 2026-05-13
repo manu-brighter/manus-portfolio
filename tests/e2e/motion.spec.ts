@@ -48,10 +48,13 @@ test.describe("motion — reducedMotion: reduce", () => {
 
   test("html does NOT get the lenis class", async ({ page }) => {
     await page.goto("/de/");
-    // Give the provider time to (not) mount Lenis.
-    await page.waitForTimeout(500);
-    const className = (await page.locator("html").getAttribute("class")) ?? "";
-    expect(className).not.toContain("lenis");
+    // Poll until the class attribute stabilises — if Lenis were to mount
+    // it would add the class within ~200ms of the provider effect firing.
+    // expect.poll with a 2s timeout replaces the brittle waitForTimeout(500)
+    // (F-testing-coverage-8) and gives slow CI runners enough headroom.
+    await expect
+      .poll(() => page.locator("html").getAttribute("class"), { timeout: 2000 })
+      .not.toContain("lenis");
   });
 
   test("programmatic scroll is instant", async ({ page }) => {

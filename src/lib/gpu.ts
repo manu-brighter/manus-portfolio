@@ -79,7 +79,10 @@ const RENDERER_PATTERNS: RendererPattern[] = [
   { pattern: "powervr", tier: "minimal" },
 ];
 
-function matchRenderer(renderer: string): GPUTier | null {
+// Exported for unit tests (F-testing-coverage-10): Iris Xe → "low" is a
+// hard constraint documented in CLAUDE.md. Export lets tests catch
+// pattern-list regressions without needing a browser WebGL context.
+export function matchRenderer(renderer: string): GPUTier | null {
   const lower = renderer.toLowerCase();
   for (const { pattern, tier } of RENDERER_PATTERNS) {
     if (lower.includes(pattern)) return tier;
@@ -89,12 +92,28 @@ function matchRenderer(renderer: string): GPUTier | null {
 
 const CACHE_KEY = "manus-gpu-tier";
 const CACHE_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
+const VALID_TIERS: readonly GPUTier[] = ["high", "medium", "low", "minimal", "static"];
 
-function getCachedTier(): GPUTier | null {
+/** Public synchronous read of the cached tier — used by useGPUCapability
+ *  for lazy-init so the FluidSim mounts with the correct config from the
+ *  first paint and never has to dispose+reinit mid-session. */
+export function getCachedTier(): GPUTier | null {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
-    const { tier, ts } = JSON.parse(raw) as { tier: GPUTier; ts: number };
+    const parsed: unknown = JSON.parse(raw);
+    if (
+      !parsed ||
+      typeof parsed !== "object" ||
+      !("tier" in parsed) ||
+      !("ts" in parsed) ||
+      typeof parsed.ts !== "number" ||
+      !VALID_TIERS.includes(parsed.tier as GPUTier)
+    ) {
+      localStorage.removeItem(CACHE_KEY);
+      return null;
+    }
+    const { tier, ts } = parsed as { tier: GPUTier; ts: number };
     if (Date.now() - ts > CACHE_MAX_AGE_MS) {
       localStorage.removeItem(CACHE_KEY);
       return null;
@@ -103,13 +122,6 @@ function getCachedTier(): GPUTier | null {
   } catch {
     return null;
   }
-}
-
-/** Public synchronous read of the cached tier — used by useGPUCapability
- *  for lazy-init so the FluidSim mounts with the correct config from the
- *  first paint and never has to dispose+reinit mid-session. */
-export function readCachedTier(): GPUTier | null {
-  return getCachedTier();
 }
 
 export function cacheTier(tier: GPUTier): void {
@@ -136,7 +148,8 @@ export function probeGPU(gl: WebGL2RenderingContext): {
   }
 
   const ext = gl.getExtension("WEBGL_debug_renderer_info");
-  const renderer = ext ? (gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) as string) : "unknown";
+  const raw = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : "unknown";
+  const renderer = typeof raw === "string" ? raw : "unknown";
 
   const matched = matchRenderer(renderer);
   if (matched) {

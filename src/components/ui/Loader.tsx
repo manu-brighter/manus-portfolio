@@ -162,6 +162,9 @@ export function Loader() {
       role="status"
       aria-live="polite"
       aria-label={t("srStatus")}
+      // data-testid consumed by E2E tests (legal-nav, case-study-lightbox)
+      // to await loader completion deterministically instead of waitForTimeout.
+      data-testid="loader-overlay"
       className="fixed inset-0 z-[9999] flex items-center justify-center bg-paper"
     >
       {/* SVG grain filter — mimics the sim's paper texture. Skipped on

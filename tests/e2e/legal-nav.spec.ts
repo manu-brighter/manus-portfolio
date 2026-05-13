@@ -35,15 +35,22 @@ test.describe("@legal nav from / to /impressum + /datenschutz", () => {
       });
 
       await page.goto("/de/");
-      // Wait past the loader (epic ~2.2s) so ScrollTrigger has finished
-      // initialising and the diorama pin spacer is in the DOM tree.
-      await page.waitForTimeout(3500);
+      // Wait for the loader overlay to disappear — deterministic signal
+      // that the epic ~2.2s animation finished and ScrollTrigger has had
+      // time to initialise the diorama pin spacer. Replaces the brittle
+      // waitForTimeout(3500) (F-testing-coverage-8).
+      await page
+        .locator('[data-testid="loader-overlay"]')
+        .waitFor({ state: "hidden", timeout: 8000 });
 
       // Scroll to bring the footer into view, then click the link.
       await page.evaluate(() =>
         window.scrollTo({ top: document.body.scrollHeight, behavior: "instant" }),
       );
-      await page.waitForTimeout(400);
+      // Replace waitForTimeout(400) with a scroll-position poll (F-testing-coverage-8).
+      await expect
+        .poll(() => page.evaluate(() => window.scrollY), { timeout: 2000, intervals: [50, 100] })
+        .toBeGreaterThan(100);
 
       const link = page.locator(`footer a[href*="/${target}"]`).first();
       await expect(link).toBeVisible();
@@ -51,7 +58,9 @@ test.describe("@legal nav from / to /impressum + /datenschutz", () => {
 
       // Wait for the new page's heading to confirm navigation completed.
       await expect(page.locator("h1")).toBeVisible();
-      await page.waitForTimeout(500);
+      // Replace waitForTimeout(500) with networkidle — pages with no
+      // pending requests have settled (F-testing-coverage-8).
+      await page.waitForLoadState("networkidle");
 
       expect(errors, `console errors during nav to /${target}`).toEqual([]);
     });
