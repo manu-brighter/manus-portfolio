@@ -293,8 +293,8 @@ function TypeAsFluidCanvas() {
             autoComplete="off"
             spellCheck={false}
             maxLength={24}
-            className="type-h2 flex-1 border-[1.5px] border-ink bg-paper px-4 py-3 text-center text-ink placeholder:text-ink-faint focus:outline-none focus:shadow-[3px_3px_0_var(--color-ink)] focus:-translate-x-[1px] focus:-translate-y-[1px] transition-[transform,box-shadow]"
-            style={{ fontStyle: "italic", letterSpacing: "0.05em" }}
+            className="type-h2 flex-1 border-[1.5px] border-ink bg-paper px-4 py-3 text-center text-ink italic placeholder:text-ink-faint focus:outline-none focus:shadow-[3px_3px_0_var(--color-ink)] focus:-translate-x-[1px] focus:-translate-y-[1px] transition-[transform,box-shadow]"
+            style={{ letterSpacing: "0.05em" }}
           />
           <button
             type="button"

@@ -212,9 +212,7 @@ export function PlaygroundCard({ slug, i18nKey, cardSpot, visual, LiveSim }: Pla
           <span aria-hidden="true" className={`inline-block size-2 ${SPOT_BG_CLASS[cardSpot]}`} />
           <span>{t("cardKicker")}</span>
         </p>
-        <h3 className="type-h2 text-ink" style={{ fontStyle: "italic" }}>
-          {t("cardTitle")}
-        </h3>
+        <h3 className="type-h2 italic text-ink">{t("cardTitle")}</h3>
         <p className="type-body max-w-[42ch] text-ink-soft">{t("cardBody")}</p>
         <p
           className="type-label-stamp mt-1 inline-flex items-baseline gap-2 text-ink transition-transform group-hover:translate-x-1 group-focus-visible:translate-x-1"

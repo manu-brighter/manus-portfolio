@@ -296,11 +296,7 @@ export function Photography() {
             <span aria-hidden="true" className="inline-block size-2 bg-spot-amber" />
             {t("eyebrow")}
           </p>
-          <h2
-            id="photography-heading"
-            className="type-h1 mt-4 text-ink"
-            style={{ fontStyle: "italic" }}
-          >
+          <h2 id="photography-heading" className="type-h1 mt-4 italic text-ink">
             {t("headline")}
           </h2>
           <p className="type-body-lg mt-6 max-w-[55ch] text-ink-soft">{t("lede")}</p>
@@ -330,9 +326,7 @@ export function Photography() {
           <p className="type-label-stamp mb-6 hidden md:inline-flex">
             {String(2).padStart(2, "0")} / {SLIDES.length}
           </p>
-          <h3 className="type-h2 text-ink" style={{ fontStyle: "italic" }}>
-            {t(`slides.${SLIDES[1].altKey}.title`)}
-          </h3>
+          <h3 className="type-h2 italic text-ink">{t(`slides.${SLIDES[1].altKey}.title`)}</h3>
           <p className="type-body mt-4 text-ink-soft">{t(`slides.${SLIDES[1].altKey}.body`)}</p>
         </div>
         <div className="col-span-12 md:col-span-7 md:col-start-6">
@@ -358,9 +352,7 @@ export function Photography() {
           <p className="type-label-stamp mb-6 hidden md:inline-flex">
             {String(4).padStart(2, "0")} / {SLIDES.length}
           </p>
-          <h3 className="type-h2 text-ink" style={{ fontStyle: "italic" }}>
-            {t(`slides.${SLIDES[3].altKey}.title`)}
-          </h3>
+          <h3 className="type-h2 italic text-ink">{t(`slides.${SLIDES[3].altKey}.title`)}</h3>
           <p className="type-body mt-4 text-ink-soft">{t(`slides.${SLIDES[3].altKey}.body`)}</p>
         </div>
       </div>

@@ -46,6 +46,7 @@
 
   /* Layout — 12-col fluid grid, plan §4.5 */
   --container-max: 96rem; /* 1536px, == 2xl breakpoint */
+  --container-max-wide: 110rem; /* ultrawide variant — About object-grid, AI block */
   --container-gutter: 1.5rem;
   --grid-gap: 1.5rem;
 
@@ -182,10 +183,10 @@
 
   /* Wide variant — used by About object-grid + loud-centered block
    * so they breathe on ultrawide displays without bumping the global
-   * container cap (which would shift Hero + Work). 110rem ~= 1760px. */
+   * container cap (which would shift Hero + Work). */
   .container-page-wide {
     width: 100%;
-    max-width: 110rem;
+    max-width: var(--container-max-wide);
     margin-inline: auto;
     padding-inline: var(--container-gutter);
   }
@@ -545,9 +546,9 @@
   }
 }
 
-/* View Transitions API: crossfade between locales. Browsers without
-   support fall back to no animation (synchronous swap). */
-@layer base {
+@layer components {
+  /* View Transitions API: crossfade between locales. Browsers without
+     support fall back to no animation (synchronous swap). */
   @media (prefers-reduced-motion: no-preference) {
     ::view-transition-old(root) {
       animation: 200ms ease-out both fade-out;

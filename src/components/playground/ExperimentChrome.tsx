@@ -45,9 +45,7 @@ export function ExperimentChrome({ i18nKey, children }: ExperimentChromeProps) {
               <span aria-hidden="true">←</span>
               <span>{tCommon("back")}</span>
             </Link>
-            <h1 className="type-h2 mt-3 text-ink" style={{ fontStyle: "italic" }}>
-              {t("title")}
-            </h1>
+            <h1 className="type-h2 mt-3 italic text-ink">{t("title")}</h1>
             <p className="type-body-sm mt-3 max-w-[36ch] text-ink-soft md:hidden">{t("caption")}</p>
           </div>
         </div>

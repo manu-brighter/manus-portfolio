@@ -42,7 +42,7 @@ export async function renderSocialCard({
         width,
         height,
         display: "flex",
-        background: "#F0E8D7",
+        background: "#f0e8dc", // --color-paper
         padding: 80,
         fontFamily: "serif",
         color: "#0A0608",
