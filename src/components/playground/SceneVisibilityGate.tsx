@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useSceneVisibility } from "@/lib/sceneVisibility";
+import { useSceneVisibilityStore } from "@/lib/sceneVisibilityStore";
 
 /**
  * Hides the persistent root <SceneCanvas> while mounted.
@@ -32,7 +32,7 @@ import { useSceneVisibility } from "@/lib/sceneVisibility";
  * re-introduce the same race in the opposite direction.
  */
 export function SceneVisibilityGate() {
-  const setHidden = useSceneVisibility((s) => s.setHidden);
+  const setHidden = useSceneVisibilityStore((s) => s.setHidden);
 
   useEffect(() => {
     const showHandle = window.requestAnimationFrame(() => {

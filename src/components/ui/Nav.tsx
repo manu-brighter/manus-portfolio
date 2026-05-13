@@ -2,7 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { type MouseEvent, useEffect, useRef, useState } from "react";
-import { useViewTransition } from "@/components/motion/useViewTransition";
+import { useViewTransition } from "@/hooks/useViewTransition";
 import { NavMobileMenu } from "@/components/ui/NavMobileMenu";
 import { useLenis } from "@/hooks/useLenis";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -37,7 +37,7 @@ const NAV_ITEMS_DESKTOP = [
   { href: "#contact", key: "contact" },
 ] as const;
 
-export const NAV_ITEMS_MOBILE = [
+const NAV_ITEMS_MOBILE = [
   { href: "#about", key: "about" },
   { href: "#skills", key: "skills" },
   { href: "#work", key: "work" },

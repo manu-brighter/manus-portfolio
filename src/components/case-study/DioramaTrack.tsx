@@ -4,7 +4,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { useSceneVisibility } from "@/lib/sceneVisibility";
+import { useSceneVisibilityStore } from "@/lib/sceneVisibilityStore";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -44,7 +44,7 @@ export function DioramaTrack({ children, mobileFallback }: Props) {
   const trackRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<ScrollTrigger | null>(null);
   const [useFallback, setUseFallback] = useState(false);
-  const sceneHidden = useSceneVisibility((s) => s.hidden);
+  const sceneHidden = useSceneVisibilityStore((s) => s.hidden);
 
   useEffect(() => {
     const mq = window.matchMedia(

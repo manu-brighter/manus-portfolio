@@ -5,9 +5,9 @@ import { useGPUCapability } from "@/hooks/useGPUCapability";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import type { GPUTier, TierConfig } from "@/lib/gpu";
 import { isLoaderComplete, subscribeToLoaderComplete } from "@/lib/loaderSession";
-import { useSceneVisibility } from "@/lib/sceneVisibility";
+import { useSceneVisibilityStore } from "@/lib/sceneVisibilityStore";
 import { AmbientVideo } from "./AmbientVideo";
-import { SceneCanvas } from "./Canvas";
+import { SceneCanvas } from "./SceneCanvas";
 import { FluidSim } from "./FluidSim";
 import { StaticFallback } from "./StaticFallback";
 
@@ -73,7 +73,7 @@ export function SceneProvider({ children }: SceneProviderProps) {
   // Playground experiment routes flip this to true so the root Canvas
   // unmounts and a per-experiment WebGL context can own the screen
   // without competing for GPU time. Stays false on the home long-scroll.
-  const sceneHidden = useSceneVisibility((s) => s.hidden);
+  const sceneHidden = useSceneVisibilityStore((s) => s.hidden);
 
   // Universal SceneCanvas defer: the WebGL2 context creation, 9 shader
   // program compilations, FBO allocation, and the first per-frame
