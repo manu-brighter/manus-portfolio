@@ -227,23 +227,23 @@
     "label": "Currently",
     "items": [
       {
-        "verb": "working on",
+        "verb": "arbeite an",
         "value": "diese Seite hier"
       },
       {
-        "verb": "learning",
+        "verb": "lerne",
         "value": "React 19 · R3F 9 · WebGPU-Shader"
       },
       {
-        "verb": "shooting",
+        "verb": "schieße",
         "value": "Wildlife in Costa Rica & Thailand"
       },
       {
-        "verb": "driving",
+        "verb": "fahre",
         "value": "Audi S5 B8.5 (Tuning-Projekt)"
       },
       {
-        "verb": "chasing",
+        "verb": "jage",
         "value": "den zvoove Ping-Pong-Champion-Titel"
       }
     ]
@@ -603,7 +603,7 @@
       "label": "Öffentliche Schicht"
     },
     "reflection": {
-      "label": "Lessons Learned",
+      "label": "Erkenntnisse",
       "body": "Manuelles Testing hat mich damals viel Zeit gekostet. Heute würde ich das Setup von Anfang an mit automatisierten Tests und KI-Tools aufsetzen, um Fehler direkt im Keim zu ersticken und den Fokus voll aufs Deployment zu legen."
     },
     "footerLink": {
@@ -651,10 +651,10 @@
     }
   },
   "photography": {
-    "sectionLabel": "05 / Photography",
-    "eyebrow": "Through the Lens",
-    "headline": "Through the Lens.",
-    "lede": "Wildlife und Autos sind meine zwei Welten. Die einen jage ich solo durch den Dschungel von Costa Rica oder Thailand, die anderen finden mich meist näher zuhause. Was beide verbindet: Geduld, Licht, und der eine Moment, der den ganzen Tag rechtfertigt.",
+    "sectionLabel": "Section 05 · Photography",
+    "eyebrow": "Section 05 · Photography",
+    "headline": "Durch die Linse.",
+    "lede": "Wildlife und Autos sind meine zwei Welten. Die einen jage ich solo durch den Dschungel von Costa Rica oder Thailand, die anderen finden mich meist näher zuhause. Was beide verbindet: Geduld, Licht, und der eine Moment, der den ganzen Tag rechtfertigt. Mit der Sony α7 IV seit 2023 unterwegs.",
     "techLabel": "SONY α7 IV · 24–600mm · seit 2023",
     "ctaLabel": "Volles Portfolio auf manuelheller.myportfolio.com",
     "ctaHref": "https://manuelheller.myportfolio.com/portfolio",
@@ -687,8 +687,8 @@
     }
   },
   "playground": {
-    "sectionLabel": "06 · PLAYGROUND",
-    "eyebrow": "OFFENE WERKBANK",
+    "sectionLabel": "Section 06 · Playground",
+    "eyebrow": "Section 06 · Playground",
     "headline": "Wo der Fluid-Sim spielen darf.",
     "lede": "Zwei Shader-Experimente, beide auf dem Tinte-/Druck-Narrativ verankert. Pure Craft-Demonstration, kein Produkt-Kontext.",
     "openLabel": "Experiment öffnen",
@@ -723,7 +723,7 @@
   },
   "contact": {
     "sectionLabel": "Section 07 · Contact",
-    "headline": "Let's talk.",
+    "headline": "Lass uns reden.",
     "subhead": "Auftrag, Frage, Tipp oder einfach Hallo — die Inbox ist offen.",
     "intro": {
       "label": "Ein paar Worte vorab",
@@ -758,6 +758,7 @@
         "sending": "Sende …"
       },
       "status": {
+        "fromLabel": "Von:",
         "fallback": "Form-Versand ist gerade noch nicht verdrahtet. Schreib mir direkt:",
         "error": "Hat nicht geklappt. Bitte direkt per E-Mail.",
         "mailSubject": "Anfrage über manuelheller.dev"

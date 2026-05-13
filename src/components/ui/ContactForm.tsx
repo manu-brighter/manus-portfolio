@@ -68,6 +68,9 @@ export function ContactForm() {
     setStatus("sending");
     // Phase-11 Sprint-1 stub: Resend Worker not deployed yet — graceful
     // fallback to direct email. Replaced in Sprint 6 with real fetch.
+    // When the real fetch is wired (Sprint 6 Cloudflare Worker):
+    // wrap in try/catch + AbortController timeout, call setStatus("error")
+    // on network failure, non-2xx response, or timeout.
     fallbackTimerRef.current = window.setTimeout(() => {
       setStatus("fallback");
       fallbackTimerRef.current = null;
@@ -157,7 +160,7 @@ export function ContactForm() {
           <span>
             {t("status.fallback")}{" "}
             <a
-              href={`mailto:${SITE.author.email}?subject=${encodeURIComponent(t("status.mailSubject"))}&body=${encodeURIComponent(`${nameValueRef.current ? `Von: ${nameValueRef.current}\n\n` : ""}${messageValueRef.current}`)}`}
+              href={`mailto:${SITE.author.email}?subject=${encodeURIComponent(t("status.mailSubject"))}&body=${encodeURIComponent(`${nameValueRef.current ? `${t("status.fromLabel")} ${nameValueRef.current}\n\n` : ""}${messageValueRef.current}`)}`}
               className="underline decoration-spot-rose decoration-2 underline-offset-4 transition-colors hover:text-ink"
             >
               {SITE.author.email}

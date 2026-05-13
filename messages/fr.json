@@ -227,24 +227,24 @@
     "label": "Currently",
     "items": [
       {
-        "verb": "working on",
+        "verb": "travaille sur",
         "value": "ce site même"
       },
       {
-        "verb": "learning",
+        "verb": "apprends",
         "value": "React 19 · R3F 9 · shaders WebGPU"
       },
       {
-        "verb": "shooting",
+        "verb": "lis",
         "value": "wildlife au Costa Rica & en Thaïlande"
       },
       {
-        "verb": "driving",
+        "verb": "écoute",
         "value": "Audi S5 B8.5 (projet tuning)"
       },
       {
-        "verb": "chasing",
-        "value": "le titre de champion ping-pong chez zvoove"
+        "verb": "joue",
+        "value": "pour le titre de champion ping-pong chez zvoove"
       }
     ]
   },
@@ -603,7 +603,7 @@
       "label": "Couche publique"
     },
     "reflection": {
-      "label": "Lessons Learned",
+      "label": "Leçons apprises",
       "body": "Les tests manuels m'ont coûté beaucoup de temps à l'époque. Aujourd'hui je monterais le projet dès le départ avec des tests automatisés et des outils IA, je tuerais les bugs à la racine et je mettrais le focus entièrement sur le déploiement."
     },
     "footerLink": {
@@ -651,9 +651,9 @@
     }
   },
   "photography": {
-    "sectionLabel": "05 / Photography",
-    "eyebrow": "Through the Lens",
-    "headline": "Through the Lens.",
+    "sectionLabel": "Section 05 · Photography",
+    "eyebrow": "Section 05 · Photography",
+    "headline": "À travers l'objectif.",
     "lede": "Wildlife et voitures, mes deux mondes. Les uns, je les traque seul dans la jungle du Costa Rica ou de Thaïlande, les autres me trouvent en général plus près de chez moi. Ce qui les relie : la patience, la lumière, et le moment qui justifie toute la journée.",
     "techLabel": "SONY α7 IV · 24–600mm · depuis 2023",
     "ctaLabel": "Portfolio complet sur manuelheller.myportfolio.com",
@@ -687,8 +687,8 @@
     }
   },
   "playground": {
-    "sectionLabel": "06 · PLAYGROUND",
-    "eyebrow": "ÉTABLI OUVERT",
+    "sectionLabel": "Section 06 · Playground",
+    "eyebrow": "Section 06 · Playground",
     "headline": "Là où la simulation de fluide a le droit de jouer.",
     "lede": "Deux expérimentations shader, toutes deux ancrées dans la narration encre/impression. Pure démonstration de craft, pas de contexte produit.",
     "openLabel": "Ouvrir l'expérimentation",
@@ -723,7 +723,7 @@
   },
   "contact": {
     "sectionLabel": "Section 07 · Contact",
-    "headline": "Let's talk.",
+    "headline": "Parlons.",
     "subhead": "Demande, question, idée, ou juste un bonjour, l'inbox est ouverte.",
     "intro": {
       "label": "Quelques mots avant",
@@ -758,6 +758,7 @@
         "sending": "Envoi …"
       },
       "status": {
+        "fromLabel": "De :",
         "fallback": "L'envoi du formulaire n'est pas encore branché. Écris-moi directement :",
         "error": "Ça n'a pas fonctionné. Écris-moi directement par e-mail.",
         "mailSubject": "Demande via manuelheller.dev"

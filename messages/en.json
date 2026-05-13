@@ -651,8 +651,8 @@
     }
   },
   "photography": {
-    "sectionLabel": "05 / Photography",
-    "eyebrow": "Through the Lens",
+    "sectionLabel": "Section 05 · Photography",
+    "eyebrow": "Section 05 · Photography",
     "headline": "Through the Lens.",
     "lede": "Wildlife and cars are my two worlds. The first I chase solo through the jungles of Costa Rica or Thailand, the second usually find me closer to home. What connects them: patience, light, and that one moment that justifies the whole day.",
     "techLabel": "SONY α7 IV · 24–600mm · since 2023",
@@ -687,8 +687,8 @@
     }
   },
   "playground": {
-    "sectionLabel": "06 · PLAYGROUND",
-    "eyebrow": "OPEN WORKBENCH",
+    "sectionLabel": "Section 06 · Playground",
+    "eyebrow": "Section 06 · Playground",
     "headline": "Where the fluid sim gets to play.",
     "lede": "Two shader experiments, both anchored to the ink-and-print narrative. Pure craft demonstration, no product context.",
     "openLabel": "Open experiment",
@@ -758,6 +758,7 @@
         "sending": "Sending …"
       },
       "status": {
+        "fromLabel": "From:",
         "fallback": "Form delivery isn't wired up yet. Write me directly:",
         "error": "Didn't go through. Please email me directly.",
         "mailSubject": "Enquiry via manuelheller.dev"
