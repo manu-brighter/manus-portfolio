@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { type Locale, routing } from "@/i18n/routing";
 import { SITE } from "@/lib/site";
+import type { MetaKeywords } from "@/types/i18n-shapes";
 
 /**
  * Build per-locale metadata for a route. Includes:
@@ -36,7 +37,7 @@ export async function buildLocaleMetadata({
     metadataBase: new URL(SITE.url),
     title: { default: title, template: t("titleTemplate") },
     description,
-    keywords: t.raw("keywords") as string[],
+    keywords: t.raw("keywords") as MetaKeywords,
     authors: [{ name: SITE.author.name, url: SITE.url }],
     creator: SITE.author.name,
     publisher: SITE.author.name,

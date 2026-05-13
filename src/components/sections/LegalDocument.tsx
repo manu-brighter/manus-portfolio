@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import type { LegalSections } from "@/types/i18n-shapes";
 
 /**
  * Shared renderer for /impressum and /datenschutz.
@@ -13,12 +14,6 @@ import { Link } from "@/i18n/navigation";
  * `legal.impressum` and `legal.datenschutz`.
  */
 
-type LegalSection = {
-  id: string;
-  heading: string;
-  body: string[];
-};
-
 type LegalDocumentProps = {
   namespace: "legal.impressum" | "legal.datenschutz";
 };
@@ -27,7 +22,7 @@ export function LegalDocument({ namespace }: LegalDocumentProps) {
   const t = useTranslations(namespace);
   const tCommon = useTranslations("legal.common");
 
-  const sections = t.raw("sections") as LegalSection[];
+  const sections = t.raw("sections") as LegalSections;
 
   return (
     <article className="container-page py-20 md:py-28" aria-labelledby="legal-heading">

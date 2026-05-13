@@ -11,7 +11,7 @@ import { Footer } from "@/components/ui/Footer";
 import { Loader } from "@/components/ui/Loader";
 import { Nav } from "@/components/ui/Nav";
 import { ScrollProgress } from "@/components/ui/ScrollProgress";
-import { type Locale, routing } from "@/i18n/routing";
+import { routing } from "@/i18n/routing";
 import { escapeForScript } from "@/lib/seo/escapeForScript";
 import { buildJsonLd } from "@/lib/seo/jsonLd";
 import { buildLocaleMetadata } from "@/lib/seo/metadata";
@@ -29,7 +29,7 @@ export async function generateMetadata({
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
-  return buildLocaleMetadata({ locale: locale as Locale, pathname: "" });
+  return buildLocaleMetadata({ locale, pathname: "" });
 }
 
 type LocaleLayoutProps = {
@@ -47,7 +47,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   const messages = await getMessages();
   const t = await getTranslations("skipLink");
   const tMeta = await getTranslations({ locale, namespace: "meta" });
-  const jsonLd = buildJsonLd(locale as Locale, tMeta("description"));
+  const jsonLd = buildJsonLd(locale, tMeta("description"));
 
   return (
     <html lang={locale}>

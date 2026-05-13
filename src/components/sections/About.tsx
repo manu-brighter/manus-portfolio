@@ -7,6 +7,7 @@ import { PullQuote } from "@/components/about/PullQuote";
 import { StampDivider } from "@/components/about/StampDivider";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { Portrait } from "@/components/ui/Portrait";
+import type { AboutAnfangenStamps, AboutParts, CurrentlyItems } from "@/types/i18n-shapes";
 
 /**
  * About — Section 01 (Phase 11 visual rework).
@@ -25,16 +26,6 @@ import { Portrait } from "@/components/ui/Portrait";
  * "Currently learning" residue lives as a sub-band under the
  * Object-Grid header.
  */
-
-type AboutPart = {
-  id: string;
-  heading: string;
-  body: string[];
-};
-
-type StampMargItem = { label: string; year: string };
-
-type CurrentlyItem = { verb: string; value: string };
 
 /**
  * BodyProse — wraps each paragraph in FadeIn (B2 in spec § 4) so the
@@ -74,9 +65,9 @@ export function About() {
   // editorial flank — refilled into the spine after originally being
   // dropped in favour of the Object-Grid's "currently learning" band.
   const tCurrently = useTranslations("currently");
-  const parts = t.raw("parts") as AboutPart[];
+  const parts = t.raw("parts") as AboutParts;
   const partsById = Object.fromEntries(parts.map((p) => [p.id, p]));
-  const currentlyItems = tCurrently.raw("items") as CurrentlyItem[];
+  const currentlyItems = tCurrently.raw("items") as CurrentlyItems;
 
   // Helpers — body prose lookup (stays verbatim from briefing).
   const bodyOf = (id: string) => partsById[id]?.body ?? [];
@@ -127,7 +118,7 @@ export function About() {
         marginalia={
           <div className="flex flex-col gap-3">
             <span className="type-label-stamp">{t("marginalia.anfangen.counter")}</span>
-            {(t.raw("marginalia.anfangen.stamps") as StampMargItem[]).map((s) => (
+            {(t.raw("marginalia.anfangen.stamps") as AboutAnfangenStamps).map((s) => (
               <span key={s.label} className="type-label-stamp">
                 {s.label} · {s.year}
               </span>

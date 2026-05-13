@@ -27,7 +27,7 @@ const PORTRAIT_CAPTION: Record<Locale, string> = {
  * box (if/when site-internal search exists), and provides locale
  * alternates as `inLanguage`.
  */
-export function buildJsonLd(locale: Locale, description: string) {
+export function buildJsonLd(locale: Locale, description: string): Record<string, unknown>[] {
   const person = {
     "@context": "https://schema.org",
     "@type": "Person",

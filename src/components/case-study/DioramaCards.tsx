@@ -5,11 +5,17 @@ import { OverlayHighlightCard } from "@/components/case-study/cards/OverlayHighl
 import { PublicCard } from "@/components/case-study/cards/PublicCard";
 import { StackCard } from "@/components/case-study/cards/StackCard";
 import { WhatCard } from "@/components/case-study/cards/WhatCard";
+import type {
+  CaseStudyFacts,
+  CaseStudyHighlightFeature,
+  CaseStudyHookStation,
+  CaseStudyStack,
+} from "@/types/i18n-shapes";
 
-type Fact = { key: string; value: string };
-type StackRow = { tech: string; use: string };
-type Feature = { title: string; body: string };
-type DateCaption = { datestamp: string; polaroidCaption?: string };
+type Fact = CaseStudyFacts[number];
+type StackRow = CaseStudyStack[number];
+type Feature = CaseStudyHighlightFeature;
+type DateCaption = CaseStudyHookStation;
 
 type PublicShot = {
   slug: string;

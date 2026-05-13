@@ -14,21 +14,17 @@ import { DioramaLupe } from "@/components/case-study/DioramaLupe";
 import { DioramaTrack } from "@/components/case-study/DioramaTrack";
 import { Lightbox } from "@/components/case-study/Lightbox";
 import { type LightboxImage, useLightboxStore } from "@/lib/lightboxStore";
-
-type Fact = { key: string; value: string };
-type StackRow = { tech: string; use: string };
-type Feature = { title: string; body: string };
-type Highlight = {
-  id: string;
-  kicker: string;
-  title: string;
-  lede: string;
-  screenshot: string;
-  screenshotAlt: string;
-  features: Feature[];
-};
-type DateCaption = { datestamp: string; polaroidCaption?: string };
-type PublicShotI18n = { datestamp: string; caption: string };
+import type {
+  CaseStudyFacts,
+  CaseStudyHighlightAdmin,
+  CaseStudyHighlightOverlay,
+  CaseStudyHighlights,
+  CaseStudyHookStation,
+  CaseStudyPublicShots,
+  CaseStudyStack,
+  CaseStudyStackStation,
+  CaseStudyStory,
+} from "@/types/i18n-shapes";
 
 const PUBLIC_SHOT_CONFIG: {
   slug: string;
@@ -44,15 +40,15 @@ const PUBLIC_SHOT_CONFIG: {
 export function CaseStudy() {
   const t = useTranslations("caseStudy");
 
-  const facts = t.raw("context.facts") as Fact[];
-  const storyParas = t.raw("context.story") as string[];
-  const stack = t.raw("platform.stack") as StackRow[];
-  const highlights = t.raw("highlights.items") as Highlight[];
-  const hookStation = t.raw("stations.hook") as DateCaption;
-  const stackStation = t.raw("stations.stack") as { heading: string };
-  const highlightAdmin = t.raw("stations.highlightAdmin") as DateCaption;
-  const highlightOverlay = t.raw("stations.highlightOverlay") as DateCaption;
-  const publicShotsI18n = t.raw("stations.publicShots") as PublicShotI18n[];
+  const facts = t.raw("context.facts") as CaseStudyFacts;
+  const storyParas = t.raw("context.story") as CaseStudyStory;
+  const stack = t.raw("platform.stack") as CaseStudyStack;
+  const highlights = t.raw("highlights.items") as CaseStudyHighlights;
+  const hookStation = t.raw("stations.hook") as CaseStudyHookStation;
+  const stackStation = t.raw("stations.stack") as CaseStudyStackStation;
+  const highlightAdmin = t.raw("stations.highlightAdmin") as CaseStudyHighlightAdmin;
+  const highlightOverlay = t.raw("stations.highlightOverlay") as CaseStudyHighlightOverlay;
+  const publicShotsI18n = t.raw("stations.publicShots") as CaseStudyPublicShots;
 
   const adminHighlight = highlights.find((h) => h.id === "admin");
   const overlayHighlight = highlights.find((h) => h.id === "overlay");

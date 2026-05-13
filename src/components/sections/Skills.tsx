@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { HeroSkillPulse } from "@/components/skills/HeroSkillPulse";
 import { VibecodedStamp } from "@/components/skills/VibecodedStamp";
+import type { SkillsTiers } from "@/types/i18n-shapes";
 
 /**
  * Skills — Section 02.
@@ -28,18 +29,7 @@ import { VibecodedStamp } from "@/components/skills/VibecodedStamp";
  * consistent with the mono labels elsewhere on the site.
  */
 
-type SkillItem = {
-  name: string;
-  vibecoded?: boolean;
-};
-
-type SkillTier = {
-  id: string;
-  label: string;
-  description?: string;
-  weight: "xl" | "l" | "m";
-  items: SkillItem[];
-};
+type SkillTier = SkillsTiers[number];
 
 const TIER_ITEM_CLASSES: Record<SkillTier["weight"], string> = {
   xl: "text-[clamp(1.75rem,3.2vw,2.75rem)] leading-[1.05] tracking-[-0.015em]",
@@ -49,7 +39,7 @@ const TIER_ITEM_CLASSES: Record<SkillTier["weight"], string> = {
 
 export function Skills() {
   const t = useTranslations("skills");
-  const tiers = t.raw("tiers") as SkillTier[];
+  const tiers = t.raw("tiers") as SkillsTiers;
   const marker = t("vibecodedMarker");
 
   return (
@@ -126,7 +116,7 @@ export function Skills() {
                   <span className="misreg-hover" data-text={item.name}>
                     {item.name}
                   </span>
-                  {item.vibecoded ? (
+                  {"vibecoded" in item && item.vibecoded ? (
                     // Stagger base 0.6s + 0.18s per item — gives the user
                     // a beat to register that something IS animating in
                     // (the prior 80ms cadence was so fast siblings cascaded
