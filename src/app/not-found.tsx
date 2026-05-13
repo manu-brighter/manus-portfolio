@@ -34,28 +34,28 @@ export default async function NotFound() {
             <p className="type-body text-ink-soft">{t("body")}</p>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-3 font-mono text-xs uppercase tracking-[0.18em]">
+          <div className="flex flex-wrap justify-center gap-3">
             <Link
               href="/de/"
-              className="border-2 border-ink px-4 py-2 transition-colors hover:bg-ink hover:text-paper"
+              className="type-label-stamp transition-colors hover:bg-ink hover:text-paper-tint focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
             >
               Deutsch
             </Link>
             <Link
               href="/en/"
-              className="border-2 border-ink px-4 py-2 transition-colors hover:bg-ink hover:text-paper"
+              className="type-label-stamp transition-colors hover:bg-ink hover:text-paper-tint focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
             >
               English
             </Link>
             <Link
               href="/fr/"
-              className="border-2 border-ink px-4 py-2 transition-colors hover:bg-ink hover:text-paper"
+              className="type-label-stamp transition-colors hover:bg-ink hover:text-paper-tint focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
             >
               Français
             </Link>
             <Link
               href="/it/"
-              className="border-2 border-ink px-4 py-2 transition-colors hover:bg-ink hover:text-paper"
+              className="type-label-stamp transition-colors hover:bg-ink hover:text-paper-tint focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
             >
               Italiano
             </Link>

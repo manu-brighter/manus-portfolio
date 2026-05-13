@@ -81,7 +81,7 @@ export function About() {
       <PlateCornerMarks />
 
       {/* 00 Header */}
-      <header className="container-page grid-12 mb-12 gap-y-4 md:mb-20">
+      <header className="container-page grid-12 mb-16 gap-y-4 md:mb-20">
         <p className="col-span-12 text-ink-muted type-label md:col-span-4">{t("sectionLabel")}</p>
         <div className="col-span-12 md:col-span-8">
           <h2 id="about-heading" className="type-h1 text-ink">
@@ -158,7 +158,7 @@ export function About() {
               </span>
               <span className="size-1 rounded-full bg-current" />
             </div>
-            <h3 id="about-portrait-heading" className="type-h3 italic text-ink">
+            <h3 id="about-portrait-heading" className="type-label-stamp">
               {tCurrently("label")}
             </h3>
             <dl className="flex flex-col gap-2">

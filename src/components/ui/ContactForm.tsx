@@ -1,5 +1,6 @@
 "use client";
 
+import gsap from "gsap";
 import { useTranslations } from "next-intl";
 import { useEffect, useId, useRef, useState } from "react";
 import { SITE } from "@/lib/site";
@@ -39,17 +40,40 @@ export function ContactForm() {
   const fallbackTimerRef = useRef<number | null>(null);
   const nameValueRef = useRef<string>("");
   const messageValueRef = useRef<string>("");
+  const submitButtonRef = useRef<HTMLButtonElement>(null);
+  const pulseTweenRef = useRef<gsap.core.Tween | null>(null);
 
-  // Cancel any in-flight stub timer on unmount so React doesn't warn
-  // about a state update on an unmounted component.
+  // Cancel any in-flight stub timer + GSAP pulse on unmount so React
+  // doesn't warn about a state update on an unmounted component.
   useEffect(() => {
     return () => {
       if (fallbackTimerRef.current !== null) {
         window.clearTimeout(fallbackTimerRef.current);
         fallbackTimerRef.current = null;
       }
+      pulseTweenRef.current?.kill();
+      pulseTweenRef.current = null;
     };
   }, []);
+
+  // Start/stop the submit-button opacity pulse while sending.
+  useEffect(() => {
+    const btn = submitButtonRef.current;
+    if (!btn) return;
+    if (status === "sending") {
+      pulseTweenRef.current = gsap.to(btn, {
+        opacity: 0.6,
+        duration: 0.55,
+        repeat: -1,
+        yoyo: true,
+        ease: "power1.inOut",
+      });
+    } else {
+      pulseTweenRef.current?.kill();
+      pulseTweenRef.current = null;
+      gsap.set(btn, { opacity: 1 });
+    }
+  }, [status]);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -74,7 +98,7 @@ export function ContactForm() {
     fallbackTimerRef.current = window.setTimeout(() => {
       setStatus("fallback");
       fallbackTimerRef.current = null;
-    }, 320);
+    }, 800);
   }
 
   const isSending = status === "sending";
@@ -147,7 +171,12 @@ export function ContactForm() {
         />
       </div>
 
-      <button type="submit" disabled={isSending} className="riso-submit self-start">
+      <button
+        ref={submitButtonRef}
+        type="submit"
+        disabled={isSending}
+        className="riso-submit self-start"
+      >
         {isSending ? t("submit.sending") : t("submit.label")}
       </button>
 
@@ -167,7 +196,17 @@ export function ContactForm() {
             </a>
           </span>
         )}
-        {status === "error" && <span className="text-spot-rose">{t("status.error")}</span>}
+        {status === "error" && (
+          <span>
+            {t("status.error")}{" "}
+            <a
+              href={`mailto:${SITE.author.email}`}
+              className="underline decoration-spot-rose decoration-2 underline-offset-4 transition-colors hover:text-ink"
+            >
+              {SITE.author.email}
+            </a>
+          </span>
+        )}
       </div>
     </form>
   );

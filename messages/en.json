@@ -496,6 +496,7 @@
     ]
   },
   "caseStudy": {
+    "sectionLabel": "Section 04 · Case Study",
     "headline": "From club chaos to a custom platform.",
     "hook": "All clubs fight the same mess: Excel sheets, static websites, file/info sharing, isolated tools. For Jogge di Balla I cleaned that up: a custom-built platform that covers everything from member management to a Twitch overlay. Vibecoded, self-hosted, over-engineered.",
     "context": {
@@ -759,7 +760,7 @@
       },
       "status": {
         "fromLabel": "From:",
-        "fallback": "Form delivery isn't wired up yet. Write me directly:",
+        "fallback": "Currently being set up — write me directly:",
         "error": "Didn't go through. Please email me directly.",
         "mailSubject": "Enquiry via manuelheller.dev"
       }

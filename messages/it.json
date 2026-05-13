@@ -496,6 +496,7 @@
     ]
   },
   "caseStudy": {
+    "sectionLabel": "Section 04 · Case Study",
     "headline": "Dal caos di un'associazione a una piattaforma dedicata.",
     "hook": "Tutte le associazioni combattono con lo stesso casino: fogli Excel, siti statici, condivisione di file e info, strumenti isolati. Per Jogge di Balla ho messo ordine: una piattaforma su misura che copre tutto, dalla gestione dei membri all'overlay Twitch. Vibecoded, auto-ospitata, esagerata.",
     "context": {
@@ -759,7 +760,7 @@
       },
       "status": {
         "fromLabel": "Da:",
-        "fallback": "L'invio del modulo non è ancora collegato. Scrivimi direttamente:",
+        "fallback": "In fase di configurazione — scrivimi direttamente:",
         "error": "Non è andato a buon fine. Scrivimi direttamente per e-mail.",
         "mailSubject": "Richiesta tramite manuelheller.dev"
       }

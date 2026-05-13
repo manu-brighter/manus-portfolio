@@ -380,7 +380,7 @@ export function WorkCard(props: WorkCardProps) {
           {/* Media frame — screenshot or generative visual. */}
           <div
             ref={mediaRef}
-            className="relative aspect-[16/9] overflow-hidden border-2 border-ink bg-paper-shade will-change-transform"
+            className="relative aspect-[16/9] overflow-hidden border-[1.5px] border-ink bg-paper-shade will-change-transform"
           >
             {media}
 
@@ -435,8 +435,9 @@ export function WorkCard(props: WorkCardProps) {
             </ul>
 
             {/* CTA stamp. */}
-            <span className="mt-6 inline-block rounded-[2px] border-2 border-ink bg-paper px-4 py-2 font-mono text-xs uppercase tracking-[0.18em] text-ink transition-transform group-hover:translate-x-1 group-hover:translate-y-1 group-hover:shadow-[3px_3px_0_var(--color-ink)]">
-              {ctaLabel} →
+            <span className="mt-6 inline-block rounded-[2px] border-[1.5px] border-ink bg-paper px-4 py-2 font-mono text-xs uppercase tracking-[0.18em] text-ink transition-transform group-hover:translate-x-1 group-hover:translate-y-1 group-hover:shadow-[3px_3px_0_var(--color-ink)]">
+              {ctaLabel}
+              {click.kind !== "scroll-hero" ? " →" : null}
             </span>
           </div>
         </div>

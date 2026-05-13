@@ -496,6 +496,7 @@
     ]
   },
   "caseStudy": {
+    "sectionLabel": "Section 04 · Case Study",
     "headline": "Vom Vereins-Chaos zur eigenen Plattform.",
     "hook": "Alle Vereine kämpfen alle mit demselben Mist: Excel-Listen, statische Websites, File-/Information-Sharing, isolierte Tools. Für Jogge di Balla habe ich das aufgeräumt — eine massgeschneiderte Plattform, die von Mitgliederverwaltung bis Twitch-Overlay alles abdeckt. Vibecoded, selbst gehostet, übertrieben.",
     "context": {
@@ -759,7 +760,7 @@
       },
       "status": {
         "fromLabel": "Von:",
-        "fallback": "Form-Versand ist gerade noch nicht verdrahtet. Schreib mir direkt:",
+        "fallback": "Momentan in Einrichtung — schreib mir direkt:",
         "error": "Hat nicht geklappt. Bitte direkt per E-Mail.",
         "mailSubject": "Anfrage über manuelheller.dev"
       }

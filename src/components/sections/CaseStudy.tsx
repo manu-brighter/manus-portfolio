@@ -134,7 +134,7 @@ export function CaseStudy() {
   // stack without illustration or fluid-sim.
   const mobileFallback = (
     <div className="container-page flex flex-col gap-12 py-12">
-      <h2 id="case-study-heading" className="type-h2 text-ink">
+      <h2 id="case-study-heading" className="type-h1 text-ink">
         {t("headline")}
       </h2>
       <HookCard
@@ -193,7 +193,7 @@ export function CaseStudy() {
   // Desktop: full diorama with sticky-pin + horizontal scroll.
   return (
     <>
-      <DioramaTrack mobileFallback={mobileFallback}>
+      <DioramaTrack mobileFallback={mobileFallback} sectionLabel={t("sectionLabel")}>
         <h2 id="case-study-heading" className="sr-only">
           {t("headline")}
         </h2>

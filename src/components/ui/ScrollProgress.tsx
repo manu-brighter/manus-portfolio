@@ -198,6 +198,8 @@ export function ScrollProgress() {
               className="group relative flex size-8 items-center justify-center"
               style={{ opacity: i === activeIndex ? 1 : 0.45 }}
             >
+              {/* Paper backdrop for contrast over Photography panorama */}
+              <span className="absolute size-5 rounded-full bg-paper/40 backdrop-blur-sm" />
               {/* Outer ring (visible on active) */}
               <span
                 className="absolute rounded-full transition-[background-color,width,height,opacity] duration-300"
