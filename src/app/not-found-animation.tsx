@@ -32,11 +32,16 @@ export function NotFoundAnimation() {
   return (
     <svg viewBox="0 0 200 200" width="220" height="220" aria-hidden="true">
       <g ref={inkRef} style={{ mixBlendMode: "multiply" }}>
+        {/* --color-spot-rose */}
         <ellipse cx="80" cy="80" rx="70" ry="60" fill="#FF6BA0" opacity="0.7" />
+        {/* --color-spot-amber */}
         <ellipse cx="120" cy="80" rx="60" ry="70" fill="#FFC474" opacity="0.7" />
+        {/* --color-spot-mint */}
         <ellipse cx="80" cy="120" rx="65" ry="60" fill="#7CE8C4" opacity="0.7" />
+        {/* --color-spot-violet */}
         <ellipse cx="120" cy="120" rx="70" ry="65" fill="#B89AFF" opacity="0.7" />
       </g>
+      {/* --color-ink */}
       <text
         x="100"
         y="116"

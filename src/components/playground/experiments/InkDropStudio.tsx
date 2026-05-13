@@ -374,17 +374,17 @@ function LevaPaperTheme() {
       titleBar={{ drag: true, filter: false, title: "INK DROP STUDIO" }}
       theme={{
         colors: {
-          elevation1: "#f0e8dc",
-          elevation2: "#fef2e2",
-          elevation3: "#e4dbcd",
-          accent1: "#ff6ba0",
-          accent2: "#ffc474",
-          accent3: "#7ce8c4",
-          highlight1: "#0a0608",
-          highlight2: "#1a0e12",
-          highlight3: "#0a0608",
-          folderTextColor: "#0a0608",
-          folderWidgetColor: "#0a0608",
+          elevation1: "#f0e8dc", // --color-paper
+          elevation2: "#fef2e2", // --color-paper-tint
+          elevation3: "#e4dbcd", // --color-paper-shade
+          accent1: "#ff6ba0", // --color-spot-rose
+          accent2: "#ffc474", // --color-spot-amber
+          accent3: "#7ce8c4", // --color-spot-mint
+          highlight1: "#0a0608", // --color-ink
+          highlight2: "#1a0e12", // --color-ink-soft
+          highlight3: "#0a0608", // --color-ink
+          folderTextColor: "#0a0608", // --color-ink
+          folderWidgetColor: "#0a0608", // --color-ink
         },
         sizes: {
           rootWidth: "300px",
