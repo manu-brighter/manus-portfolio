@@ -38,10 +38,19 @@ export function ScrollToOnLoad() {
   useEffect(() => {
     const target = sessionStorage.getItem("scrollToOnLoad");
     if (!target) return;
-    sessionStorage.removeItem("scrollToOnLoad");
 
+    // sessionStorage entry is consumed by the TIMER firing, not by the
+    // effect entry. React 19 StrictMode in dev double-invokes the
+    // effect: removing on entry meant mount-1 read+removed → unmount-1
+    // cleared the timer → mount-2 found empty sessionStorage → scroll
+    // never fired. Leaving the entry until the timer actually runs
+    // means the second mount picks it up fresh, schedules another
+    // timer, and one of the two fires successfully. The entry is
+    // removed inside the callback so a future navigation through the
+    // home page doesn't re-trigger a stale scroll.
     timer = window.setTimeout(() => {
       timer = null;
+      sessionStorage.removeItem("scrollToOnLoad");
       document.getElementById(target)?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, POST_MOUNT_DELAY_MS);
 

@@ -83,6 +83,17 @@ function TypeAsFluidCanvas() {
 
   // ---- Mount: build orchestrator + stamper ----
   useEffect(() => {
+    // Reset disposed flag on every mount — React 19 StrictMode in dev
+    // simulates unmount/remount, and useRef survives across the cycle.
+    // Without this reset, the second-mount's effect inherits
+    // disposedRef.current = true from the first-mount's cleanup, and
+    // every stampWord call (initial + on text change + button click)
+    // short-circuits via the disposedRef guard inside the timer
+    // callbacks. Net symptom: input typing + button click produce no
+    // visible fluid stamps. Production builds (no StrictMode double
+    // invoke) aren't affected, but the dev experience is broken.
+    disposedRef.current = false;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
     const gl = canvas.getContext("webgl2", {
