@@ -32,9 +32,11 @@ test.describe("contact form", () => {
 
     await section.getByRole("button", { name: /senden|send/i }).click();
 
-    // Stub timeout is 320ms; allow 1000ms for safety (analyzer spec).
+    // Stub timeout is 800ms (Wave E ui bumped from 320ms for graceful pulse).
+    // Allow 3000ms for webkit safety — its event-loop scheduling under
+    // reducedMotion=false + GPU compositor is slower than chromium.
     await expect(page.locator('[aria-live="polite"] a[href^="mailto:"]')).toBeVisible({
-      timeout: 1000,
+      timeout: 3000,
     });
   });
 

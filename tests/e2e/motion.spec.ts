@@ -52,8 +52,21 @@ test.describe("motion — reducedMotion: reduce", () => {
     // it would add the class within ~200ms of the provider effect firing.
     // expect.poll with a 2s timeout replaces the brittle waitForTimeout(500)
     // (F-testing-coverage-8) and gives slow CI runners enough headroom.
+    // `getAttribute("class")` returns null when the element has no class
+    // attribute at all (the desired state under reduced-motion). Default to
+    // empty string so `.not.toContain("lenis")` has a string to operate on
+    // regardless of whether `<html>` ever got *any* class set.
     await expect
-      .poll(() => page.locator("html").getAttribute("class"), { timeout: 2000 })
+      .poll(
+        () =>
+          page
+            .locator("html")
+            .getAttribute("class")
+            .then((c) => c ?? ""),
+        {
+          timeout: 2000,
+        },
+      )
       .not.toContain("lenis");
   });
 

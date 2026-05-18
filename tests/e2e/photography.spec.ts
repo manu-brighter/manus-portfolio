@@ -12,9 +12,14 @@ test.describe("photography section", () => {
     const section = page.locator("#photography");
     await expect(section).toBeAttached();
 
-    const heading = section.getByRole("heading", { name: "Through the Lens." });
+    // Headline is i18n'd per locale post-rework (F-i18n-4). On /de/ it reads
+    // "Durch die Linse." — match either the German or English variant so the
+    // test stays locale-stable.
+    const heading = section.getByRole("heading", { name: /Durch die Linse\.|Through the Lens\./ });
     await expect(heading).toBeVisible();
-    await expect(section.getByText("SONY α7 IV", { exact: false })).toBeVisible();
+    // The DE lede also mentions "Sony α7 IV"; scope to the type-label-stamp
+    // class so we only match the tech stamp itself, not the body copy.
+    await expect(section.locator(".type-label-stamp", { hasText: "SONY α7 IV" })).toBeVisible();
   });
 
   test("all 5 photo slots render with picture + caption", async ({ page }) => {

@@ -22,13 +22,18 @@ test.describe("mobile hamburger nav", () => {
     // The hamburger lives inside NavMobileMenu which is md:hidden on desktop.
     // On Pixel 5 (393px) it should be visible.
     const hamburger = page.getByRole("button", {
-      name: /menü öffnen|menü schließen|open menu|close menu/i,
+      name: /menü öffnen|menü schliessen|menü schließen|open menu|close menu/i,
     });
     await expect(hamburger).toBeVisible();
   });
 
   test("click opens panel, aria-expanded becomes true", async ({ page }) => {
-    const hamburger = page.getByRole("button", { name: /menü öffnen|open menu/i });
+    // Swiss-German uses "schliessen" (ss), not "schließen" (ß). Match both
+    // open and close states — the locator re-queries after each click and the
+    // button label switches on toggle, so a narrow regex would lose the ref.
+    const hamburger = page.getByRole("button", {
+      name: /menü öffnen|menü schliessen|menü schließen|open menu|close menu/i,
+    });
     await expect(hamburger).toBeVisible();
 
     await hamburger.click();
@@ -40,7 +45,12 @@ test.describe("mobile hamburger nav", () => {
   });
 
   test("Escape closes panel, aria-expanded becomes false", async ({ page }) => {
-    const hamburger = page.getByRole("button", { name: /menü öffnen|open menu/i });
+    // Swiss-German uses "schliessen" (ss), not "schließen" (ß). Match both
+    // open and close states — the locator re-queries after each click and the
+    // button label switches on toggle, so a narrow regex would lose the ref.
+    const hamburger = page.getByRole("button", {
+      name: /menü öffnen|menü schliessen|menü schließen|open menu|close menu/i,
+    });
     await hamburger.click();
     await expect(hamburger).toHaveAttribute("aria-expanded", "true");
 
@@ -50,7 +60,12 @@ test.describe("mobile hamburger nav", () => {
   });
 
   test("<main> has inert while panel is open, inert removed on close", async ({ page }) => {
-    const hamburger = page.getByRole("button", { name: /menü öffnen|open menu/i });
+    // Swiss-German uses "schliessen" (ss), not "schließen" (ß). Match both
+    // open and close states — the locator re-queries after each click and the
+    // button label switches on toggle, so a narrow regex would lose the ref.
+    const hamburger = page.getByRole("button", {
+      name: /menü öffnen|menü schliessen|menü schließen|open menu|close menu/i,
+    });
 
     await hamburger.click();
     await expect(hamburger).toHaveAttribute("aria-expanded", "true");
