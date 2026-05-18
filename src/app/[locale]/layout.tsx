@@ -70,7 +70,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
                 {t("label")}
               </a>
               <Nav />
-              <main id="main" className="flex-1">
+              <main id="main" className="flex-1" tabIndex={-1}>
                 {children}
               </main>
               <Footer />

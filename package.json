@@ -18,7 +18,7 @@
     "test:a11y": "playwright test --grep @a11y",
     "test:visual": "playwright test --grep @visual",
     "lighthouse": "lhci autorun",
-    "ci:local": "pnpm lint && pnpm typecheck && pnpm build && E2E_TARGET=prod pnpm test",
+    "ci:local": "pnpm lint && pnpm typecheck && pnpm build && cross-env E2E_TARGET=prod pnpm test",
     "prepare": "node scripts/install-git-hooks.mjs"
   },
   "dependencies": {
@@ -51,8 +51,10 @@
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
     "@types/three": "^0.184.1",
+    "cross-env": "^10.1.0",
     "leva": "^0.10.1",
     "postcss": "^8.5.14",
+    "raw-loader": "^4.0.2",
     "tailwindcss": "^4.3.0",
     "typescript": "^6.0.3"
   },

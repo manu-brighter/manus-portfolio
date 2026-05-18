@@ -109,7 +109,17 @@ const RENDERER_PATTERNS: RendererPattern[] = [
 // hard constraint documented in CLAUDE.md. Export lets tests catch
 // pattern-list regressions without needing a browser WebGL context.
 export function matchRenderer(renderer: string): GPUTier | null {
-  const lower = renderer.toLowerCase();
+  // Strip branding suffixes Intel/Qualcomm/etc. inject — "(R)", "(TM)",
+  // "(C)", "(SM)" — and collapse the resulting double-space so the
+  // patterns below stay literal. Without this, `Intel(R) Iris(R) Xe
+  // Graphics` and `Adreno (TM) 530` slip past the `iris xe` / `adreno 5`
+  // patterns and fall through to a `null` tier (then frametime fallback
+  // does the work — but slower than the renderer fast-path it was
+  // meant to short-circuit).
+  const lower = renderer
+    .toLowerCase()
+    .replace(/\((?:r|tm|c|sm)\)/g, "")
+    .replace(/\s+/g, " ");
   for (const { pattern, tier } of RENDERER_PATTERNS) {
     if (lower.includes(pattern)) return tier;
   }

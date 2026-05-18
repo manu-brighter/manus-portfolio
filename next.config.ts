@@ -23,7 +23,6 @@ const nextConfig: NextConfig = {
       "three",
       "@react-three/fiber",
       "@react-three/drei",
-      "@react-three/postprocessing",
       "gsap",
       "@gsap/react",
     ],
@@ -31,7 +30,16 @@ const nextConfig: NextConfig = {
   turbopack: {
     rules: {
       "*.glsl": {
-        type: "raw",
+        // raw-loader + `as: "*.js"` is the only working pattern for
+        // Turbopack-built static export — Turbopack-native `type: "raw"`
+        // alone produces an asset URL, not a string default export, and
+        // every `import x from "*.glsl"` ends up undefined at runtime.
+        // raw-loader is archived but functional; replacing it requires
+        // either inlining all shader sources or migrating to per-import
+        // `?raw` query suffix (call-site refactor).
+        // Mirror of the webpack `asset/source` rule below.
+        loaders: ["raw-loader"],
+        as: "*.js",
       },
     },
   },
