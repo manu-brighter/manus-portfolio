@@ -11,10 +11,17 @@ import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { NotFoundAnimation } from "./not-found-animation";
 
-export const metadata: Metadata = {
-  title: "404 · Im Fluid versickert",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  // Mirror the body-string strategy: pull from `notFound` namespace at
+  // `routing.defaultLocale`. The 404 page's <html lang> is hardcoded to
+  // the default locale (no [locale] segment can run on a not-found URL
+  // by definition), so the title follows the same source of truth.
+  const t = await getTranslations({ locale: routing.defaultLocale, namespace: "notFound" });
+  return {
+    title: t("metaTitle"),
+    robots: { index: false, follow: false },
+  };
+}
 
 export default async function NotFound() {
   const t = await getTranslations({ locale: routing.defaultLocale, namespace: "notFound" });
