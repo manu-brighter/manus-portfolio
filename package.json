@@ -11,7 +11,7 @@
     "dev": "node node_modules/next/dist/bin/next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "biome check .",
+    "lint": "biome check . && node scripts/check-layering.mjs",
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit",
     "test": "playwright test --grep-invert @visual",
