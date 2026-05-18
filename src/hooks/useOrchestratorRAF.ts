@@ -23,14 +23,19 @@
  * reduced-motion or while the orchestrator hasn't been built yet.
  */
 
-import type { MutableRefObject } from "react";
+import type { RefObject } from "react";
 import { useEffect } from "react";
 import type { FluidOrchestrator, PointerState } from "@/lib/gl/fluidOrchestrator";
 import { MAX_DT_S, subscribe } from "@/lib/raf";
 
 export function useOrchestratorRAF(
-  orchestratorRef: MutableRefObject<FluidOrchestrator | null>,
-  pointerRef: MutableRefObject<PointerState>,
+  // RefObject (not MutableRefObject) — React 19 deprecated the latter in
+  // favour of `RefObject<T | null>` for the standard `useRef<T>(null)`
+  // pattern. Both are mutable at runtime; the new type just better
+  // reflects that initialisation via `useRef<T>(null)` is the canonical
+  // shape and the .current slot is freely assignable.
+  orchestratorRef: RefObject<FluidOrchestrator | null>,
+  pointerRef: RefObject<PointerState>,
   priority = 50,
   enabled = true,
 ): void {

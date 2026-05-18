@@ -65,6 +65,10 @@ export function buildJsonLd(locale: Locale, description: string): Record<string,
       "@type": "Country",
       name: "CH",
     },
+    // Honest claim — DE (native), EN (fluent), FR (working). Site is
+    // localised to IT as well, but Manuel doesn't actually speak Italian
+    // beyond tourist-level, so it's deliberately excluded from the SEO
+    // claim. If that changes, add "it" here.
     knowsLanguage: ["de", "en", "fr"],
     knowsAbout: [
       "Full-Stack Development",

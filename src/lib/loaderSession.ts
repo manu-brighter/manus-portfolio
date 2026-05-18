@@ -31,11 +31,22 @@ export function isLoaderComplete(): boolean {
 
 /** Mark the loader as complete and fire every queued listener exactly
  *  once. Idempotent — repeated calls are no-ops, matching the prior
- *  `loaderFired` boolean guard in `Loader.tsx`. */
+ *  `loaderFired` boolean guard in `Loader.tsx`. Each listener call is
+ *  wrapped in try/catch so a single throwing subscriber doesn't block
+ *  subsequent listeners from receiving the signal (which would otherwise
+ *  be unrecoverable — `complete` is already set, so re-subscribers fire
+ *  sync but the queued ones are gone). */
 export function markLoaderComplete(): void {
   if (complete) return;
   complete = true;
-  for (const fn of listeners) fn();
+  for (const fn of listeners) {
+    try {
+      fn();
+    } catch (err) {
+      // biome-ignore lint/suspicious/noConsole: dev-time observability for a defensive guard
+      console.error("[loaderSession] subscriber threw — others continue", err);
+    }
+  }
   listeners.clear();
 }
 
