@@ -1,0 +1,37 @@
+{
+  "playground": {
+    "sectionLabel": "Section 06 · Playground",
+    "eyebrow": "Section 06 · Playground",
+    "headline": "Where the fluid sim gets to play.",
+    "lede": "Two shader experiments, both anchored to the ink-and-print narrative. Pure craft demonstration, no product context.",
+    "openLabel": "Open experiment",
+    "shell": {
+      "back": "BACK TO PLAYGROUND"
+    },
+    "experiments": {
+      "inkDropStudio": {
+        "cardTitle": "Ink Drop Studio",
+        "cardKicker": "01 · INK DROP STUDIO",
+        "cardBody": "Empty paper canvas, click spawns ink droplets in the chosen spot colour. Sliders for sim parameters, bomb button, freeze button.",
+        "title": "Ink Drop Studio.",
+        "caption": "Playground for the hero simulation. Click = ink splat, sliders = sim parameters, 'Bomb' if you're in the mood for chaos.",
+        "buttonBomb": "BOMB",
+        "buttonFreeze": "FREEZE",
+        "buttonResume": "RESUME",
+        "buttonReset": "RESET",
+        "reducedMotionNote": "This experiment is a moving playground. Under prefers-reduced-motion I hide the running simulation. Head back to the Playground for a quieter section."
+      },
+      "typeAsFluid": {
+        "cardTitle": "Type-as-Fluid",
+        "cardKicker": "02 · TYPE-AS-FLUID",
+        "cardBody": "Type a word. It gets printed, then swallowed by the ink. Gently.",
+        "title": "Type-as-Fluid.",
+        "caption": "Type a word. It gets printed, then swallowed by the ink. Gently.",
+        "inputLabel": "TYPE A WORD",
+        "inputPlaceholder": "Manuel",
+        "triggerLabel": "Print word again",
+        "reducedMotionNote": "This experiment prints words live into a running fluid simulation. Under prefers-reduced-motion I hide the animation. Head back to the Playground for a quieter section."
+      }
+    }
+  }
+}

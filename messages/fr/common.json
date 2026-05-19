@@ -1,0 +1,75 @@
+{
+  "meta": {
+    "title": "Manuel Heller — Portfolio",
+    "titleTemplate": "%s · Manuel Heller",
+    "description": "Développeur full-stack avec un œil d'artiste. Code, photo, design : même artisanat, surface différente. — Manuel Heller, développeur full-stack à Bâle.",
+    "keywords": [
+      "Manuel Heller",
+      "Portfolio",
+      "Développeur Full-Stack",
+      "WebGL",
+      "Shader",
+      "Vibecoding",
+      "Design Riso",
+      "Suisse",
+      "Bâle"
+    ]
+  },
+  "skipLink": {
+    "label": "Aller au contenu"
+  },
+  "brand": {
+    "label": "MH·STUDIO",
+    "aria": "Manuel Heller — accueil"
+  },
+  "nav": {
+    "ariaLabel": "Navigation principale",
+    "items": {
+      "work": "Travaux",
+      "about": "À propos",
+      "playground": "Playground",
+      "contact": "Contact",
+      "impressum": "Mentions légales",
+      "datenschutz": "Confidentialité",
+      "skills": "Skills",
+      "casestudy": "Étude de cas",
+      "photography": "Photographie"
+    },
+    "mobileMenu": {
+      "open": "Ouvrir le menu",
+      "close": "Fermer le menu"
+    }
+  },
+  "localeSwitcher": {
+    "ariaLabel": "Langue",
+    "currentLabel": "Langue actuelle : {name}",
+    "switchLabel": "Passer en {name}",
+    "locales": {
+      "de": "Deutsch",
+      "en": "English",
+      "fr": "Français",
+      "it": "Italiano"
+    }
+  },
+  "footer": {
+    "location": "Basel · Dev",
+    "year": "MMXXVI",
+    "socialAriaLabel": "Réseaux sociaux",
+    "legalAriaLabel": "Liens légaux",
+    "social": {
+      "github": "GitHub",
+      "linkedin": "LinkedIn",
+      "instagram": "Instagram",
+      "email": "Courriel"
+    }
+  },
+  "loader": {
+    "brand": "MH·STUDIO",
+    "srStatus": "Chargement de la page"
+  },
+  "scrollProgress": {
+    "ariaLabel": "Navigation des sections",
+    "heroLabel": "Hero",
+    "aboutObjectsLabel": "Off the Screen"
+  }
+}

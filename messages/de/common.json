@@ -1,0 +1,75 @@
+{
+  "meta": {
+    "title": "Manuel Heller — Craft Portfolio",
+    "titleTemplate": "%s · Manuel Heller",
+    "description": "Full-Stack Developer mit künstlerischem Auge. Code, Foto, Design: alles dasselbe Handwerk in unterschiedlicher Form. — Manuel Heller, Full-Stack Developer aus Basel.",
+    "keywords": [
+      "Manuel Heller",
+      "Portfolio",
+      "Full-Stack Developer",
+      "WebGL",
+      "Shader",
+      "Vibecoding",
+      "Riso Design",
+      "Schweiz",
+      "Basel"
+    ]
+  },
+  "skipLink": {
+    "label": "Zum Inhalt springen"
+  },
+  "brand": {
+    "label": "MH·STUDIO",
+    "aria": "Manuel Heller — Startseite"
+  },
+  "nav": {
+    "ariaLabel": "Hauptnavigation",
+    "items": {
+      "work": "Arbeiten",
+      "about": "Über",
+      "playground": "Playground",
+      "contact": "Kontakt",
+      "impressum": "Impressum",
+      "datenschutz": "Datenschutz",
+      "skills": "Skills",
+      "casestudy": "Case Study",
+      "photography": "Fotografie"
+    },
+    "mobileMenu": {
+      "open": "Menü öffnen",
+      "close": "Menü schliessen"
+    }
+  },
+  "localeSwitcher": {
+    "ariaLabel": "Sprache",
+    "currentLabel": "Aktuelle Sprache: {name}",
+    "switchLabel": "Zu {name} wechseln",
+    "locales": {
+      "de": "Deutsch",
+      "en": "English",
+      "fr": "Français",
+      "it": "Italiano"
+    }
+  },
+  "footer": {
+    "location": "Basel · Dev",
+    "year": "MMXXVI",
+    "socialAriaLabel": "Social-Kanäle",
+    "legalAriaLabel": "Rechtliches",
+    "social": {
+      "github": "GitHub",
+      "linkedin": "LinkedIn",
+      "instagram": "Instagram",
+      "email": "E-Mail"
+    }
+  },
+  "loader": {
+    "brand": "MH·STUDIO",
+    "srStatus": "Seite wird geladen"
+  },
+  "scrollProgress": {
+    "ariaLabel": "Abschnitt-Navigation",
+    "heroLabel": "Hero",
+    "aboutObjectsLabel": "Off the Screen"
+  }
+}

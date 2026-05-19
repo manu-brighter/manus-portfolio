@@ -1,0 +1,128 @@
+{
+  "legal": {
+    "common": {
+      "lastUpdatedLabel": "Last updated",
+      "lastUpdated": "6 May 2026",
+      "backLabel": "Back to home"
+    },
+    "impressum": {
+      "metaTitle": "Imprint · Manuel Heller",
+      "metaDescription": "Imprint and legal information for manuelheller.dev.",
+      "sectionLabel": "Legal · Imprint",
+      "headline": "Imprint",
+      "lede": "This site is a private, non-commercial portfolio. No paid services are offered.",
+      "sections": [
+        {
+          "id": "responsible",
+          "heading": "Responsible for content",
+          "body": [
+            "Manuel Heller",
+            "Martisackerweg 18, 4203 Grellingen, Switzerland",
+            "manuelheller@bluewin.ch"
+          ]
+        },
+        {
+          "id": "character",
+          "heading": "Nature of this site",
+          "body": [
+            "This site exists solely for self-presentation and showcasing my own work. No products are sold, no paid services are offered, and no advertising is run."
+          ]
+        },
+        {
+          "id": "liability",
+          "heading": "Disclaimer",
+          "body": [
+            "Content is created with care, but without warranty as to completeness or currency. Links and references to external sites are made without responsibility for their content."
+          ]
+        },
+        {
+          "id": "copyright",
+          "heading": "Copyright",
+          "body": [
+            "All text, photos, graphics, code samples, and shader source on this site are copyright Manuel Heller unless otherwise marked. Use outside this site requires written permission."
+          ]
+        },
+        {
+          "id": "jurisdiction",
+          "heading": "Jurisdiction",
+          "body": [
+            "Swiss law applies. Place of performance and jurisdiction is Basel-Stadt, Switzerland."
+          ]
+        }
+      ]
+    },
+    "datenschutz": {
+      "metaTitle": "Privacy · Manuel Heller",
+      "metaDescription": "Privacy policy for manuelheller.dev. No cookies, no analytics, no tracking.",
+      "sectionLabel": "Legal · Privacy",
+      "headline": "Privacy policy",
+      "lede": "Short version: this site sets no cookies, runs no tracking, no analytics. There's no cookie banner because there's nothing that would need consent.",
+      "sections": [
+        {
+          "id": "responsible",
+          "heading": "Data controller",
+          "body": [
+            "Manuel Heller",
+            "Martisackerweg 18, 4203 Grellingen, Switzerland",
+            "manuelheller@bluewin.ch"
+          ]
+        },
+        {
+          "id": "data",
+          "heading": "What data is collected",
+          "body": [
+            "This site sets no cookies. There's no tracking, no analytics, no advertising networks, no social-media pixels. No data is shared with third parties for advertising purposes.",
+            "For purely technical reasons the browser's LocalStorage is used: one anonymous entry remembers your device's GPU performance class (so the WebGL animation starts at the right detail level on your next visit) and one entry remembers that the loading screen has already played (so it doesn't replay when you switch language). These values are not personal, are not transmitted to third parties, and can be cleared at any time via your browser settings."
+          ]
+        },
+        {
+          "id": "logs",
+          "heading": "Server logs",
+          "body": [
+            "The hosting server (Linux with nginx) is self-operated and located at the provider mc-host24.de in Germany. DNS resolution runs through Cloudflare (Cloudflare, Inc., USA), which also acts as proxy protection against bot attacks. IP addresses are processed technically in this context but are not stored for tracking purposes. The server logs technically necessary access events: IP address, timestamp, requested URL, referrer, user-agent. These logs are deleted automatically after 14 days and are used exclusively for error analysis and security monitoring (legal basis: legitimate interest, Art. 6(1)(f) GDPR, and Art. 31(2)(b) revFADP).",
+            "Cloudflare is covered for data transfers to the USA via Standard Contractual Clauses (Art. 46 GDPR)."
+          ]
+        },
+        {
+          "id": "form",
+          "heading": "Contact form",
+          "body": [
+            "When you use the contact form, your email client's mailto mechanism is currently triggered. The message goes via your email provider, not via a server under my control. Only the data you enter yourself in your mail client is processed.",
+            "Should a direct delivery via a server bridge (Resend.com, Resend, Inc., USA) be activated at a later point, your name, email address, and message would be transmitted to me through that technical intermediary. Resend would be covered via Standard Contractual Clauses (Art. 46 GDPR). This statement will be updated accordingly when activated.",
+            "Legal basis in both cases: your consent by submitting (Art. 6(1)(a) GDPR, Art. 31(1) revFADP). Incoming messages are deleted after they're answered, at the latest after six months. You can request access, correction, or deletion at any time. Just write to manuelheller@bluewin.ch."
+          ]
+        },
+        {
+          "id": "fonts",
+          "heading": "Fonts",
+          "body": [
+            "Fonts (Instrument Serif, Inter, JetBrains Mono) are served locally from this server. There are no connections to Google Fonts or any other third-party servers."
+          ]
+        },
+        {
+          "id": "externalLinks",
+          "heading": "External links",
+          "body": [
+            "This site links to external platforms in several places, whose content I cannot influence or control. When you click an external link you leave this site, and the privacy policy of the respective provider applies from that point.",
+            "Currently linked external services: GitHub (github.com), LinkedIn (linkedin.com), Instagram (instagram.com), Adobe Portfolio (manuelheller.myportfolio.com), Twitch (twitch.tv), Jogge di Balla (joggediballa.ch). A list of the exact providers with their country of residence can be requested at any time via email."
+          ]
+        },
+        {
+          "id": "security",
+          "heading": "Data security",
+          "body": [
+            "All connections to this site are encrypted via TLS 1.3. The server is updated regularly and shielded by Cloudflare's proxy against automated attacks. These measures meet the requirements of Art. 32 GDPR and Art. 8 revFADP."
+          ]
+        },
+        {
+          "id": "rights",
+          "heading": "Your rights",
+          "body": [
+            "Under the Swiss Federal Act on Data Protection (revFADP) and the EU GDPR you have the right to access, correction, deletion, restriction of processing, and data portability. For all enquiries write to: manuelheller@bluewin.ch.",
+            "For complaints about the processing of your data, you can contact the competent supervisory authority: in Switzerland the Federal Data Protection and Information Commissioner (FDPIC, https://www.edoeb.admin.ch). Within the EU, the data protection authority of your country of residence."
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -33,10 +33,20 @@ function flatten(obj: unknown, prefix = ""): string[] {
     .sort();
 }
 
+// SF-5: messages now live in `messages/{locale}/<group>.json`. The
+// parity check merges every group into one tree before flattening so
+// the test still asserts "DE/EN/FR/IT share the same key set" without
+// caring about how the file split is organised.
+const NAMESPACE_GROUPS = ["common", "home", "playground", "legal", "notFound"] as const;
+
 function loadFlatKeys(locale: string): Set<string> {
-  const path = resolve(ROOT, "messages", `${locale}.json`);
-  const json = JSON.parse(readFileSync(path, "utf-8"));
-  return new Set(flatten(json));
+  const merged: Record<string, unknown> = {};
+  for (const group of NAMESPACE_GROUPS) {
+    const path = resolve(ROOT, "messages", locale, `${group}.json`);
+    const json = JSON.parse(readFileSync(path, "utf-8")) as Record<string, unknown>;
+    Object.assign(merged, json);
+  }
+  return new Set(flatten(merged));
 }
 
 test.describe("@i18n key parity across locales", () => {

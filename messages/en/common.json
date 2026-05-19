@@ -1,0 +1,75 @@
+{
+  "meta": {
+    "title": "Manuel Heller — Craft Portfolio",
+    "titleTemplate": "%s · Manuel Heller",
+    "description": "Full-stack developer with an artist's eye. Code, photo, design: same craft, different surface. — Manuel Heller, full-stack developer from Basel.",
+    "keywords": [
+      "Manuel Heller",
+      "Portfolio",
+      "Full-Stack Developer",
+      "WebGL",
+      "Shader",
+      "Vibecoding",
+      "Riso Design",
+      "Switzerland",
+      "Basel"
+    ]
+  },
+  "skipLink": {
+    "label": "Skip to content"
+  },
+  "brand": {
+    "label": "MH·STUDIO",
+    "aria": "Manuel Heller — home"
+  },
+  "nav": {
+    "ariaLabel": "Primary",
+    "items": {
+      "work": "Work",
+      "about": "About",
+      "playground": "Playground",
+      "contact": "Contact",
+      "impressum": "Imprint",
+      "datenschutz": "Privacy",
+      "skills": "Skills",
+      "casestudy": "Case Study",
+      "photography": "Photography"
+    },
+    "mobileMenu": {
+      "open": "Open menu",
+      "close": "Close menu"
+    }
+  },
+  "localeSwitcher": {
+    "ariaLabel": "Language",
+    "currentLabel": "Current language: {name}",
+    "switchLabel": "Switch to {name}",
+    "locales": {
+      "de": "Deutsch",
+      "en": "English",
+      "fr": "Français",
+      "it": "Italiano"
+    }
+  },
+  "footer": {
+    "location": "Basel · Dev",
+    "year": "MMXXVI",
+    "socialAriaLabel": "Social channels",
+    "legalAriaLabel": "Legal links",
+    "social": {
+      "github": "GitHub",
+      "linkedin": "LinkedIn",
+      "instagram": "Instagram",
+      "email": "Email"
+    }
+  },
+  "loader": {
+    "brand": "MH·STUDIO",
+    "srStatus": "Page loading"
+  },
+  "scrollProgress": {
+    "ariaLabel": "Section navigation",
+    "heroLabel": "Hero",
+    "aboutObjectsLabel": "Off the Screen"
+  }
+}

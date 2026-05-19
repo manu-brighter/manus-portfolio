@@ -1,0 +1,37 @@
+{
+  "playground": {
+    "sectionLabel": "Section 06 · Playground",
+    "eyebrow": "Section 06 · Playground",
+    "headline": "Wo der Fluid-Sim spielen darf.",
+    "lede": "Zwei Shader-Experimente, beide auf dem Tinte-/Druck-Narrativ verankert. Pure Craft-Demonstration, kein Produkt-Kontext.",
+    "openLabel": "Experiment öffnen",
+    "shell": {
+      "back": "ZURÜCK ZUM PLAYGROUND"
+    },
+    "experiments": {
+      "inkDropStudio": {
+        "cardTitle": "Ink Drop Studio",
+        "cardKicker": "01 · INK DROP STUDIO",
+        "cardBody": "Leere Paper-Canvas, Klick spawnt Ink-Tropfen in der gewählten Spot-Farbe. Slider für Sim-Parameter, Bomb-Button, Freeze-Button.",
+        "title": "Ink Drop Studio.",
+        "caption": "Spielwiese für die Hero-Simulation. Klick = Ink-Splat, Slider = Sim-Parameter, „Bomb\" wenn dir gerade nach Chaos ist.",
+        "buttonBomb": "BOMB",
+        "buttonFreeze": "FREEZE",
+        "buttonResume": "RESUME",
+        "buttonReset": "RESET",
+        "reducedMotionNote": "Dieses Experiment ist eine bewegte Spielwiese. Unter prefers-reduced-motion blende ich die laufende Simulation aus — zurück zum Playground für eine ruhigere Section."
+      },
+      "typeAsFluid": {
+        "cardTitle": "Type-as-Fluid",
+        "cardKicker": "02 · TYPE-AS-FLUID",
+        "cardBody": "Tipp ein Wort. Es wird gedruckt, dann von der Tinte verschluckt. Sanft.",
+        "title": "Type-as-Fluid.",
+        "caption": "Tipp ein Wort. Es wird gedruckt, dann von der Tinte verschluckt. Sanft.",
+        "inputLabel": "TIPPE EIN WORT",
+        "inputPlaceholder": "Manuel",
+        "triggerLabel": "Wort erneut drucken",
+        "reducedMotionNote": "Dieses Experiment druckt Wörter live in eine laufende Fluid-Simulation. Unter prefers-reduced-motion blende ich die Animation aus — zurück zum Playground für eine ruhigere Section."
+      }
+    }
+  }
+}
