@@ -1,12 +1,13 @@
 "use client";
 
 import { useThree } from "@react-three/fiber";
-import { useEffect, useRef, useState } from "react";
-import { isLoaderComplete } from "@/components/ui/Loader";
+import { useEffect, useRef } from "react";
+import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { subscribeToSplats } from "@/lib/fluidBus";
+import { FluidOrchestrator, type PointerState } from "@/lib/gl/fluidOrchestrator";
 import type { TierConfig } from "@/lib/gpu";
-import { subscribe } from "@/lib/raf";
-import { FluidOrchestrator, type PointerState } from "./FluidOrchestrator";
+import { subscribeToLoaderComplete } from "@/lib/loaderSession";
+import { MAX_DT_S, subscribe } from "@/lib/raf";
 
 type FluidSimProps = {
   config: TierConfig;
@@ -37,12 +38,7 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
   // wandering points run. Pointer listeners aren't attached at all so
   // touch-scroll doesn't fight pointermove polyfills, and the orchestrator
   // is told explicitly via setPointerSplatEnabled(false) as a safety net.
-  // Lazy-init useState so the value is computed synchronously during the
-  // first render — must be available before the orchestrator init effect
-  // reads it on the same commit.
-  const [isCoarsePointer] = useState(
-    () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches,
-  );
+  const isCoarsePointer = useCoarsePointer();
 
   // Mount + config-change: init orchestrator, dispose on cleanup,
   // and schedule the ambient warmup-trigger inline so the trigger is
@@ -76,24 +72,18 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
     // already lives in SceneProvider's deferred-mount path.
     const HERO_REVEAL_MS = 100;
     let ambientTimer: number | null = null;
-    let ambientListener: (() => void) | null = null;
     const scheduleAmbient = () => {
       ambientTimer = window.setTimeout(() => {
         orchestratorRef.current?.triggerAmbient();
       }, HERO_REVEAL_MS);
     };
-    if (isLoaderComplete()) {
-      scheduleAmbient();
-    } else {
-      ambientListener = () => scheduleAmbient();
-      window.addEventListener("loader-complete", ambientListener, { once: true });
-    }
+    // subscribeToLoaderComplete fires synchronously if the loader has
+    // already completed, otherwise queues until markLoaderComplete().
+    const unsubLoader = subscribeToLoaderComplete(scheduleAmbient);
 
     return () => {
       if (ambientTimer !== null) window.clearTimeout(ambientTimer);
-      if (ambientListener) {
-        window.removeEventListener("loader-complete", ambientListener);
-      }
+      unsubLoader();
       orchestrator.dispose();
       orchestratorRef.current = null;
     };
@@ -120,7 +110,7 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
       const orchestrator = orchestratorRef.current;
       if (!orchestrator) return;
 
-      const dt = Math.min(deltaMs * 0.001, 0.033);
+      const dt = Math.min(deltaMs * 0.001, MAX_DT_S);
       const t0 = performance.now();
 
       orchestrator.step(dt, elapsedMs, pointerRef.current);

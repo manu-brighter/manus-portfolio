@@ -23,7 +23,7 @@ force source. Static export → Nginx. Full spec in [`docs/plan.md`](../docs/pla
 - `src/components/sections` — page sections (Hero, About, Work, Playground, Contact)
 - `src/components/scene` — WebGL/R3F wrappers; one persistent `<Canvas>` only
 - `src/components/motion` — GSAP primitives
-- `src/shaders/` — GLSL split into `common/`, `fluid/`, `toon/`, `photo-duotone/`, `page-transition/`
+- `src/shaders/` — GLSL split into `common/`, `fluid/`, `ink-mask/`, `ink-wipe/`, `text-fluid/`. The retired `toon/` and `photo-duotone/` subdirs no longer exist — duotone treatment was reversed (see "Visual / image policy" below).
 - `src/lib/` — `raf.ts`, `gpu.ts`, `motion/tokens.ts`, `i18n/`, `content/`, `site.ts` (central identity: URL/email/socials), `gl/compileShader.ts` (shared, with `#version`-strip)
 - `src/hooks/` — `useLenis`, `useReducedMotion`, `useGPUCapability`, `useMousePosition`
 - `content/` — MDX (project-scoped, 4 locales per file)
@@ -155,6 +155,7 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 - **Asset pipeline**: `scripts/optimize-assets.mjs` (`.mjs`, not `.ts` — no
   ts-runner in devDeps). Per-task `quality` field for AVIF override on
   detail-heavy shots (q38–q50 vs default q60).
+- **Override note**: `docs/content-briefing.md` §§2.4, 5.2, 6.2 still describe a Riso-Duotone shader treatment — that direction was reversed. The framing-only rule above wins.
 
 ## Tailwind / dynamic classes
 

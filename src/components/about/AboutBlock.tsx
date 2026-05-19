@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
-import { PlateCornerMarks } from "./PlateCornerMarks";
+import { PlateCornerMarks } from "@/components/ui/PlateCornerMarks";
+import { SPOT_CSS_VAR, type SpotColor } from "@/lib/palette";
 
 /**
  * AboutBlock — generic block container for the rewritten About
@@ -23,20 +24,15 @@ import { PlateCornerMarks } from "./PlateCornerMarks";
  * top-level` (same trap as Phase 6 About / Phase 9 Photography).
  */
 
-export type Spot = "rose" | "mint" | "amber" | "violet";
+/** Re-export the canonical spot-color type so `StampDivider.tsx` and
+ *  any other About-local consumer can keep importing from this file. */
+export type Spot = SpotColor;
 
 export type AboutBlockLayout =
   | "marg-left-content-right"
   | "content-left-marg-right"
   | "loud-centered"
   | "short-centered";
-
-const SPOT_VAR: Record<Spot, string> = {
-  rose: "var(--color-spot-rose)",
-  mint: "var(--color-spot-mint)",
-  amber: "var(--color-spot-amber)",
-  violet: "var(--color-spot-violet)",
-};
 
 type AboutBlockProps = {
   id: string;
@@ -59,7 +55,7 @@ export function AboutBlock({
   children,
 }: AboutBlockProps) {
   const cssVars = {
-    "--block-spot": SPOT_VAR[spot],
+    "--block-spot": SPOT_CSS_VAR[spot],
   } as CSSProperties;
 
   // Column class composition keyed by layout variant.

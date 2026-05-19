@@ -1,8 +1,26 @@
-// One-shot variant generator for Joggediballa case-study screenshots.
-// Pattern matches Phase 6 (portrait) and Phase 7 (joggediballa-home):
-// keep originals visually intact, only resize + recompress.
-// Phase 9's photo-duotone shader is the place where color treatment lives;
-// pro screenshots stay in their actual colors so the UI reads.
+/**
+ * Generate optimized screenshot variants for the Joggediballa case-study section.
+ *
+ * What it does:
+ * - Reads master PNG files from `content-input/projects/joggediballa/`
+ * - Generates AVIF + WebP variants for each master
+ * - Writes optimized files to `public/projects/joggediballa/screenshots/`
+ *
+ * When to run:
+ * - After updating any source screenshots in the content-input directory
+ * - Before deploying (run manually, not in pnpm scripts — see CLAUDE.md asset-pipeline pattern)
+ *
+ * Usage:
+ * ```
+ * node scripts/generate-joggediballa-screenshots.mjs
+ * ```
+ *
+ * Inputs:
+ * - `content-input/projects/joggediballa/*.png` (master source screenshots)
+ *
+ * Outputs:
+ * - `public/projects/joggediballa/screenshots/*.{avif,webp,png}` (optimized variants)
+ */
 
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";

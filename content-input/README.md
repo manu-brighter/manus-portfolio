@@ -84,10 +84,10 @@ Aktuell ist das 1200w JPG aus dem WebP rekonstruiert (Original ging verloren). S
 |---|---|---|
 | `photography` | `content-input/photography/source/DSC*.jpg` | `public/photography/` |
 | `profile` | `content-input/profile/profile-picture.jpg` | `public/profile/` |
-| `portfolio` | `public/projects/portfolio/source/homepage-landscape.png` | `public/projects/portfolio/` |
-| `joggediballa` | `public/projects/joggediballa/source/*-lightmode-*.png` | `public/projects/joggediballa/` |
+| `portfolio` | `content-input/projects/portfolio/source/homepage-landscape.png` | `public/projects/portfolio/` |
+| `joggediballa` | `content-input/projects/joggediballa/source/*-lightmode-*.png` | `public/projects/joggediballa/` |
 
-Photography + profile-Sources sind gitignored (große Originale, semi-private Inhalte). Portfolio + joggediballa-Sources liegen im Repo, weil's kleinere PNG-Screenshots sind und Re-Generierbarkeit wichtiger ist als Größe.
+Alle Sources liegen unter `content-input/` und sind gitignored — Originale (Fotos, Profilbild) wegen Größe und Privacy, Screenshots wegen Konsistenz und um `public/` rein für Build-Outputs zu halten. Das Script enforced das per Startup-Assertion: findet es ein `source/` oder `_unused/` Verzeichnis irgendwo unter `public/`, bricht es mit einer Fehlermeldung ab.
 
 Nur die `public/`-Outputs werden gecommittet.
 

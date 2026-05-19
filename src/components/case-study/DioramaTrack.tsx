@@ -4,7 +4,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { useSceneVisibility } from "@/lib/sceneVisibility";
+import { useSceneVisibilityStore } from "@/lib/sceneVisibilityStore";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -36,15 +36,17 @@ type Props = {
   children: ReactNode;
   /** Vertical-stack fallback rendered on mobile / reduced-motion. */
   mobileFallback: ReactNode;
+  /** Decorative section identity stamp shown top-left of the desktop diorama. */
+  sectionLabel: string;
 };
 
-export function DioramaTrack({ children, mobileFallback }: Props) {
+export function DioramaTrack({ children, mobileFallback, sectionLabel }: Props) {
   const reducedMotion = useReducedMotion();
   const sectionRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<ScrollTrigger | null>(null);
   const [useFallback, setUseFallback] = useState(false);
-  const sceneHidden = useSceneVisibility((s) => s.hidden);
+  const sceneHidden = useSceneVisibilityStore((s) => s.hidden);
 
   useEffect(() => {
     const mq = window.matchMedia(
@@ -131,6 +133,10 @@ export function DioramaTrack({ children, mobileFallback }: Props) {
       aria-labelledby="case-study-heading"
       className="relative h-screen overflow-hidden bg-paper"
     >
+      {/* Floating section identity stamp — visible on desktop diorama only. */}
+      <p aria-hidden="true" className="absolute top-6 left-6 z-10 type-label-stamp text-ink-muted">
+        {sectionLabel}
+      </p>
       <div ref={trackRef} className="relative h-full" style={{ width: `${TRACK_WIDTH_VH}vh` }}>
         {children}
       </div>

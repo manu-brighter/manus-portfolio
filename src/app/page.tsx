@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { routing } from "@/i18n/routing";
+import { escapeForScript } from "@/lib/seo/escapeForScript";
 
 /**
  * Root language-detection redirect.
@@ -24,14 +25,6 @@ export const metadata: Metadata = {
   title: "Manuel Heller — Craft Portfolio",
   robots: { index: false, follow: false },
 };
-
-/**
- * `JSON.stringify` does not escape `</script>` or `<!--`. Even though our
- * inputs are a static compile-time array of 2-letter strings, we harden
- * the serialisation in case a future locale value ever sneaks through
- * (defence-in-depth, Phase 11 CSP will also gate this script).
- */
-const escapeForScript = (value: unknown): string => JSON.stringify(value).replace(/</g, "\\u003c");
 
 const REDIRECT_SCRIPT = `
 (function () {

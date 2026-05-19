@@ -4,9 +4,12 @@
  * public/about/objects/. Source asset: content-input/icons/jogge di
  * balla.PNG (3500×3500, transparent bg). 1x + 2x retina variants.
  *
- * See AudiStamp.tsx for the rationale on keeping width 140 × height
+ * See AudiStamp.tsx for the rationale on keeping width 140 x height
  * 90 (grid alignment) and the unused-but-preserved spotVar prop
  * (parent dispatcher uniformity).
+ *
+ * Plain <img> with 1x + 2x srcSet — no <picture>/AVIF/WebP wrap yet
+ * (see AudiStamp.tsx header for the rationale).
  */
 
 type Props = { spotVar: string };
@@ -18,6 +21,10 @@ export function JoggediballaStamp({ spotVar: _spotVar }: Props) {
       srcSet="/about/objects/joggediballa-120w.png 1x, /about/objects/joggediballa-240w.png 2x"
       alt=""
       aria-hidden="true"
+      loading="lazy"
+      decoding="async"
+      width={120}
+      height={120}
       className="block h-16 w-auto max-w-[140px] object-contain"
       style={{ transform: "rotate(-0.5deg)" }}
     />

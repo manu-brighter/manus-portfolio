@@ -38,8 +38,8 @@
 
 import gsap from "gsap";
 import { type CSSProperties, useEffect, useId, useRef } from "react";
-import { isLoaderComplete } from "@/components/ui/Loader";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { subscribeToLoaderComplete } from "@/lib/loaderSession";
 import { splitChars } from "@/lib/motion/splitChars";
 import { dur, ease } from "@/lib/motion/tokens";
 
@@ -130,7 +130,7 @@ export function OverprintReveal({
     let fired = false;
     let timeline: gsap.core.Timeline | null = null;
     let settleTimer: number | null = null;
-    let pendingLoaderListener: (() => void) | null = null;
+    let unsubLoader: (() => void) | null = null;
 
     const startTimeline = () => {
       timeline = gsap.timeline({ delay });
@@ -197,25 +197,18 @@ export function OverprintReveal({
 
     const fireWhenReady = () => {
       // If the consumer asked us to wait for the loader, gate the
-      // timeline until the loader-complete event has fired, then add a
+      // timeline until markLoaderComplete() has fired, then add a
       // settle window so the first-frame jank doesn't eat the animation.
       // Non-loader-gated consumers go straight through.
       if (!waitForLoader) {
         startTimeline();
         return;
       }
-      const launch = () => {
+      // subscribeToLoaderComplete fires synchronously if the loader
+      // already finished, otherwise queues until markLoaderComplete().
+      unsubLoader = subscribeToLoaderComplete(() => {
         settleTimer = window.setTimeout(startTimeline, LOADER_SETTLE_MS);
-      };
-      if (isLoaderComplete()) {
-        launch();
-      } else {
-        pendingLoaderListener = () => {
-          pendingLoaderListener = null;
-          launch();
-        };
-        window.addEventListener("loader-complete", pendingLoaderListener, { once: true });
-      }
+      });
     };
 
     const observer = new IntersectionObserver(
@@ -236,8 +229,7 @@ export function OverprintReveal({
       observer.disconnect();
       timeline?.kill();
       if (settleTimer !== null) window.clearTimeout(settleTimer);
-      if (pendingLoaderListener)
-        window.removeEventListener("loader-complete", pendingLoaderListener);
+      unsubLoader?.();
     };
   }, [reducedMotion, threshold, delay, stagger, waitForLoader]);
 

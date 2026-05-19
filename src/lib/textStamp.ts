@@ -21,8 +21,8 @@
  * 2 ping-pong blur FBOs + the blur program.
  */
 
-import type { FluidOrchestrator } from "@/components/scene/FluidOrchestrator";
 import { compileShader } from "@/lib/gl/compileShader";
+import type { FluidOrchestrator } from "@/lib/gl/fluidOrchestrator";
 import quadVert from "@/shaders/common/quad.vert.glsl";
 import blurFrag from "@/shaders/text-fluid/blur.frag.glsl";
 

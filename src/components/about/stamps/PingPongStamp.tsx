@@ -4,9 +4,12 @@
  * content-input/icons/ping pong.png (688×660, transparent bg).
  * 1x + 2x retina variants.
  *
- * See AudiStamp.tsx for the rationale on keeping width 140 × height
+ * See AudiStamp.tsx for the rationale on keeping width 140 x height
  * 90 (grid alignment) and the unused-but-preserved spotVar prop
  * (parent dispatcher uniformity).
+ *
+ * Plain <img> with 1x + 2x srcSet — no <picture>/AVIF/WebP wrap yet
+ * (see AudiStamp.tsx header for the rationale).
  */
 
 type Props = { spotVar: string };
@@ -18,6 +21,10 @@ export function PingPongStamp({ spotVar: _spotVar }: Props) {
       srcSet="/about/objects/pingpong-120w.png 1x, /about/objects/pingpong-240w.png 2x"
       alt=""
       aria-hidden="true"
+      loading="lazy"
+      decoding="async"
+      width={120}
+      height={115}
       className="block h-16 w-auto max-w-[140px] object-contain"
       style={{ transform: "rotate(-2deg)" }}
     />

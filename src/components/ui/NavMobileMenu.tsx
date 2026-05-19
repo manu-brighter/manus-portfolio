@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { type MouseEvent, useEffect, useRef, useState } from "react";
+import { type MouseEvent, useCallback, useEffect, useRef, useState } from "react";
 
 /**
  * Mobile hamburger menu — only mounts the dropdown subtree on mobile
@@ -43,6 +43,15 @@ export function NavMobileMenu({ items, activeSection, buildHref, onAnchorClick }
   const t = useTranslations();
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+  // WCAG 2.4.3: focus must return to the trigger that opened the dialog
+  // when it closes (Esc or item-click). Without this, focus is dropped to
+  // the document body — keyboard and AT users lose their place in the page.
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  const closeAndReturnFocus = useCallback(() => {
+    setOpen(false);
+    triggerRef.current?.focus();
+  }, []);
 
   // Close on viewport-resize past md breakpoint.
   useEffect(() => {
@@ -54,15 +63,15 @@ export function NavMobileMenu({ items, activeSection, buildHref, onAnchorClick }
     return () => mq.removeEventListener("change", onChange);
   }, []);
 
-  // Esc to close.
+  // Esc to close — returns focus to the hamburger trigger (WCAG 2.4.3).
   useEffect(() => {
     if (!open) return;
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") closeAndReturnFocus();
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [open]);
+  }, [open, closeAndReturnFocus]);
 
   // `inert` on <main> traps keyboard / AT focus inside the open menu.
   // Set via effect because <main> is rendered by the parent layout, not
@@ -88,15 +97,16 @@ export function NavMobileMenu({ items, activeSection, buildHref, onAnchorClick }
   // Close menu on anchor-click so the user lands on the section without
   // the dropdown obscuring it. Also delegate to the parent's sub-route
   // handler so /playground/[slug] -> home anchors stash a sessionStorage
-  // target for <ScrollToOnLoad />.
+  // target for <ScrollToOnLoad />. Focus returns to trigger (WCAG 2.4.3).
   const onItemClick = (e: MouseEvent<HTMLAnchorElement>, hash: string) => {
-    setOpen(false);
+    closeAndReturnFocus();
     onAnchorClick(e, hash);
   };
 
   return (
     <div className="md:hidden">
       <button
+        ref={triggerRef}
         type="button"
         aria-label={open ? t("nav.mobileMenu.close") : t("nav.mobileMenu.open")}
         aria-expanded={open}
@@ -157,7 +167,7 @@ export function NavMobileMenu({ items, activeSection, buildHref, onAnchorClick }
                 <a
                   href={buildHref(item.href)}
                   onClick={(e) => onItemClick(e, item.href)}
-                  aria-current={isActive ? "true" : undefined}
+                  aria-current={isActive ? "location" : undefined}
                   className={`block py-2 type-label transition-colors active:scale-[0.97] active:duration-100 ${
                     isActive ? "text-ink" : "text-ink-soft hover:text-ink"
                   }`}

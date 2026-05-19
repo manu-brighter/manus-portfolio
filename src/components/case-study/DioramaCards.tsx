@@ -1,15 +1,10 @@
 import type { CSSProperties } from "react";
-import { AdminHighlightCard } from "@/components/case-study/cards/AdminHighlightCard";
+import { HighlightCard } from "@/components/case-study/cards/HighlightCard";
 import { HookCard } from "@/components/case-study/cards/HookCard";
-import { OverlayHighlightCard } from "@/components/case-study/cards/OverlayHighlightCard";
 import { PublicCard } from "@/components/case-study/cards/PublicCard";
 import { StackCard } from "@/components/case-study/cards/StackCard";
 import { WhatCard } from "@/components/case-study/cards/WhatCard";
-
-type Fact = { key: string; value: string };
-type StackRow = { tech: string; use: string };
-type Feature = { title: string; body: string };
-type DateCaption = { datestamp: string; polaroidCaption?: string };
+import type { DateCaption, Fact, Feature, StackRow } from "@/components/case-study/types";
 
 type PublicShot = {
   slug: string;
@@ -21,37 +16,56 @@ type PublicShot = {
   rotate: number;
 };
 
-type Props = {
+/**
+ * Grouped per-station config. The Diorama has 4 narrative stations
+ * (hook / what+stack / 2 highlights / public); collapsing the
+ * previous 28-prop flat surface into one object per station keeps
+ * `CaseStudy.tsx`'s call site scannable. Each station's content
+ * (text + media + click) is co-located instead of scattered across
+ * 4 prop groups by index.
+ */
+
+type HookConfig = {
   hookText: string;
-  hookStation: DateCaption;
-  storyParas: string[];
+  station: DateCaption;
+  onClick?: () => void;
+};
+
+type ContextConfig = {
   whatLabel: string;
   facts: Fact[];
+  storyParas: string[];
   stackHeading: string;
   stack: StackRow[];
-  adminKicker: string;
-  adminTitle: string;
-  adminLede: string;
-  adminFeatures: Feature[];
-  adminScreenshotAlt: string;
-  adminStation: DateCaption;
-  overlayKicker: string;
-  overlayTitle: string;
-  overlayLede: string;
-  overlayFeatures: Feature[];
-  overlayScreenshotAlt: string;
-  overlayStation: DateCaption;
-  publicShots: PublicShot[];
+};
+
+type HighlightConfig = {
+  kicker: string;
+  title: string;
+  lede: string;
+  features: Feature[];
+  screenshotAlt: string;
+  station: DateCaption;
+  onClick?: () => void;
+};
+
+type PublicConfig = {
+  shots: PublicShot[];
   reflectionLabel: string;
   reflectionBody: string;
   footerLabel: string;
   footerDomain: string;
   footerUrl: string;
   footerExternal: string;
-  hookOnClick?: () => void;
-  adminOnClick?: () => void;
-  overlayOnClick?: () => void;
-  publicOnShotClick?: (shotIndex: number) => void;
+  onShotClick?: (shotIndex: number) => void;
+};
+
+type Props = {
+  hook: HookConfig;
+  context: ContextConfig;
+  admin: HighlightConfig;
+  overlay: HighlightConfig;
+  public: PublicConfig;
 };
 
 /**
@@ -80,61 +94,65 @@ const CARD_LAYOUT: Record<CardKey, CSSProperties> = {
   public: { left: "296vh", top: "22vh", width: "110vh", height: "62vh", transform: "rotate(2deg)" },
 };
 
-export function DioramaCards(props: Props) {
+export function DioramaCards({ hook, context, admin, overlay, public: pub }: Props) {
   return (
     <div className="absolute inset-0">
       <article style={{ position: "absolute", ...CARD_LAYOUT.hook }}>
         <HookCard
-          hookText={props.hookText}
-          datestamp={props.hookStation.datestamp}
-          polaroidCaption={props.hookStation.polaroidCaption ?? ""}
+          hookText={hook.hookText}
+          datestamp={hook.station.datestamp}
+          polaroidCaption={hook.station.polaroidCaption ?? ""}
           lightboxIndex={0}
-          onPolaroidClick={props.hookOnClick}
+          onPolaroidClick={hook.onClick}
         />
       </article>
       <article style={{ position: "absolute", ...CARD_LAYOUT.what }}>
-        <WhatCard label={props.whatLabel} facts={props.facts} storyParas={props.storyParas} />
+        <WhatCard label={context.whatLabel} facts={context.facts} storyParas={context.storyParas} />
       </article>
       <article style={{ position: "absolute", ...CARD_LAYOUT.stack }}>
-        <StackCard heading={props.stackHeading} stack={props.stack} />
+        <StackCard heading={context.stackHeading} stack={context.stack} />
       </article>
       <article style={{ position: "absolute", ...CARD_LAYOUT.admin }}>
-        <AdminHighlightCard
-          kicker={props.adminKicker}
-          title={props.adminTitle}
-          lede={props.adminLede}
-          features={props.adminFeatures}
-          screenshotAlt={props.adminScreenshotAlt}
-          datestamp={props.adminStation.datestamp}
-          polaroidCaption={props.adminStation.polaroidCaption ?? ""}
+        <HighlightCard
+          slug="admin"
+          spot="rose"
+          kicker={admin.kicker}
+          title={admin.title}
+          lede={admin.lede}
+          features={admin.features}
+          screenshotAlt={admin.screenshotAlt}
+          datestamp={admin.station.datestamp}
+          polaroidCaption={admin.station.polaroidCaption ?? ""}
           lightboxIndex={1}
-          onPolaroidClick={props.adminOnClick}
+          onPolaroidClick={admin.onClick}
         />
       </article>
       <article style={{ position: "absolute", ...CARD_LAYOUT.overlay }}>
-        <OverlayHighlightCard
-          kicker={props.overlayKicker}
-          title={props.overlayTitle}
-          lede={props.overlayLede}
-          features={props.overlayFeatures}
-          screenshotAlt={props.overlayScreenshotAlt}
-          datestamp={props.overlayStation.datestamp}
-          polaroidCaption={props.overlayStation.polaroidCaption ?? ""}
+        <HighlightCard
+          slug="twitchoverlay"
+          spot="amber"
+          kicker={overlay.kicker}
+          title={overlay.title}
+          lede={overlay.lede}
+          features={overlay.features}
+          screenshotAlt={overlay.screenshotAlt}
+          datestamp={overlay.station.datestamp}
+          polaroidCaption={overlay.station.polaroidCaption ?? ""}
           lightboxIndex={2}
-          onPolaroidClick={props.overlayOnClick}
+          onPolaroidClick={overlay.onClick}
         />
       </article>
       <article style={{ position: "absolute", ...CARD_LAYOUT.public }}>
         <PublicCard
-          shots={props.publicShots}
-          reflectionLabel={props.reflectionLabel}
-          reflectionBody={props.reflectionBody}
-          footerLabel={props.footerLabel}
-          footerDomain={props.footerDomain}
-          footerUrl={props.footerUrl}
-          footerExternal={props.footerExternal}
+          shots={pub.shots}
+          reflectionLabel={pub.reflectionLabel}
+          reflectionBody={pub.reflectionBody}
+          footerLabel={pub.footerLabel}
+          footerDomain={pub.footerDomain}
+          footerUrl={pub.footerUrl}
+          footerExternal={pub.footerExternal}
           lightboxBaseIndex={3}
-          onShotClick={props.publicOnShotClick}
+          onShotClick={pub.onShotClick}
         />
       </article>
     </div>

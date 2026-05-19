@@ -39,11 +39,7 @@ export function Playground() {
             <span aria-hidden="true" className="inline-block size-2 bg-spot-violet" />
             {t("eyebrow")}
           </p>
-          <h2
-            id="playground-heading"
-            className="type-h1 mt-4 text-ink"
-            style={{ fontStyle: "italic" }}
-          >
+          <h2 id="playground-heading" className="type-h1 mt-4 italic text-ink">
             {t("headline")}
           </h2>
           <p className="type-body-lg mt-6 max-w-[55ch] text-ink-soft">{t("lede")}</p>

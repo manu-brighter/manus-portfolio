@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { SceneVisibilityGate } from "@/components/playground/SceneVisibilityGate";
+import { SceneVisibilityGate } from "@/components/scene/SceneVisibilityGate";
 import { HideScrollbar } from "@/components/ui/HideScrollbar";
 
 /**

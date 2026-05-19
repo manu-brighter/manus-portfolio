@@ -34,6 +34,12 @@ export function Lightbox() {
   const figureRef = useRef<HTMLElement | null>(null);
   const gridRef = useRef<HTMLDivElement | null>(null);
   const previousIndexRef = useRef<number | null>(null);
+  // Set true synchronously before `dialog.close()` so the dialog's
+  // `close` event listener (below) can tell its own programmatic-close
+  // from a real native-ESC press. Prior approach checked the zustand
+  // store's `activeIndex` to detect "already closed", which races on
+  // browsers that fire `close` between React's setState and re-render.
+  const closingRef = useRef(false);
 
   const onBackdropClick = useCallback(
     (e: React.MouseEvent<HTMLDialogElement>) => {
@@ -107,6 +113,7 @@ export function Lightbox() {
     if (activeIndex !== null && !dialog.open) {
       dialog.showModal();
     } else if (activeIndex === null && dialog.open) {
+      closingRef.current = true;
       dialog.close();
     }
   }, [activeIndex]);
@@ -116,12 +123,15 @@ export function Lightbox() {
     const dialog = dialogRef.current;
     if (!dialog) return;
     const onClose = () => {
-      // Only push close to the store if the dialog actually closed
-      // because of native ESC — guard against the close()-from-store
-      // path firing this listener and causing a setState loop.
-      if (useLightboxStore.getState().activeIndex !== null) {
-        close();
+      // `closingRef` is set synchronously by the programmatic-close
+      // path above. If true, we're already mid-close from the store
+      // side — consume the flag and bail. Otherwise this is a real
+      // native ESC press: push the close to the store.
+      if (closingRef.current) {
+        closingRef.current = false;
+        return;
       }
+      close();
     };
     dialog.addEventListener("close", onClose);
     return () => dialog.removeEventListener("close", onClose);

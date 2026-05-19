@@ -20,7 +20,16 @@
 
 import gsap from "gsap";
 
-export type TickFn = (deltaMs: number, elapsedMs: number) => void;
+/**
+ * Per-step delta-time cap (seconds). When a tab returns from background
+ * `deltaMs` can spike to multiple seconds — feeding that raw into a
+ * fluid-sim's advect step produces a runaway smear. 33ms (~2 frames at
+ * 60fps) is the project-wide cap; matches the conservative default
+ * across every consumer of `subscribe()`.
+ */
+export const MAX_DT_S = 0.033;
+
+type TickFn = (deltaMs: number, elapsedMs: number) => void;
 
 type Subscriber = {
   fn: TickFn;

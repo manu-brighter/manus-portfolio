@@ -1,5 +1,31 @@
 // src/lib/gpu.ts
 
+/**
+ * Standard device-pixel-ratio caps used across the GL canvases.
+ *
+ * `DPR_FULL` — fullscreen canvases (Hero FluidSim, InkDropStudio,
+ *   TypeAsFluid, InkWipeOverlay, PhotoInkMask). Caps Retina/4K at
+ *   2x so the toon shader's posterize pass doesn't waste cycles
+ *   resolving pixels that compress back to the spot palette anyway.
+ * `DPR_MINI` — small-card mini-sims (InkDropMiniSim,
+ *   TypeAsFluidMiniSim). Cards measure <300px on screen so 1.5x is
+ *   enough; 2x is invisible to the eye + the mini orchestrators run
+ *   at the "minimal" tier (96^2 grid) where backpressure shows up
+ *   quickly on integrated GPUs.
+ */
+export const DPR_FULL = 2;
+export const DPR_MINI = 1.5;
+
+/**
+ * Clamp `window.devicePixelRatio` against a max. SSR-safe — returns 1
+ * when no window is present. Replaces inline
+ * `Math.min(window.devicePixelRatio || 1, X)` repetitions.
+ */
+export function capDPR(max: number = DPR_FULL): number {
+  if (typeof window === "undefined") return 1;
+  return Math.min(window.devicePixelRatio || 1, max);
+}
+
 export type GPUTier = "high" | "medium" | "low" | "minimal" | "static";
 
 export type TierConfig = {
@@ -79,8 +105,21 @@ const RENDERER_PATTERNS: RendererPattern[] = [
   { pattern: "powervr", tier: "minimal" },
 ];
 
-function matchRenderer(renderer: string): GPUTier | null {
-  const lower = renderer.toLowerCase();
+// Exported for unit tests (F-testing-coverage-10): Iris Xe → "low" is a
+// hard constraint documented in CLAUDE.md. Export lets tests catch
+// pattern-list regressions without needing a browser WebGL context.
+export function matchRenderer(renderer: string): GPUTier | null {
+  // Strip branding suffixes Intel/Qualcomm/etc. inject — "(R)", "(TM)",
+  // "(C)", "(SM)" — and collapse the resulting double-space so the
+  // patterns below stay literal. Without this, `Intel(R) Iris(R) Xe
+  // Graphics` and `Adreno (TM) 530` slip past the `iris xe` / `adreno 5`
+  // patterns and fall through to a `null` tier (then frametime fallback
+  // does the work — but slower than the renderer fast-path it was
+  // meant to short-circuit).
+  const lower = renderer
+    .toLowerCase()
+    .replace(/\((?:r|tm|c|sm)\)/g, "")
+    .replace(/\s+/g, " ");
   for (const { pattern, tier } of RENDERER_PATTERNS) {
     if (lower.includes(pattern)) return tier;
   }
@@ -89,12 +128,28 @@ function matchRenderer(renderer: string): GPUTier | null {
 
 const CACHE_KEY = "manus-gpu-tier";
 const CACHE_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
+const VALID_TIERS: readonly GPUTier[] = ["high", "medium", "low", "minimal", "static"];
 
-function getCachedTier(): GPUTier | null {
+/** Public synchronous read of the cached tier — used by useGPUCapability
+ *  for lazy-init so the FluidSim mounts with the correct config from the
+ *  first paint and never has to dispose+reinit mid-session. */
+export function getCachedTier(): GPUTier | null {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
-    const { tier, ts } = JSON.parse(raw) as { tier: GPUTier; ts: number };
+    const parsed: unknown = JSON.parse(raw);
+    if (
+      !parsed ||
+      typeof parsed !== "object" ||
+      !("tier" in parsed) ||
+      !("ts" in parsed) ||
+      typeof parsed.ts !== "number" ||
+      !VALID_TIERS.includes(parsed.tier as GPUTier)
+    ) {
+      localStorage.removeItem(CACHE_KEY);
+      return null;
+    }
+    const { tier, ts } = parsed as { tier: GPUTier; ts: number };
     if (Date.now() - ts > CACHE_MAX_AGE_MS) {
       localStorage.removeItem(CACHE_KEY);
       return null;
@@ -103,13 +158,6 @@ function getCachedTier(): GPUTier | null {
   } catch {
     return null;
   }
-}
-
-/** Public synchronous read of the cached tier — used by useGPUCapability
- *  for lazy-init so the FluidSim mounts with the correct config from the
- *  first paint and never has to dispose+reinit mid-session. */
-export function readCachedTier(): GPUTier | null {
-  return getCachedTier();
 }
 
 export function cacheTier(tier: GPUTier): void {
@@ -136,7 +184,8 @@ export function probeGPU(gl: WebGL2RenderingContext): {
   }
 
   const ext = gl.getExtension("WEBGL_debug_renderer_info");
-  const renderer = ext ? (gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) as string) : "unknown";
+  const raw = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : "unknown";
+  const renderer = typeof raw === "string" ? raw : "unknown";
 
   const matched = matchRenderer(renderer);
   if (matched) {

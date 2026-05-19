@@ -2,10 +2,13 @@
 
 import gsap from "gsap";
 import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from "react";
+import { useCoarsePointer } from "@/hooks/useCoarsePointer";
+import { useHoverOrCenterViewport } from "@/hooks/useHoverOrCenterViewport";
 import { useLenis } from "@/hooks/useLenis";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { dispatchSplat, type SplatColorName } from "@/lib/fluidBus";
+import { dispatchSplat } from "@/lib/fluidBus";
 import { dur, ease } from "@/lib/motion/tokens";
+import type { SpotColor } from "@/lib/palette";
 
 /**
  * WorkCard — the editorial flex unit of Section 03.
@@ -52,7 +55,7 @@ export type WorkCardProps = {
   /** CTA stamp text. */
   ctaLabel: string;
   /** Spot-color seed used for the hover splat + accent. */
-  splatColor: SplatColorName;
+  splatColor: SpotColor;
   /** Whether to show the [vibecoded] stamp. */
   vibecoded?: boolean;
   /** Marker label (i18n). */
@@ -113,12 +116,29 @@ export function WorkCard(props: WorkCardProps) {
   const reducedMotion = useReducedMotion();
   const lenis = useLenis();
 
-  const rootRef = useRef<HTMLElement>(null);
+  // Coarse-pointer hover replacement — viewport-center band IO.
+  const { ref: rootRef, active: coarseHovered } = useHoverOrCenterViewport<HTMLElement>();
   const cardRef = useRef<HTMLDivElement>(null);
   const backingRef = useRef<HTMLDivElement>(null);
   const mediaRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
   const pillsRef = useRef<HTMLUListElement>(null);
+  // Tracks the cascade of setTimeout IDs fired by the scroll-hero
+  // click handler (1 base + 3 cluster splats). Mirrors the project-
+  // wide setTimeout-discipline convention (see TypeAsFluid's
+  // stampTimersRef): every scheduled handle registers here on
+  // creation, removes itself on fire, and unmount cleanup clears the
+  // set so route-changes mid-cascade don't fire splats against a
+  // disposed sim.
+  const splatTimersRef = useRef<Set<number>>(new Set());
+
+  useEffect(() => {
+    const timers = splatTimersRef.current;
+    return () => {
+      for (const id of timers) window.clearTimeout(id);
+      timers.clear();
+    };
+  }, []);
 
   const [hovered, setHovered] = useState(false);
 
@@ -126,30 +146,16 @@ export function WorkCard(props: WorkCardProps) {
   // entry instead of hover. The cursor-driven parallax + magnetic and
   // the ambient splat dispatch are skipped entirely (no cursor + sim
   // interaction is mobile-disabled per Phase 13 deviations).
-  const [isCoarse] = useState(
-    () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches,
-  );
+  const isCoarse = useCoarsePointer();
 
+  // Mirror coarse-pointer viewport-IO active state into the unified
+  // `hovered` state that drives the pill cascade + parallax. Desktop
+  // path still flips hovered via onPointerEnter/Leave below — the IO
+  // path only contributes on coarse pointers.
   useEffect(() => {
-    if (!isCoarse || reducedMotion) return;
-    const root = rootRef.current;
-    if (!root) return;
-    // rootMargin -32.5/0/-32.5 carves out the central 35% vertical band
-    // of the viewport. Element fires `isIntersecting` only when its box
-    // overlaps that band — tighter than the original 50% band so the
-    // hover-replacement animation only kicks in when the card is
-    // genuinely centred, not just past the upper third.
-    const obs = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (!entry) return;
-        setHovered(entry.isIntersecting);
-      },
-      { threshold: 0, rootMargin: "-32.5% 0px -32.5% 0px" },
-    );
-    obs.observe(root);
-    return () => obs.disconnect();
-  }, [isCoarse, reducedMotion]);
+    if (!isCoarse) return;
+    setHovered(coarseHovered);
+  }, [isCoarse, coarseHovered]);
 
   // Hover-enter / hover-leave choreography. GSAP timeline is rebuilt
   // each direction so we can reverse with the same easing.
@@ -297,7 +303,9 @@ export function WorkCard(props: WorkCardProps) {
       // so the sim has resumed when the splat lands. 0.55s matches the
       // typical smooth-scroll easing tail.
       if (!reducedMotion) {
-        window.setTimeout(() => {
+        const timers = splatTimersRef.current;
+        const baseId = window.setTimeout(() => {
+          timers.delete(baseId);
           dispatchSplat({
             x: 0.5,
             y: 0.5,
@@ -309,15 +317,18 @@ export function WorkCard(props: WorkCardProps) {
           });
           // Three more in a tight cluster for a stamp-like cascade
           for (let i = 1; i <= 3; i++) {
-            window.setTimeout(() => {
+            const id = window.setTimeout(() => {
+              timers.delete(id);
               dispatchSplat({
                 x: 0.5 + (Math.random() - 0.5) * 0.1,
                 y: 0.5 + (Math.random() - 0.5) * 0.1,
                 color: splatColor,
               });
             }, i * 80);
+            timers.add(id);
           }
         }, 350);
+        timers.add(baseId);
       }
       return;
     }
@@ -335,7 +346,6 @@ export function WorkCard(props: WorkCardProps) {
   };
 
   const href = click.kind === "anchor" ? click.target : "#hero";
-  const isExternal = false;
 
   return (
     <article
@@ -353,7 +363,7 @@ export function WorkCard(props: WorkCardProps) {
         onFocus={() => setHovered(true)}
         onBlur={() => setHovered(false)}
         className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-4 focus-visible:ring-offset-paper"
-        rel={isExternal ? "noreferrer external" : undefined}
+        {...(href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       >
         <div ref={cardRef} className="relative will-change-transform">
           {/* Backing block — riso underlay shifted bottom-right. */}
@@ -370,7 +380,7 @@ export function WorkCard(props: WorkCardProps) {
           {/* Media frame — screenshot or generative visual. */}
           <div
             ref={mediaRef}
-            className="relative aspect-[16/9] overflow-hidden border-2 border-ink bg-paper-shade will-change-transform"
+            className="relative aspect-[16/9] overflow-hidden border-[1.5px] border-ink bg-paper-shade will-change-transform"
           >
             {media}
 
@@ -425,8 +435,9 @@ export function WorkCard(props: WorkCardProps) {
             </ul>
 
             {/* CTA stamp. */}
-            <span className="mt-6 inline-block rounded-[2px] border-2 border-ink bg-paper px-4 py-2 font-mono text-xs uppercase tracking-[0.18em] text-ink transition-transform group-hover:translate-x-1 group-hover:translate-y-1 group-hover:shadow-[3px_3px_0_var(--color-ink)]">
-              {ctaLabel} →
+            <span className="mt-6 inline-block rounded-[2px] border-[1.5px] border-ink bg-paper px-4 py-2 font-mono text-xs uppercase tracking-[0.18em] text-ink transition-transform group-hover:translate-x-1 group-hover:translate-y-1 group-hover:shadow-[3px_3px_0_var(--color-ink)]">
+              {ctaLabel}
+              {click.kind !== "scroll-hero" ? <span aria-hidden="true"> →</span> : null}
             </span>
           </div>
         </div>

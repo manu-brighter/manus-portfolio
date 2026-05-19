@@ -4,9 +4,9 @@ import { useCallback, useRef, useState } from "react";
 import {
   cacheTier,
   type GPUTier,
+  getCachedTier,
   getTierConfig,
   probeGPU,
-  readCachedTier,
   type TierConfig,
   tierFromFrametime,
 } from "@/lib/gpu";
@@ -27,8 +27,20 @@ type GPUCapability = {
  */
 function pickInitialCapability(): GPUCapability {
   if (typeof window !== "undefined") {
-    const cached = readCachedTier();
-    if (cached && cached !== "static") {
+    const cached = getCachedTier();
+    if (cached) {
+      // Cached "static" must short-circuit too — otherwise we'd render
+      // the medium-tier FluidSim for a few frames before the probe
+      // demotes it to static, costing the slowest user cohort a
+      // mount-and-dispose round-trip on every page visit.
+      if (cached === "static") {
+        return {
+          tier: "static",
+          config: null,
+          renderer: "(cached)",
+          measuring: false,
+        };
+      }
       return {
         tier: cached,
         config: getTierConfig(cached),

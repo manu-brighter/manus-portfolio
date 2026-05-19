@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { WorkCard } from "@/components/ui/WorkCard";
 import { PortfolioCardReveal } from "@/components/work/PortfolioCardReveal";
+import type { WorkProjects } from "@/types/i18n-shapes";
 
 /**
  * Work — Section 03.
@@ -19,30 +20,9 @@ import { PortfolioCardReveal } from "@/components/work/PortfolioCardReveal";
  * later pass.
  */
 
-type WorkProject = {
-  id: string;
-  title: string;
-  subtitle?: string;
-  year: string;
-  role: string;
-  stack: string[];
-  description: string;
-  metaNote?: string;
-  ctaLabel: string;
-  screenshot?: {
-    alt: string;
-    caption?: string;
-  };
-  reveal?: {
-    surname: string;
-    given: string;
-    ariaAnnouncement: string;
-  };
-};
-
 export function Work() {
   const t = useTranslations("work");
-  const projects = t.raw("projects") as WorkProject[];
+  const projects = t.raw("projects") as WorkProjects;
   const vibecodedLabel = t("vibecodedStamp");
 
   // Hard-coded order matches briefing §4: Portfolio first (meta-card),

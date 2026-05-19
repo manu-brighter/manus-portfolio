@@ -61,7 +61,7 @@ export function Contact() {
       aria-labelledby="contact-heading"
       className="container-page relative py-20 md:py-28"
     >
-      <header className="grid-12 mb-14 gap-y-4 md:mb-20">
+      <header className="grid-12 mb-16 gap-y-4 md:mb-20">
         <p className="col-span-12 text-ink-muted type-label md:col-span-4">{t("sectionLabel")}</p>
         <div className="col-span-12 md:col-span-8">
           <h2 id="contact-heading" className="type-h1 text-ink">

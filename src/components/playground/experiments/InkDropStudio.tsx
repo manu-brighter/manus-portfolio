@@ -3,11 +3,12 @@
 import { Leva, useControls } from "leva";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
-import { FluidOrchestrator, type PointerState } from "@/components/scene/FluidOrchestrator";
+import { useOrchestratorRAF } from "@/hooks/useOrchestratorRAF";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { INK_DROP_STUDIO_DEFAULTS, type SpotColor } from "@/lib/content/playground";
-import { getTierConfig } from "@/lib/gpu";
-import { subscribe } from "@/lib/raf";
+import { INK_DROP_STUDIO_DEFAULTS } from "@/lib/content/playground";
+import { FluidOrchestrator, type PointerState } from "@/lib/gl/fluidOrchestrator";
+import { capDPR, DPR_FULL, getTierConfig } from "@/lib/gpu";
+import { randomSpot } from "@/lib/palette";
 import { ExperimentChrome } from "../ExperimentChrome";
 
 /**
@@ -32,16 +33,12 @@ import { ExperimentChrome } from "../ExperimentChrome";
 // number scale-readable while leaving the tier baseline intact.
 const BASE_SPLAT_RADIUS = 0.015;
 
-const SPOT_COLOR_KEYS = ["rose", "amber", "mint", "violet"] as const satisfies readonly SpotColor[];
-
 // The toon render shader (render-toon.frag.glsl) maps dye *magnitude*
 // to a fixed mint→amber→rose→violet ladder rather than reading the
 // dye RGB itself — so a single-colour override can't show through the
 // layered Riso look. Studio embraces that: every splat picks a random
-// Riso spot and the visual feel is layered ink, just like the hero.
-function randomSpot(): SpotColor {
-  return SPOT_COLOR_KEYS[Math.floor(Math.random() * SPOT_COLOR_KEYS.length)] ?? "rose";
-}
+// Riso spot via the shared `randomSpot()` helper and the visual feel
+// is layered ink, just like the hero.
 
 export function InkDropStudio() {
   const reducedMotion = useReducedMotion();
@@ -131,7 +128,7 @@ function InkDropStudioCanvas() {
     }) as WebGL2RenderingContext | null;
     if (!gl) return;
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = capDPR(DPR_FULL);
     canvas.width = Math.floor(window.innerWidth * dpr);
     canvas.height = Math.floor(window.innerHeight * dpr);
 
@@ -157,17 +154,21 @@ function InkDropStudioCanvas() {
     orchestratorRef.current = orchestrator;
 
     const onResize = () => {
-      const ratio = Math.min(window.devicePixelRatio || 1, 2);
+      const ratio = capDPR(DPR_FULL);
       const w = Math.floor(window.innerWidth * ratio);
       const h = Math.floor(window.innerHeight * ratio);
       canvas.width = w;
       canvas.height = h;
       orchestrator.resize(w, h);
     };
-    window.addEventListener("resize", onResize);
+    // ResizeObserver on the canvas's parent so the sim adapts to
+    // container reflow (e.g. Leva panel toggling, ExperimentChrome
+    // chrome density change) rather than only viewport changes.
+    const ro = new ResizeObserver(onResize);
+    ro.observe(canvas.parentElement ?? canvas);
 
     return () => {
-      window.removeEventListener("resize", onResize);
+      ro.disconnect();
       orchestrator.dispose();
       orchestratorRef.current = null;
     };
@@ -190,17 +191,7 @@ function InkDropStudioCanvas() {
   // pointer-splat handles the hover trail (and any click-and-drag
   // sustain) since `pointer.moved || pointer.down` covers both cases.
   // The click-burst is fired in the pointerdown handler below.
-  useEffect(() => {
-    return subscribe((deltaMs, elapsedMs) => {
-      const orchestrator = orchestratorRef.current;
-      if (!orchestrator) return;
-      const dt = Math.min(deltaMs * 0.001, 0.033);
-      orchestrator.step(dt, elapsedMs, pointerRef.current);
-      pointerRef.current.dx = 0;
-      pointerRef.current.dy = 0;
-      pointerRef.current.moved = false;
-    }, 15);
-  }, []);
+  useOrchestratorRAF(orchestratorRef, pointerRef, 15);
 
   // Document-level pointer wiring. Hover (move without click held) is
   // the trail; click is a wavy multi-splat burst. Pointer state goes
@@ -377,17 +368,17 @@ function LevaPaperTheme() {
       titleBar={{ drag: true, filter: false, title: "INK DROP STUDIO" }}
       theme={{
         colors: {
-          elevation1: "#f0e8dc",
-          elevation2: "#fef2e2",
-          elevation3: "#e4dbcd",
-          accent1: "#ff6ba0",
-          accent2: "#ffc474",
-          accent3: "#7ce8c4",
-          highlight1: "#0a0608",
-          highlight2: "#1a0e12",
-          highlight3: "#0a0608",
-          folderTextColor: "#0a0608",
-          folderWidgetColor: "#0a0608",
+          elevation1: "#f0e8dc", // --color-paper
+          elevation2: "#fef2e2", // --color-paper-tint
+          elevation3: "#e4dbcd", // --color-paper-shade
+          accent1: "#ff6ba0", // --color-spot-rose
+          accent2: "#ffc474", // --color-spot-amber
+          accent3: "#7ce8c4", // --color-spot-mint
+          highlight1: "#0a0608", // --color-ink
+          highlight2: "#1a0e12", // --color-ink-soft
+          highlight3: "#0a0608", // --color-ink
+          folderTextColor: "#0a0608", // --color-ink
+          folderWidgetColor: "#0a0608", // --color-ink
         },
         sizes: {
           rootWidth: "300px",

@@ -51,12 +51,17 @@ export function Footer() {
       // Respect modifier-clicks (open in new tab etc.) — don't intercept.
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
       e.preventDefault();
-      // Revert ALL ScrollTrigger pin spacers BEFORE the route change
+      // Revert ScrollTrigger pin spacers BEFORE the route change
       // unmounts the home page tree. Otherwise React's removeChild
       // fails because a pin-spacer div wraps the case-study section,
       // so the section is no longer a direct child of <main>.
-      // kill(true) restores the original DOM hierarchy.
-      for (const trigger of ScrollTrigger.getAll()) trigger.kill(true);
+      // kill(true) restores the original DOM hierarchy. Filter to
+      // pin-only triggers — unscoped killAll also tore down GSAP's
+      // hidden internal triggers that have nothing to do with the
+      // unmount race.
+      for (const trigger of ScrollTrigger.getAll()) {
+        if (trigger.vars.pin === true) trigger.kill(true);
+      }
       router.push(href);
     };
 

@@ -2,9 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo } from "react";
-import { AdminHighlightCard } from "@/components/case-study/cards/AdminHighlightCard";
+import { HighlightCard } from "@/components/case-study/cards/HighlightCard";
 import { HookCard } from "@/components/case-study/cards/HookCard";
-import { OverlayHighlightCard } from "@/components/case-study/cards/OverlayHighlightCard";
 import { PublicCard } from "@/components/case-study/cards/PublicCard";
 import { StackCard } from "@/components/case-study/cards/StackCard";
 import { WhatCard } from "@/components/case-study/cards/WhatCard";
@@ -13,22 +12,19 @@ import { DioramaIllustration } from "@/components/case-study/DioramaIllustration
 import { DioramaLupe } from "@/components/case-study/DioramaLupe";
 import { DioramaTrack } from "@/components/case-study/DioramaTrack";
 import { Lightbox } from "@/components/case-study/Lightbox";
+import { buildPublicShotImage, LIGHTBOX_IMAGES } from "@/components/case-study/lightboxConfig";
 import { type LightboxImage, useLightboxStore } from "@/lib/lightboxStore";
-
-type Fact = { key: string; value: string };
-type StackRow = { tech: string; use: string };
-type Feature = { title: string; body: string };
-type Highlight = {
-  id: string;
-  kicker: string;
-  title: string;
-  lede: string;
-  screenshot: string;
-  screenshotAlt: string;
-  features: Feature[];
-};
-type DateCaption = { datestamp: string; polaroidCaption?: string };
-type PublicShotI18n = { datestamp: string; caption: string };
+import type {
+  CaseStudyFacts,
+  CaseStudyHighlightAdmin,
+  CaseStudyHighlightOverlay,
+  CaseStudyHighlights,
+  CaseStudyHookStation,
+  CaseStudyPublicShots,
+  CaseStudyStack,
+  CaseStudyStackStation,
+  CaseStudyStory,
+} from "@/types/i18n-shapes";
 
 const PUBLIC_SHOT_CONFIG: {
   slug: string;
@@ -44,68 +40,65 @@ const PUBLIC_SHOT_CONFIG: {
 export function CaseStudy() {
   const t = useTranslations("caseStudy");
 
-  const facts = t.raw("context.facts") as Fact[];
-  const storyParas = t.raw("context.story") as string[];
-  const stack = t.raw("platform.stack") as StackRow[];
-  const highlights = t.raw("highlights.items") as Highlight[];
-  const hookStation = t.raw("stations.hook") as DateCaption;
-  const stackStation = t.raw("stations.stack") as { heading: string };
-  const highlightAdmin = t.raw("stations.highlightAdmin") as DateCaption;
-  const highlightOverlay = t.raw("stations.highlightOverlay") as DateCaption;
-  const publicShotsI18n = t.raw("stations.publicShots") as PublicShotI18n[];
+  const facts = t.raw("context.facts") as CaseStudyFacts;
+  const storyParas = t.raw("context.story") as CaseStudyStory;
+  const stack = t.raw("platform.stack") as CaseStudyStack;
+  const highlights = t.raw("highlights.items") as CaseStudyHighlights;
+  const hookStation = t.raw("stations.hook") as CaseStudyHookStation;
+  const stackStation = t.raw("stations.stack") as CaseStudyStackStation;
+  const highlightAdmin = t.raw("stations.highlightAdmin") as CaseStudyHighlightAdmin;
+  const highlightOverlay = t.raw("stations.highlightOverlay") as CaseStudyHighlightOverlay;
+  const publicShotsI18n = t.raw("stations.publicShots") as CaseStudyPublicShots;
 
   const adminHighlight = highlights.find((h) => h.id === "admin");
   const overlayHighlight = highlights.find((h) => h.id === "overlay");
 
-  const publicShots = PUBLIC_SHOT_CONFIG.map((cfg, i) => ({
-    ...cfg,
-    alt: `${t("publicLayer.label")} ${i + 1}`,
-    datestamp: publicShotsI18n[i]?.datestamp ?? "",
-    caption: publicShotsI18n[i]?.caption ?? "",
-  }));
+  // Wrap in useMemo so the array reference is stable across renders.
+  // Without this the downstream `lightboxImages` memo would never hit
+  // (its `publicShots` dep is a freshly-allocated array every render),
+  // re-firing the `useEffect([lightboxImages, setLightboxImages])`
+  // and re-rendering the Lightbox subscriber on every parent render.
+  const publicLayerLabel = t("publicLayer.label");
+  const publicShots = useMemo(
+    () =>
+      PUBLIC_SHOT_CONFIG.map((cfg, i) => ({
+        ...cfg,
+        alt: `${publicLayerLabel} ${i + 1}`,
+        datestamp: publicShotsI18n[i]?.datestamp ?? "",
+        caption: publicShotsI18n[i]?.caption ?? "",
+      })),
+    [publicShotsI18n, publicLayerLabel],
+  );
 
   // Image set for the lightbox — fixed order: hook (0), admin (1),
-  // overlay (2), public shots 3/4/5. Each entry uses the largest
-  // available width as the lightbox source.
+  // overlay (2), public shots 3/4/5. Each entry merges the static
+  // LIGHTBOX_IMAGES manifest (paths + aspect ratios) with the
+  // per-locale alt + caption strings.
   const lightboxImages = useMemo<LightboxImage[]>(() => {
     const out: LightboxImage[] = [
       {
-        fullSrc: "/projects/joggediballa/homepage-phone-720w.jpg",
-        avifSrc: "/projects/joggediballa/homepage-phone-720w.avif",
-        webpSrc: "/projects/joggediballa/homepage-phone-720w.webp",
-        aspect: 540 / 960,
+        ...LIGHTBOX_IMAGES.hook,
         alt: "Joggediballa Homepage Mobile",
         caption: hookStation.polaroidCaption ?? "",
       },
     ];
     if (adminHighlight) {
       out.push({
-        fullSrc: "/projects/joggediballa/admin-1200w.jpg",
-        avifSrc: "/projects/joggediballa/admin-1200w.avif",
-        webpSrc: "/projects/joggediballa/admin-1200w.webp",
-        aspect: 800 / 450,
+        ...LIGHTBOX_IMAGES.admin,
         alt: adminHighlight.screenshotAlt,
         caption: highlightAdmin.polaroidCaption ?? "",
       });
     }
     if (overlayHighlight) {
       out.push({
-        fullSrc: "/projects/joggediballa/twitchoverlay-1200w.jpg",
-        avifSrc: "/projects/joggediballa/twitchoverlay-1200w.avif",
-        webpSrc: "/projects/joggediballa/twitchoverlay-1200w.webp",
-        aspect: 800 / 450,
+        ...LIGHTBOX_IMAGES.overlay,
         alt: overlayHighlight.screenshotAlt,
         caption: highlightOverlay.polaroidCaption ?? "",
       });
     }
     publicShots.forEach((s) => {
-      const isPortrait = s.aspect === "9/16";
-      const fallbackW = isPortrait ? 720 : 1200;
       out.push({
-        fullSrc: `/projects/joggediballa/${s.slug}-${fallbackW}w.jpg`,
-        avifSrc: `/projects/joggediballa/${s.slug}-${fallbackW}w.avif`,
-        webpSrc: `/projects/joggediballa/${s.slug}-${fallbackW}w.webp`,
-        aspect: isPortrait ? 540 / 960 : 800 / 450,
+        ...buildPublicShotImage(s.slug, s.aspect),
         alt: s.alt,
         caption: s.caption,
       });
@@ -141,7 +134,7 @@ export function CaseStudy() {
   // stack without illustration or fluid-sim.
   const mobileFallback = (
     <div className="container-page flex flex-col gap-12 py-12">
-      <h2 id="case-study-heading" className="type-h2 text-ink">
+      <h2 id="case-study-heading" className="type-h1 text-ink">
         {t("headline")}
       </h2>
       <HookCard
@@ -154,7 +147,9 @@ export function CaseStudy() {
       <WhatCard label={t("context.label")} facts={facts} storyParas={storyParas} />
       <StackCard heading={stackStation.heading} stack={stack} />
       {adminHighlight ? (
-        <AdminHighlightCard
+        <HighlightCard
+          slug="admin"
+          spot="rose"
           kicker={adminHighlight.kicker}
           title={adminHighlight.title}
           lede={adminHighlight.lede}
@@ -167,7 +162,9 @@ export function CaseStudy() {
         />
       ) : null}
       {overlayHighlight ? (
-        <OverlayHighlightCard
+        <HighlightCard
+          slug="twitchoverlay"
+          spot="amber"
           kicker={overlayHighlight.kicker}
           title={overlayHighlight.title}
           lede={overlayHighlight.lede}
@@ -196,43 +193,53 @@ export function CaseStudy() {
   // Desktop: full diorama with sticky-pin + horizontal scroll.
   return (
     <>
-      <DioramaTrack mobileFallback={mobileFallback}>
+      <DioramaTrack mobileFallback={mobileFallback} sectionLabel={t("sectionLabel")}>
         <h2 id="case-study-heading" className="sr-only">
           {t("headline")}
         </h2>
         <DioramaIllustration />
         {adminHighlight && overlayHighlight ? (
           <DioramaCards
-            hookText={t("hook")}
-            hookStation={hookStation}
-            storyParas={storyParas}
-            whatLabel={t("context.label")}
-            facts={facts}
-            stackHeading={stackStation.heading}
-            stack={stack}
-            adminKicker={adminHighlight.kicker}
-            adminTitle={adminHighlight.title}
-            adminLede={adminHighlight.lede}
-            adminFeatures={adminHighlight.features}
-            adminScreenshotAlt={adminHighlight.screenshotAlt}
-            adminStation={highlightAdmin}
-            overlayKicker={overlayHighlight.kicker}
-            overlayTitle={overlayHighlight.title}
-            overlayLede={overlayHighlight.lede}
-            overlayFeatures={overlayHighlight.features}
-            overlayScreenshotAlt={overlayHighlight.screenshotAlt}
-            overlayStation={highlightOverlay}
-            publicShots={publicShots}
-            reflectionLabel={t("reflection.label")}
-            reflectionBody={t("reflection.body")}
-            footerLabel={t("footerLink.label")}
-            footerDomain={t("footerLink.domain")}
-            footerUrl={t("footerLink.url")}
-            footerExternal={t("footerLink.external")}
-            hookOnClick={handleOpen(0)}
-            adminOnClick={handleOpen(1)}
-            overlayOnClick={handleOpen(2)}
-            publicOnShotClick={(i) => handleOpen(3 + i)()}
+            hook={{
+              hookText: t("hook"),
+              station: hookStation,
+              onClick: handleOpen(0),
+            }}
+            context={{
+              whatLabel: t("context.label"),
+              facts,
+              storyParas,
+              stackHeading: stackStation.heading,
+              stack,
+            }}
+            admin={{
+              kicker: adminHighlight.kicker,
+              title: adminHighlight.title,
+              lede: adminHighlight.lede,
+              features: adminHighlight.features,
+              screenshotAlt: adminHighlight.screenshotAlt,
+              station: highlightAdmin,
+              onClick: handleOpen(1),
+            }}
+            overlay={{
+              kicker: overlayHighlight.kicker,
+              title: overlayHighlight.title,
+              lede: overlayHighlight.lede,
+              features: overlayHighlight.features,
+              screenshotAlt: overlayHighlight.screenshotAlt,
+              station: highlightOverlay,
+              onClick: handleOpen(2),
+            }}
+            public={{
+              shots: publicShots,
+              reflectionLabel: t("reflection.label"),
+              reflectionBody: t("reflection.body"),
+              footerLabel: t("footerLink.label"),
+              footerDomain: t("footerLink.domain"),
+              footerUrl: t("footerLink.url"),
+              footerExternal: t("footerLink.external"),
+              onShotClick: (i) => handleOpen(3 + i)(),
+            }}
           />
         ) : null}
         <DioramaLupe />

@@ -22,16 +22,11 @@
 
 import Lenis from "lenis";
 import "lenis/dist/lenis.css";
-import { createContext, type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { MotionContext } from "@/lib/motion/context";
 import { bootstrap, subscribe, teardown } from "@/lib/raf";
-
-type MotionContextValue = {
-  lenis: Lenis | null;
-};
-
-export const MotionContext = createContext<MotionContextValue>({ lenis: null });
 
 type MotionProviderProps = {
   children: ReactNode;

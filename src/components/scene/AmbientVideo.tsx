@@ -50,6 +50,12 @@ export function AmbientVideo() {
       tabIndex={-1}
       data-scene="root"
       onLoadedData={() => setLoaded(true)}
+      onError={() =>
+        // biome-ignore lint/suspicious/noConsole: missing asset is a dev signal for fresh checkouts
+        console.warn(
+          "[AmbientVideo] /ambient-loop.mp4 failed to load — mobile background will be static paper",
+        )
+      }
       className="pointer-events-none transition-opacity duration-700 ease-out"
       style={{
         position: "fixed",
@@ -64,7 +70,15 @@ export function AmbientVideo() {
       {/* MP4 / H.264 — universal browser support, including older
           iOS Safari. The earlier WebM/VP9 attempt rendered as a still
           image on iOS 18 (codec was technically supported but only the
-          first frame decoded reliably). */}
+          first frame decoded reliably).
+
+          TODO (mobile-hero rework): the coarse-pointer fallback that
+          this <video> backs needs a full redesign — the ambient loop
+          on mobile doesn't fit the hero feel Manuel is after. Defer
+          all size-variant work (480p/1024p MP4 + <source media>
+          chain) until the redesign decides whether video is even the
+          right primitive. The previous F-performance-9 stub for an
+          ffmpeg variant pass is superseded by this larger redirect. */}
       <source src="/ambient-loop.mp4" type="video/mp4" />
     </video>
   );

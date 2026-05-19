@@ -12,9 +12,14 @@ test.describe("photography section", () => {
     const section = page.locator("#photography");
     await expect(section).toBeAttached();
 
-    const heading = section.getByRole("heading", { name: "Through the Lens." });
+    // Headline is i18n'd per locale post-rework (F-i18n-4). On /de/ it reads
+    // "Durch die Linse." — match either the German or English variant so the
+    // test stays locale-stable.
+    const heading = section.getByRole("heading", { name: /Durch die Linse\.|Through the Lens\./ });
     await expect(heading).toBeVisible();
-    await expect(section.getByText("SONY α7 IV", { exact: false })).toBeVisible();
+    // The DE lede also mentions "Sony α7 IV"; scope to the type-label-stamp
+    // class so we only match the tech stamp itself, not the body copy.
+    await expect(section.locator(".type-label-stamp", { hasText: "SONY α7 IV" })).toBeVisible();
   });
 
   test("all 5 photo slots render with picture + caption", async ({ page }) => {
@@ -55,5 +60,56 @@ test.describe("photography section", () => {
     await expect(slots).toHaveCount(5);
 
     await context.close();
+  });
+
+  // F-testing-coverage-6: assert 5 canvases mount and the IO-triggered
+  // ink-reveal fires when a photo enters the central viewport band.
+  // Pattern: expect.poll on getComputedStyle(canvas).opacity — same
+  // pattern as overprint.spec.ts. Skip under reduced-motion (no canvases
+  // mount there; existing test above covers that branch).
+  test("default motion: 5 ink-mask canvases are mounted", async ({ page }) => {
+    await page.goto("/de/");
+    const section = page.locator("#photography");
+    // Scroll photography section into the viewport so IntersectionObserver
+    // can detect it; canvases mount after the section enters the DOM.
+    await section.scrollIntoViewIfNeeded();
+    await expect(section.locator("canvas")).toHaveCount(5, { timeout: 5000 });
+  });
+
+  test("default motion: scrolling a photo into central band triggers ink reveal", async ({
+    page,
+  }) => {
+    await page.goto("/de/");
+    const section = page.locator("#photography");
+    await section.scrollIntoViewIfNeeded();
+
+    // Confirm 5 canvases mount first.
+    await expect(section.locator("canvas")).toHaveCount(5, { timeout: 5000 });
+
+    // Scroll the second photo slide into the center of the viewport so the
+    // IO trigger (rootMargin "-44% 0px -44% 0px") fires.
+    const targetSlide = section.locator("[data-photo-slide]").nth(1);
+    const handle = await targetSlide.elementHandle();
+    if (handle) {
+      await page.evaluate((el) => {
+        el.scrollIntoView({ behavior: "instant", block: "center" });
+      }, handle);
+    } else {
+      await targetSlide.scrollIntoViewIfNeeded();
+    }
+
+    // The corresponding canvas (nth(1) — same order as slides) should
+    // transition from opacity 0 to > 0 as the ink mask reveals.
+    const canvas = section.locator("canvas").nth(1);
+    await expect
+      .poll(
+        () =>
+          canvas.evaluate((c) => {
+            const style = getComputedStyle(c);
+            return Number.parseFloat(style.opacity ?? "0");
+          }),
+        { timeout: 5000, intervals: [100, 200, 500] },
+      )
+      .toBeGreaterThan(0);
   });
 });

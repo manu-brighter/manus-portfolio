@@ -6,10 +6,6 @@ import { Link } from "@/i18n/navigation";
 type ExperimentChromeProps = {
   i18nKey: "inkDropStudio" | "typeAsFluid";
   children: React.ReactNode;
-  /** Optional slot rendered top-right next to the back link.
-   *  Used for in-experiment controls that must live in chrome rather
-   *  than overlay the canvas (e.g. Type-as-Fluid's input field). */
-  toolbar?: React.ReactNode;
 };
 
 /**
@@ -17,14 +13,13 @@ type ExperimentChromeProps = {
  *
  * Fixed-position frame on top of the experiment's full-screen canvas:
  *   - top-left: back link + experiment title (Riso stamp style)
- *   - top-right: optional toolbar slot
  *   - bottom-left: 1-line caption
  *
  * The chrome itself is `pointer-events: none` outside its actual
  * controls, so the experiment canvas stays interactive everywhere
  * except the small badges.
  */
-export function ExperimentChrome({ i18nKey, children, toolbar }: ExperimentChromeProps) {
+export function ExperimentChrome({ i18nKey, children }: ExperimentChromeProps) {
   const t = useTranslations(`playground.experiments.${i18nKey}`);
   const tCommon = useTranslations("playground.shell");
 
@@ -41,7 +36,7 @@ export function ExperimentChrome({ i18nKey, children, toolbar }: ExperimentChrom
             Caption renders inline below the title on mobile to free
             the bottom edge for experiment-specific controls (Ink Drop's
             ButtonRow, Type-as-Fluid's input bar). */}
-        <div className="container-page absolute top-20 left-0 right-0 flex items-start justify-between gap-6 md:top-6">
+        <div className="container-page absolute top-20 left-0 right-0 md:top-6">
           <div className="pointer-events-auto flex flex-col gap-1">
             <Link
               href="/#playground"
@@ -50,12 +45,9 @@ export function ExperimentChrome({ i18nKey, children, toolbar }: ExperimentChrom
               <span aria-hidden="true">←</span>
               <span>{tCommon("back")}</span>
             </Link>
-            <h1 className="type-h2 mt-3 text-ink" style={{ fontStyle: "italic" }}>
-              {t("title")}
-            </h1>
+            <h1 className="type-h2 mt-3 italic text-ink">{t("title")}</h1>
             <p className="type-body-sm mt-3 max-w-[36ch] text-ink-soft md:hidden">{t("caption")}</p>
           </div>
-          {toolbar ? <div className="pointer-events-auto">{toolbar}</div> : null}
         </div>
 
         {/* Bottom-left: caption — desktop only. Mobile renders the

@@ -3,16 +3,15 @@
 import gsap from "gsap";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
+import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { isLoaderComplete, markLoaderComplete } from "@/lib/loaderSession";
+import { SPOT_HEX } from "@/lib/palette";
 
-/** Module-level flag so FluidSim + OverprintReveal can check if loader
- *  already fired in this session. Survives component re-mounts; only
- *  resets on full page reload (sessionStorage handles cross-mount
- *  persistence inside the same tab session — see useEffect below). */
-let loaderFired = false;
-export function isLoaderComplete(): boolean {
-  return loaderFired;
-}
+// Re-exported so existing consumers that imported `isLoaderComplete`
+// from this file keep working. The canonical implementation lives in
+// `@/lib/loaderSession` together with the typed pub/sub.
+export { isLoaderComplete };
 
 /** sessionStorage key — survives locale switches that re-mount the
  *  whole locale layout subtree (Next swaps `<html lang>` between /de
@@ -27,8 +26,9 @@ const LOADER_SESSION_KEY = "manuelheller:loader-shown";
  * that pulses through the 4 Riso spot colors, shows the brand mark,
  * then expands to fill the viewport before fading away.
  *
- * On exit, dispatches a `loader-complete` CustomEvent so FluidSim
- * can trigger ambient motion immediately.
+ * On exit, calls `markLoaderComplete()` (`@/lib/loaderSession`) so
+ * FluidSim, SceneProvider, OverprintReveal and FadeIn can trigger
+ * their ambient/reveal cadences immediately.
  */
 export function Loader() {
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -37,19 +37,15 @@ export function Loader() {
   const [visible, setVisible] = useState(true);
   // Grain SVG-filter is expensive on mobile GPUs (feTurbulence runs per
   // pixel every paint). Drop it on coarse-pointer devices to keep the
-  // first-paint window from stuttering. Initial state must match SSR
-  // (`true` — grain ships in the static HTML), so the effect below
-  // flips it after hydration on coarse-pointer. One-frame grain flash
-  // on mobile fresh-load; the loader is on screen for ~2.4s anyway.
-  const [grainOn, setGrainOn] = useState(true);
+  // first-paint window from stuttering. useCoarsePointer's
+  // useSyncExternalStore returns `false` on SSR, so the static HTML
+  // ships with grainOn=true; the post-hydration tick flips it on
+  // mobile. One-frame grain flash on mobile fresh-load; the loader is
+  // on screen for ~2.4s anyway.
+  const isCoarse = useCoarsePointer();
+  const grainOn = !isCoarse;
   const reducedMotion = useReducedMotion();
   const t = useTranslations("loader");
-
-  useEffect(() => {
-    if (window.matchMedia("(pointer: coarse)").matches) {
-      setGrainOn(false);
-    }
-  }, []);
 
   useEffect(() => {
     // Locale switches re-mount this component (Next reconciles a new
@@ -74,11 +70,10 @@ export function Loader() {
       }
     }
     if (alreadyShown) {
-      loaderFired = true;
       setVisible(false);
-      // Dispatch immediately so OverprintReveal's loader gate clears
-      // and the Hero animation runs on this navigation too.
-      window.dispatchEvent(new CustomEvent("loader-complete"));
+      // Mark immediately so OverprintReveal's loader gate clears and
+      // the Hero animation runs on this navigation too.
+      markLoaderComplete();
       return;
     }
 
@@ -88,31 +83,27 @@ export function Loader() {
     if (!overlay || !drop || !text) return;
 
     const onComplete = () => {
-      loaderFired = true;
       try {
         sessionStorage.setItem(LOADER_SESSION_KEY, "1");
       } catch {
         // ignore — flag is a perf optimisation, not load-bearing.
       }
       setVisible(false);
-      window.dispatchEvent(new CustomEvent("loader-complete"));
+      markLoaderComplete();
     };
 
     // Reduced motion: brief hold, then simple fade
     if (reducedMotion) {
-      const timer = setTimeout(() => {
+      const timer = window.setTimeout(() => {
         gsap.to(overlay, { opacity: 0, duration: 0.3, onComplete });
       }, 600);
-      return () => clearTimeout(timer);
+      return () => window.clearTimeout(timer);
     }
 
-    // Spot color hex values — must stay in sync with globals.css @theme.
-    // GSAP animates backgroundColor directly; CSS custom properties can't
-    // be interpolated by GSAP without a plugin.
-    const rose = "#ff6ba0";
-    const amber = "#ffc474";
-    const mint = "#7ce8c4";
-    const violet = "#b89aff";
+    // Spot color hex values from `@/lib/palette` — GSAP animates
+    // backgroundColor directly and CSS custom properties can't be
+    // interpolated without a plugin, so we feed the raw hex.
+    const { rose, amber, mint, violet } = SPOT_HEX;
 
     const tl = gsap.timeline({ onComplete });
 
@@ -168,6 +159,9 @@ export function Loader() {
       role="status"
       aria-live="polite"
       aria-label={t("srStatus")}
+      // data-testid consumed by E2E tests (legal-nav, case-study-lightbox)
+      // to await loader completion deterministically instead of waitForTimeout.
+      data-testid="loader-overlay"
       className="fixed inset-0 z-[9999] flex items-center justify-center bg-paper"
     >
       {/* SVG grain filter — mimics the sim's paper texture. Skipped on

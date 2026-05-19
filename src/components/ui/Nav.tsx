@@ -2,13 +2,14 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { type MouseEvent, useEffect, useRef, useState } from "react";
-import { useViewTransition } from "@/components/motion/useViewTransition";
 import { NavMobileMenu } from "@/components/ui/NavMobileMenu";
 import { useLenis } from "@/hooks/useLenis";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useViewTransition } from "@/hooks/useViewTransition";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { routing } from "@/i18n/routing";
+import { SECTIONS } from "@/lib/content/sections";
 
 /**
  * Top navigation — Phase 2 (i18n wired).
@@ -23,39 +24,23 @@ import { routing } from "@/i18n/routing";
  * `NextIntlClientProvider` which wraps the locale layout.
  */
 
-// Order matches the on-page section flow in [locale]/page.tsx:
-//   Hero → About → Skills → Work → CaseStudy → Photography → Playground → Contact
-// Hero is meta (not anchored). CaseStudy is reachable from the Work card,
-// kept out of the desktop bar to avoid 7+ items but surfaced in the mobile
-// menu for completeness.
-const NAV_ITEMS_DESKTOP = [
-  { href: "#about", key: "about" },
-  { href: "#skills", key: "skills" },
-  { href: "#work", key: "work" },
-  { href: "#photography", key: "photography" },
-  { href: "#playground", key: "playground" },
-  { href: "#contact", key: "contact" },
-] as const;
+// Derived from `SECTIONS` (`@/lib/content/sections`). Hero / About-
+// Objects (`navLabelKey === null`) are filtered out of both nav lists;
+// Case Study is mobile-only by `showInDesktopNav: false`. The order
+// matches the on-page section flow in [locale]/page.tsx — keep both
+// the SECTIONS list and that file in sync.
+const NAV_ITEMS_DESKTOP = SECTIONS.filter(
+  (s): s is typeof s & { navLabelKey: string } => s.showInDesktopNav && s.navLabelKey !== null,
+).map((s) => ({ href: `#${s.id}`, key: s.navLabelKey }));
 
-export const NAV_ITEMS_MOBILE = [
-  { href: "#about", key: "about" },
-  { href: "#skills", key: "skills" },
-  { href: "#work", key: "work" },
-  { href: "#case-study", key: "casestudy" },
-  { href: "#photography", key: "photography" },
-  { href: "#playground", key: "playground" },
-  { href: "#contact", key: "contact" },
-] as const;
+const NAV_ITEMS_MOBILE = SECTIONS.filter(
+  (s): s is typeof s & { navLabelKey: string } => s.showInMobileNav && s.navLabelKey !== null,
+).map((s) => ({ href: `#${s.id}`, key: s.navLabelKey }));
 
-const SECTION_IDS = [
-  "about",
-  "skills",
-  "work",
-  "case-study",
-  "photography",
-  "playground",
-  "contact",
-];
+// Scroll-spy observes every section that any nav row points at.
+const SECTION_IDS = SECTIONS.filter((s) => s.showInDesktopNav || s.showInMobileNav).map(
+  (s) => s.id,
+);
 
 export function Nav() {
   const t = useTranslations();
@@ -172,9 +157,19 @@ export function Nav() {
 
     const observer = new IntersectionObserver(
       (entries) => {
+        // Prefer the section with the highest intersectionRatio (i.e.
+        // the one most visibly inside the active band). Tiebreaker:
+        // topmost in viewport for stable order when two adjacent
+        // sections both fill the band. Matches ScrollProgress for
+        // handoff consistency.
         const visible = entries
           .filter((e) => e.isIntersecting)
-          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+          .sort((a, b) => {
+            if (b.intersectionRatio !== a.intersectionRatio) {
+              return b.intersectionRatio - a.intersectionRatio;
+            }
+            return a.boundingClientRect.top - b.boundingClientRect.top;
+          });
         if (visible[0]) setActiveSection(visible[0].target.id);
       },
       { rootMargin: "-20% 0px -70% 0px", threshold: 0 },
@@ -210,7 +205,7 @@ export function Nav() {
                   <a
                     href={buildHref(item.href)}
                     onClick={(e) => handleAnchor(e, item.href)}
-                    aria-current={isActive ? "true" : undefined}
+                    aria-current={isActive ? "location" : undefined}
                     className={`type-label relative inline-block transition-colors active:scale-[0.94] active:duration-100 after:pointer-events-none after:absolute after:bottom-[-3px] after:left-0 after:h-[1.5px] after:w-full after:origin-left after:bg-ink after:transition-transform after:duration-300 after:ease-out after:content-[''] hover:after:scale-x-100 ${
                       isActive
                         ? "text-ink after:scale-x-100"

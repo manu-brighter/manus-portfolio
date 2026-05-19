@@ -38,3 +38,33 @@ test.describe("smoke — root redirect", () => {
     expect(lang ?? "", "html[lang] must match BCP 47 pattern").toMatch(/^[a-z]{2,3}(-[A-Z]{2})?$/);
   });
 });
+
+// F-testing-coverage-4: 404 page smoke assertions.
+// The 404 page has its own <html lang="de"> shell (no locale layout),
+// a <h1> with the "lost" message, and locale-switch links so visitors
+// can navigate home in their preferred language.
+test.describe("smoke — 404 page", () => {
+  test("renders a visible h1", async ({ page }) => {
+    await page.goto("/this-does-not-exist");
+    await expect(page.locator("h1")).toBeVisible();
+  });
+
+  test("html[lang] is hardcoded to de (documented constraint)", async ({ page }) => {
+    await page.goto("/this-does-not-exist");
+    // CLAUDE.md: "404 own <html lang='de'> hardcoded; noindex." This
+    // test pins that contract so a future locale-variable change is
+    // caught immediately.
+    const lang = await page.locator("html").getAttribute("lang");
+    expect(lang).toBe("de");
+  });
+
+  test("contains locale home links for all 4 locales", async ({ page }) => {
+    await page.goto("/this-does-not-exist");
+    for (const locale of ["de", "en", "fr", "it"] as const) {
+      await expect(
+        page.locator(`a[href="/${locale}/"]`),
+        `locale link for /${locale}/ must exist`,
+      ).toHaveCount(1);
+    }
+  });
+});

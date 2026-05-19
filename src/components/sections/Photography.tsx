@@ -100,14 +100,51 @@ const SLIDES: readonly [Slide, Slide, Slide, Slide, Slide] = [
 ];
 
 /**
- * Distance (as a fraction of viewport height) within which the photo's
- * vertical centre must land relative to the viewport's centre to trigger
- * the reveal. ~12% gives enough hysteresis that natural scroll always
- * fires within a single rAF tick of the photo passing through centre,
- * but tight enough that "edge peek" or "just-scrolled-past" don't
- * trigger early.
+ * Reveal trigger band: the photo fires its ink-dissolve once its centre
+ * lands inside the central viewport strip. `rootMargin: "-44% 0px -44% 0px"`
+ * + `threshold: 0` gives us a 12vh-tall active band centred on the
+ * viewport — same hysteresis as the previous rAF-throttled scroll
+ * listener, but routed through a single shared IntersectionObserver so
+ * the 5 PhotoFrame instances no longer each register their own
+ * window-scroll listener (5x rAF coalescing → 1x browser-managed IO).
  */
-const CENTER_PROXIMITY_FRACTION = 0.12;
+const REVEAL_OBSERVER_OPTIONS: IntersectionObserverInit = {
+  rootMargin: "-44% 0px -44% 0px",
+  threshold: 0,
+};
+
+/**
+ * Module-singleton observer + element->callback map. Lives at module
+ * scope (not inside a hook) so all PhotoFrame instances on the page
+ * share the same browser-side observer — when the page mounts 5
+ * frames, we hit `IntersectionObserver` once, not 5x. Each frame's
+ * callback self-unsubscribes after it fires (one-shot reveal).
+ */
+type RevealCallback = () => void;
+let revealObserver: IntersectionObserver | null = null;
+const revealCallbacks = new Map<Element, RevealCallback>();
+
+function getRevealObserver(): IntersectionObserver {
+  if (revealObserver) return revealObserver;
+  revealObserver = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      const cb = revealCallbacks.get(entry.target);
+      if (cb) {
+        revealCallbacks.delete(entry.target);
+        revealObserver?.unobserve(entry.target);
+        cb();
+      }
+    }
+    // Drop the singleton once nobody's watching — lets GC collect the
+    // observer if the user navigates away from /photography and back.
+    if (revealCallbacks.size === 0 && revealObserver) {
+      revealObserver.disconnect();
+      revealObserver = null;
+    }
+  }, REVEAL_OBSERVER_OPTIONS);
+  return revealObserver;
+}
 
 function PhotoFrame({ slide, index, total }: { slide: Slide; index: number; total: number }) {
   const t = useTranslations("photography");
@@ -116,42 +153,24 @@ function PhotoFrame({ slide, index, total }: { slide: Slide; index: number; tota
   const lenis = useLenis();
   const reducedMotion = useReducedMotion();
 
-  // Reveal when the photo's vertical centre crosses the viewport centre
-  // (within CENTER_PROXIMITY_FRACTION × viewport-height). Replaces the
-  // earlier rootMargin-shrunk IO that fired on edge entry — Manuel
-  // explicitly wanted the reveal to land when the photo IS the focus,
-  // not when it first peeks in.
+  // Subscribe this frame to the shared module-level observer. The
+  // earlier per-frame `window.addEventListener("scroll", ...)` +
+  // rAF pattern allocated one listener per PhotoFrame; with 5 frames
+  // that was 5 scroll listeners each spinning their own rAF chain on
+  // every scroll event. One shared IO replaces all of it.
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    let frame = 0;
-    let triggered = false;
-
-    const check = () => {
-      frame = 0;
-      if (triggered) return;
-      const rect = el.getBoundingClientRect();
-      const photoCenter = rect.top + rect.height / 2;
-      const viewportCenter = window.innerHeight / 2;
-      if (Math.abs(photoCenter - viewportCenter) < window.innerHeight * CENTER_PROXIMITY_FRACTION) {
-        triggered = true;
-        setReveal(true);
-      }
-    };
-
-    const onScroll = () => {
-      if (frame !== 0) return;
-      frame = requestAnimationFrame(check);
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    // Initial check covers the case where the photo is already centred
-    // on first paint (deep-link to #photography or short viewport).
-    check();
+    const observer = getRevealObserver();
+    revealCallbacks.set(el, () => setReveal(true));
+    observer.observe(el);
 
     return () => {
-      if (frame !== 0) cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", onScroll);
+      revealCallbacks.delete(el);
+      observer.unobserve(el);
+      // Note: we don't disconnect the singleton here — other PhotoFrames
+      // may still be subscribed. The observer self-cleans inside its
+      // callback when the map empties.
     };
   }, []);
 
@@ -217,18 +236,33 @@ function PhotoFrame({ slide, index, total }: { slide: Slide; index: number; tota
         <source type="image/avif" srcSet={avif} sizes={sizes} />
         <source type="image/webp" srcSet={webp} sizes={sizes} />
         <img
+          // Fallback <img> width/height: gives the browser a layout
+          // hint before the picture resolves, so the figure reserves
+          // the right slot height. The figure also sets
+          // `style={{ aspectRatio }}` on its outer element (see below),
+          // which is the primary CLS guard; these intrinsic dims back
+          // it up for older UAs that don't honor `aspect-ratio` on the
+          // outer element until the image resolves.
           src={jpg}
           alt={t(`slides.${slide.altKey}.alt`)}
           loading="lazy"
           decoding="async"
+          width={slide.widths[1]}
+          height={Math.round((slide.widths[1] ?? slide.widths[0] ?? 1200) / slide.aspect)}
           className="block h-full w-full object-cover shadow-[6px_6px_0_var(--color-ink)] outline outline-[1.5px] outline-ink"
         />
       </picture>
       <PhotoInkMask spotColor={slide.spot} reveal={reveal} className="z-10" />
 
-      {/* Mono-stempel caption — ink-revealed in parallel with the photo */}
+      {/* Mono-stempel caption — ink-revealed in parallel with the photo.
+          `transition-all` was painting every animatable property on
+          this element (incl. the unintended pointer-events / colour
+          transitions from inherited utility resets); scoping to
+          opacity+transform only and aligning the easing with our token
+          stack (ease.expo, 560ms) makes the caption land with the same
+          riso cadence as the rest of the section. */}
       <figcaption
-        className={`type-label absolute left-0 z-20 mt-3 flex flex-wrap items-center gap-3 text-ink-soft transition-all duration-700 ease-out ${
+        className={`type-label absolute left-0 z-20 mt-3 flex flex-wrap items-center gap-3 text-ink-soft transition-[opacity,transform] duration-[560ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
           reveal ? "translate-x-0 opacity-100" : "-translate-x-4 opacity-0"
         }`}
         style={{ top: "100%" }}
@@ -262,11 +296,7 @@ export function Photography() {
             <span aria-hidden="true" className="inline-block size-2 bg-spot-amber" />
             {t("eyebrow")}
           </p>
-          <h2
-            id="photography-heading"
-            className="type-h1 mt-4 text-ink"
-            style={{ fontStyle: "italic" }}
-          >
+          <h2 id="photography-heading" className="type-h1 mt-4 italic text-ink">
             {t("headline")}
           </h2>
           <p className="type-body-lg mt-6 max-w-[55ch] text-ink-soft">{t("lede")}</p>
@@ -275,14 +305,19 @@ export function Photography() {
       </header>
 
       {/* Slot 1 · Egret · full-bleed */}
-      <div className="container-page mb-32 md:mb-40">
+      {/* Bottom margins bumped to mb-36/md:mb-44 (was mb-32/mb-40) so
+          the absolute-positioned figcaption (top: 100%) has breathing
+          room before the next slot — without this the next photo's
+          frame border could touch the caption baseline on shorter
+          viewports. Per F-frontend-design-4. */}
+      <div className="container-page mb-36 md:mb-44">
         <div className="mx-auto w-full max-w-[min(72rem,92vw)]">
           <PhotoFrame slide={SLIDES[0]} index={0} total={SLIDES.length} />
         </div>
       </div>
 
       {/* Slot 2 · Koenigsegg · right-60% with left meta-text */}
-      <div className="container-page grid-12 mb-32 items-center gap-y-8 md:mb-40">
+      <div className="container-page grid-12 mb-36 items-center gap-y-8 md:mb-44">
         <div className="col-span-12 md:col-span-4 md:pr-8">
           {/* Hidden on mobile: the photo's own figcaption already
               shows "02 / 5" — duplicating the index above the title
@@ -291,9 +326,7 @@ export function Photography() {
           <p className="type-label-stamp mb-6 hidden md:inline-flex">
             {String(2).padStart(2, "0")} / {SLIDES.length}
           </p>
-          <h3 className="type-h2 text-ink" style={{ fontStyle: "italic" }}>
-            {t(`slides.${SLIDES[1].altKey}.title`)}
-          </h3>
+          <h3 className="type-h2 italic text-ink">{t(`slides.${SLIDES[1].altKey}.title`)}</h3>
           <p className="type-body mt-4 text-ink-soft">{t(`slides.${SLIDES[1].altKey}.body`)}</p>
         </div>
         <div className="col-span-12 md:col-span-7 md:col-start-6">
@@ -302,14 +335,14 @@ export function Photography() {
       </div>
 
       {/* Slot 3 · Panorama · full-bleed thin spread */}
-      <div className="-mx-[max(0px,calc((100vw-100%)/2))] mb-32 md:mb-40">
+      <div className="-mx-[max(0px,calc((100vw-100%)/2))] mb-36 md:mb-44">
         <div className="mx-auto w-full">
           <PhotoFrame slide={SLIDES[2]} index={2} total={SLIDES.length} />
         </div>
       </div>
 
       {/* Slot 4 · Tree-Lake · left-70% with right meta-text */}
-      <div className="container-page grid-12 mb-32 items-center gap-y-8 md:mb-40">
+      <div className="container-page grid-12 mb-36 items-center gap-y-8 md:mb-44">
         <div className="col-span-12 md:col-span-7">
           <PhotoFrame slide={SLIDES[3]} index={3} total={SLIDES.length} />
         </div>
@@ -319,9 +352,7 @@ export function Photography() {
           <p className="type-label-stamp mb-6 hidden md:inline-flex">
             {String(4).padStart(2, "0")} / {SLIDES.length}
           </p>
-          <h3 className="type-h2 text-ink" style={{ fontStyle: "italic" }}>
-            {t(`slides.${SLIDES[3].altKey}.title`)}
-          </h3>
+          <h3 className="type-h2 italic text-ink">{t(`slides.${SLIDES[3].altKey}.title`)}</h3>
           <p className="type-body mt-4 text-ink-soft">{t(`slides.${SLIDES[3].altKey}.body`)}</p>
         </div>
       </div>
@@ -346,9 +377,6 @@ export function Photography() {
               ↗
             </span>
           </a>
-          {t("ctaCaption") ? (
-            <p className="mt-3 type-body-sm text-ink-muted">{t("ctaCaption")}</p>
-          ) : null}
         </div>
       </div>
     </section>

@@ -1,8 +1,14 @@
 import "./globals.css";
 import "@fontsource/instrument-serif/400-italic.css";
 import "@fontsource/instrument-serif/400.css";
-import "@fontsource-variable/inter";
-import "@fontsource-variable/jetbrains-mono";
+// Subset to wght-only (drop italic axis + multi-script @font-face entries).
+// The 4 locales (de/en/fr/it) only need Latin + Latin-ext; the default
+// `@fontsource-variable/inter` entry pulls in cyrillic, greek, vietnamese
+// etc. via 9 @font-face declarations. `/wght.css` ships a single
+// variable-weight Latin/Latin-ext stylesheet — saves measurable CSS
+// payload + parser time on first paint.
+import "@fontsource-variable/inter/wght.css";
+import "@fontsource-variable/jetbrains-mono/wght.css";
 
 import type { Metadata } from "next";
 import type { ReactNode } from "react";

@@ -11,10 +11,12 @@ import {
   useRef,
   useState,
 } from "react";
+import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { Link, useRouter } from "@/i18n/navigation";
-import type { ExperimentSlug, SpotColor } from "@/lib/content/playground";
+import type { ExperimentSlug } from "@/lib/content/playground";
 import { GROW_MS, useInkWipeStore } from "@/lib/inkWipeStore";
+import { SPOT_BG_CLASS, SPOT_CSS_VAR, type SpotColor } from "@/lib/palette";
 
 type PlaygroundCardProps = {
   slug: ExperimentSlug;
@@ -29,22 +31,11 @@ type PlaygroundCardProps = {
   LiveSim?: ComponentType<{ paused: boolean }>;
 };
 
-// Tailwind v4's class scanner can't see runtime-built class names, so
-// dynamic spot bg-classes come from a static map. The shadow uses a
-// per-card `--card-spot` CSS variable so :hover / :focus-visible can
-// drive the shadow without imperative handlers.
-const SPOT_BG_CLASS: Record<SpotColor, string> = {
-  rose: "bg-spot-rose",
-  amber: "bg-spot-amber",
-  mint: "bg-spot-mint",
-  violet: "bg-spot-violet",
-};
-const SPOT_CSS_VAR: Record<SpotColor, string> = {
-  rose: "var(--color-spot-rose)",
-  amber: "var(--color-spot-amber)",
-  mint: "var(--color-spot-mint)",
-  violet: "var(--color-spot-violet)",
-};
+// `SPOT_BG_CLASS` + `SPOT_CSS_VAR` come from `@/lib/palette`. The shadow
+// uses a per-card `--card-spot` CSS variable so :hover / :focus-visible
+// can drive it without imperative handlers. Tailwind v4's class scanner
+// can't see runtime-built names, so the bg-class lookup goes through
+// the static map.
 
 /**
  * Playground card on the home page.
@@ -79,9 +70,7 @@ export function PlaygroundCard({ slug, i18nKey, cardSpot, visual, LiveSim }: Pla
   // Coarse-pointer: hover state is driven by viewport visibility instead
   // of mouseenter/leave. Card entering viewport activates + unpauses the
   // mini-sim; leaving pauses it (orchestrator state preserved).
-  const [isCoarse] = useState(
-    () => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches,
-  );
+  const isCoarse = useCoarsePointer();
 
   useEffect(() => {
     if (!isCoarse || reducedMotion) return;
@@ -154,12 +143,17 @@ export function PlaygroundCard({ slug, i18nKey, cardSpot, visual, LiveSim }: Pla
     startGrow({ x, y, color: cardSpot });
     navTimerRef.current = window.setTimeout(
       () => {
-        // Revert ALL ScrollTrigger pin spacers BEFORE the route change
+        // Revert ScrollTrigger pin spacers BEFORE the route change
         // unmounts the home page. Otherwise React's removeChild fails
         // because pin-spacer divs are now between <main> and the pinned
         // <section>, so the section is no longer a direct child of main.
-        // kill(true) restores the original DOM hierarchy.
-        for (const t of ScrollTrigger.getAll()) t.kill(true);
+        // kill(true) restores the original DOM hierarchy. Filter to
+        // pin-only triggers — the previous unscoped kill also tore
+        // down GSAP's hidden internal triggers that have nothing to do
+        // with the unmount race.
+        for (const t of ScrollTrigger.getAll()) {
+          if (t.vars.pin === true) t.kill(true);
+        }
         router.push(`/playground/${slug}`);
         navTimerRef.current = null;
       },
@@ -218,16 +212,14 @@ export function PlaygroundCard({ slug, i18nKey, cardSpot, visual, LiveSim }: Pla
           <span aria-hidden="true" className={`inline-block size-2 ${SPOT_BG_CLASS[cardSpot]}`} />
           <span>{t("cardKicker")}</span>
         </p>
-        <h3 className="type-h2 text-ink" style={{ fontStyle: "italic" }}>
-          {t("cardTitle")}
-        </h3>
+        <h3 className="type-h2 italic text-ink">{t("cardTitle")}</h3>
         <p className="type-body max-w-[42ch] text-ink-soft">{t("cardBody")}</p>
         <p
           className="type-label-stamp mt-1 inline-flex items-baseline gap-2 text-ink transition-transform group-hover:translate-x-1 group-focus-visible:translate-x-1"
           aria-hidden="true"
         >
           <span>{tCommon("openLabel")}</span>
-          <span>→</span>
+          <span aria-hidden="true">→</span>
         </p>
       </div>
     </Link>

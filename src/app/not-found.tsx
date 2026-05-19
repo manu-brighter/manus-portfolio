@@ -1,4 +1,5 @@
 import "./globals.css";
+// Mirrors root layout — 404 owns its own document shell, fonts must be imported here too
 import "@fontsource/instrument-serif/400-italic.css";
 import "@fontsource/instrument-serif/400.css";
 import "@fontsource-variable/inter";
@@ -6,16 +7,27 @@ import "@fontsource-variable/jetbrains-mono";
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import { routing } from "@/i18n/routing";
 import { NotFoundAnimation } from "./not-found-animation";
 
-export const metadata: Metadata = {
-  title: "404 — Seite nicht gefunden",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  // Mirror the body-string strategy: pull from `notFound` namespace at
+  // `routing.defaultLocale`. The 404 page's <html lang> is hardcoded to
+  // the default locale (no [locale] segment can run on a not-found URL
+  // by definition), so the title follows the same source of truth.
+  const t = await getTranslations({ locale: routing.defaultLocale, namespace: "notFound" });
+  return {
+    title: t("metaTitle"),
+    robots: { index: false, follow: false },
+  };
+}
 
-export default function NotFound() {
+export default async function NotFound() {
+  const t = await getTranslations({ locale: routing.defaultLocale, namespace: "notFound" });
+
   return (
-    <html lang="de">
+    <html lang={routing.defaultLocale}>
       <body
         className="flex min-h-dvh flex-col items-center justify-center bg-paper text-ink"
         suppressHydrationWarning
@@ -25,37 +37,32 @@ export default function NotFound() {
           <NotFoundAnimation />
 
           <div className="space-y-4">
-            <h1 className="font-display text-[clamp(2rem,5vw,3.5rem)] text-ink italic leading-tight">
-              Diese Seite ist im Scrollen verloren gegangen.
-            </h1>
-            <p className="text-ink-soft text-lg">
-              Vielleicht ein Tippfehler? Vielleicht eine Seite, die nie da war? In jedem Fall — kein
-              Drama. Zurück zum Anfang:
-            </p>
+            <h1 className="type-h2 italic">{t("headline")}</h1>
+            <p className="type-body text-ink-soft">{t("body")}</p>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-3 font-mono text-xs uppercase tracking-[0.18em]">
+          <div className="flex flex-wrap justify-center gap-3">
             <Link
               href="/de/"
-              className="border-2 border-ink px-4 py-2 transition-colors hover:bg-ink hover:text-paper"
+              className="type-label-stamp transition-colors hover:bg-ink hover:text-paper-tint focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
             >
               Deutsch
             </Link>
             <Link
               href="/en/"
-              className="border-2 border-ink px-4 py-2 transition-colors hover:bg-ink hover:text-paper"
+              className="type-label-stamp transition-colors hover:bg-ink hover:text-paper-tint focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
             >
               English
             </Link>
             <Link
               href="/fr/"
-              className="border-2 border-ink px-4 py-2 transition-colors hover:bg-ink hover:text-paper"
+              className="type-label-stamp transition-colors hover:bg-ink hover:text-paper-tint focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
             >
               Français
             </Link>
             <Link
               href="/it/"
-              className="border-2 border-ink px-4 py-2 transition-colors hover:bg-ink hover:text-paper"
+              className="type-label-stamp transition-colors hover:bg-ink hover:text-paper-tint focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
             >
               Italiano
             </Link>

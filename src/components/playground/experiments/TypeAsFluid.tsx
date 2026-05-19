@@ -2,11 +2,12 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
-import { FluidOrchestrator, type PointerState } from "@/components/scene/FluidOrchestrator";
+import { useOrchestratorRAF } from "@/hooks/useOrchestratorRAF";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { TYPE_AS_FLUID_DEFAULTS } from "@/lib/content/playground";
-import { getTierConfig } from "@/lib/gpu";
-import { subscribe } from "@/lib/raf";
+import { FluidOrchestrator, type PointerState } from "@/lib/gl/fluidOrchestrator";
+import { capDPR, DPR_FULL, getTierConfig } from "@/lib/gpu";
+import { randomSpot } from "@/lib/palette";
 import { TextStamper } from "@/lib/textStamp";
 import { ExperimentChrome } from "../ExperimentChrome";
 
@@ -29,8 +30,6 @@ import { ExperimentChrome } from "../ExperimentChrome";
  *
  * Reduced motion: instant-fade replacement (no sim, no stamp pipeline).
  */
-
-const SPOT_KEYS = ["rose", "amber", "mint", "violet"] as const;
 
 export function TypeAsFluid() {
   const reducedMotion = useReducedMotion();
@@ -84,6 +83,17 @@ function TypeAsFluidCanvas() {
 
   // ---- Mount: build orchestrator + stamper ----
   useEffect(() => {
+    // Reset disposed flag on every mount — React 19 StrictMode in dev
+    // simulates unmount/remount, and useRef survives across the cycle.
+    // Without this reset, the second-mount's effect inherits
+    // disposedRef.current = true from the first-mount's cleanup, and
+    // every stampWord call (initial + on text change + button click)
+    // short-circuits via the disposedRef guard inside the timer
+    // callbacks. Net symptom: input typing + button click produce no
+    // visible fluid stamps. Production builds (no StrictMode double
+    // invoke) aren't affected, but the dev experience is broken.
+    disposedRef.current = false;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
     const gl = canvas.getContext("webgl2", {
@@ -94,7 +104,7 @@ function TypeAsFluidCanvas() {
     }) as WebGL2RenderingContext | null;
     if (!gl) return;
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = capDPR(DPR_FULL);
     canvas.width = Math.floor(window.innerWidth * dpr);
     canvas.height = Math.floor(window.innerHeight * dpr);
 
@@ -152,17 +162,21 @@ function TypeAsFluidCanvas() {
     stampWord(stamperRef.current, orchestrator, initial, stampTimersRef.current, disposedRef);
 
     const onResize = () => {
-      const ratio = Math.min(window.devicePixelRatio || 1, 2);
+      const ratio = capDPR(DPR_FULL);
       const w = Math.floor(window.innerWidth * ratio);
       const h = Math.floor(window.innerHeight * ratio);
       canvas.width = w;
       canvas.height = h;
       orchestrator.resize(w, h);
     };
-    window.addEventListener("resize", onResize);
+    // ResizeObserver on the canvas's parent so the sim adapts to
+    // container reflow rather than only viewport changes (parity with
+    // the mini-sims).
+    const ro = new ResizeObserver(onResize);
+    ro.observe(canvas.parentElement ?? canvas);
 
     return () => {
-      window.removeEventListener("resize", onResize);
+      ro.disconnect();
       // Flip disposed flag FIRST so any callback that's already
       // executing (race between clear + fire) early-returns instead
       // of touching disposed GL handles.
@@ -179,17 +193,7 @@ function TypeAsFluidCanvas() {
   }, []);
 
   // ---- RAF loop ----
-  useEffect(() => {
-    return subscribe((deltaMs, elapsedMs) => {
-      const orchestrator = orchestratorRef.current;
-      if (!orchestrator) return;
-      const dt = Math.min(deltaMs * 0.001, 0.033);
-      orchestrator.step(dt, elapsedMs, pointerRef.current);
-      pointerRef.current.dx = 0;
-      pointerRef.current.dy = 0;
-      pointerRef.current.moved = false;
-    }, 15);
-  }, []);
+  useOrchestratorRAF(orchestratorRef, pointerRef, 15);
 
   // ---- Document pointer wiring (hover trail only — no clicks) ----
   useEffect(() => {
@@ -231,22 +235,31 @@ function TypeAsFluidCanvas() {
     return () => window.clearTimeout(handle);
   }, [text]);
 
-  // ---- Idle re-stamp: every 5s after the last keystroke, refresh
-  // whichever word is currently most relevant. If the user has typed
-  // something into the input, the rotation re-stamps THAT word (in a
-  // fresh random Riso ink each time); otherwise pulls the next default
-  // from TYPE_AS_FLUID_DEFAULTS.
+  // ---- Idle re-stamp: 5s after the last keystroke (reset on every
+  // keystroke), refresh whichever word is currently most relevant. If
+  // the user has typed something, the rotation re-stamps THAT word (in
+  // a fresh random Riso ink each time); otherwise pulls the next
+  // default from TYPE_AS_FLUID_DEFAULTS.
   //
-  // Race protection: skip if a stamp-reveal is already in flight
-  // (stampTimersRef non-empty). Without this, the 5s interval could
-  // fire 4.75s into a typing-debounce reveal that itself runs ~2.45s,
-  // producing two overlapping 23-timer animations with cross-color
-  // bleed. The size check is cheap and exact.
+  // setTimeout + per-keystroke reset (vs the previous setInterval +
+  // inline elapsed-check) matches the documented intent: the comment
+  // for years claimed "every 5s after the last keystroke", but the
+  // interval-with-gate path could fire ~5s of one steady cadence
+  // regardless of typing rhythm. Now `text` change re-runs this
+  // effect, the cleanup clears the prior timer, and a new 5s window
+  // starts from the current keystroke.
+  //
+  // Race protection: skip the stamp if a stamp-reveal is already in
+  // flight (stampTimersRef non-empty). Without this, the typing-
+  // debounce reveal that runs ~2.45s could collide with the idle
+  // re-stamp and produce two overlapping 23-timer animations with
+  // cross-colour bleed.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `text` is the reset trigger — each keystroke re-runs the effect, the cleanup clears the prior timer, and a fresh 5s window starts. The effect body reads textRef so the rotation always sees the latest input even if it fires mid-typing.
   useEffect(() => {
-    const handle = window.setInterval(() => {
-      const sinceTyped = performance.now() - lastTypedAtRef.current;
-      if (lastTypedAtRef.current !== 0 && sinceTyped < 3000) return;
-      if (stampTimersRef.current.size > 0) return;
+    const timers = stampTimersRef.current;
+    const id = window.setTimeout(() => {
+      timers.delete(id);
+      if (timers.size > 0) return;
       const stamper = stamperRef.current;
       const orchestrator = orchestratorRef.current;
       if (!stamper || !orchestrator) return;
@@ -256,10 +269,14 @@ function TypeAsFluidCanvas() {
           : (TYPE_AS_FLUID_DEFAULTS.defaultWords[
               Math.floor(Math.random() * TYPE_AS_FLUID_DEFAULTS.defaultWords.length)
             ] ?? "MANUEL");
-      stampWord(stamper, orchestrator, word, stampTimersRef.current, disposedRef);
+      stampWord(stamper, orchestrator, word, timers, disposedRef);
     }, 5000);
-    return () => window.clearInterval(handle);
-  }, []);
+    timers.add(id);
+    return () => {
+      window.clearTimeout(id);
+      timers.delete(id);
+    };
+  }, [text]);
 
   return (
     <ExperimentChrome i18nKey="typeAsFluid">
@@ -287,8 +304,8 @@ function TypeAsFluidCanvas() {
             autoComplete="off"
             spellCheck={false}
             maxLength={24}
-            className="type-h2 flex-1 border-[1.5px] border-ink bg-paper px-4 py-3 text-center text-ink placeholder:text-ink-faint focus:outline-none focus:shadow-[3px_3px_0_var(--color-ink)] focus:-translate-x-[1px] focus:-translate-y-[1px] transition-[transform,box-shadow]"
-            style={{ fontStyle: "italic", letterSpacing: "0.05em" }}
+            className="type-h2 flex-1 border-[1.5px] border-ink bg-paper px-4 py-3 text-center text-ink italic placeholder:text-ink-muted focus-visible:outline-none focus-visible:shadow-[3px_3px_0_var(--color-ink)] focus-visible:-translate-x-[1px] focus-visible:-translate-y-[1px] transition-[transform,box-shadow]"
+            style={{ letterSpacing: "0.05em" }}
           />
           <button
             type="button"
@@ -313,10 +330,6 @@ function TypeAsFluidCanvas() {
       </div>
     </ExperimentChrome>
   );
-}
-
-function randomSpot(): "rose" | "amber" | "mint" | "violet" {
-  return SPOT_KEYS[Math.floor(Math.random() * SPOT_KEYS.length)] ?? "rose";
 }
 
 // Stamp-pipeline tunables — module-level so they're shared across all

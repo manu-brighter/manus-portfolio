@@ -86,7 +86,7 @@
       "family": "Heller,",
       "given": "Manuel."
     },
-    "tagline": "Manu's showcase craft portfolio",
+    "tagline": "Awwwards-inspired craft portfolio",
     "taglineSuffix": "booting …"
   },
   "about": {
@@ -496,6 +496,7 @@
     ]
   },
   "caseStudy": {
+    "sectionLabel": "Section 04 · Case Study",
     "headline": "From club chaos to a custom platform.",
     "hook": "All clubs fight the same mess: Excel sheets, static websites, file/info sharing, isolated tools. For Jogge di Balla I cleaned that up: a custom-built platform that covers everything from member management to a Twitch overlay. Vibecoded, self-hosted, over-engineered.",
     "context": {
@@ -651,8 +652,8 @@
     }
   },
   "photography": {
-    "sectionLabel": "05 / Photography",
-    "eyebrow": "Through the Lens",
+    "sectionLabel": "Section 05 · Photography",
+    "eyebrow": "Section 05 · Photography",
     "headline": "Through the Lens.",
     "lede": "Wildlife and cars are my two worlds. The first I chase solo through the jungles of Costa Rica or Thailand, the second usually find me closer to home. What connects them: patience, light, and that one moment that justifies the whole day.",
     "techLabel": "SONY α7 IV · 24–600mm · since 2023",
@@ -687,8 +688,8 @@
     }
   },
   "playground": {
-    "sectionLabel": "06 · PLAYGROUND",
-    "eyebrow": "OPEN WORKBENCH",
+    "sectionLabel": "Section 06 · Playground",
+    "eyebrow": "Section 06 · Playground",
     "headline": "Where the fluid sim gets to play.",
     "lede": "Two shader experiments, both anchored to the ink-and-print narrative. Pure craft demonstration, no product context.",
     "openLabel": "Open experiment",
@@ -757,8 +758,10 @@
         "label": "Send",
         "sending": "Sending …"
       },
+      "requiredNote": "All fields required",
       "status": {
-        "fallback": "Form delivery isn't wired up yet. Write me directly:",
+        "fromLabel": "From:",
+        "fallback": "Currently being set up — write me directly:",
         "error": "Didn't go through. Please email me directly.",
         "mailSubject": "Enquiry via manuelheller.dev"
       }
@@ -895,7 +898,6 @@
     "stamp": "Error 404",
     "headline": "This page got lost in the fluid.",
     "body": "The URL doesn't exist. Either a typo, an old link, or the ink swallowed it. Both are possible.",
-    "backHome": "Back to home",
-    "backWork": "See work"
+    "backHome": "Back to home"
   }
 }

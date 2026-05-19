@@ -1,4 +1,6 @@
 import { createNavigation } from "next-intl/navigation";
 import { routing } from "./routing";
 
-export const { Link, redirect, usePathname, useRouter, getPathname } = createNavigation(routing);
+// If you need server-side redirect, the static-export target precludes it.
+// Use a client-side router push or rethink the route.
+export const { Link, usePathname, useRouter } = createNavigation(routing);

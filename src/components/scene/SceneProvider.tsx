@@ -1,14 +1,15 @@
 "use client";
 
 import { Component, createContext, type ReactNode, useContext, useEffect, useState } from "react";
+import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useGPUCapability } from "@/hooks/useGPUCapability";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import type { GPUTier, TierConfig } from "@/lib/gpu";
-import { useSceneVisibility } from "@/lib/sceneVisibility";
-import { isLoaderComplete } from "../ui/Loader";
+import { isLoaderComplete, subscribeToLoaderComplete } from "@/lib/loaderSession";
+import { useSceneVisibilityStore } from "@/lib/sceneVisibilityStore";
 import { AmbientVideo } from "./AmbientVideo";
-import { SceneCanvas } from "./Canvas";
 import { FluidSim } from "./FluidSim";
+import { SceneCanvas } from "./SceneCanvas";
 import { StaticFallback } from "./StaticFallback";
 
 type SceneContextValue = {
@@ -26,12 +27,15 @@ export function useScene() {
 }
 
 function probeWebGL2(): boolean {
+  // The detached probe canvas is GC'd naturally once `supported` is
+  // recorded. Don't call `WEBGL_lose_context.loseContext()` here — the
+  // documented StrictMode trap (see `.claude/CLAUDE.md` "Never do")
+  // is that a lost-context canvas surfaces a dead context on the next
+  // `getContext()`, which silently fails every shader compile from
+  // the React re-mount onward.
   try {
     const canvas = document.createElement("canvas");
     const gl = canvas.getContext("webgl2");
-    if (gl) {
-      gl.getExtension("WEBGL_lose_context")?.loseContext();
-    }
     return gl !== null;
   } catch {
     return false;
@@ -54,6 +58,11 @@ class SceneErrorBoundary extends Component<EBProps, EBState> {
   static getDerivedStateFromError(): EBState {
     return { hasError: true };
   }
+  componentDidCatch(error: Error, info: React.ErrorInfo): void {
+    // biome-ignore lint/suspicious/noConsole: boundary catch is a real-user signal
+    console.error("[SceneErrorBoundary]", error, info);
+    // When Sentry is wired up: Sentry.captureException(error, { extra: info });
+  }
   render() {
     return this.state.hasError ? this.props.fallback : this.props.children;
   }
@@ -70,7 +79,7 @@ export function SceneProvider({ children }: SceneProviderProps) {
   // Playground experiment routes flip this to true so the root Canvas
   // unmounts and a per-experiment WebGL context can own the screen
   // without competing for GPU time. Stays false on the home long-scroll.
-  const sceneHidden = useSceneVisibility((s) => s.hidden);
+  const sceneHidden = useSceneVisibilityStore((s) => s.hidden);
 
   // Universal SceneCanvas defer: the WebGL2 context creation, 9 shader
   // program compilations, FBO allocation, and the first per-frame
@@ -96,26 +105,20 @@ export function SceneProvider({ children }: SceneProviderProps) {
   // compositor which handles scroll without cull. Trade-off is
   // mobile loses pointer-driven sim interactivity, but that was
   // already disabled on coarse-pointer per earlier UX decisions.
-  // Initial state must match SSR (false — no window). The effect
-  // below flips it on mount; one-frame mismatch is invisible since
-  // the whole scene is gated on `canvasMounted` for the deferred
-  // mount path anyway.
   //
   // The `?record-bg` query param (consumed by AmbientRecorder)
   // bypasses the coarse-pointer branch — recording requires the
   // live WebGL canvas to be present. Lets Manuel record at mobile-
   // portrait viewport via DevTools resize without DevTools also
   // flipping pointer:coarse and routing to the video path.
-  const [isCoarsePointer, setIsCoarsePointer] = useState(false);
+  const rawCoarsePointer = useCoarsePointer();
+  const [recordOverride, setRecordOverride] = useState(false);
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
-    if (params.has("record-bg")) {
-      setIsCoarsePointer(false);
-      return;
-    }
-    setIsCoarsePointer(window.matchMedia("(pointer: coarse)").matches);
+    setRecordOverride(params.has("record-bg"));
   }, []);
+  const isCoarsePointer = recordOverride ? false : rawCoarsePointer;
 
   useEffect(() => {
     if (canvasMounted) return;
@@ -123,19 +126,20 @@ export function SceneProvider({ children }: SceneProviderProps) {
     const RETURNING_DEFER = 200;
     let timer: number | null = null;
 
-    if (isLoaderComplete()) {
-      timer = window.setTimeout(() => setCanvasMounted(true), RETURNING_DEFER);
-      return () => {
-        if (timer !== null) window.clearTimeout(timer);
-      };
-    }
+    // Capture the loader-complete state at effect-entry so we choose
+    // the right defer window. subscribeToLoaderComplete fires the
+    // callback synchronously if the loader already finished — that
+    // branch wants the short RETURNING_DEFER; the queued branch wants
+    // the long FRESH_LOAD_DEFER that lets the hero choreography land
+    // before the WebGL canvas elbows into the GPU.
+    const wasComplete = isLoaderComplete();
+    const unsub = subscribeToLoaderComplete(() => {
+      const defer = wasComplete ? RETURNING_DEFER : FRESH_LOAD_DEFER;
+      timer = window.setTimeout(() => setCanvasMounted(true), defer);
+    });
 
-    const onLoaderComplete = () => {
-      timer = window.setTimeout(() => setCanvasMounted(true), FRESH_LOAD_DEFER);
-    };
-    window.addEventListener("loader-complete", onLoaderComplete, { once: true });
     return () => {
-      window.removeEventListener("loader-complete", onLoaderComplete);
+      unsub();
       if (timer !== null) window.clearTimeout(timer);
     };
   }, [canvasMounted]);

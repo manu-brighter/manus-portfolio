@@ -1,22 +1,18 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { FluidOrchestrator, type PointerState } from "@/components/scene/FluidOrchestrator";
+import { useEffect, useRef, useState } from "react";
+import { useOrchestratorRAF } from "@/hooks/useOrchestratorRAF";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { TYPE_AS_FLUID_DEFAULTS } from "@/lib/content/playground";
-import { getTierConfig } from "@/lib/gpu";
-import { subscribe } from "@/lib/raf";
+import { FluidOrchestrator, type PointerState } from "@/lib/gl/fluidOrchestrator";
+import { capDPR, DPR_MINI, getTierConfig } from "@/lib/gpu";
+import { randomSpot } from "@/lib/palette";
 import { TextStamper } from "@/lib/textStamp";
 
 type Props = {
   /** True while the parent card is NOT hovered/focused. */
   paused: boolean;
 };
-
-const SPOT_KEYS = ["rose", "amber", "mint", "violet"] as const;
-function randomSpot(): "rose" | "amber" | "mint" | "violet" {
-  return SPOT_KEYS[Math.floor(Math.random() * SPOT_KEYS.length)] ?? "rose";
-}
 
 /**
  * Tiny self-driven Type-as-Fluid demo for the home-card hover state.
@@ -40,6 +36,8 @@ export function TypeAsFluidMiniSim({ paused }: Props) {
     down: false,
     moved: false,
   });
+  // Local init-failure flag — see InkDropMiniSim for rationale.
+  const [initFailed, setInitFailed] = useState(false);
 
   useEffect(() => {
     if (reducedMotion) return;
@@ -51,41 +49,52 @@ export function TypeAsFluidMiniSim({ paused }: Props) {
       powerPreference: "high-performance",
       preserveDrawingBuffer: false,
     }) as WebGL2RenderingContext | null;
-    if (!gl) return;
+    if (!gl) {
+      setInitFailed(true);
+      return;
+    }
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    const dpr = capDPR(DPR_MINI);
     canvas.width = Math.floor(canvas.clientWidth * dpr);
     canvas.height = Math.floor(canvas.clientHeight * dpr);
 
-    const orchestrator = new FluidOrchestrator();
-    orchestrator.init(gl, {
-      ...getTierConfig("minimal"),
-      velocityDissipation: 0.94,
-      // Faster fade than the full route's 0.995 — at this cadence
-      // each word has to clear out of the way before the next one
-      // lands, otherwise stamps stack into illegible mush. 0.985
-      // means the previous word is at ~7% density by 3s, basically
-      // gone by the time the next stamp arrives.
-      dyeDissipation: 0.985,
-      confinement: 8,
-    });
-    orchestrator.setAmbientEnabled(false);
-    // Open the warmup gate so step() runs — TypeAsFluid drives the
-    // dye field via TextStamper, no ambient kick needed.
-    orchestrator.start();
-    orchestratorRef.current = orchestrator;
-    stamperRef.current = new TextStamper(gl, orchestrator);
+    let orchestrator: FluidOrchestrator;
+    try {
+      orchestrator = new FluidOrchestrator();
+      orchestrator.init(gl, {
+        ...getTierConfig("minimal"),
+        velocityDissipation: 0.94,
+        // Faster fade than the full route's 0.995 — at this cadence
+        // each word has to clear out of the way before the next one
+        // lands, otherwise stamps stack into illegible mush. 0.985
+        // means the previous word is at ~7% density by 3s, basically
+        // gone by the time the next stamp arrives.
+        dyeDissipation: 0.985,
+        confinement: 8,
+      });
+      orchestrator.setAmbientEnabled(false);
+      // Open the warmup gate so step() runs — TypeAsFluid drives the
+      // dye field via TextStamper, no ambient kick needed.
+      orchestrator.start();
+      stamperRef.current = new TextStamper(gl, orchestrator);
 
-    // Fire an initial stamp so the card has dye visible the moment
-    // it cross-fades in (rather than blank paper for ~1s).
-    const initial =
-      TYPE_AS_FLUID_DEFAULTS.defaultWords[
-        Math.floor(Math.random() * TYPE_AS_FLUID_DEFAULTS.defaultWords.length)
-      ] ?? "MANUEL";
-    stamperRef.current.stampText(initial, randomSpot(), 1.4, 1);
+      // Fire an initial stamp so the card has dye visible the moment
+      // it cross-fades in (rather than blank paper for ~1s).
+      const initial =
+        TYPE_AS_FLUID_DEFAULTS.defaultWords[
+          Math.floor(Math.random() * TYPE_AS_FLUID_DEFAULTS.defaultWords.length)
+        ] ?? "MANUEL";
+      stamperRef.current.stampText(initial, randomSpot(), 1.4, 1);
+    } catch (err) {
+      // biome-ignore lint/suspicious/noConsole: init failure is a dev signal
+      console.error("[TypeAsFluidMiniSim] orchestrator/stamper init failed", err);
+      setInitFailed(true);
+      return;
+    }
+    orchestratorRef.current = orchestrator;
 
     const onResize = () => {
-      const ratio = Math.min(window.devicePixelRatio || 1, 1.5);
+      const ratio = capDPR(DPR_MINI);
       const w = Math.floor(canvas.clientWidth * ratio);
       const h = Math.floor(canvas.clientHeight * ratio);
       canvas.width = w;
@@ -132,20 +141,9 @@ export function TypeAsFluidMiniSim({ paused }: Props) {
   }, [paused]);
 
   // Shared RAF.
-  useEffect(() => {
-    if (reducedMotion) return;
-    return subscribe((deltaMs, elapsedMs) => {
-      const orchestrator = orchestratorRef.current;
-      if (!orchestrator) return;
-      const dt = Math.min(deltaMs * 0.001, 0.033);
-      orchestrator.step(dt, elapsedMs, pointerRef.current);
-      pointerRef.current.dx = 0;
-      pointerRef.current.dy = 0;
-      pointerRef.current.moved = false;
-    }, 25);
-  }, [reducedMotion]);
+  useOrchestratorRAF(orchestratorRef, pointerRef, 25, !reducedMotion);
 
-  if (reducedMotion) return null;
+  if (reducedMotion || initFailed) return null;
 
   return (
     <canvas

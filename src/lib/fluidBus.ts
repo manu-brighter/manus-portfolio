@@ -9,11 +9,10 @@
  *
  * Coordinates are normalised 0..1, with `y` measured from the bottom
  * of the canvas (the same convention FluidOrchestrator already uses
- * for pointer state). For viewport-relative dispatch helpers see
- * `splatAtViewport()` below.
+ * for pointer state).
  */
 
-export type SplatColorName = "rose" | "amber" | "mint" | "violet";
+import type { SpotColor } from "@/lib/palette";
 
 export type SplatRequest = {
   /** 0..1 normalised, origin at canvas bottom-left. */
@@ -21,7 +20,7 @@ export type SplatRequest = {
   /** 0..1 normalised, origin at canvas bottom-left. */
   y: number;
   /** Riso spot-color name OR raw normalised RGB tuple. */
-  color: SplatColorName | readonly [number, number, number];
+  color: SpotColor | readonly [number, number, number];
   /** Velocity-x injected into the splat (default 0 = stationary dye dump). */
   dx?: number;
   /** Velocity-y injected into the splat (default 0). */
@@ -41,28 +40,4 @@ export function subscribeToSplats(listener: Listener): () => void {
 
 export function dispatchSplat(req: SplatRequest): void {
   for (const l of listeners) l(req);
-}
-
-/**
- * Convenience wrapper — dispatches a splat at viewport coordinates
- * (CSS pixels, origin top-left), converting to the canvas's normalised
- * space. Use from event handlers where you have `clientX/clientY`.
- */
-export function splatAtViewport(
-  clientX: number,
-  clientY: number,
-  color: SplatRequest["color"],
-  velocity?: { dx?: number; dy?: number },
-): void {
-  if (typeof window === "undefined") return;
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-  if (w === 0 || h === 0) return;
-  dispatchSplat({
-    x: clientX / w,
-    y: 1 - clientY / h,
-    color,
-    dx: velocity?.dx ?? 0,
-    dy: velocity?.dy ?? 0,
-  });
 }

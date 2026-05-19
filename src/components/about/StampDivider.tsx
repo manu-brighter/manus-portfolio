@@ -1,4 +1,4 @@
-import type { Spot } from "./AboutBlock";
+import { SPOT_CSS_VAR, type SpotColor } from "@/lib/palette";
 
 /**
  * StampDivider — asterism row between AboutBlocks. Tints the centre
@@ -12,20 +12,13 @@ import type { Spot } from "./AboutBlock";
  * Decorative — `aria-hidden`. Pure markup, no JS, no animation.
  */
 
-const SPOT_VAR: Record<Spot, string> = {
-  rose: "var(--color-spot-rose)",
-  mint: "var(--color-spot-mint)",
-  amber: "var(--color-spot-amber)",
-  violet: "var(--color-spot-violet)",
-};
-
 type Props = {
   /** Outgoing block's spot-color. Falls back to ink-muted if omitted. */
-  spot?: Spot;
+  spot?: SpotColor;
 };
 
 export function StampDivider({ spot }: Props) {
-  const color = spot ? SPOT_VAR[spot] : "var(--color-ink-muted)";
+  const color = spot ? SPOT_CSS_VAR[spot] : "var(--color-ink-muted)";
   return (
     <div aria-hidden="true" className="my-12 flex items-center justify-center gap-3 md:my-20">
       <span className="size-1 rounded-full bg-ink-muted" />
