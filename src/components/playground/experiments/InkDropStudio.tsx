@@ -1,8 +1,8 @@
 "use client";
 
-import { Leva, useControls } from "leva";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
+import { Pane } from "tweakpane";
 import { useOrchestratorRAF } from "@/hooks/useOrchestratorRAF";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { INK_DROP_STUDIO_DEFAULTS } from "@/lib/content/playground";
@@ -15,7 +15,7 @@ import { ExperimentChrome } from "../ExperimentChrome";
  * Ink Drop Studio — Phase 10 Sprint 2.
  *
  * Sandbox over the full Navier–Stokes solver from FluidOrchestrator,
- * exposed live through Leva sliders + a Riso-stamped button row.
+ * exposed live through Tweakpane sliders + a Riso-stamped button row.
  *
  * Differences vs. the hero rig:
  *   - Ambient wandering points OFF (clean paper canvas to fill)
@@ -28,7 +28,7 @@ import { ExperimentChrome } from "../ExperimentChrome";
  * component owns the GPU exclusively.
  */
 
-// gpu.ts ships splatRadius=0.015 for medium tier. Leva's slider value
+// gpu.ts ships splatRadius=0.015 for medium tier. The slider value
 // is a 0.3..4.0 multiplier on top of that — keeps the user-facing
 // number scale-readable while leaving the tier baseline intact.
 const BASE_SPLAT_RADIUS = 0.015;
@@ -39,6 +39,22 @@ const BASE_SPLAT_RADIUS = 0.015;
 // layered Riso look. Studio embraces that: every splat picks a random
 // Riso spot via the shared `randomSpot()` helper and the visual feel
 // is layered ink, just like the hero.
+
+type StudioParams = {
+  velocityDissipation: number;
+  dyeDissipation: number;
+  vorticity: number;
+  pressureIterations: number;
+  splatRadius: number;
+};
+
+const INITIAL_PARAMS: StudioParams = {
+  velocityDissipation: INK_DROP_STUDIO_DEFAULTS.velocityDissipation,
+  dyeDissipation: INK_DROP_STUDIO_DEFAULTS.dyeDissipation,
+  vorticity: INK_DROP_STUDIO_DEFAULTS.vorticity,
+  pressureIterations: INK_DROP_STUDIO_DEFAULTS.pressureIterations,
+  splatRadius: INK_DROP_STUDIO_DEFAULTS.splatRadius,
+};
 
 export function InkDropStudio() {
   const reducedMotion = useReducedMotion();
@@ -61,6 +77,7 @@ function ReducedMotionFallback() {
 
 function InkDropStudioCanvas() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const paneContainerRef = useRef<HTMLDivElement | null>(null);
   const orchestratorRef = useRef<FluidOrchestrator | null>(null);
   const pointerRef = useRef<PointerState>({
     x: 0.5,
@@ -76,47 +93,14 @@ function InkDropStudioCanvas() {
   const bombIntervalRef = useRef<number | null>(null);
   const [paused, setPaused] = useState(false);
 
-  // Leva controls — values reactive, Leva re-renders the component on
-  // each slider change. Defaults pulled from the experiment registry
-  // so the home-card preview (Sprint 4) and this route start aligned.
-  const params = useControls({
-    "Velocity Dissipation": {
-      value: INK_DROP_STUDIO_DEFAULTS.velocityDissipation,
-      min: 0.85,
-      max: 1.0,
-      step: 0.005,
-    },
-    "Dye Dissipation": {
-      value: INK_DROP_STUDIO_DEFAULTS.dyeDissipation,
-      min: 0.85,
-      max: 1.0,
-      step: 0.005,
-    },
-    Vorticity: {
-      value: INK_DROP_STUDIO_DEFAULTS.vorticity,
-      min: 0,
-      max: 60,
-      step: 1,
-    },
-    "Pressure Iters": {
-      value: INK_DROP_STUDIO_DEFAULTS.pressureIterations,
-      min: 5,
-      max: 50,
-      step: 1,
-    },
-    "Splat Radius": {
-      value: INK_DROP_STUDIO_DEFAULTS.splatRadius,
-      min: 0.3,
-      max: 4.0,
-      step: 0.1,
-    },
-  });
+  // Tweakpane mutates this object directly. No React state — slider
+  // drags don't trigger re-renders; the change-handler below pushes
+  // updates straight to the orchestrator. Stable ref shared between
+  // the orchestrator-mount effect (reads initial values) and the
+  // pane-mount effect (writes new values via Tweakpane bindings).
+  const paramsRef = useRef<StudioParams>({ ...INITIAL_PARAMS });
 
   // Mount: build orchestrator once, hand off to RAF + pointer effects.
-  // We read params at mount only; live updates flow through the
-  // dedicated sync effect below. Depending on params here would tear
-  // down the orchestrator on every slider tick.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: see comment
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -133,16 +117,17 @@ function InkDropStudioCanvas() {
     canvas.height = Math.floor(window.innerHeight * dpr);
 
     // Start at medium tier; the studio is interactive so we don't bias
-    // for power efficiency. The Leva sliders dominate from here.
+    // for power efficiency. The Tweakpane sliders dominate from here.
     const baseConfig = getTierConfig("medium");
     const orchestrator = new FluidOrchestrator();
+    const p = paramsRef.current;
     orchestrator.init(gl, {
       ...baseConfig,
-      velocityDissipation: params["Velocity Dissipation"],
-      dyeDissipation: params["Dye Dissipation"],
-      confinement: params.Vorticity,
-      pressureIterations: params["Pressure Iters"],
-      splatRadius: params["Splat Radius"] * BASE_SPLAT_RADIUS,
+      velocityDissipation: p.velocityDissipation,
+      dyeDissipation: p.dyeDissipation,
+      confinement: p.vorticity,
+      pressureIterations: p.pressureIterations,
+      splatRadius: p.splatRadius * BASE_SPLAT_RADIUS,
     });
     orchestrator.setAmbientEnabled(false);
     // Studio doesn't trigger ambient (it's an interactive canvas) but
@@ -162,8 +147,8 @@ function InkDropStudioCanvas() {
       orchestrator.resize(w, h);
     };
     // ResizeObserver on the canvas's parent so the sim adapts to
-    // container reflow (e.g. Leva panel toggling, ExperimentChrome
-    // chrome density change) rather than only viewport changes.
+    // container reflow (e.g. ExperimentChrome density change) rather
+    // than only viewport changes.
     const ro = new ResizeObserver(onResize);
     ro.observe(canvas.parentElement ?? canvas);
 
@@ -174,18 +159,63 @@ function InkDropStudioCanvas() {
     };
   }, []);
 
-  // Live param sync — re-runs on every Leva change, mutates config.
+  // Tweakpane mount — pane container is part of our DOM tree (vs. Leva's
+  // portal-to-body), so positioning/data-no-splat live on the wrapper div.
+  // The pane writes back into `paramsRef.current` on every change and
+  // fires 'change'; we forward to the orchestrator without re-rendering.
   useEffect(() => {
-    const orchestrator = orchestratorRef.current;
-    if (!orchestrator) return;
-    orchestrator.setParams({
-      velocityDissipation: params["Velocity Dissipation"],
-      dyeDissipation: params["Dye Dissipation"],
-      confinement: params.Vorticity,
-      pressureIterations: params["Pressure Iters"],
-      splatRadius: params["Splat Radius"] * BASE_SPLAT_RADIUS,
+    const container = paneContainerRef.current;
+    if (!container) return;
+    const params = paramsRef.current;
+    const pane = new Pane({
+      container,
+      title: "INK DROP STUDIO",
     });
-  }, [params]);
+    pane.addBinding(params, "velocityDissipation", {
+      label: "Velocity Dissipation",
+      min: 0.85,
+      max: 1.0,
+      step: 0.005,
+    });
+    pane.addBinding(params, "dyeDissipation", {
+      label: "Dye Dissipation",
+      min: 0.85,
+      max: 1.0,
+      step: 0.005,
+    });
+    pane.addBinding(params, "vorticity", {
+      label: "Vorticity",
+      min: 0,
+      max: 60,
+      step: 1,
+    });
+    pane.addBinding(params, "pressureIterations", {
+      label: "Pressure Iters",
+      min: 5,
+      max: 50,
+      step: 1,
+    });
+    pane.addBinding(params, "splatRadius", {
+      label: "Splat Radius",
+      min: 0.3,
+      max: 4.0,
+      step: 0.1,
+    });
+    pane.on("change", () => {
+      const orchestrator = orchestratorRef.current;
+      if (!orchestrator) return;
+      orchestrator.setParams({
+        velocityDissipation: params.velocityDissipation,
+        dyeDissipation: params.dyeDissipation,
+        confinement: params.vorticity,
+        pressureIterations: params.pressureIterations,
+        splatRadius: params.splatRadius * BASE_SPLAT_RADIUS,
+      });
+    });
+    return () => {
+      pane.dispose();
+    };
+  }, []);
 
   // RAF loop — drives orchestrator.step. The orchestrator's auto-
   // pointer-splat handles the hover trail (and any click-and-drag
@@ -347,53 +377,19 @@ function InkDropStudioCanvas() {
         onFreezeToggle={onFreezeToggle}
         onReset={onReset}
       />
-      {/* Leva panel — paper-themed, mounted via portal by the lib.
-          The `data-no-splat` guard on the wrapper isn't enough because
-          Leva renders elsewhere; we instead key the canvas pointerdown
-          off `e.target.closest("[data-no-splat]")`, and the Leva root
-          element gets that attribute via the LevaPaperTheme below. */}
-      <LevaPaperTheme />
+      {/* Tweakpane mount target.
+          Riso theme is inlined via --tp-* CSS variables (Tweakpane reads
+          them at first paint). Mounted in our DOM tree so `data-no-splat`
+          stops pointer events here from triggering ink splats underneath
+          (vs. Leva which portaled-to-body and needed CSS-selector hacks).
+          Positioning: top-right, below the sticky navbar on mobile,
+          tighter under the chrome on desktop. */}
+      <div
+        ref={paneContainerRef}
+        data-no-splat
+        className="riso-tweakpane pointer-events-auto absolute top-20 right-4 z-20 w-[300px] md:top-6"
+      />
     </ExperimentChrome>
-  );
-}
-
-/** Riso-themed Leva panel. Paper backing, ink text, spot-rose accent.
- *  Mounted as a sibling of the canvas; Leva positions itself fixed
- *  top-right via its own internal store. */
-function LevaPaperTheme() {
-  return (
-    <Leva
-      collapsed={false}
-      hideCopyButton
-      titleBar={{ drag: true, filter: false, title: "INK DROP STUDIO" }}
-      theme={{
-        colors: {
-          elevation1: "#f0e8dc", // --color-paper
-          elevation2: "#fef2e2", // --color-paper-tint
-          elevation3: "#e4dbcd", // --color-paper-shade
-          accent1: "#ff6ba0", // --color-spot-rose
-          accent2: "#ffc474", // --color-spot-amber
-          accent3: "#7ce8c4", // --color-spot-mint
-          highlight1: "#0a0608", // --color-ink
-          highlight2: "#1a0e12", // --color-ink-soft
-          highlight3: "#0a0608", // --color-ink
-          folderTextColor: "#0a0608", // --color-ink
-          folderWidgetColor: "#0a0608", // --color-ink
-        },
-        sizes: {
-          rootWidth: "300px",
-          controlWidth: "120px",
-        },
-        fontSizes: {
-          root: "11px",
-        },
-        radii: {
-          xs: "0",
-          sm: "0",
-          lg: "0",
-        },
-      }}
-    />
   );
 }
 

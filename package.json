@@ -47,15 +47,16 @@
     "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4.3.0",
+    "@tweakpane/core": "^2.0.5",
     "@types/node": "^25.8.0",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
     "@types/three": "^0.184.1",
     "cross-env": "^10.1.0",
-    "leva": "^0.10.1",
     "postcss": "^8.5.14",
     "raw-loader": "^4.0.2",
     "tailwindcss": "^4.3.0",
+    "tweakpane": "^4.0.5",
     "typescript": "^6.0.3"
   },
   "pnpm": {
