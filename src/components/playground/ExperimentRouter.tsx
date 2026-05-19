@@ -9,7 +9,7 @@ import type { ExperimentSlug } from "@/lib/content/playground";
  * Each experiment is dynamic-imported with `ssr: false` so:
  *   1. The experiment's WebGL setup never runs in the SSG pass
  *      (avoids `getContext('webgl2')` on a non-existent canvas).
- *   2. The Leva panel + sim shaders only ship in their route's
+ *   2. The Tweakpane panel + sim shaders only ship in their route's
  *      chunk — initial bundle stays unaffected.
  *
  * Loading-state is intentionally minimal — paper bg + a centred

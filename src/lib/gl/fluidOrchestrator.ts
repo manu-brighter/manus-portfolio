@@ -67,7 +67,7 @@ type Programs = {
 const SPOT_COLORS = SPOT_RGB;
 
 // Ambient motion: 3 wandering points that splat fluid when no pointer input.
-// Extracted for future Leva-dev tuning. Time-scale governs the whole rig;
+// Extracted for future dev-panel tuning. Time-scale governs the whole rig;
 // per-point freq/range/force multipliers are in AMBIENT_POINTS below.
 const AMBIENT_PARAMS = {
   timeScale: 0.0003,
@@ -388,7 +388,7 @@ export class FluidOrchestrator {
   /**
    * Live-tunable param overrides. Mutates `this.config` so step() picks
    * up the new values on the very next frame without re-init / FBO
-   * teardown. Used by Ink Drop Studio's Leva sliders. Pressure-iters
+   * teardown. Used by Ink Drop Studio's Tweakpane sliders. Pressure-iters
    * changes are also live since the count is read inside the solve loop.
    */
   setParams(partial: Partial<TierConfig>): void {

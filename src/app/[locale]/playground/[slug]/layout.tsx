@@ -11,10 +11,10 @@ import { HideScrollbar } from "@/components/ui/HideScrollbar";
  * experiment's dedicated WebGL context. On unmount (back-nav to
  * home), the flag clears and the persistent canvas remounts.
  *
- * The chrome (back-link, title bar, Leva mount) lives in each
+ * The chrome (back-link, title bar, Tweakpane mount) lives in each
  * experiment's own component, not here — different experiments may
  * want different chrome density (Type-as-Fluid has an input bar; Ink
- * Drop Studio has a full Leva panel).
+ * Drop Studio has a full Tweakpane panel).
  */
 export default function PlaygroundExperimentLayout({ children }: { children: ReactNode }) {
   return (
