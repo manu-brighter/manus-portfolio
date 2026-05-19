@@ -46,6 +46,7 @@ This matches the analyzer's recommendation in F-security-5: "CSP rollout traditi
 | `font-src` | `'self'` | `@fontsource-variable/*` ships fonts under `/_next/static/media/`. No `data:` URIs in font payloads. |
 | `connect-src` | `'self'` | No external fetches today. Sprint 6 adds Worker URL (TBD); analytics adds Plausible host. |
 | `media-src` | `'self'` | `AmbientVideo` ships from same origin. |
+| `worker-src` | `'self'` | No Workers today. Explicit because CSP3 falls back through `child-src` → `default-src`, which works but obscures intent — and a future Plausible self-hosted script (or any tracker) could pull in a Worker without our noticing. |
 | `frame-src` | `'none'` | Site embeds no iframes. |
 | `frame-ancestors` | `'none'` | Site refuses to be iframed (legacy X-Frame-Options DENY shim kept too). |
 | `base-uri` | `'self'` | Pins `<base href>` injection vector. |
@@ -59,11 +60,11 @@ This matches the analyzer's recommendation in F-security-5: "CSP rollout traditi
 
 | Header | Value | Why |
 |---|---|---|
-| `Strict-Transport-Security` | `max-age=63072000; includeSubDomains; preload` | 2-year max-age + preload-eligible. Already deployed via certbot's HSTS default, but pinning here makes it explicit. Preload step needs a separate submission to https://hstspreload.org once Manuel is comfortable with the value. |
+| `Strict-Transport-Security` | `max-age=63072000; includeSubDomains; preload` | 2-year max-age + preload-eligible. ⚠️ **certbot's default `--hsts` flag adds its own `add_header Strict-Transport-Security ...` line into the cert-managed config block. If left in place, Nginx emits HSTS twice (different `max-age` values). Deploy step 2 below removes the certbot line before reloading.** Preload step needs a separate submission to https://hstspreload.org once Manuel is comfortable with the value — preload is quasi-permanent, so confirm every `*.manuelheller.dev` subdomain (incl. future analytics + mail/MX) is HTTPS-ready before submitting. |
 | `X-Content-Type-Options` | `nosniff` | Forces browsers to respect the `Content-Type` header. |
 | `X-Frame-Options` | `DENY` | Legacy clickjacking shim. Redundant with `frame-ancestors 'none'` but cheap and supported by older browsers. |
 | `Referrer-Policy` | `strict-origin-when-cross-origin` | Browser default for modern browsers; pinning here for safety. |
-| `Permissions-Policy` | `camera=(), microphone=(), geolocation=(), interest-cohort=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()` | Site uses none of these APIs; deny everything. `interest-cohort=()` opts out of Google's FLoC. |
+| `Permissions-Policy` | `camera=(), microphone=(), geolocation=(), interest-cohort=(), browsing-topics=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()` | Site uses none of these APIs; deny everything. Both Google behavioural-ad opt-outs: `interest-cohort=()` covers the retired FLoC (still respected by older Chromium); `browsing-topics=()` is the active Topics API opt-out. |
 | `Cross-Origin-Opener-Policy` | `same-origin` | Isolates the site's browsing context group. |
 | `Cross-Origin-Resource-Policy` | `same-origin` | Pairs with COOP for Spectre mitigations. |
 | `Cross-Origin-Embedder-Policy` | (omitted) | Would require all cross-origin resources to send CORP. Site is fully same-origin, so this works in principle — but enabling COEP breaks `SharedArrayBuffer`-incompatible features in some browsers and risks future-Plausible/Worker complications. Skip for now. |
@@ -71,24 +72,35 @@ This matches the analyzer's recommendation in F-security-5: "CSP rollout traditi
 ## Manuel's deploy steps
 
 1. `scp infra/nginx/security-headers.conf manuel@mc-host24.de:/etc/nginx/conf.d/`
-2. Inside `/etc/nginx/sites-available/manuelheller.dev`, inside the `server { ... }` block, add:
+2. **Remove the certbot HSTS line** from `/etc/nginx/sites-available/manuelheller.dev` (or wherever certbot wrote it — usually inside the `server { … }` block immediately after the `ssl_certificate*` lines). It looks like
+   `add_header Strict-Transport-Security "max-age=...";` — delete that single line so the include below is the sole HSTS source. Without this step Nginx emits HSTS twice with conflicting `max-age` values.
+3. Inside `/etc/nginx/sites-available/manuelheller.dev`, inside the `server { … }` block, add:
    ```nginx
    include /etc/nginx/conf.d/security-headers.conf;
    ```
-3. `sudo nginx -t && sudo systemctl reload nginx`.
-4. Verify via `curl -I https://manuelheller.dev/` — every header from the table above should appear in the response.
-5. Open Chrome DevTools → Network → click `/` → Response Headers — `Content-Security-Policy-Report-Only` should be present. Browse the site normally for 1–2 weeks; watch the Console for `Refused to load … because it violates the following Content Security Policy directive` warnings. Capture screenshots / forward DevTools output to a notes doc.
-6. Once the violation list is stable (ideally empty), swap `Content-Security-Policy-Report-Only` → `Content-Security-Policy` (just rename the directive in the conf), reload nginx.
-7. Phase 2 (later): replace `script-src 'self' 'unsafe-inline'` with `script-src 'self' 'sha256-<hash1>' 'sha256-<hash2>'`. Compute hashes via:
+4. `sudo nginx -t && sudo systemctl reload nginx`.
+5. Verify via `curl -sI https://manuelheller.dev/` — every header from the table above should appear in the response exactly once.
+6. Open Chrome DevTools → Network → click `/` → Response Headers — `Content-Security-Policy-Report-Only` should be present. Browse the site normally for 1–2 weeks; watch the Console for `Refused to load … because it violates the following Content Security Policy directive` warnings. Capture screenshots / forward DevTools output to a notes doc.
+7. Once the violation list is stable (ideally empty), swap `Content-Security-Policy-Report-Only` → `Content-Security-Policy` (just rename the directive in the conf), reload nginx. ⚠️ Add a TODO with a hard date in `MEMORY.md` (or as a GitHub issue) at deploy time — `'unsafe-inline'` stays in script-src/style-src until step 8 lands and otherwise becomes a permanent weakening of the policy.
+8. Phase 2 (later) — replace `script-src 'self' 'unsafe-inline'` with two SHA-256 hashes covering the two inline scripts shipped today:
+   - `/index.html` (the locale-detect REDIRECT_SCRIPT from `src/app/page.tsx`).
+   - `/[locale]/index.html` (the `<script type="application/ld+json">` JSON-LD from `src/app/[locale]/layout.tsx`).
+
+   The Python one-liner below is **example-only, not copy-paste-ready** — it matches every `<script>` tag in the served HTML, including Next.js's runtime chunk-loader inline scripts. Phase 2 needs a hardened build-time helper (e.g. a post-build node script that reads `out/index.html` + `out/de/index.html`, extracts the two known inline scripts by stable marker — `location.replace` for REDIRECT_SCRIPT, `type="application/ld+json"` for the JSON-LD — and writes the two CSP hashes to a small file Nginx can `include`).
+
    ```bash
-   curl -s https://manuelheller.dev/de/ \
+   # Example, not production: prints SHA-256 for EVERY inline <script>
+   # in the page — useful to enumerate candidates, NOT to derive the
+   # final CSP directive. Replace with a build-time helper that
+   # targets the two known scripts by marker.
+   curl -s https://manuelheller.dev/ \
      | python3 -c "import sys, re, hashlib, base64; \
        html = sys.stdin.read(); \
-       for m in re.finditer(r'<script[^>]*>(.*?)</script>', html, re.S): \
-           h = hashlib.sha256(m.group(1).encode('utf-8')).digest(); \
-           print('sha256-' + base64.b64encode(h).decode())"
+       [print('sha256-' + base64.b64encode(hashlib.sha256(m.group(1).encode('utf-8')).digest()).decode()) \
+        for m in re.finditer(r'<script(?![^>]*src=)[^>]*>(.*?)</script>', html, re.S)]"
    ```
-   Hashes change whenever either script's content changes — easiest to regenerate on every deploy and ship them as part of the nginx config.
+
+   Hashes change whenever either script's bytes change, so the helper should run as part of the deploy pipeline — not on demand. Tracking issue: see step 7's TODO.
 
 ## Test plan
 
