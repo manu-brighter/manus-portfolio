@@ -4,8 +4,8 @@
  * Each entry maps a URL slug to:
  *   - the i18n namespace key (titles, captions, default-word lists)
  *   - the spot-color identity used in the home-page card backing
- *   - default sim params surfaced through the Leva panel inside the
- *     experiment route
+ *   - default sim params surfaced through the Tweakpane panel inside
+ *     the experiment route
  *
  * Slugs are stable: once shipped they survive content rewrites
  * (sitemaps, OG cards, share-links).

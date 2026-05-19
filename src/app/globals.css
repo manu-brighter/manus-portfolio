@@ -538,16 +538,49 @@
     position: relative;
   }
 
-  /* Leva control panel (Ink Drop Studio playground) — push below the
-   * sticky nav. Leva mounts a fixed-positioned root with stitches-
-   * generated `leva-c-XXXXX-fill-false` classes (no #leva__root id);
-   * only the ROOT has the `-fill-` variant suffix, children of the
-   * panel use plain `leva-c-XXXXX` hashes. Targeting via the fill
-   * variant makes us robust to stitches hash drift AND avoids
-   * matching the ~65 child elements inside the panel.
-   * !important needed to beat Leva's stitches CSS-in-JS specificity. */
-  [class*="leva-c-"][class*="-fill-"] {
-    top: 5rem !important;
+  /* Tweakpane control panel (Ink Drop Studio playground).
+   * Tweakpane v4 reads `--tp-*` CSS variables at first paint;
+   * scoping them here maps the default dark Roboto-Mono theme onto
+   * the Riso paper palette (ink-on-paper, spot-rose accents, no
+   * border-radius — matches the rest of the playground chrome).
+   * The pane mounts inside our `<div ref={paneContainerRef}>` so
+   * positioning + `data-no-splat` live on the wrapper, not on
+   * Tweakpane's internal root (avoids the Leva-style class-hash hack). */
+  .riso-tweakpane {
+    --tp-base-background-color: var(--color-paper);
+    --tp-base-border-radius: 0;
+    --tp-base-shadow-color: rgba(10, 6, 8, 0.18);
+    --tp-base-font-family: var(--font-mono);
+
+    --tp-blade-border-radius: 0;
+    --tp-blade-horizontal-padding: 8px;
+    --tp-blade-value-width: 140px;
+
+    --tp-container-background-color: var(--color-paper-tint);
+    --tp-container-background-color-active: var(--color-paper-shade);
+    --tp-container-background-color-focus: var(--color-paper-shade);
+    --tp-container-background-color-hover: var(--color-paper-shade);
+    --tp-container-foreground-color: var(--color-ink);
+    --tp-container-horizontal-padding: 6px;
+    --tp-container-vertical-padding: 6px;
+    --tp-container-unit-spacing: 6px;
+
+    --tp-input-background-color: var(--color-paper-tint);
+    --tp-input-background-color-active: var(--color-paper-shade);
+    --tp-input-background-color-focus: var(--color-paper-shade);
+    --tp-input-background-color-hover: var(--color-paper-shade);
+    --tp-input-foreground-color: var(--color-ink);
+
+    --tp-button-background-color: var(--color-spot-rose);
+    --tp-button-background-color-active: var(--color-spot-amber);
+    --tp-button-background-color-focus: var(--color-spot-amber);
+    --tp-button-background-color-hover: var(--color-spot-amber);
+    --tp-button-foreground-color: var(--color-ink);
+
+    --tp-groove-foreground-color: var(--color-paper-line);
+    --tp-label-foreground-color: rgba(10, 6, 8, 0.7);
+    --tp-monitor-background-color: var(--color-paper-tint);
+    --tp-monitor-foreground-color: var(--color-ink);
   }
 }
 

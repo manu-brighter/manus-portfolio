@@ -215,10 +215,16 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   mask, no pressure solve). Trigger IO: `rootMargin: "-20% 0px -20% 0px"`,
   `threshold: 0` — fires when photo enters central 60% band. Document
   pointermove listener detached + ambient queue cleared at reveal lock.
-- **Playground**: Leva ships in prod (the demo IS runtime parameter
-  exploration). Mini-sims on cards stay paused after first hover/focus for
-  instant re-hovers. Dynamic-imported in `/playground/[slug]` so home pays
-  zero cost.
+- **Playground**: Tweakpane ships in prod (the demo IS runtime parameter
+  exploration). Tweakpane v4 replaced Leva (SF-7) — single consumer in
+  `InkDropStudio.tsx`. Theming via `--tp-*` CSS variables on the wrapper
+  `<div className="riso-tweakpane">` (defined in `globals.css`), no
+  fixed-positioned portal-to-body so `data-no-splat` lives on the
+  wrapper. Pane mutates a stable `paramsRef.current` object and fires
+  `on('change')`; we forward to the orchestrator without React re-renders.
+  Mini-sims on cards stay paused after first hover/focus for instant
+  re-hovers. Dynamic-imported in `/playground/[slug]` so home pays zero
+  cost.
 - **Contact**: form is fully built but submit is **stubbed** (320ms graceful
   fallback → mailto:`SITE.author.email`). Cloudflare Worker → Resend bridge
   is the next sprint. Honeypot field (`bot-trap`, off-screen, `tabIndex=-1`,

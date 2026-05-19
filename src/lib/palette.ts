@@ -70,7 +70,7 @@ export const SPOT_BG_CLASS: Record<SpotColor, string> = {
 
 /**
  * Hex literals — for consumers that can't read CSS variables at runtime
- * (GSAP `backgroundColor` tweens, Leva accent inputs, OG image renderers).
+ * (GSAP `backgroundColor` tweens, Tweakpane accent CSS variables, OG image renderers).
  * Kept in sync with `SPOT_RGB` by construction; if you change one,
  * change the other.
  */
