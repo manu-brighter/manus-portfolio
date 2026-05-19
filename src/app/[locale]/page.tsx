@@ -20,18 +20,29 @@ type HomePageProps = {
   params: Promise<{ locale: string }>;
 };
 
-// SF-5: home page adds `home` + `playground` namespace groups on top of
-// the layout's `common`. Excludes `legal` and `notFound` from the client
-// payload (those load only on /impressum, /datenschutz, and the 404).
+/**
+ * SF-5: home page adds `home` + `playground` namespace groups on top of
+ * the layout's `common`. Excludes `legal` and `notFound` from the client
+ * payload (those load only on /impressum, /datenschutz, and the 404).
+ *
+ * Note on the nested `<NextIntlClientProvider>` — next-intl v4 inner
+ * providers REPLACE the outer `messages` rather than merging them. We
+ * therefore re-include `common` in the merged tree so that any client
+ * component inside `{children}` (e.g. a future widget that reads
+ * `nav.items` or `footer.*`) can still resolve common keys. The outer
+ * layout provider still carries `common` alone for the chrome that
+ * lives OUTSIDE `{children}` (Nav, Footer, Loader, ScrollProgress).
+ */
 export default async function HomePage({ params }: HomePageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const [homeMessages, playgroundMessages] = await Promise.all([
+  const [commonMessages, homeMessages, playgroundMessages] = await Promise.all([
+    loadNamespaceGroup(locale, "common"),
     loadNamespaceGroup(locale, "home"),
     loadNamespaceGroup(locale, "playground"),
   ]);
-  const pageMessages = { ...homeMessages, ...playgroundMessages };
+  const pageMessages = { ...commonMessages, ...homeMessages, ...playgroundMessages };
 
   return (
     <NextIntlClientProvider messages={pageMessages}>
