@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
-import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { ReactNode } from "react";
 import { MotionProvider } from "@/components/motion/MotionProvider";
 import { AmbientRecorderDevGate } from "@/components/scene/AmbientRecorderDevGate";
@@ -11,6 +11,7 @@ import { Footer } from "@/components/ui/Footer";
 import { Loader } from "@/components/ui/Loader";
 import { Nav } from "@/components/ui/Nav";
 import { ScrollProgress } from "@/components/ui/ScrollProgress";
+import { loadNamespaceGroup } from "@/i18n/messages";
 import { routing } from "@/i18n/routing";
 import { escapeForScript } from "@/lib/seo/escapeForScript";
 import { buildJsonLd } from "@/lib/seo/jsonLd";
@@ -44,7 +45,11 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   }
   setRequestLocale(locale);
 
-  const messages = await getMessages();
+  // SF-5: pass only the `common` namespace group to the client-side
+  // provider. Pages add their route-specific groups via nested
+  // <NextIntlClientProvider> wrappers (home: home + playground;
+  // legal pages: legal; playground experiments: playground).
+  const commonMessages = await loadNamespaceGroup(locale, "common");
   const t = await getTranslations("skipLink");
   const tMeta = await getTranslations({ locale, namespace: "meta" });
   const jsonLd = buildJsonLd(locale, tMeta("description"));
@@ -63,7 +68,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
           // biome-ignore lint/security/noDangerouslySetInnerHtml: ld+json must be raw, not text
           dangerouslySetInnerHTML={{ __html: escapeForScript(jsonLd) }}
         />
-        <NextIntlClientProvider locale={locale} messages={messages}>
+        <NextIntlClientProvider locale={locale} messages={commonMessages}>
           <MotionProvider>
             <SceneProvider>
               <a className="skip-link" href="#main">

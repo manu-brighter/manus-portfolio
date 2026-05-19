@@ -1,57 +1,59 @@
 // src/types/i18n-shapes.ts
 //
-// Typed re-exports of the inferred message-tree shapes from de.json.
+// Typed re-exports of the inferred message-tree shapes from the DE
+// locale (source-of-truth language).
 //
 // next-intl's `t.raw(key)` returns `unknown` — so every consumer of a
 // structured message (an array, an object) has to cast at the boundary.
 // Inventing local types at each cast site is what we used to do, and it
 // drifted from the actual JSON whenever a new field was added.
 //
-// This module imports `messages/de.json` once (TS already does this for
-// the IntlMessages declaration in `i18n.d.ts`) and re-exports the
-// inferred shapes as named types. Cast sites now use these directly:
-//   const parts = t.raw("parts") as AboutParts;
+// Post-SF-5: messages now live in per-route-segment files under
+// `messages/{locale}/<group>.json`. We import each segment directly so
+// each shape's provenance is explicit — the home-page shapes import
+// from `home.json`, legal from `legal.json`, etc.
 //
-// Drift between de.json and en/fr/it/it is a separate concern not
-// solved here — that's the "translation parity" sprint. This module
-// only fixes the type-vs-source drift at the i18n boundary.
+// Drift between de.json and en/fr/it is a separate concern not solved
+// here — that's the "translation parity" sprint. This module only
+// fixes the type-vs-source drift at the i18n boundary.
 
-import type messages from "../../messages/de.json";
-
-type Messages = typeof messages;
+import type deCommon from "../../messages/de/common.json";
+import type deHome from "../../messages/de/home.json";
+import type deLegal from "../../messages/de/legal.json";
 
 // --- meta -----------------------------------------------------------
 
-export type MetaKeywords = Messages["meta"]["keywords"];
+export type MetaKeywords = (typeof deCommon)["meta"]["keywords"];
 
 // --- about ----------------------------------------------------------
 
-export type AboutParts = Messages["about"]["parts"];
-export type AboutAnfangenStamps = Messages["about"]["marginalia"]["anfangen"]["stamps"];
+export type AboutParts = (typeof deHome)["about"]["parts"];
+export type AboutAnfangenStamps = (typeof deHome)["about"]["marginalia"]["anfangen"]["stamps"];
 
 // --- currently ------------------------------------------------------
 
-export type CurrentlyItems = Messages["currently"]["items"];
+export type CurrentlyItems = (typeof deHome)["currently"]["items"];
 
 // --- skills ---------------------------------------------------------
 
-export type SkillsTiers = Messages["skills"]["tiers"];
+export type SkillsTiers = (typeof deHome)["skills"]["tiers"];
 
 // --- work -----------------------------------------------------------
 
-export type WorkProjects = Messages["work"]["projects"];
+export type WorkProjects = (typeof deHome)["work"]["projects"];
 
 // --- caseStudy ------------------------------------------------------
 
-export type CaseStudyFacts = Messages["caseStudy"]["context"]["facts"];
-export type CaseStudyStory = Messages["caseStudy"]["context"]["story"];
-export type CaseStudyStack = Messages["caseStudy"]["platform"]["stack"];
-export type CaseStudyHighlights = Messages["caseStudy"]["highlights"]["items"];
-export type CaseStudyHookStation = Messages["caseStudy"]["stations"]["hook"];
-export type CaseStudyStackStation = Messages["caseStudy"]["stations"]["stack"];
-export type CaseStudyHighlightAdmin = Messages["caseStudy"]["stations"]["highlightAdmin"];
-export type CaseStudyHighlightOverlay = Messages["caseStudy"]["stations"]["highlightOverlay"];
-export type CaseStudyPublicShots = Messages["caseStudy"]["stations"]["publicShots"];
+export type CaseStudyFacts = (typeof deHome)["caseStudy"]["context"]["facts"];
+export type CaseStudyStory = (typeof deHome)["caseStudy"]["context"]["story"];
+export type CaseStudyStack = (typeof deHome)["caseStudy"]["platform"]["stack"];
+export type CaseStudyHighlights = (typeof deHome)["caseStudy"]["highlights"]["items"];
+export type CaseStudyHookStation = (typeof deHome)["caseStudy"]["stations"]["hook"];
+export type CaseStudyStackStation = (typeof deHome)["caseStudy"]["stations"]["stack"];
+export type CaseStudyHighlightAdmin = (typeof deHome)["caseStudy"]["stations"]["highlightAdmin"];
+export type CaseStudyHighlightOverlay =
+  (typeof deHome)["caseStudy"]["stations"]["highlightOverlay"];
+export type CaseStudyPublicShots = (typeof deHome)["caseStudy"]["stations"]["publicShots"];
 
 // Per-item helpers — `Highlight` is used in CaseStudy.tsx for `.find()`
 // lookups; element types are projected from the array shape.
@@ -62,4 +64,4 @@ export type CaseStudyHighlightFeature = CaseStudyHighlight["features"][number];
 
 // Impressum + Datenschutz share the same `sections` shape; either works
 // for the `LegalDocument` cast since the renderer is namespace-agnostic.
-export type LegalSections = Messages["legal"]["impressum"]["sections"];
+export type LegalSections = (typeof deLegal)["legal"]["impressum"]["sections"];

@@ -1,0 +1,37 @@
+{
+  "playground": {
+    "sectionLabel": "Section 06 · Playground",
+    "eyebrow": "Section 06 · Playground",
+    "headline": "Là où la simulation de fluide a le droit de jouer.",
+    "lede": "Deux expérimentations shader, toutes deux ancrées dans la narration encre/impression. Pure démonstration de craft, pas de contexte produit.",
+    "openLabel": "Ouvrir l'expérimentation",
+    "shell": {
+      "back": "RETOUR AU PLAYGROUND"
+    },
+    "experiments": {
+      "inkDropStudio": {
+        "cardTitle": "Ink Drop Studio",
+        "cardKicker": "01 · INK DROP STUDIO",
+        "cardBody": "Toile papier vide, un clic fait naître des gouttes d'encre dans la spot color choisie. Sliders pour les paramètres de simulation, bouton bomb, bouton freeze.",
+        "title": "Ink Drop Studio.",
+        "caption": "Bac à sable pour la simulation hero. Clic = ink splat, sliders = paramètres de simulation, « Bomb » si tu as envie de chaos.",
+        "buttonBomb": "BOMB",
+        "buttonFreeze": "FREEZE",
+        "buttonResume": "RESUME",
+        "buttonReset": "RESET",
+        "reducedMotionNote": "Cette expérimentation est un terrain de jeu animé. Sous prefers-reduced-motion, je masque la simulation en cours. Retourne au Playground pour une section plus calme."
+      },
+      "typeAsFluid": {
+        "cardTitle": "Type-as-Fluid",
+        "cardKicker": "02 · TYPE-AS-FLUID",
+        "cardBody": "Tape un mot. Il s'imprime, puis se fait avaler par l'encre. Tout en douceur.",
+        "title": "Type-as-Fluid.",
+        "caption": "Tape un mot. Il s'imprime, puis se fait avaler par l'encre. Tout en douceur.",
+        "inputLabel": "TAPE UN MOT",
+        "inputPlaceholder": "Manuel",
+        "triggerLabel": "Imprimer le mot à nouveau",
+        "reducedMotionNote": "Cette expérimentation imprime des mots en direct dans une simulation de fluide. Sous prefers-reduced-motion, je masque l'animation. Retourne au Playground pour une section plus calme."
+      }
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "playground": {
+    "sectionLabel": "Section 06 · Playground",
+    "eyebrow": "Section 06 · Playground",
+    "headline": "Dove la simulazione di fluido può giocare.",
+    "lede": "Due esperimenti shader, entrambi ancorati alla narrazione inchiostro/stampa. Pura dimostrazione di craft, nessun contesto di prodotto.",
+    "openLabel": "Apri esperimento",
+    "shell": {
+      "back": "TORNA AL PLAYGROUND"
+    },
+    "experiments": {
+      "inkDropStudio": {
+        "cardTitle": "Ink Drop Studio",
+        "cardKicker": "01 · INK DROP STUDIO",
+        "cardBody": "Tela di carta vuota, un click fa nascere gocce di inchiostro nello spot color scelto. Slider per i parametri della simulazione, pulsante bomb, pulsante freeze.",
+        "title": "Ink Drop Studio.",
+        "caption": "Sandbox per la simulazione hero. Click = ink splat, slider = parametri di simulazione, «Bomb» se hai voglia di caos.",
+        "buttonBomb": "BOMB",
+        "buttonFreeze": "FREEZE",
+        "buttonResume": "RESUME",
+        "buttonReset": "RESET",
+        "reducedMotionNote": "Questo esperimento è un terreno di gioco animato. Sotto prefers-reduced-motion nascondo la simulazione in corso. Torna al Playground per una sezione più tranquilla."
+      },
+      "typeAsFluid": {
+        "cardTitle": "Type-as-Fluid",
+        "cardKicker": "02 · TYPE-AS-FLUID",
+        "cardBody": "Digita una parola. Viene stampata, poi inghiottita dall'inchiostro. Con dolcezza.",
+        "title": "Type-as-Fluid.",
+        "caption": "Digita una parola. Viene stampata, poi inghiottita dall'inchiostro. Con dolcezza.",
+        "inputLabel": "DIGITA UNA PAROLA",
+        "inputPlaceholder": "Manuel",
+        "triggerLabel": "Stampa di nuovo la parola",
+        "reducedMotionNote": "Questo esperimento stampa parole live in una simulazione di fluido. Sotto prefers-reduced-motion nascondo l'animazione. Torna al Playground per una sezione più tranquilla."
+      }
+    }
+  }
+}

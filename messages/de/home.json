@@ -1,0 +1,662 @@
+{
+  "hero": {
+    "statusStamps": {
+      "section": "Section 00 · Hero",
+      "status": "Status · Booting"
+    },
+    "bioStamps": {
+      "role": "zvoove · Full Stack",
+      "sideProject": "Jogge di Balla · VP",
+      "location": "Basel-Region · CH"
+    },
+    "heading": {
+      "family": "Heller,",
+      "given": "Manuel."
+    },
+    "tagline": "Awwwards-inspired craft portfolio",
+    "taglineSuffix": "booting …"
+  },
+  "currently": {
+    "label": "Currently",
+    "items": [
+      {
+        "verb": "arbeite an",
+        "value": "diese Seite hier"
+      },
+      {
+        "verb": "lerne",
+        "value": "React 19 · R3F 9 · WebGPU-Shader"
+      },
+      {
+        "verb": "schieße",
+        "value": "Wildlife in Costa Rica & Thailand"
+      },
+      {
+        "verb": "fahre",
+        "value": "Audi S5 B8.5 (Tuning-Projekt)"
+      },
+      {
+        "verb": "jage",
+        "value": "den zvoove Ping-Pong-Champion-Titel"
+      }
+    ]
+  },
+  "skills": {
+    "sectionLabel": "Section 02 · Skills",
+    "headline": "Was ich mitbringe.",
+    "subhead": "Grösse transportiert Gewicht. Keine Jahre, keine Labels.",
+    "heroSkill": {
+      "eyebrow": "Hero-Skill",
+      "name": "AI-Workflow & Vibecoding",
+      "description": "Custom Agents, Hooks, Skills, mehrstufige Prompts. AI ist nicht das Tool, das ich nutze, sondern das Werkzeug, mit dem ich Tools baue."
+    },
+    "vibecodedMarker": "vibecoded",
+    "tiers": [
+      {
+        "id": "daily-driver",
+        "label": "Daily Driver · Production",
+        "weight": "xl",
+        "items": [
+          {
+            "name": "PHP"
+          },
+          {
+            "name": "Vue"
+          },
+          {
+            "name": "MariaDB · MySQL"
+          },
+          {
+            "name": "HTML · CSS · Webdesign-Eye"
+          }
+        ]
+      },
+      {
+        "id": "production",
+        "label": "Production · Operations",
+        "weight": "l",
+        "items": [
+          {
+            "name": "Yii"
+          },
+          {
+            "name": "Docker"
+          },
+          {
+            "name": "Vite"
+          },
+          {
+            "name": "GitLab"
+          },
+          {
+            "name": "Cypress"
+          },
+          {
+            "name": "OpenAPI · Swagger"
+          },
+          {
+            "name": "nginx · Linux-Server-Admin"
+          }
+        ]
+      },
+      {
+        "id": "vibecoded",
+        "label": "Vibecoded Stack",
+        "description": "Was ich mit AI-Workflow baue, nicht spontan ohne.",
+        "weight": "l",
+        "items": [
+          {
+            "name": "TypeScript",
+            "vibecoded": true
+          },
+          {
+            "name": "React",
+            "vibecoded": true
+          },
+          {
+            "name": "Next.js",
+            "vibecoded": true
+          },
+          {
+            "name": "tRPC",
+            "vibecoded": true
+          },
+          {
+            "name": "Drizzle ORM",
+            "vibecoded": true
+          },
+          {
+            "name": "shadcn/ui",
+            "vibecoded": true
+          },
+          {
+            "name": "GSAP",
+            "vibecoded": true
+          },
+          {
+            "name": "Three.js · R3F · Drei · Postprocessing",
+            "vibecoded": true
+          },
+          {
+            "name": "Lenis",
+            "vibecoded": true
+          },
+          {
+            "name": "next-intl",
+            "vibecoded": true
+          },
+          {
+            "name": "zustand · State",
+            "vibecoded": true
+          },
+          {
+            "name": "GLSL · WebGL Shader",
+            "vibecoded": true
+          },
+          {
+            "name": "Biome · Lint & Format",
+            "vibecoded": true
+          },
+          {
+            "name": "Playwright · E2E + Axe + Visual",
+            "vibecoded": true
+          },
+          {
+            "name": "Sharp · Asset Pipeline",
+            "vibecoded": true
+          }
+        ]
+      },
+      {
+        "id": "occasional",
+        "label": "Im Werkzeugkasten",
+        "description": "Kenne ich, nutze ich nicht täglich.",
+        "weight": "m",
+        "items": [
+          {
+            "name": "Java"
+          },
+          {
+            "name": "Python"
+          },
+          {
+            "name": "PowerShell"
+          },
+          {
+            "name": "Bash"
+          },
+          {
+            "name": "Git"
+          },
+          {
+            "name": "Tailwind CSS"
+          },
+          {
+            "name": "Lightroom"
+          },
+          {
+            "name": "Photoshop"
+          },
+          {
+            "name": "DaVinci Resolve"
+          }
+        ]
+      },
+      {
+        "id": "craft",
+        "label": "Craft · Eye",
+        "weight": "m",
+        "items": [
+          {
+            "name": "Fotografie"
+          },
+          {
+            "name": "Videoschnitt"
+          },
+          {
+            "name": "Grafikdesign"
+          },
+          {
+            "name": "Live Web Fluid Simulations"
+          },
+          {
+            "name": "Shader-Spielereien"
+          }
+        ]
+      }
+    ]
+  },
+  "about": {
+    "sectionLabel": "Section 01 · About",
+    "headline": "Full-Stack Developer mit künstlerischem Auge.",
+    "subhead": "Code, Foto, Design: alles dasselbe Handwerk in unterschiedlicher Form.",
+    "parts": [
+      {
+        "id": "wer-ich-bin",
+        "heading": "Wer ich bin",
+        "body": [
+          "Ich bin Manuel, Full-Stack Developer bei zvoove Switzerland AG, seit November 2021. Beruflich tief drin in PHP und Vue, privat eingehend mit Kameras, Photoshop und allem was zwischen Code und Bild Spass macht. Ich glaube nicht an die Trennung von 'technisch' und 'kreativ'; die spannenden Sachen passieren genau dazwischen."
+        ]
+      },
+      {
+        "id": "wie-angefangen",
+        "heading": "Wie ich angefangen habe",
+        "body": [
+          "Programmieren kam bei mir über Gaming. Ich habe einen eigenen Minecraft-Modpack-Server aufgesetzt und angefangen, Mining-Turtles in Lua zu programmieren. Das war der Moment in dem ich gemerkt habe: ich will verstehen, wie das alles unter der Haube läuft.",
+          "Die Berufslehre habe ich dann als Betriebsinformatiker EFZ bei Novartis gemacht. Eigentlich wollte ich Entwickler werden, aber Novartis bot nur den Betriebsinformatiker-Track, und so einen Ausbildungsplatz lässt man sich nicht entgehen. Vier Jahre Server, Netzwerk, Support: solide Grundlage, aber spätestens am Ende der Lehre war klar, ich bewerbe mich als Developer. Seit 2021 bin ich bei zvoove und arbeite am Hauptprodukt zvoove Core, an diversen Schnittstellen-Tools und an Cypress-E2E-Tests."
+        ]
+      },
+      {
+        "id": "ai-workflow",
+        "heading": "Wie ich mit AI arbeite",
+        "body": [
+          "Eine AI ist wie ein Pinsel: ein Werkzeug, das die Kunst nicht alleine macht. Sie ist nur so gut wie der Plan und der Prompt, den man ihr gibt, und sie braucht jemanden mit Geschmack, Kreativität und einem klaren Bild davon, wo es hingehen soll. AI-generierte Websites sehen heute alle gleich aus, weil die meisten Leute der AI die Kreativität überlassen.",
+          "Ich nutze einen tief eingerichteten AI-Workflow: Custom Agents, Hooks, Skills, mehrstufige Prompts, klare Konventions-Dateien. Ich habe bisher zwei komplexe Webapps damit von Null auf produktionsreif gebracht (eine davon ist die Jogge di Balla-Plattform, die andere ist genau diese Seite hier). Die Kombination aus dieser Workflow-Tiefe und meinem visuellen Sinn aus Foto und Grafik ist das, was am Ende den Unterschied macht zwischen noch einer generischen Landing-Page und etwas, das man sich merkt."
+        ]
+      },
+      {
+        "id": "antrieb",
+        "heading": "Was mich antreibt",
+        "body": [
+          "Ich bin für fast alles zu begeistern und überzeugt: Gerade jetzt im KI-Zeitalter muss man mehr denn je dranbleiben. Wer aufhört zu lernen, ist innerhalb von 12 Monaten abgehängt. Mir macht das Aneignen neuer Skills aber einfach Spass, für mich ist das kein Druck, sondern der Default-Modus."
+        ]
+      },
+      {
+        "id": "off-screen",
+        "heading": "Ausserhalb vom Bildschirm",
+        "body": [
+          "Wildlife-Fotografie ist meine grösste Leidenschaft. Ich reise solo nach Costa Rica oder Thailand und stapfe selbst in den Dschungel um Tiere in freier Wildbahn vor die Linse zu bekommen. Daneben Autos (siehe mein Audi-S5-Tuning-Projekt), Ski/Snowboard, Tauchen, und der Verein Jogge di Balla, in dem ich Vize-Präsident, Web-Entwickler, Vereinsfotograf, Kameramann und Social-Media-Manager bin."
+        ]
+      }
+    ],
+    "portrait": {
+      "alt": "Portraitfoto Manuel Heller, Full-Stack Developer Basel",
+      "caption": "St. Moritz · MMXXV",
+      "plate": "Plate Nº 03",
+      "label": "Selbstporträt",
+      "stamps": [
+        {
+          "label": "Location",
+          "value": "Basel-Region"
+        },
+        {
+          "label": "Year",
+          "value": "MMXXVI"
+        },
+        {
+          "label": "Signed",
+          "value": "manu"
+        }
+      ]
+    },
+    "pullQuotes": {
+      "werIchBin": "Die spannenden Sachen passieren genau [[dazwischen]].",
+      "anfangen": "Ich will verstehen, [[wie das alles unter der Haube]] läuft.",
+      "aiWorkflow": "AI-generierte Websites sehen heute alle gleich aus, weil die meisten Leute der AI die [[Kreativität]] überlassen.",
+      "antrieb": "Was mich antreibt? [[Neugier]], ehrlich gesagt."
+    },
+    "marginalia": {
+      "werIchBin": {
+        "counter": "01 / 04",
+        "label": "Identität",
+        "year": "MMXXVI"
+      },
+      "anfangen": {
+        "counter": "02 / 04",
+        "stamps": [
+          {
+            "label": "Minecraft",
+            "year": "2014"
+          },
+          {
+            "label": "Novartis EFZ",
+            "year": "2017–2021"
+          },
+          {
+            "label": "zvoove",
+            "year": "2021—"
+          }
+        ]
+      },
+      "aiWorkflow": {
+        "counter": "03 / 04",
+        "label": "Vibecoded"
+      },
+      "antrieb": {
+        "counter": "04 / 04",
+        "label": "Antrieb"
+      }
+    },
+    "objectGrid": {
+      "sectionLabel": "Off the screen",
+      "headline": "Wenn der Bildschirm aus ist.",
+      "currentlyBand": "Snapshot 2026 · Wildlife-Reise in Planung · Wintersaison · Paddle griffbereit",
+      "currentlyBandShort": "Snapshot 2026",
+      "tiles": {
+        "camera": {
+          "name": "Kamera",
+          "caption": "shooting · Sony α7 IV · Wildlife"
+        },
+        "audi": {
+          "name": "Audi S5",
+          "caption": "driving · B8.5 · Tuning-Projekt"
+        },
+        "joggediballa": {
+          "name": "Jogge di Balla",
+          "caption": "co-running · Verein · Vize-Präsident"
+        },
+        "schnee": {
+          "name": "Schnee",
+          "caption": "carving · Ski/Snowboard · Wintersaison"
+        },
+        "tauchen": {
+          "name": "Tiefe",
+          "caption": "diving · certified"
+        },
+        "pingpong": {
+          "name": "Ping-Pong",
+          "caption": "chasing · zvoove-Champion-Titel"
+        }
+      }
+    }
+  },
+  "work": {
+    "sectionLabel": "Section 03 · Work",
+    "headline": "Zwei Projekte. Beide vibecoded.",
+    "subhead": "Keine Werkschau, kein Stack-Buffet. Zwei ernsthafte Webapps von Null auf Live.",
+    "vibecodedStamp": "vibecoded",
+    "projects": [
+      {
+        "id": "portfolio",
+        "title": "Manuels Portfolio",
+        "subtitle": "Toon Fluid",
+        "year": "MMXXVI",
+        "role": "Konzept · Design · Entwicklung · Hosting",
+        "stack": [
+          "Next.js 16",
+          "React 19",
+          "TypeScript",
+          "Tailwind v4",
+          "GSAP · ScrollTrigger",
+          "Lenis",
+          "R3F",
+          "WebGL Shader",
+          "next-intl",
+          "zustand · State"
+        ],
+        "description": "Diese Seite. Fullscreen GPU-Fluid-Simulation als Hero, Risograph-inspirierte Editorial-Ästhetik, vibecoded in mehrwöchigen Sessions mit Claude Code.",
+        "metaNote": "Du surfst gerade auf einer GPU-Fluid-Simulation. Kein Iframe, kein Video-Loop, keine Lottie-Datei. Echte Frames.",
+        "ctaLabel": "Du bist schon hier",
+        "screenshot": {
+          "alt": "Screenshot der Hero-Section von manuelheller.dev",
+          "caption": "manuelheller.dev · hero"
+        },
+        "reveal": {
+          "surname": "Heller,",
+          "given": "Manuel.",
+          "ariaAnnouncement": "Vorschau-Animation der Hero-Section"
+        }
+      },
+      {
+        "id": "joggediballa",
+        "title": "Jogge di Balla",
+        "subtitle": "Vereinsplattform",
+        "year": "MMXXIV–MMXXVI",
+        "role": "Konzept · Design · Fullstack · Hosting",
+        "stack": [
+          "React 19",
+          "Vite",
+          "TypeScript",
+          "tRPC",
+          "Drizzle ORM",
+          "MySQL",
+          "Tailwind",
+          "shadcn/ui"
+        ],
+        "description": "Eine massgeschneiderte All-in-One-Vereinsplattform: von der Mitgliederverwaltung bis zum Live-Twitch-Overlay, vibecoded mit modernem TypeScript-Stack.",
+        "screenshot": {
+          "alt": "Screenshot der öffentlichen Startseite von joggediballa.ch",
+          "caption": "joggediballa.ch · home"
+        },
+        "ctaLabel": "Case Study"
+      }
+    ]
+  },
+  "caseStudy": {
+    "sectionLabel": "Section 04 · Case Study",
+    "headline": "Vom Vereins-Chaos zur eigenen Plattform.",
+    "hook": "Alle Vereine kämpfen alle mit demselben Mist: Excel-Listen, statische Websites, File-/Information-Sharing, isolierte Tools. Für Jogge di Balla habe ich das aufgeräumt — eine massgeschneiderte Plattform, die von Mitgliederverwaltung bis Twitch-Overlay alles abdeckt. Vibecoded, selbst gehostet, übertrieben.",
+    "context": {
+      "label": "Was ist Jogge di Balla?",
+      "facts": [
+        {
+          "key": "Gegründet",
+          "value": "05.08.2022 in Brislach"
+        },
+        {
+          "key": "Aktive Mitglieder",
+          "value": "9"
+        },
+        {
+          "key": "Gönner verwaltet",
+          "value": "68+"
+        },
+        {
+          "key": "Events / Jahr",
+          "value": "4–8"
+        },
+        {
+          "key": "Instagram-Reichweite",
+          "value": "1067+ Follower · ~100k Views / 30 Tage"
+        }
+      ],
+      "story": [
+        "Idee zur Coronazeit: vier Freunde, nichts ging, also haben wir ausgefallene Events unter Freunden gemacht. Aus dem wurde dann ein Verein mit öffentlichen Event-Klassikern wie Schlag den Kassier, Silvester 2.0, Harassenlauf oder der beliebten Lotto-Party.",
+        "Meine Rolle: Vize-Präsident, Web-Entwickler, Vereinsfotograf, Kameramann, Social-Media-Manager. Weil ich das Skillset hatte und Perfektionist genug bin, um dem Verein nicht nur ein Gesicht, sondern eine eigene, selbst gehostete Webapp zu verpassen."
+      ]
+    },
+    "platform": {
+      "stack": [
+        {
+          "tech": "React 19 · Vite",
+          "use": "Frontend & Build"
+        },
+        {
+          "tech": "TypeScript",
+          "use": "Sprache (Fullstack)"
+        },
+        {
+          "tech": "tRPC",
+          "use": "API-Layer"
+        },
+        {
+          "tech": "Drizzle ORM · MySQL",
+          "use": "Datenbank"
+        },
+        {
+          "tech": "Tailwind · shadcn/ui",
+          "use": "Styling & Komponenten"
+        }
+      ]
+    },
+    "highlights": {
+      "items": [
+        {
+          "id": "admin",
+          "kicker": "Highlight 01 · Tech-Substanz",
+          "title": "Das Admin-Dashboard",
+          "lede": "Für Besucher unsichtbar, für die Website das Herzstück. Hier laufen alle Fäden zusammen.",
+          "screenshot": "admin-dashboard",
+          "screenshotAlt": "Admin-Dashboard mit Berechtigungs-Card und Mitgliederliste",
+          "features": [
+            {
+              "title": "Dynamisches Berechtigungssystem",
+              "body": "Granulare Rechte (edit_events, manage_sponsors, edit_shotcounter, …) per Card pro Rolle zuweisbar — ohne Code-Änderung. Backend prüft jeden tRPC-Call durch eine eigene requirePermission()-Middleware."
+            },
+            {
+              "title": "Anwesenheitsverwaltung mit Statistik",
+              "body": "Pro Event generierbare Anwesenheitsliste, Daten fliessen direkt in eine grafische Statistik. Fördert Übersicht und ein bisschen internen Wettbewerb."
+            },
+            {
+              "title": "Gönner-Lifecycle",
+              "body": "Sponsoren über das System. Status (aktiv / abgelaufen / neu) automatisch berechnet mit Finanz- und Adressmanagement für unseren Kassier."
+            }
+          ]
+        },
+        {
+          "id": "overlay",
+          "kicker": "Highlight 02 · Sichtbarstes Feature",
+          "title": "«Schlag den Kassier» Live-Overlay",
+          "lede": "Custom Twitch-Overlay direkt in die Plattform integriert. Statt teurer externer Dienste: einfach selbst gebaut.",
+          "screenshot": "overlay-stream",
+          "screenshotAlt": "Twitch-Overlay im Stream mit Live-Score und Vereinsdesign",
+          "features": [
+            {
+              "title": "Versteckte URL als Browser-Source",
+              "body": "OBS bindet /overlay/sdk ein, ein Control-Panel auf /overlay/sdk/control steuert den Spielstand live."
+            },
+            {
+              "title": "Echtzeit ohne Page-Reload",
+              "body": "tRPC-Polling synchronisiert das Overlay im Stream sofort. Goldener Shimmer-Effekt für Sieger, automatische Berechnung «mathematisch nicht mehr einholbar»."
+            },
+            {
+              "title": "Reichweite ehrlich klein",
+              "body": "~15–20 concurrent Viewer, ~100 total. Das Tooling ist trotzdem solide gebaut — und übertragbar."
+            }
+          ]
+        }
+      ]
+    },
+    "publicLayer": {
+      "label": "Öffentliche Schicht"
+    },
+    "reflection": {
+      "label": "Erkenntnisse",
+      "body": "Manuelles Testing hat mich damals viel Zeit gekostet. Heute würde ich das Setup von Anfang an mit automatisierten Tests und KI-Tools aufsetzen, um Fehler direkt im Keim zu ersticken und den Fokus voll aufs Deployment zu legen."
+    },
+    "footerLink": {
+      "label": "Live im Einsatz",
+      "url": "https://joggediballa.ch",
+      "domain": "joggediballa.ch",
+      "external": "öffnet in neuem Tab"
+    },
+    "lightbox": {
+      "closeLabel": "Lightbox schließen",
+      "previousLabel": "Vorheriges Bild",
+      "nextLabel": "Nächstes Bild",
+      "counterLabel": "{current} / {total}"
+    },
+    "stations": {
+      "hook": {
+        "datestamp": "2022.05",
+        "polaroidCaption": "Joggediballa · Mobile · Live"
+      },
+      "stack": {
+        "heading": "Stack-Notiz"
+      },
+      "highlightAdmin": {
+        "datestamp": "Admin · v3",
+        "polaroidCaption": "Admin-Dashboard · Daily Driver"
+      },
+      "highlightOverlay": {
+        "datestamp": "Twitch-Overlay",
+        "polaroidCaption": "Schlag-den-Kassier · Live-Stream"
+      },
+      "publicShots": [
+        {
+          "datestamp": "Stats",
+          "caption": "Statistik · Mitglieder & Saisons"
+        },
+        {
+          "datestamp": "Members",
+          "caption": "Gönnerverwaltung · CRM-Light"
+        },
+        {
+          "datestamp": "Form",
+          "caption": "Anmeldeformular · Mobile"
+        }
+      ]
+    }
+  },
+  "photography": {
+    "sectionLabel": "Section 05 · Photography",
+    "eyebrow": "Section 05 · Photography",
+    "headline": "Durch die Linse.",
+    "lede": "Wildlife und Autos sind meine zwei Welten. Die einen jage ich solo durch den Dschungel von Costa Rica oder Thailand, die anderen finden mich meist näher zuhause. Was beide verbindet: Geduld, Licht, und der eine Moment, der den ganzen Tag rechtfertigt. Mit der Sony α7 IV seit 2023 unterwegs.",
+    "techLabel": "SONY α7 IV · 24–600mm · seit 2023",
+    "ctaLabel": "Volles Portfolio auf manuelheller.myportfolio.com",
+    "ctaHref": "https://manuelheller.myportfolio.com/portfolio",
+    "ctaCaption": "",
+    "slides": {
+      "koenigsegg": {
+        "alt": "Koenigsegg-Hypercar unter einem Hotel-Bogen in der Abenddämmerung",
+        "stamp": "ST. MORITZ · 2025 · AUTO",
+        "title": "Stillstand bei 30 km/h.",
+        "body": "Manchmal ist das spannendste Bild nicht das mit der höchsten Verschlusszeit, sondern das mit dem Licht das nur fünf Minuten lang da ist."
+      },
+      "panorama": {
+        "alt": "Frachtschiffe vor einer dramatischen Wolkenformation am Horizont",
+        "stamp": "COSTA RICA · 2024 · SEASCAPE"
+      },
+      "treeLake": {
+        "alt": "Einsamer Baum am Ufer eines Sees, Spiegelung im Wasser, Costa Rica",
+        "stamp": "LAKE ARENAL · 2024 · LANDSCAPE",
+        "title": "Geduld als Bildkomposition.",
+        "body": "Lake Arenal: anderthalb Stunden auf den Wind gewartet, der die Wasseroberfläche endlich glättet. Reflexion macht das Bild, nicht der Baum."
+      },
+      "crocodile": {
+        "alt": "Krokodil mit einem Schmetterling auf der Schnauze, Costa Rica",
+        "stamp": "TÁRCOLES · 2024 · WILDLIFE"
+      },
+      "pelican": {
+        "alt": "Pelikan im Anflug über dem Pazifik, Costa Rica",
+        "stamp": "MANUEL ANTONIO · 2024 · WILDLIFE"
+      }
+    }
+  },
+  "contact": {
+    "sectionLabel": "Section 07 · Contact",
+    "headline": "Lass uns reden.",
+    "subhead": "Auftrag, Frage, Tipp oder einfach Hallo — die Inbox ist offen.",
+    "intro": {
+      "label": "Ein paar Worte vorab",
+      "body": "Ich antworte üblicherweise innerhalb von ein bis zwei Tagen. Für Recruiter und Anfragen aus der Vereinswelt: bitte kurz schreiben woher du kommst, das spart die zweite Mail."
+    },
+    "channels": {
+      "label": "Direkt-Kanäle",
+      "note": "GitHub ist nur semi-aktiv — kein 100-Repo-Glanzfassaden-Account.",
+      "email": "E-Mail",
+      "github": "GitHub",
+      "linkedin": "LinkedIn",
+      "photos": "Fotos"
+    },
+    "form": {
+      "name": {
+        "label": "Name",
+        "placeholder": "Wie heisst du?"
+      },
+      "email": {
+        "label": "E-Mail",
+        "placeholder": "deine@adresse.ch"
+      },
+      "message": {
+        "label": "Nachricht",
+        "placeholder": "Was beschäftigt dich? (mind. 10 Zeichen)"
+      },
+      "honeypot": {
+        "label": "Bitte nicht ausfüllen"
+      },
+      "submit": {
+        "label": "Senden",
+        "sending": "Sende …"
+      },
+      "requiredNote": "Alle Felder erforderlich",
+      "status": {
+        "fromLabel": "Von:",
+        "fallback": "Momentan in Einrichtung — schreib mir direkt:",
+        "error": "Hat nicht geklappt. Bitte direkt per E-Mail.",
+        "mailSubject": "Anfrage über manuelheller.dev"
+      }
+    }
+  }
+}
