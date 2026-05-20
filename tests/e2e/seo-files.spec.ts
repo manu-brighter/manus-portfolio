@@ -25,7 +25,9 @@ test.describe("@seo sitemap.xml", () => {
     expect(locMatches.length, "<loc> count").toBe(4);
     // Exactly the home URLs — no legal or playground paths.
     for (const locale of ["de", "en", "fr", "it"]) {
-      expect(body, `${locale} home loc`).toContain(`<loc>https://manuelheller.dev/${locale}/</loc>`);
+      expect(body, `${locale} home loc`).toContain(
+        `<loc>https://manuelheller.dev/${locale}/</loc>`,
+      );
     }
     expect(body, "must NOT contain impressum").not.toMatch(/impressum/i);
     expect(body, "must NOT contain datenschutz").not.toMatch(/datenschutz/i);
