@@ -116,4 +116,37 @@ test.describe("gpu.ts — matchRenderer pattern matching", () => {
   test("empty string → null", () => {
     expect(gpu.matchRenderer("")).toBeNull();
   });
+
+  // Mobile-Rework §5.1 GPU-Tier mapping
+  test("Apple A17 Pro → 'medium' (iPhone 15 Pro flagship)", () => {
+    expect(gpu.matchRenderer("Apple A17 Pro GPU")).toBe("medium");
+  });
+
+  test("Apple A18 → 'medium' (iPhone 16 base flagship)", () => {
+    expect(gpu.matchRenderer("Apple A18 GPU")).toBe("medium");
+  });
+
+  test("Adreno 750 → 'medium' (Snapdragon 8 Gen 3 flagship)", () => {
+    expect(gpu.matchRenderer("Adreno (TM) 750")).toBe("medium");
+  });
+
+  test("Adreno 730 → 'medium' (Snapdragon 8 Gen 1 flagship)", () => {
+    expect(gpu.matchRenderer("Adreno 730")).toBe("medium");
+  });
+
+  test("Apple A15 → 'low' (iPhone 13 mid-mobile)", () => {
+    expect(gpu.matchRenderer("Apple A15 Bionic GPU")).toBe("low");
+  });
+
+  test("Apple A16 → 'low' (iPhone 14 Pro mid-mobile)", () => {
+    expect(gpu.matchRenderer("Apple A16 Bionic GPU")).toBe("low");
+  });
+
+  test("Adreno 644 → 'low' (mid-tier Android)", () => {
+    expect(gpu.matchRenderer("Adreno 644")).toBe("low");
+  });
+
+  test("Apple A13 → 'minimal' (older iPhone)", () => {
+    expect(gpu.matchRenderer("Apple A13 Bionic GPU")).toBe("minimal");
+  });
 });
