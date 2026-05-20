@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo } from "react";
 import { HighlightCard } from "@/components/case-study/cards/HighlightCard";
@@ -13,7 +14,18 @@ import { DioramaLupe } from "@/components/case-study/DioramaLupe";
 import { DioramaTrack } from "@/components/case-study/DioramaTrack";
 import { Lightbox } from "@/components/case-study/Lightbox";
 import { buildPublicShotImage, LIGHTBOX_IMAGES } from "@/components/case-study/lightboxConfig";
+import { useMobileLayout } from "@/hooks/useMobileLayout";
 import { type LightboxImage, useLightboxStore } from "@/lib/lightboxStore";
+
+// Mobile-Rework spec §4.5: lazy-import the Mobile scrolly so Desktop
+// bundle stays free of the per-station Sim canvas wiring.
+const CaseStudyMobileScrolly = dynamic(
+  () =>
+    import("@/components/case-study/CaseStudyMobileScrolly").then(
+      (m) => m.CaseStudyMobileScrolly,
+    ),
+  { ssr: false },
+);
 import type {
   CaseStudyFacts,
   CaseStudyHighlightAdmin,
@@ -39,6 +51,7 @@ const PUBLIC_SHOT_CONFIG: {
 
 export function CaseStudy() {
   const t = useTranslations("caseStudy");
+  const isMobile = useMobileLayout();
 
   const facts = t.raw("context.facts") as CaseStudyFacts;
   const storyParas = t.raw("context.story") as CaseStudyStory;
@@ -189,6 +202,18 @@ export function CaseStudy() {
       />
     </div>
   );
+
+  // Mobile-Rework spec §4.5: vertical scrolly with per-station Sim
+  // transitions replaces the horizontal-pin Diorama. Desktop branch
+  // (Tablet + fine-pointer) is unchanged.
+  if (isMobile) {
+    return (
+      <>
+        <CaseStudyMobileScrolly handleOpen={handleOpen} publicShots={publicShots} />
+        <Lightbox />
+      </>
+    );
+  }
 
   // Desktop: full diorama with sticky-pin + horizontal scroll.
   return (
