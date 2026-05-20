@@ -5,6 +5,9 @@
 
 # Claude Code per-machine permission overrides (not shared)
 .claude/settings.local.json
+# Claude Code agent worktrees + per-session lock files — tooling state only
+.claude/worktrees/
+.claude/scheduled_tasks.lock
 
 # OS / editor
 .DS_Store
