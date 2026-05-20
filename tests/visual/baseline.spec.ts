@@ -28,8 +28,7 @@ async function hideCanvases(page: Page) {
     // canvas — global FluidSim + per-section mini-sim canvases
     // video    — coarse-pointer AmbientVideo fallback on Mobile
     // hero-skill-aura — conic-gradient halo, sub-pixel-drifts even under reducedMotion
-    content:
-      "canvas, video, .hero-skill-aura { visibility: hidden !important; }",
+    content: "canvas, video, .hero-skill-aura { visibility: hidden !important; }",
   });
   // Give the browser a frame to process the styleTag insertion + any
   // remaining layout/composite work before the screenshot stability poll.
@@ -40,6 +39,7 @@ test.describe("@visual phase 2 baseline", () => {
   // Desktop-chromium-project only. Webkit's WebGL stack produces too much
   // per-frame noise even with canvas-hidden + reducedMotion; the
   // mobile-chrome project runs the separate Mobile-viewport describe below.
+  // biome-ignore lint/correctness/noEmptyPattern: Playwright requires destructuring for the fixtures arg
   test.beforeEach(({}, testInfo) => {
     if (testInfo.project.name !== "chromium") test.skip();
   });

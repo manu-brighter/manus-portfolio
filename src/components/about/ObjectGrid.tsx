@@ -84,9 +84,7 @@ export function ObjectGrid({ variant = "grid" }: ObjectGridProps) {
       id="about-objects"
       aria-labelledby="about-objects-heading"
       className={
-        isStrip
-          ? "relative my-12"
-          : "plate-corners relative container-page-wide my-20 md:my-28"
+        isStrip ? "relative my-12" : "plate-corners relative container-page-wide my-20 md:my-28"
       }
     >
       {!isStrip && <PlateCornerMarks />}

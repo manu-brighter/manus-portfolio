@@ -20,13 +20,7 @@ import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 
 const MOBILE_MAX_WIDTH = 768;
 
-export function isMobileLayout({
-  coarse,
-  width,
-}: {
-  coarse: boolean;
-  width: number;
-}): boolean {
+export function isMobileLayout({ coarse, width }: { coarse: boolean; width: number }): boolean {
   return coarse && width < MOBILE_MAX_WIDTH;
 }
 
@@ -46,10 +40,6 @@ function getWidthServerSnapshot(): number {
 
 export function useMobileLayout(): boolean {
   const coarse = useCoarsePointer();
-  const width = useSyncExternalStore(
-    subscribeWidth,
-    getWidthSnapshot,
-    getWidthServerSnapshot,
-  );
+  const width = useSyncExternalStore(subscribeWidth, getWidthSnapshot, getWidthServerSnapshot);
   return isMobileLayout({ coarse, width });
 }
