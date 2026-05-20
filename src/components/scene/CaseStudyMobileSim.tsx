@@ -113,8 +113,18 @@ export function CaseStudyMobileSim({ stationIds }: Props) {
         start: "center center",
         once: false,
         onEnter: () => {
+          const orchestrator = orchestratorRef.current;
+          if (!orchestrator) return;
           const rgb = SPOT_RGB[color];
-          orchestratorRef.current?.injectSplat(0.5, 0.45, rgb, 0, -0.3);
+          // Multi-burst: a centre splat + two flanking offsets give the
+          // transition a wider visible impact than a single point-splat.
+          // Manuel's read of the previous single-splat behind bg-paper:
+          // "viel text und langweiliger vertical scroll, hast du da
+          // überhaupt was gemacht" — making the sim genuinely visible
+          // here is the entire point of the per-station transition.
+          orchestrator.injectSplat(0.5, 0.45, rgb, 0, -0.35, 0.05);
+          orchestrator.injectSplat(0.3, 0.55, rgb, -0.25, -0.2, 0.04);
+          orchestrator.injectSplat(0.7, 0.55, rgb, 0.25, -0.2, 0.04);
         },
       });
       triggers.push(trigger);

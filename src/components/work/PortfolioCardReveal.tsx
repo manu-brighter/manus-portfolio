@@ -153,7 +153,7 @@ export function PortfolioCardReveal({
             height={450}
             loading="lazy"
             decoding="async"
-            className="block h-full w-full object-cover object-top"
+            className="block h-full w-full object-cover object-center md:object-top"
           />
         </picture>
       </div>

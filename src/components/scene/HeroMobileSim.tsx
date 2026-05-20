@@ -178,9 +178,15 @@ export function HeroMobileSim() {
     };
   }, [reduced]);
 
-  // RAF loop with IO-pause-gate: only step the orchestrator when the
-  // Hero section is at least 20% in viewport. Cheap when paused (no GL
-  // work), responsive on resume.
+  // RAF loop with IO-pause-gate. Two non-obvious choices below:
+  // 1) Lowered threshold to 0.05 (was 0.2): partial visibility keeps the
+  //    sim alive so a small scroll doesn't pause/resume mid-section.
+  // 2) `virtualElapsedRef` only advances when the sim is in-view. The
+  //    orchestrator's ambient points are positioned via sin() of
+  //    elapsedMs; if elapsedMs jumped 500ms on every resume, every
+  //    ambient point would teleport — visually a hard blink. virtual-
+  //    Elapsed makes pause invisible: positions resume from where they
+  //    paused, not from where wall-clock-time landed them.
   useEffect(() => {
     if (reduced) return;
     const canvas = canvasRef.current;
@@ -189,19 +195,21 @@ export function HeroMobileSim() {
     const io = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          inViewRef.current = entry.intersectionRatio > 0.2;
+          inViewRef.current = entry.intersectionRatio > 0.05;
         }
       },
-      { threshold: [0, 0.2, 0.5, 0.8] },
+      { threshold: [0, 0.05, 0.5] },
     );
     io.observe(canvas);
 
-    const unsubRaf = subscribe((deltaMs, elapsedMs) => {
+    let virtualElapsedMs = 0;
+    const unsubRaf = subscribe((deltaMs) => {
       const orchestrator = orchestratorRef.current;
       if (!orchestrator) return;
       if (!inViewRef.current) return;
       const dt = Math.min(deltaMs * 0.001, MAX_DT_S);
-      orchestrator.step(dt, elapsedMs, pointerRef.current);
+      virtualElapsedMs += Math.min(deltaMs, MAX_DT_S * 1000);
+      orchestrator.step(dt, virtualElapsedMs, pointerRef.current);
       // Clear single-frame pointer-velocity so next frame starts fresh
       // unless touchmove re-populates dx/dy.
       pointerRef.current.dx = 0;

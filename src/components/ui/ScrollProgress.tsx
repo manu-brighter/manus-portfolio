@@ -195,8 +195,8 @@ export function ScrollProgress() {
               onClick={() => scrollTo(i)}
               aria-label={getLabel(section)}
               aria-current={i === activeIndex ? "location" : undefined}
-              className="group relative flex size-8 items-center justify-center"
-              style={{ opacity: i === activeIndex ? 1 : 0.45 }}
+              className="group relative flex size-11 cursor-pointer items-center justify-center"
+              style={{ opacity: i === activeIndex ? 1 : 0.45, touchAction: "manipulation" }}
             >
               {/* Outer ring (visible on active) */}
               <span

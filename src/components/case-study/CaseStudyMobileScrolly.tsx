@@ -80,7 +80,7 @@ export function CaseStudyMobileScrolly({ handleOpen, publicShots }: Props) {
   const stationIds = useMemo(() => [...STATION_IDS], []);
 
   return (
-    <section id="case-study" aria-labelledby="case-study-heading" className="relative bg-paper">
+    <section id="case-study" aria-labelledby="case-study-heading" className="relative">
       <h2 id="case-study-heading" className="sr-only">
         {t("headline")}
       </h2>
@@ -90,7 +90,11 @@ export function CaseStudyMobileScrolly({ handleOpen, publicShots }: Props) {
           prefers-reduced-motion (per CaseStudyMobileSim's own guard). */}
       {!reduced && <CaseStudyMobileSim stationIds={stationIds} />}
 
-      <div className="container-page flex flex-col gap-16 py-12">
+      {/* Removed bg-paper from section above so the sim canvas at -z-10
+          shows through in the gaps between stations. Cards keep their
+          bg-paper-tint, so the gap-32 spacers become the visible sim
+          surface where ScrollTrigger fires station-transition splats. */}
+      <div className="container-page relative flex flex-col gap-32 py-20">
         {/* Station 1: Hook */}
         <article data-testid="cs-station-hook" id="cs-station-hook" className="relative">
           <HookCard

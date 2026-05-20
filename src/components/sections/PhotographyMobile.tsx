@@ -126,23 +126,27 @@ export function PhotographyMobile() {
                 <source
                   type="image/avif"
                   srcSet={slide.widths
-                    .map((w) => `/photography/${slide.baseName}-${w}.avif ${w}w`)
+                    .map((w) => `/photography/${slide.baseName}-${w}w.avif ${w}w`)
                     .join(", ")}
                 />
                 <source
                   type="image/webp"
                   srcSet={slide.widths
-                    .map((w) => `/photography/${slide.baseName}-${w}.webp ${w}w`)
+                    .map((w) => `/photography/${slide.baseName}-${w}w.webp ${w}w`)
                     .join(", ")}
                 />
                 <img
-                  src={`/photography/${slide.baseName}-1200.jpg`}
+                  src={`/photography/${slide.baseName}-1200w.jpg`}
                   alt={t(`slides.${slide.stampKey}.alt`)}
                   loading={slideIndex === 0 ? "eager" : "lazy"}
                   className="max-h-full max-w-full object-contain"
                 />
               </picture>
-              <figcaption className="absolute right-6 bottom-6 max-w-[60%] type-label-stamp">
+              {/* Caption sits inside the image area with extra inset so
+                  it doesn't overflow on portrait-aspect slides
+                  (Koenigsegg, Tree-Lake) where the image is narrower than
+                  the slide bounds. max-w[80%] gives wrapping headroom. */}
+              <figcaption className="type-label-stamp absolute right-8 bottom-8 max-w-[80%]">
                 {t(`slides.${slide.stampKey}.stamp`)}
               </figcaption>
             </figure>
@@ -150,7 +154,11 @@ export function PhotographyMobile() {
         </section>
 
         {/* Pagination controls — prev | dots | next. Dots are 44×44
-            hit-area buttons (visually 12×12 with padding) per WCAG 2.5.5. */}
+            hit-area buttons (visually 12×12 with padding) per WCAG 2.5.5.
+            touch-action: manipulation removes iOS Safari's 300ms tap delay
+            + double-tap-zoom interception that swallowed some real-device
+            clicks. cursor-pointer added defensively (some iOS WebView
+            builds need it for click event to fire). */}
         <div className="container-page mt-6 flex items-center justify-between">
           <button
             type="button"
@@ -158,9 +166,10 @@ export function PhotographyMobile() {
             onClick={() => goTo(index - 1)}
             disabled={index === 0}
             aria-label={t("ariaPrev")}
-            className="type-label-stamp inline-flex min-h-[44px] min-w-[44px] items-center justify-center px-3 disabled:opacity-30"
+            className="inline-flex size-12 cursor-pointer items-center justify-center text-2xl text-ink disabled:opacity-30"
+            style={{ touchAction: "manipulation" }}
           >
-            ← {t("prev")}
+            <span aria-hidden="true">←</span>
           </button>
 
           <div
@@ -177,7 +186,8 @@ export function PhotographyMobile() {
                 aria-current={i === index ? "true" : "false"}
                 aria-label={t("ariaDot", { index: i + 1, total: SLIDES.length })}
                 onClick={() => goTo(i)}
-                className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center"
+                className="inline-flex min-h-[44px] min-w-[44px] cursor-pointer items-center justify-center"
+                style={{ touchAction: "manipulation" }}
               >
                 <span
                   aria-hidden="true"
@@ -195,9 +205,10 @@ export function PhotographyMobile() {
             onClick={() => goTo(index + 1)}
             disabled={index === SLIDES.length - 1}
             aria-label={t("ariaNext")}
-            className="type-label-stamp inline-flex min-h-[44px] min-w-[44px] items-center justify-center px-3 disabled:opacity-30"
+            className="inline-flex size-12 cursor-pointer items-center justify-center text-2xl text-ink disabled:opacity-30"
+            style={{ touchAction: "manipulation" }}
           >
-            {t("next")} →
+            <span aria-hidden="true">→</span>
           </button>
         </div>
 
