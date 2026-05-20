@@ -46,14 +46,13 @@ export default defineConfig({
     },
     // F-testing-coverage-2: Mobile Chrome project for hamburger nav and
     // coarse-pointer paths that are md:hidden on desktop (never exercised
-    // by the chromium + webkit projects above).
+    // by the chromium + webkit projects above). Also runs the Mobile
+    // visual baseline (post-Phase-1 of Mobile-Rework).
     {
       name: "mobile-chrome",
       use: { ...devices["Pixel 5"] },
-      // Only run the mobile-specific spec plus the shared smoke + axe suites.
-      // Skipping i18n (node-only, already runs in chromium) and visual
-      // (visual baseline is desktop-only) keeps CI time bounded.
-      testIgnore: /tests\/(i18n|visual)\//,
+      // i18n is node-only (already runs in chromium); skip from mobile.
+      testIgnore: /tests\/i18n\//,
     },
   ],
   webServer: {
