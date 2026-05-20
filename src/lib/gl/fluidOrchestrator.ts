@@ -205,23 +205,49 @@ function destroyDoubleFBO(gl: WebGL2RenderingContext, dfbo: DoubleFBO): void {
 // FluidOrchestrator
 // ---------------------------------------------------------------------------
 
-export class FluidOrchestrator {
-  private gl!: WebGL2RenderingContext;
-  private config!: TierConfig;
-  private programs!: Programs;
+// All GL-dependent state lives behind a single optional handle so init()
+// is the only place that constructs it. Eliminates the 8
+// definite-assignment assertions that the old `gl!: WebGL2RenderingContext`
+// shape required, and gives every method a single null-guard
+// (`requireState()`) instead of trusting `init()` was called.
+//
+// SF-3 (Mobile Rework pre-work) needs multi-instance orchestrators with
+// no cross-talk; bundling per-instance state in one object also makes
+// that boundary explicit.
+type GLState = {
+  gl: WebGL2RenderingContext;
+  config: TierConfig;
+  programs: Programs;
+  velocity: DoubleFBO;
+  dye: DoubleFBO;
+  pressure: DoubleFBO;
+  divergenceFBO: FBO;
+  curlFBO: FBO;
+  emptyVAO: WebGLVertexArrayObject | null;
+};
 
-  private velocity!: DoubleFBO;
-  private dye!: DoubleFBO;
-  private pressure!: DoubleFBO;
-  private divergenceFBO!: FBO;
-  private curlFBO!: FBO;
+/**
+ * FluidOrchestrator — Navier-Stokes ink simulation pipeline.
+ *
+ * Two equivalent ways to instantiate (post-SF-3):
+ * - **New call sites: prefer `createFluidOrchestrator()`** below. Factory-style
+ *   instantiation is the documented entry point for the Mobile Rework's
+ *   multi-instance sim spots and any future per-section sims.
+ * - **Existing call sites: `new FluidOrchestrator()` still works.** All 5
+ *   pre-SF-3 consumers (FluidSim, mini-sims, playground experiments) use
+ *   this form unchanged.
+ *
+ * Lifecycle: construct → `init(gl, config)` → `start()` or `triggerAmbient()`
+ * → `step()` per RAF → `dispose()`. `dispose()` is terminal — the instance
+ * is not designed to be reused (queue/counter state is not reset on dispose).
+ */
+export class FluidOrchestrator {
+  private state: GLState | null = null;
 
   private simWidth = 0;
   private simHeight = 0;
   private canvasWidth = 0;
   private canvasHeight = 0;
-
-  private emptyVAO: WebGLVertexArrayObject | null = null;
 
   private frameCount = 0;
   private paused = false;
@@ -278,9 +304,17 @@ export class FluidOrchestrator {
   // Lifecycle
   // ---------------------------------------------------------------------------
 
+  /** Returns the GL state or throws if `init()` was never called.
+   *  Replaces the old `!` definite-assignment-assertion contract with
+   *  an explicit precondition. */
+  private requireState(): GLState {
+    if (!this.state) {
+      throw new Error("FluidOrchestrator: init() must be called before use");
+    }
+    return this.state;
+  }
+
   init(gl: WebGL2RenderingContext, config: TierConfig): void {
-    this.gl = gl;
-    this.config = config;
     this.lastPointerTime = performance.now();
 
     // WebGL2: half-float filtering is core; rendering to float FBOs needs
@@ -297,7 +331,7 @@ export class FluidOrchestrator {
       sobel: sobelSrc,
     });
 
-    this.programs = {
+    const programs: Programs = {
       splat: createProgram(gl, quadVert, splatFrag, "fluid.splat"),
       curl: createProgram(gl, quadVert, curlFrag, "fluid.curl"),
       vorticity: createProgram(gl, quadVert, vorticityFrag, "fluid.vorticity"),
@@ -309,12 +343,33 @@ export class FluidOrchestrator {
       injectDensity: createProgram(gl, quadVert, injectDensityFrag, "fluid.inject-density"),
     };
 
-    this.emptyVAO = gl.createVertexArray();
-
-    // Create FBOs at initial size
+    // FBO geometry derives from the current drawing buffer; createSimFBOs()
+    // reads simWidth/simHeight off `this` so set those first.
     this.canvasWidth = gl.drawingBufferWidth;
     this.canvasHeight = gl.drawingBufferHeight;
-    this.createSimFBOs();
+    const aspectRatio = this.canvasWidth / this.canvasHeight;
+    this.simWidth = config.gridSize;
+    this.simHeight = Math.round(config.gridSize / aspectRatio);
+
+    const w = this.simWidth;
+    const h = this.simHeight;
+    const velocity = createDoubleFBO(gl, w, h, gl.RG16F, gl.RG, gl.HALF_FLOAT);
+    const dye = createDoubleFBO(gl, w, h, gl.RGBA16F, gl.RGBA, gl.HALF_FLOAT);
+    const pressure = createDoubleFBO(gl, w, h, gl.R16F, gl.RED, gl.HALF_FLOAT);
+    const divergenceFBO = createFBO(gl, w, h, gl.R16F, gl.RED, gl.HALF_FLOAT);
+    const curlFBO = createFBO(gl, w, h, gl.R16F, gl.RED, gl.HALF_FLOAT);
+
+    this.state = {
+      gl,
+      config,
+      programs,
+      velocity,
+      dye,
+      pressure,
+      divergenceFBO,
+      curlFBO,
+      emptyVAO: gl.createVertexArray(),
+    };
   }
 
   resize(width: number, height: number): void {
@@ -323,22 +378,41 @@ export class FluidOrchestrator {
     this.canvasWidth = width;
     this.canvasHeight = height;
 
-    // Destroy and recreate sim FBOs (aspect ratio may have changed)
-    this.destroyFBOs();
-    this.createSimFBOs();
+    // Destroy and recreate sim FBOs (aspect ratio may have changed).
+    // No-op if init() hasn't run yet — the next init() picks up
+    // canvasWidth/Height directly.
+    if (!this.state) return;
+    this.destroyFBOs(this.state);
+    this.createSimFBOs(this.state);
   }
 
+  /**
+   * Release all GL resources (programs, FBOs, VAOs) and null the state
+   * handle. Idempotent — calling dispose() twice is safe (second call
+   * early-returns on `!state`). StrictMode-safe — does NOT call
+   * `loseContext()` (see `.claude/CLAUDE.md`).
+   *
+   * **Terminal:** instance is not designed to be reused after dispose.
+   * Queue/counter state (`pendingSplats`, `frameCount`, `ambientStrength`,
+   * `started`, etc.) is not reset. If a caller does `dispose()` → `init()`
+   * the orchestrator wakes up in the prior session's state. No current
+   * consumer needs the reuse path; if a future one does, extend dispose()
+   * to also reset the non-GL state.
+   */
   dispose(): void {
-    const gl = this.gl;
-    this.destroyFBOs();
-    for (const program of Object.values(this.programs)) {
+    const state = this.state;
+    if (!state) return;
+    const gl = state.gl;
+    this.destroyFBOs(state);
+    for (const program of Object.values(state.programs)) {
       gl.deleteProgram(program);
     }
-    if (this.emptyVAO) {
-      gl.deleteVertexArray(this.emptyVAO);
-      this.emptyVAO = null;
+    if (state.emptyVAO) {
+      gl.deleteVertexArray(state.emptyVAO);
+      state.emptyVAO = null;
     }
     this.uniformCache.clear();
+    this.state = null;
   }
 
   pause(): void {
@@ -390,9 +464,15 @@ export class FluidOrchestrator {
    * up the new values on the very next frame without re-init / FBO
    * teardown. Used by Ink Drop Studio's Tweakpane sliders. Pressure-iters
    * changes are also live since the count is read inside the solve loop.
+   *
+   * **Contract:** `init()` must be called first. Calling setParams() on
+   * an uninitialised orchestrator throws via `requireState()`. (Pre-SF-3
+   * this silently spread into an undefined config — also broken, just
+   * quietly.)
    */
   setParams(partial: Partial<TierConfig>): void {
-    this.config = { ...this.config, ...partial };
+    const state = this.requireState();
+    state.config = { ...state.config, ...partial };
   }
 
   /**
@@ -437,21 +517,22 @@ export class FluidOrchestrator {
    * to call from a button).
    */
   reset(): void {
-    const gl = this.gl;
+    const state = this.requireState();
+    const gl = state.gl;
     const clearFBO = (fbo: FBO) => {
       gl.bindFramebuffer(gl.FRAMEBUFFER, fbo.framebuffer);
       gl.viewport(0, 0, fbo.width, fbo.height);
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT);
     };
-    clearFBO(this.velocity.read);
-    clearFBO(this.velocity.write);
-    clearFBO(this.dye.read);
-    clearFBO(this.dye.write);
-    clearFBO(this.pressure.read);
-    clearFBO(this.pressure.write);
-    clearFBO(this.divergenceFBO);
-    clearFBO(this.curlFBO);
+    clearFBO(state.velocity.read);
+    clearFBO(state.velocity.write);
+    clearFBO(state.dye.read);
+    clearFBO(state.dye.write);
+    clearFBO(state.pressure.read);
+    clearFBO(state.pressure.write);
+    clearFBO(state.divergenceFBO);
+    clearFBO(state.curlFBO);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
     this.pendingSplats.length = 0;
@@ -478,18 +559,19 @@ export class FluidOrchestrator {
     color: SpotColor | readonly [number, number, number],
     strength = 1.0,
   ): void {
-    const gl = this.gl;
+    const state = this.requireState();
+    const gl = state.gl;
     const resolved = typeof color === "string" ? SPOT_COLORS[color] : color;
-    const p = this.programs.injectDensity;
+    const p = state.programs.injectDensity;
     this.activateProgram(p);
-    this.bindTexture(p, "uDye", this.dye.read.texture, 0);
+    this.bindTexture(p, "uDye", state.dye.read.texture, 0);
     this.bindTexture(p, "uStamp", stamp, 1);
     this.setVec3(p, "uColor", resolved[0], resolved[1], resolved[2]);
     this.setFloat(p, "uStrength", strength);
-    gl.bindVertexArray(this.emptyVAO);
-    this.renderToFBO(this.dye.write);
+    gl.bindVertexArray(state.emptyVAO);
+    this.renderToFBO(state.dye.write);
     this.drawQuad();
-    this.dye.swap();
+    state.dye.swap();
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   }
 
@@ -509,6 +591,9 @@ export class FluidOrchestrator {
    * field saturates and the velocity field gets a real shockwave
    * outward, not just a single small dot. `color` is the active ink.
    */
+  // No requireState() here: this is a pure queue push (this.pendingSplats)
+  // with no GL access. step() drains the queue and gates draws on
+  // requireState() at the consumer side. Same pattern as injectSplat().
   injectBomb(x: number, y: number, color: SpotColor): void {
     const resolved = SPOT_COLORS[color];
     // 8 outward-pointing impulses around the centre + a stationary
@@ -533,35 +618,43 @@ export class FluidOrchestrator {
   // FBO management
   // ---------------------------------------------------------------------------
 
-  private createSimFBOs(): void {
-    const gl = this.gl;
+  /** Reallocate the sim FBOs against the current canvas size. Used by
+   *  resize() after the aspect ratio changes; init() inlines this work
+   *  so the state object can be constructed atomically. */
+  private createSimFBOs(state: GLState): void {
+    const gl = state.gl;
     const aspectRatio = this.canvasWidth / this.canvasHeight;
-    this.simWidth = this.config.gridSize;
-    this.simHeight = Math.round(this.config.gridSize / aspectRatio);
+    this.simWidth = state.config.gridSize;
+    this.simHeight = Math.round(state.config.gridSize / aspectRatio);
 
     const w = this.simWidth;
     const h = this.simHeight;
 
-    this.velocity = createDoubleFBO(gl, w, h, gl.RG16F, gl.RG, gl.HALF_FLOAT);
-    this.dye = createDoubleFBO(gl, w, h, gl.RGBA16F, gl.RGBA, gl.HALF_FLOAT);
-    this.pressure = createDoubleFBO(gl, w, h, gl.R16F, gl.RED, gl.HALF_FLOAT);
-    this.divergenceFBO = createFBO(gl, w, h, gl.R16F, gl.RED, gl.HALF_FLOAT);
-    this.curlFBO = createFBO(gl, w, h, gl.R16F, gl.RED, gl.HALF_FLOAT);
+    state.velocity = createDoubleFBO(gl, w, h, gl.RG16F, gl.RG, gl.HALF_FLOAT);
+    state.dye = createDoubleFBO(gl, w, h, gl.RGBA16F, gl.RGBA, gl.HALF_FLOAT);
+    state.pressure = createDoubleFBO(gl, w, h, gl.R16F, gl.RED, gl.HALF_FLOAT);
+    state.divergenceFBO = createFBO(gl, w, h, gl.R16F, gl.RED, gl.HALF_FLOAT);
+    state.curlFBO = createFBO(gl, w, h, gl.R16F, gl.RED, gl.HALF_FLOAT);
   }
 
-  private destroyFBOs(): void {
-    const gl = this.gl;
-    if (this.velocity) destroyDoubleFBO(gl, this.velocity);
-    if (this.dye) destroyDoubleFBO(gl, this.dye);
-    if (this.pressure) destroyDoubleFBO(gl, this.pressure);
-    if (this.divergenceFBO) destroyFBO(gl, this.divergenceFBO);
-    if (this.curlFBO) destroyFBO(gl, this.curlFBO);
+  private destroyFBOs(state: GLState): void {
+    const gl = state.gl;
+    destroyDoubleFBO(gl, state.velocity);
+    destroyDoubleFBO(gl, state.dye);
+    destroyDoubleFBO(gl, state.pressure);
+    destroyFBO(gl, state.divergenceFBO);
+    destroyFBO(gl, state.curlFBO);
   }
 
   // ---------------------------------------------------------------------------
   // Draw helpers & uniform cache
   // ---------------------------------------------------------------------------
 
+  // Hot-path helpers read `gl` through requireState() rather than a
+  // non-null assertion. requireState() is cheap (one truthy check); the
+  // alternative was a single `this.state!.gl` non-null assertion or
+  // re-plumbing `gl` through every helper signature. SF-3 explicitly
+  // tightened on this: no `!` assertions remain in this file.
   private getUniform(program: WebGLProgram, name: string): WebGLUniformLocation | null {
     let programMap = this.uniformCache.get(program);
     if (!programMap) {
@@ -569,26 +662,26 @@ export class FluidOrchestrator {
       this.uniformCache.set(program, programMap);
     }
     if (!programMap.has(name)) {
-      programMap.set(name, this.gl.getUniformLocation(program, name));
+      programMap.set(name, this.requireState().gl.getUniformLocation(program, name));
     }
     return programMap.get(name) ?? null;
   }
 
   private activateProgram(program: WebGLProgram): void {
     // biome-ignore lint/correctness/useHookAtTopLevel: gl.useProgram is a WebGL API, not a React hook
-    this.gl.useProgram(program);
+    this.requireState().gl.useProgram(program);
   }
 
   private setFloat(program: WebGLProgram, name: string, value: number): void {
-    this.gl.uniform1f(this.getUniform(program, name), value);
+    this.requireState().gl.uniform1f(this.getUniform(program, name), value);
   }
 
   private setVec2(program: WebGLProgram, name: string, x: number, y: number): void {
-    this.gl.uniform2f(this.getUniform(program, name), x, y);
+    this.requireState().gl.uniform2f(this.getUniform(program, name), x, y);
   }
 
   private setVec3(program: WebGLProgram, name: string, r: number, g: number, b: number): void {
-    this.gl.uniform3f(this.getUniform(program, name), r, g, b);
+    this.requireState().gl.uniform3f(this.getUniform(program, name), r, g, b);
   }
 
   private bindTexture(
@@ -597,18 +690,19 @@ export class FluidOrchestrator {
     texture: WebGLTexture,
     unit: number,
   ): void {
-    const gl = this.gl;
+    const gl = this.requireState().gl;
     gl.activeTexture(gl.TEXTURE0 + unit);
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.uniform1i(this.getUniform(program, name), unit);
   }
 
   private drawQuad(): void {
-    this.gl.drawArrays(this.gl.TRIANGLES, 0, 3);
+    const gl = this.requireState().gl;
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
 
   private renderToFBO(fbo: FBO): void {
-    const gl = this.gl;
+    const gl = this.requireState().gl;
     gl.viewport(0, 0, fbo.width, fbo.height);
     gl.bindFramebuffer(gl.FRAMEBUFFER, fbo.framebuffer);
   }
@@ -628,55 +722,59 @@ export class FluidOrchestrator {
     color: readonly [number, number, number],
     radiusOverride?: number,
   ): void {
-    const p = this.programs.splat;
+    const state = this.requireState();
+    const p = state.programs.splat;
     this.activateProgram(p);
 
     // Velocity splat
-    this.bindTexture(p, "uTarget", this.velocity.read.texture, 0);
+    this.bindTexture(p, "uTarget", state.velocity.read.texture, 0);
     this.setFloat(p, "uAspectRatio", this.canvasWidth / this.canvasHeight);
     this.setVec2(p, "uPoint", x, y);
-    this.setFloat(p, "uRadius", radiusOverride ?? this.config.splatRadius);
+    this.setFloat(p, "uRadius", radiusOverride ?? state.config.splatRadius);
     this.setVec3(p, "uColor", dx * 10.0, dy * 10.0, 0.0);
-    this.renderToFBO(this.velocity.write);
+    this.renderToFBO(state.velocity.write);
     this.drawQuad();
-    this.velocity.swap();
+    state.velocity.swap();
 
     // Dye splat — scale intensity down so dye stays in [0,1] range
     // and doesn't overwhelm the toon shader's Sobel edge detection.
     const dyeScale = 0.15;
-    this.bindTexture(p, "uTarget", this.dye.read.texture, 0);
+    this.bindTexture(p, "uTarget", state.dye.read.texture, 0);
     this.setVec3(p, "uColor", color[0] * dyeScale, color[1] * dyeScale, color[2] * dyeScale);
-    this.renderToFBO(this.dye.write);
+    this.renderToFBO(state.dye.write);
     this.drawQuad();
-    this.dye.swap();
+    state.dye.swap();
   }
 
   private runCurl(): void {
-    const p = this.programs.curl;
+    const state = this.requireState();
+    const p = state.programs.curl;
     this.activateProgram(p);
-    this.bindTexture(p, "uVelocity", this.velocity.read.texture, 0);
+    this.bindTexture(p, "uVelocity", state.velocity.read.texture, 0);
     this.setVec2(p, "uTexelSize", 1.0 / this.simWidth, 1.0 / this.simHeight);
-    this.renderToFBO(this.curlFBO);
+    this.renderToFBO(state.curlFBO);
     this.drawQuad();
   }
 
   private runVorticity(dt: number): void {
-    const p = this.programs.vorticity;
+    const state = this.requireState();
+    const p = state.programs.vorticity;
     this.activateProgram(p);
-    this.bindTexture(p, "uVelocity", this.velocity.read.texture, 0);
-    this.bindTexture(p, "uCurl", this.curlFBO.texture, 1);
+    this.bindTexture(p, "uVelocity", state.velocity.read.texture, 0);
+    this.bindTexture(p, "uCurl", state.curlFBO.texture, 1);
     this.setVec2(p, "uTexelSize", 1.0 / this.simWidth, 1.0 / this.simHeight);
-    this.setFloat(p, "uConfinement", this.config.confinement);
+    this.setFloat(p, "uConfinement", state.config.confinement);
     this.setFloat(p, "uDt", dt);
-    this.renderToFBO(this.velocity.write);
+    this.renderToFBO(state.velocity.write);
     this.drawQuad();
-    this.velocity.swap();
+    state.velocity.swap();
   }
 
   private runAdvect(target: DoubleFBO, dissipation: number, dt: number): void {
-    const p = this.programs.advect;
+    const state = this.requireState();
+    const p = state.programs.advect;
     this.activateProgram(p);
-    this.bindTexture(p, "uVelocity", this.velocity.read.texture, 0);
+    this.bindTexture(p, "uVelocity", state.velocity.read.texture, 0);
     this.bindTexture(p, "uSource", target.read.texture, 1);
     this.setVec2(p, "uTexelSize", 1.0 / this.simWidth, 1.0 / this.simHeight);
     this.setFloat(p, "uDt", dt);
@@ -687,43 +785,47 @@ export class FluidOrchestrator {
   }
 
   private runDivergence(): void {
-    const p = this.programs.divergence;
+    const state = this.requireState();
+    const p = state.programs.divergence;
     this.activateProgram(p);
-    this.bindTexture(p, "uVelocity", this.velocity.read.texture, 0);
+    this.bindTexture(p, "uVelocity", state.velocity.read.texture, 0);
     this.setVec2(p, "uTexelSize", 1.0 / this.simWidth, 1.0 / this.simHeight);
-    this.renderToFBO(this.divergenceFBO);
+    this.renderToFBO(state.divergenceFBO);
     this.drawQuad();
   }
 
   private runPressure(): void {
-    const p = this.programs.pressure;
+    const state = this.requireState();
+    const p = state.programs.pressure;
     this.activateProgram(p);
     this.setVec2(p, "uTexelSize", 1.0 / this.simWidth, 1.0 / this.simHeight);
-    this.bindTexture(p, "uDivergence", this.divergenceFBO.texture, 1);
+    this.bindTexture(p, "uDivergence", state.divergenceFBO.texture, 1);
 
-    for (let i = 0; i < this.config.pressureIterations; i++) {
-      this.bindTexture(p, "uPressure", this.pressure.read.texture, 0);
-      this.renderToFBO(this.pressure.write);
+    for (let i = 0; i < state.config.pressureIterations; i++) {
+      this.bindTexture(p, "uPressure", state.pressure.read.texture, 0);
+      this.renderToFBO(state.pressure.write);
       this.drawQuad();
-      this.pressure.swap();
+      state.pressure.swap();
     }
   }
 
   private runGradientSubtract(): void {
-    const p = this.programs.gradientSub;
+    const state = this.requireState();
+    const p = state.programs.gradientSub;
     this.activateProgram(p);
-    this.bindTexture(p, "uPressure", this.pressure.read.texture, 0);
-    this.bindTexture(p, "uVelocity", this.velocity.read.texture, 1);
+    this.bindTexture(p, "uPressure", state.pressure.read.texture, 0);
+    this.bindTexture(p, "uVelocity", state.velocity.read.texture, 1);
     this.setVec2(p, "uTexelSize", 1.0 / this.simWidth, 1.0 / this.simHeight);
-    this.renderToFBO(this.velocity.write);
+    this.renderToFBO(state.velocity.write);
     this.drawQuad();
-    this.velocity.swap();
+    state.velocity.swap();
   }
 
   private runRenderToon(elapsed: number): void {
-    const p = this.programs.renderToon;
+    const state = this.requireState();
+    const p = state.programs.renderToon;
     this.activateProgram(p);
-    this.bindTexture(p, "uDye", this.dye.read.texture, 0);
+    this.bindTexture(p, "uDye", state.dye.read.texture, 0);
     this.setVec2(p, "uTexelSize", 1.0 / this.canvasWidth, 1.0 / this.canvasHeight);
     this.setFloat(p, "uLevels", 4.0);
     this.setFloat(p, "uOutlineThreshold", 0.15);
@@ -744,7 +846,7 @@ export class FluidOrchestrator {
     );
 
     // Render directly to screen (default framebuffer)
-    const gl = this.gl;
+    const gl = state.gl;
     gl.viewport(0, 0, this.canvasWidth, this.canvasHeight);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     this.drawQuad();
@@ -793,7 +895,11 @@ export class FluidOrchestrator {
       return;
     }
 
-    const gl = this.gl;
+    // step() may fire before init() (e.g. from a stale closure during
+    // teardown). Bail silently rather than throwing into the RAF loop.
+    if (!this.state) return;
+    const state = this.state;
+    const gl = state.gl;
     this.frameCount++;
 
     // Pre-warmup gate: while !started, skip all expensive sim passes
@@ -805,7 +911,7 @@ export class FluidOrchestrator {
     // don't dump as a glitch when ambient kicks in.
     if (!this.started) {
       this.pendingSplats.length = 0;
-      gl.bindVertexArray(this.emptyVAO);
+      gl.bindVertexArray(state.emptyVAO);
       gl.disable(gl.BLEND);
       this.runRenderToon(elapsed);
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -840,13 +946,13 @@ export class FluidOrchestrator {
     }
 
     // Bind empty VAO for attribute-less draws (avoids driver warnings)
-    gl.bindVertexArray(this.emptyVAO);
+    gl.bindVertexArray(state.emptyVAO);
 
     // Disable blending for all sim passes
     gl.disable(gl.BLEND);
 
     // Sim-step: skipped on odd frames at half-rate
-    const runSim = !this.config.halfRate || this.frameCount % 2 === 0;
+    const runSim = !state.config.halfRate || this.frameCount % 2 === 0;
 
     if (runSim) {
       // Splat from pointer (hero default; studio mode disables this and
@@ -901,20 +1007,20 @@ export class FluidOrchestrator {
       }
 
       // Clear pressure field before solve
-      gl.bindFramebuffer(gl.FRAMEBUFFER, this.pressure.read.framebuffer);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, state.pressure.read.framebuffer);
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT);
-      gl.bindFramebuffer(gl.FRAMEBUFFER, this.pressure.write.framebuffer);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, state.pressure.write.framebuffer);
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.clearColor(0, 0, 0, 1);
 
       this.runCurl();
       this.runVorticity(dt);
-      this.runAdvect(this.velocity, this.config.velocityDissipation, dt);
+      this.runAdvect(state.velocity, state.config.velocityDissipation, dt);
       this.runDivergence();
       this.runPressure();
       this.runGradientSubtract();
-      this.runAdvect(this.dye, this.config.dyeDissipation, dt);
+      this.runAdvect(state.dye, state.config.dyeDissipation, dt);
     }
 
     // Render-toon always runs (even at half-rate)
@@ -924,4 +1030,27 @@ export class FluidOrchestrator {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.bindVertexArray(null);
   }
+}
+
+// ---------------------------------------------------------------------------
+// Factory
+// ---------------------------------------------------------------------------
+
+/**
+ * Public factory for FluidOrchestrator instances.
+ *
+ * SF-3 introduced this alongside the existing `new FluidOrchestrator()`
+ * constructor so callers that prefer factory-style instantiation (Mobile
+ * Rework's multi-instance sim spots — see
+ * `docs/superpowers/specs/2026-05-20-mobile-rework-design.md` Section
+ * 3.3) get a stable entry point. The constructor remains available for
+ * existing call sites; both produce identical instances.
+ *
+ * Each call returns an independent orchestrator with its own GL state.
+ * Per-instance state lives behind `state: GLState | null`, so two
+ * orchestrators on different canvases can't trip over each other's
+ * uniforms / FBOs.
+ */
+export function createFluidOrchestrator(): FluidOrchestrator {
+  return new FluidOrchestrator();
 }
