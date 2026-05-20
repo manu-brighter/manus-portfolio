@@ -65,42 +65,59 @@ function TileStamp({ k, spotVar }: { k: StampKey; spotVar: string }) {
   }
 }
 
-export function ObjectGrid() {
+type ObjectGridProps = {
+  /**
+   * Layout variant.
+   * - `grid` (default) — original 2-col / 3-col responsive grid for Desktop + Tablet.
+   * - `mobile-strip` — horizontal scroll-snap row for Mobile-Rework Phase 6.
+   *   Tiles align to viewport with one fully-visible tile per snap.
+   */
+  variant?: "grid" | "mobile-strip";
+};
+
+export function ObjectGrid({ variant = "grid" }: ObjectGridProps) {
   const t = useTranslations("about.objectGrid");
+  const isStrip = variant === "mobile-strip";
 
   return (
     <section
       id="about-objects"
       aria-labelledby="about-objects-heading"
-      className="plate-corners relative container-page-wide my-20 md:my-28"
+      className={
+        isStrip
+          ? "relative my-12"
+          : "plate-corners relative container-page-wide my-20 md:my-28"
+      }
     >
-      <PlateCornerMarks />
-      <header className="mb-10 md:mb-14">
+      {!isStrip && <PlateCornerMarks />}
+      <header className={isStrip ? "container-page mb-6" : "mb-10 md:mb-14"}>
         <p className="type-label text-ink-muted">{t("sectionLabel")}</p>
         <h3 id="about-objects-heading" className="type-h2 mt-2 italic text-ink">
           {t("headline")}
         </h3>
-        {/* Full band on desktop; truncated to a stamp on mobile because
-            the long mono string with letter-spacing 0.22em + nowrap
-            blows past the viewport edge on narrow screens. */}
         <p className="mt-3 type-label-stamp hidden md:inline-flex">{t("currentlyBand")}</p>
         <p className="mt-3 type-label-stamp md:hidden">{t("currentlyBandShort")}</p>
       </header>
 
-      <ul className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6">
+      <ul
+        className={
+          isStrip
+            ? "flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-4"
+            : "grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6"
+        }
+        style={isStrip ? { scrollbarWidth: "none" } : undefined}
+      >
         {TILES.map((tile) => {
           const cssVars = { "--tile-spot": SPOT_VAR[tile.spot] } as CSSProperties;
           return (
-            <li key={tile.key} className="list-none">
-              {/* TileFigure adds `data-active=true` on coarse-pointer
-                  viewport-entry. The data-[active=true]:* variants
-                  below mirror the hover: variants so the same
-                  choreography fires on scroll-into-view on mobile. */}
+            <li
+              key={tile.key}
+              className={isStrip ? "list-none w-[72vw] shrink-0 snap-center" : "list-none"}
+            >
               <TileFigure
                 className="group relative flex h-full flex-col gap-3 border-[1.5px] border-ink bg-paper-tint p-4 transition-transform duration-[280ms] ease-out hover:rotate-[-1.5deg] data-[active=true]:rotate-[-1.5deg] md:p-5"
                 style={cssVars}
               >
-                {/* Hover-flood: spot-color sweeps from top-left corner. */}
                 <span
                   aria-hidden="true"
                   className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-[280ms] ease-out group-hover:opacity-30 group-data-[active=true]:opacity-30"
