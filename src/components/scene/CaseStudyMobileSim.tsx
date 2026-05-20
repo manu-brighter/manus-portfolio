@@ -116,15 +116,12 @@ export function CaseStudyMobileSim({ stationIds }: Props) {
           const orchestrator = orchestratorRef.current;
           if (!orchestrator) return;
           const rgb = SPOT_RGB[color];
-          // Multi-burst: a centre splat + two flanking offsets give the
-          // transition a wider visible impact than a single point-splat.
-          // Manuel's read of the previous single-splat behind bg-paper:
-          // "viel text und langweiliger vertical scroll, hast du da
-          // überhaupt was gemacht" — making the sim genuinely visible
-          // here is the entire point of the per-station transition.
-          orchestrator.injectSplat(0.5, 0.45, rgb, 0, -0.35, 0.05);
-          orchestrator.injectSplat(0.3, 0.55, rgb, -0.25, -0.2, 0.04);
-          orchestrator.injectSplat(0.7, 0.55, rgb, 0.25, -0.2, 0.04);
+          // Canvas is sticky at viewport size, so UV (0.5, 0.5) is the
+          // visible centre. Multi-burst: centre + 2 flanking offsets to
+          // widen the visible impact beyond a single point splat.
+          orchestrator.injectSplat(0.5, 0.5, rgb, 0, -0.35, 0.06);
+          orchestrator.injectSplat(0.28, 0.62, rgb, -0.25, -0.2, 0.05);
+          orchestrator.injectSplat(0.72, 0.62, rgb, 0.25, -0.2, 0.05);
         },
       });
       triggers.push(trigger);
@@ -167,13 +164,23 @@ export function CaseStudyMobileSim({ stationIds }: Props) {
 
   if (reduced) return null;
 
+  // Sticky canvas pinned to top-0 with viewport-height. Earlier `absolute
+  // inset-0` made the canvas span the entire ~3000px-tall section, so
+  // splats at UV (0.5, 0.45) all stacked at the mathematical midpoint of
+  // the section regardless of where in scroll the user actually was —
+  // visual symptom: "ganze zeit nicht, dann mitte flackert in allen
+  // farben". Sticky positioning keeps the canvas at viewport size so
+  // splat (0.5, 0.5) always lands at viewport centre, where the user
+  // is currently looking when each ScrollTrigger fires.
   return (
-    <canvas
-      ref={canvasRef}
-      data-testid="cs-mobile-sim"
-      aria-hidden="true"
-      tabIndex={-1}
-      className="pointer-events-none absolute inset-0 -z-10 h-full w-full"
-    />
+    <div className="pointer-events-none absolute inset-0 -z-10">
+      <canvas
+        ref={canvasRef}
+        data-testid="cs-mobile-sim"
+        aria-hidden="true"
+        tabIndex={-1}
+        className="sticky top-0 block h-screen w-full"
+      />
+    </div>
   );
 }

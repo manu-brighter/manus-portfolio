@@ -120,9 +120,15 @@ export function PhotographyMobile() {
                 index: slideIndex + 1,
                 total: SLIDES.length,
               })}
-              className="relative flex h-full w-full shrink-0 snap-center items-center justify-center px-6"
+              className="relative flex h-full w-full shrink-0 snap-center flex-col items-center justify-center gap-4 px-6 py-6"
             >
-              <picture>
+              {/* Image area capped at 62vh so the figcaption below it has
+                  guaranteed flow-space inside the 75vh slide bounds.
+                  Portrait-aspect images (Koenigsegg, Tree-Lake) were
+                  filling the full height and pushing the caption-overlay
+                  on top of the image; the column layout + max-height
+                  pair fixes that. */}
+              <picture className="flex max-h-[62vh] w-full items-center justify-center">
                 <source
                   type="image/avif"
                   srcSet={slide.widths
@@ -139,14 +145,10 @@ export function PhotographyMobile() {
                   src={`/photography/${slide.baseName}-1200w.jpg`}
                   alt={t(`slides.${slide.stampKey}.alt`)}
                   loading={slideIndex === 0 ? "eager" : "lazy"}
-                  className="max-h-full max-w-full object-contain"
+                  className="max-h-[62vh] max-w-full object-contain"
                 />
               </picture>
-              {/* Caption sits inside the image area with extra inset so
-                  it doesn't overflow on portrait-aspect slides
-                  (Koenigsegg, Tree-Lake) where the image is narrower than
-                  the slide bounds. max-w[80%] gives wrapping headroom. */}
-              <figcaption className="type-label-stamp absolute right-8 bottom-8 max-w-[80%]">
+              <figcaption className="type-label-stamp max-w-[90%] self-end text-right">
                 {t(`slides.${slide.stampKey}.stamp`)}
               </figcaption>
             </figure>
