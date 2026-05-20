@@ -80,11 +80,7 @@ export function CaseStudyMobileScrolly({ handleOpen, publicShots }: Props) {
   const stationIds = useMemo(() => [...STATION_IDS], []);
 
   return (
-    <section
-      id="case-study"
-      aria-labelledby="case-study-heading"
-      className="relative bg-paper"
-    >
+    <section id="case-study" aria-labelledby="case-study-heading" className="relative bg-paper">
       <h2 id="case-study-heading" className="sr-only">
         {t("headline")}
       </h2>
@@ -155,11 +151,7 @@ export function CaseStudyMobileScrolly({ handleOpen, publicShots }: Props) {
         </article>
 
         {/* Station 4: Public shots */}
-        <article
-          data-testid="cs-station-public"
-          id="cs-station-public"
-          className="relative"
-        >
+        <article data-testid="cs-station-public" id="cs-station-public" className="relative">
           <PublicCard
             shots={publicShots}
             reflectionLabel={t("reflection.label")}

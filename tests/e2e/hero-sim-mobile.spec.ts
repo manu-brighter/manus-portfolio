@@ -19,9 +19,7 @@ test.describe("Hero mobile sim", () => {
     await page.goto("/de/");
     await page.waitForLoadState("networkidle");
 
-    const heroCanvas = page.locator(
-      'section#hero canvas[data-testid="hero-mobile-sim"]',
-    );
+    const heroCanvas = page.locator('section#hero canvas[data-testid="hero-mobile-sim"]');
     await expect(heroCanvas).toBeVisible();
   });
 

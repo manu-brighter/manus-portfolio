@@ -162,6 +162,7 @@ export function CaseStudyMobileSim({ stationIds }: Props) {
       ref={canvasRef}
       data-testid="cs-mobile-sim"
       aria-hidden="true"
+      tabIndex={-1}
       className="pointer-events-none absolute inset-0 -z-10 h-full w-full"
     />
   );

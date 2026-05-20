@@ -142,6 +142,7 @@ export function PhotoSwiperSim({ spot, index }: Props) {
       ref={canvasRef}
       data-testid="photo-swiper-sim"
       aria-hidden="true"
+      tabIndex={-1}
       className="pointer-events-none absolute inset-0 -z-10 h-full w-full"
     />
   );

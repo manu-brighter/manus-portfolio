@@ -17,15 +17,6 @@ import { buildPublicShotImage, LIGHTBOX_IMAGES } from "@/components/case-study/l
 import { useMobileLayout } from "@/hooks/useMobileLayout";
 import { type LightboxImage, useLightboxStore } from "@/lib/lightboxStore";
 
-// Mobile-Rework spec §4.5: lazy-import the Mobile scrolly so Desktop
-// bundle stays free of the per-station Sim canvas wiring.
-const CaseStudyMobileScrolly = dynamic(
-  () =>
-    import("@/components/case-study/CaseStudyMobileScrolly").then(
-      (m) => m.CaseStudyMobileScrolly,
-    ),
-  { ssr: false },
-);
 import type {
   CaseStudyFacts,
   CaseStudyHighlightAdmin,
@@ -37,6 +28,14 @@ import type {
   CaseStudyStackStation,
   CaseStudyStory,
 } from "@/types/i18n-shapes";
+
+// Mobile-Rework spec §4.5: lazy-import the Mobile scrolly so Desktop
+// bundle stays free of the per-station Sim canvas wiring.
+const CaseStudyMobileScrolly = dynamic(
+  () =>
+    import("@/components/case-study/CaseStudyMobileScrolly").then((m) => m.CaseStudyMobileScrolly),
+  { ssr: false },
+);
 
 const PUBLIC_SHOT_CONFIG: {
   slug: string;

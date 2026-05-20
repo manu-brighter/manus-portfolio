@@ -232,6 +232,7 @@ export function HeroMobileSim() {
       ref={canvasRef}
       data-testid="hero-mobile-sim"
       aria-hidden="true"
+      tabIndex={-1}
       className="pointer-events-auto absolute inset-0 -z-10 h-full w-full"
     />
   );

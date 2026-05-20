@@ -84,11 +84,7 @@ export function PhotographyMobile() {
   const current = SLIDES[index] ?? SLIDES[0];
 
   return (
-    <section
-      id="photography"
-      aria-labelledby="photography-heading"
-      className="relative py-12"
-    >
+    <section id="photography" aria-labelledby="photography-heading" className="relative py-12">
       <header className="container-page mb-8">
         <p className="type-label text-ink-muted">{t("eyebrow")}</p>
         <h2 id="photography-heading" className="type-h2 mt-2 italic text-ink">
@@ -101,12 +97,15 @@ export function PhotographyMobile() {
 
         {/* Horizontal swiper: scroll-snap-x mandatory, one slide per
             snap, native touch scrolling. Keyboard ArrowLeft/Right also
-            navigates via the onKey handler on the focusable region. */}
-        <div
-          ref={trackRef}
-          role="region"
+            navigates via the onKey handler on the focusable region.
+            Uses <section> over <div role="region"> per useSemanticElements.
+            tabIndex={0} is intentional per W3C ARIA carousel pattern —
+            the region is the keyboard focus stop for arrow-key nav. */}
+        <section
+          ref={trackRef as React.RefObject<HTMLElement>}
           aria-roledescription="carousel"
           aria-label={t("ariaCarouselLabel")}
+          // biome-ignore lint/a11y/noNoninteractiveTabindex: ARIA carousel pattern — region is tab stop for arrow-key nav
           tabIndex={0}
           onKeyDown={onKey}
           className="flex h-[75vh] snap-x snap-mandatory overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-spot-mint)] focus-visible:ring-offset-2"
@@ -148,7 +147,7 @@ export function PhotographyMobile() {
               </figcaption>
             </figure>
           ))}
-        </div>
+        </section>
 
         {/* Pagination controls — prev | dots | next. Dots are 44×44
             hit-area buttons (visually 12×12 with padding) per WCAG 2.5.5. */}
@@ -164,7 +163,11 @@ export function PhotographyMobile() {
             ← {t("prev")}
           </button>
 
-          <div className="flex items-center gap-1" role="tablist" aria-label={t("ariaPaginationLabel")}>
+          <div
+            className="flex items-center gap-1"
+            role="tablist"
+            aria-label={t("ariaPaginationLabel")}
+          >
             {SLIDES.map((slide, i) => (
               <button
                 key={slide.baseName}
