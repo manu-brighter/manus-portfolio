@@ -3,6 +3,7 @@
 import { Component, createContext, type ReactNode, useContext, useEffect, useState } from "react";
 import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useGPUCapability } from "@/hooks/useGPUCapability";
+import { useMobileLayout } from "@/hooks/useMobileLayout";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import type { GPUTier, TierConfig } from "@/lib/gpu";
 import { isLoaderComplete, subscribeToLoaderComplete } from "@/lib/loaderSession";
@@ -120,6 +121,15 @@ export function SceneProvider({ children }: SceneProviderProps) {
   }, []);
   const isCoarsePointer = recordOverride ? false : rawCoarsePointer;
 
+  // Mobile-Rework mode-split: on Mobile-phone layouts (coarse + viewport
+  // < 768) the global background sim/video is suppressed entirely. Each
+  // section that wants its own sim mounts a scroll-attached canvas in
+  // its own DOM scope (Hero, Photography, Case-Study). Tablets and
+  // larger coarse-pointer devices fall through to the existing
+  // AmbientVideo path; fine-pointer Desktop falls through to the live
+  // SceneCanvas + FluidSim path.
+  const isMobile = useMobileLayout();
+
   useEffect(() => {
     if (canvasMounted) return;
     const FRESH_LOAD_DEFER = 1700;
@@ -154,7 +164,7 @@ export function SceneProvider({ children }: SceneProviderProps) {
         // immediately — no GPU cost to defer. Only the WebGL Canvas path
         // is gated on `canvasMounted` to skip mobile first-paint contention.
         <StaticFallback />
-      ) : !canvasMounted ? null : isCoarsePointer ? (
+      ) : isMobile ? null : !canvasMounted ? null : isCoarsePointer ? (
         // Mobile / coarse-pointer: pre-recorded video loop instead of
         // live WebGL. Video element survives iOS Safari's tile-
         // compositor cull during momentum scroll where the WebGL
