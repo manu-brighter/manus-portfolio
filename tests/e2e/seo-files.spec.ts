@@ -15,13 +15,12 @@ test.describe("@seo sitemap.xml", () => {
     const body = await response.text();
     // Root element + sitemap-protocol namespace
     expect(body).toContain('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"');
-    // At least one <url><loc> entry — sitemap.ts emits 12 entries
-    // (4 locales × 3 static paths: /, /impressum, /datenschutz).
-    // Playground slugs were removed from the sitemap because robots.txt
-    // disallows /playground/* — emitting them would create a
-    // sitemap-vs-robots conflict for Google's canonicalisation.
+    // sitemap.ts emits 4 entries — one home per locale. Legal pages
+    // (impressum, datenschutz) and playground experiments are noindex'd
+    // at the page level, so listing them here would send Google a
+    // contradictory "discover-but-don't-index" signal.
     const locMatches = body.match(/<loc>/g) ?? [];
-    expect(locMatches.length, "<loc> count").toBeGreaterThanOrEqual(12);
+    expect(locMatches.length, "<loc> count").toBeGreaterThanOrEqual(4);
     // hreflang alternates emitted via xhtml:link rel="alternate"
     expect(body).toContain("xhtml:link");
     expect(body).toContain('rel="alternate"');
@@ -40,7 +39,8 @@ test.describe("@seo robots.txt", () => {
     expect(body, "must point at sitemap.xml").toMatch(/Sitemap:\s*\S*sitemap\.xml/);
     // Allow line-wrapped Disallow paths but reject "Disallow: /"
     // alone (would deindex everything). robots.ts emits
-    // disallow: ["/playground/*", "/_next/", "/api/"] which is fine.
+    // disallow: ["/_next/"] which is fine — noindex routes use the
+    // page-level robots meta tag instead of a robots.txt disallow.
     const disallowAll = /^Disallow:\s*\/\s*$/m.test(body);
     expect(disallowAll, "must NOT have Disallow: / (full-site deindex)").toBe(false);
   });

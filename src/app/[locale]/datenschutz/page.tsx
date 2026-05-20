@@ -18,6 +18,8 @@ export async function generateMetadata({ params }: DatenschutzPageProps): Promis
   return {
     title: t("metaTitle"),
     description: t("metaDescription"),
+    // See impressum/page.tsx — same rationale.
+    robots: { index: false, follow: true },
   };
 }
 

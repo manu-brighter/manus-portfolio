@@ -18,6 +18,10 @@ export async function generateMetadata({ params }: ImpressumPageProps): Promise<
   return {
     title: t("metaTitle"),
     description: t("metaDescription"),
+    // Legal boilerplate has no SEO value and exposes contact info to scrapers.
+    // `follow` stays true so Google can still discover outbound links from
+    // datenschutz (e.g. to upstream policies).
+    robots: { index: false, follow: true },
   };
 }
 

@@ -19,14 +19,18 @@ import { SITE } from "@/lib/site";
  * has spotty support, so the JPG is the safe bet).
  *
  * Playground experiment routes (`/[locale]/playground/[slug]`) are
- * intentionally excluded — they're decorative, not content. Blocked
- * via robots.txt (`/*\/playground/*`).
+ * intentionally excluded — they're decorative, not content. The pages
+ * themselves carry `robots: { index: false }`; not listing them here
+ * is the second signal.
+ *
+ * Legal pages (impressum, datenschutz) are also excluded — they're
+ * noindex'd via page-level metadata, so listing them in the sitemap
+ * would send Google a contradictory signal ("discover this URL" +
+ * "don't index it"). Footer links keep them discoverable for users.
  *
  * lastModified is set to the build time. We don't track per-route
  * content edits; for a portfolio that's fine.
  */
-const STATIC_PATHS = ["", "/impressum", "/datenschutz"] as const;
-
 // Every craft image visible on the home page that's worth surfacing
 // in Google Image Search. Each entry uses the JPG fallback width
 // (matching what optimize-assets.mjs emits) for maximum crawler
@@ -48,40 +52,21 @@ const HOME_IMAGES = [
   `${SITE.url}/projects/portfolio/homepage-800w.jpg`,
 ];
 
-// Per-path crawl-hint tuning. Home shifts more often (typo fixes,
-// content polish, new case studies) so signal weekly; legal pages are
-// boilerplate that rarely changes — yearly is honest. Google treats
-// these as hints not commands, but explicit honest values reduce
-// wasted crawl budget.
-const CHANGE_FREQ = {
-  "": "weekly",
-  "/impressum": "yearly",
-  "/datenschutz": "yearly",
-} as const;
-
 export const dynamic = "force-static";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
-  const entries: MetadataRoute.Sitemap = [];
 
-  for (const locale of routing.locales) {
-    for (const path of STATIC_PATHS) {
-      const url = `${SITE.url}/${locale}${path}/`;
-      entries.push({
-        url,
-        lastModified: now,
-        changeFrequency: CHANGE_FREQ[path],
-        priority: path === "" ? 1.0 : 0.5,
-        ...(path === "" ? { images: HOME_IMAGES } : {}),
-        alternates: {
-          languages: Object.fromEntries(
-            routing.locales.filter((l) => l !== locale).map((l) => [l, `${SITE.url}/${l}${path}/`]),
-          ),
-        },
-      });
-    }
-  }
-
-  return entries;
+  return routing.locales.map((locale) => ({
+    url: `${SITE.url}/${locale}/`,
+    lastModified: now,
+    changeFrequency: "weekly" as const,
+    priority: 1.0,
+    images: HOME_IMAGES,
+    alternates: {
+      languages: Object.fromEntries(
+        routing.locales.filter((l) => l !== locale).map((l) => [l, `${SITE.url}/${l}/`]),
+      ),
+    },
+  }));
 }
