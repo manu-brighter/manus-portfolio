@@ -226,6 +226,21 @@ type GLState = {
   emptyVAO: WebGLVertexArrayObject | null;
 };
 
+/**
+ * FluidOrchestrator — Navier-Stokes ink simulation pipeline.
+ *
+ * Two equivalent ways to instantiate (post-SF-3):
+ * - **New call sites: prefer `createFluidOrchestrator()`** below. Factory-style
+ *   instantiation is the documented entry point for the Mobile Rework's
+ *   multi-instance sim spots and any future per-section sims.
+ * - **Existing call sites: `new FluidOrchestrator()` still works.** All 5
+ *   pre-SF-3 consumers (FluidSim, mini-sims, playground experiments) use
+ *   this form unchanged.
+ *
+ * Lifecycle: construct → `init(gl, config)` → `start()` or `triggerAmbient()`
+ * → `step()` per RAF → `dispose()`. `dispose()` is terminal — the instance
+ * is not designed to be reused (queue/counter state is not reset on dispose).
+ */
 export class FluidOrchestrator {
   private state: GLState | null = null;
 
@@ -371,6 +386,19 @@ export class FluidOrchestrator {
     this.createSimFBOs(this.state);
   }
 
+  /**
+   * Release all GL resources (programs, FBOs, VAOs) and null the state
+   * handle. Idempotent — calling dispose() twice is safe (second call
+   * early-returns on `!state`). StrictMode-safe — does NOT call
+   * `loseContext()` (see `.claude/CLAUDE.md`).
+   *
+   * **Terminal:** instance is not designed to be reused after dispose.
+   * Queue/counter state (`pendingSplats`, `frameCount`, `ambientStrength`,
+   * `started`, etc.) is not reset. If a caller does `dispose()` → `init()`
+   * the orchestrator wakes up in the prior session's state. No current
+   * consumer needs the reuse path; if a future one does, extend dispose()
+   * to also reset the non-GL state.
+   */
   dispose(): void {
     const state = this.state;
     if (!state) return;
@@ -436,6 +464,11 @@ export class FluidOrchestrator {
    * up the new values on the very next frame without re-init / FBO
    * teardown. Used by Ink Drop Studio's Tweakpane sliders. Pressure-iters
    * changes are also live since the count is read inside the solve loop.
+   *
+   * **Contract:** `init()` must be called first. Calling setParams() on
+   * an uninitialised orchestrator throws via `requireState()`. (Pre-SF-3
+   * this silently spread into an undefined config — also broken, just
+   * quietly.)
    */
   setParams(partial: Partial<TierConfig>): void {
     const state = this.requireState();
@@ -558,6 +591,9 @@ export class FluidOrchestrator {
    * field saturates and the velocity field gets a real shockwave
    * outward, not just a single small dot. `color` is the active ink.
    */
+  // No requireState() here: this is a pure queue push (this.pendingSplats)
+  // with no GL access. step() drains the queue and gates draws on
+  // requireState() at the consumer side. Same pattern as injectSplat().
   injectBomb(x: number, y: number, color: SpotColor): void {
     const resolved = SPOT_COLORS[color];
     // 8 outward-pointing impulses around the centre + a stationary

@@ -120,11 +120,27 @@ test.describe("FluidOrchestrator — live multi-instance smoke", () => {
     "HAS_WEBGL=0 set — skipping browser-fixture orchestrator tests",
   );
 
-  test("two orchestrator instances live on the same page without crashing", async ({ page }) => {
-    // Collect console errors and uncaught exceptions throughout the
-    // run. Multi-instance cross-talk surfaces here (e.g. shared module
-    // state would lose a context, throw `INVALID_OPERATION`, or crash
-    // on dispose).
+  test("two orchestrator instances coexist on home (hero + mini-sim)", async ({ page }) => {
+    // Multi-instance contract: Mobile-Rework Phase 3-5 will mount three
+    // concurrent orchestrators (Hero scroll-attached, Photography swiper,
+    // Case-Study scrolly). This test asserts the existing Home page
+    // already runs at least 2 orchestrators (Hero FluidSim + a Playground
+    // mini-sim activated via focus) without cross-talk crashes — a
+    // strict subset of the Mobile-Rework guarantee that we can verify
+    // pre-Mobile-Rework.
+    //
+    // What "cross-talk" looks like if it regresses:
+    //   - INVALID_OPERATION GL errors from a shared FBO/texture handle
+    //   - dispose-during-active-step exceptions surfaced as pageerror
+    //   - Module-level singleton mutations that survive instance bounds
+    // All would surface as page.on('pageerror') or console errors.
+    //
+    // What this test does NOT cover:
+    //   - True state-isolation between instances (would require a
+    //     window-side getter on each orchestrator, which we don't want
+    //     in prod). The coexistence + steady-state-no-error test is the
+    //     practical regression net without dev instrumentation.
+
     const errors: string[] = [];
     const consoleErrors: string[] = [];
     page.on("pageerror", (err) => errors.push(err.message));
@@ -134,30 +150,56 @@ test.describe("FluidOrchestrator — live multi-instance smoke", () => {
       }
     });
 
-    // Home mounts the root FluidSim (orchestrator #1) plus the
-    // Playground section with two InkDropMiniSim instances
-    // (orchestrators #2 and #3 — they mount lazily as cards enter
-    // viewport, but the playground section is below the fold so we
-    // scroll to trigger them).
     await page.goto("/de/");
-    // Wait for the root FluidSim canvas to register.
-    await page.waitForSelector("canvas", { state: "attached" });
-    // Scroll to playground so mini-sims mount.
+    await page.waitForLoadState("networkidle");
+
+    // Hero FluidSim mounts via SceneProvider — its canvas should be in
+    // the DOM after networkidle. Single-canvas baseline.
+    const heroOnly = await page.locator("canvas").count();
+    expect(heroOnly, "hero FluidSim canvas should be mounted").toBeGreaterThanOrEqual(1);
+
+    // Scroll Playground into view, then focus a card to activate its
+    // InkDropMiniSim. Per CLAUDE.md "Mini-sims on cards stay paused
+    // after first hover/focus" — focus triggers the mount, hover would
+    // too but focus is more reliable in headless runs.
     await page.evaluate(() => {
-      const el = document.querySelector("#playground");
-      el?.scrollIntoView({ behavior: "instant", block: "start" });
+      document
+        .querySelector("#playground")
+        ?.scrollIntoView({ behavior: "instant", block: "start" });
     });
-    // Give RAF a few hundred ms to settle so any cross-talk crashes
-    // would have surfaced.
+    await page.waitForTimeout(400);
+
+    const playgroundCard = page.locator('a[href*="/playground/"]').first();
+    await playgroundCard.scrollIntoViewIfNeeded();
+    await playgroundCard.focus();
+
+    // Mini-sim mount + first RAF frame.
+    await page.waitForTimeout(1500);
+
+    // Coexistence assertion: at least 2 canvases now (hero + mini-sim).
+    // If the FluidOrchestrator factory regressed multi-instance support
+    // (e.g. module-level state collision), the mini-sim either fails to
+    // mount or throws, taking the canvas count back below 2.
+    const coexisting = await page.locator("canvas").count();
+    expect(
+      coexisting,
+      `after Playground card focus, expected ≥2 canvases (hero + mini-sim), got ${coexisting}`,
+    ).toBeGreaterThanOrEqual(2);
+
+    // Steady-state — RAF runs for both orchestrators, any deferred
+    // cross-talk would surface as a GL error in console.
     await page.waitForTimeout(800);
 
-    // No GL errors, no orchestrator dispose-during-active-step crashes.
     const fatal = errors.filter((e) => !/ResizeObserver loop/i.test(e));
     expect(fatal, `Page errors during multi-instance run: ${fatal.join(" | ")}`).toEqual([]);
-    // Soft expectation on console.error — some third-party noise (font
-    // preload mismatch in dev) is tolerable, but orchestrator-tagged
-    // errors are not.
-    const orchestratorErrors = consoleErrors.filter((e) => /orchestrator|fluid/i.test(e));
-    expect(orchestratorErrors).toEqual([]);
+
+    // Orchestrator-tagged console errors (filter out unrelated noise
+    // like font-preload mismatch in dev mode).
+    const orchestratorRelated = consoleErrors.filter((e) =>
+      /orchestrator|fluid|webgl|INVALID_OPERATION/i.test(e),
+    );
+    expect(orchestratorRelated, `Orchestrator errors: ${orchestratorRelated.join(" | ")}`).toEqual(
+      [],
+    );
   });
 });
