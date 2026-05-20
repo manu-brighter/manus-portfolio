@@ -1,10 +1,20 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
 import { PhotoInkMask, type SpotColor } from "@/components/scene/PhotoInkMask";
 import { useLenis } from "@/hooks/useLenis";
+import { useMobileLayout } from "@/hooks/useMobileLayout";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+
+// Mobile-Rework spec §4.6: Mobile-phone layout collapses 5 vertical slots
+// into a horizontal swiper. Lazy-imported so Desktop bundle stays free of
+// the swiper component + its own PhotoSwiperSim canvas wiring.
+const PhotographyMobile = dynamic(
+  () => import("@/components/sections/PhotographyMobile").then((m) => m.PhotographyMobile),
+  { ssr: false },
+);
 
 /**
  * Photography — Section 05 · "Through the Lens".
@@ -282,6 +292,13 @@ function PhotoFrame({ slide, index, total }: { slide: Slide; index: number; tota
 
 export function Photography() {
   const t = useTranslations("photography");
+  const isMobile = useMobileLayout();
+
+  // Mobile-phone layout: hand off to the swiper variant entirely. Tablets
+  // and Desktop fall through to the original 5-slot editorial flow below.
+  if (isMobile) {
+    return <PhotographyMobile />;
+  }
 
   return (
     <section
