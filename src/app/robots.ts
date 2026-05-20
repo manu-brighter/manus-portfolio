@@ -2,14 +2,16 @@ import type { MetadataRoute } from "next";
 import { SITE } from "@/lib/site";
 
 /**
- * robots.txt — production allows all crawlers, disallows the
- * playground experiments (decorative, not content) + .next internals.
+ * robots.txt — production allows all crawlers; only `/_next/` internals are
+ * disallowed.
  *
- * The playground rules use `/*\/playground/*` (wildcard) because the
- * actual routes are locale-prefixed (`/de/playground/...` etc), not
- * bare `/playground/`. The bare `/playground/*` pattern alone is kept
- * as a belt-and-suspenders for any future un-prefixed redirects.
- * Google supports `*` wildcards in robots.txt paths.
+ * Routes we don't want indexed (playground experiments, legal pages,
+ * styleguide) use page-level `robots: { index: false }` metadata instead
+ * of robots.txt disallow. Rationale: a robots.txt disallow stops the crawl
+ * before Google can read the noindex tag — if a third party links to the
+ * URL, it can still appear in SERPs as a snippet-less listing. noindex on
+ * a crawl-allowed page is the only signal that reliably keeps a URL out of
+ * the index.
  *
  * For preview deploys / local builds, set NEXT_PUBLIC_ROBOTS_DISALLOW=true
  * to disallow everything (prevents Lighthouse/preview URLs from being
@@ -32,7 +34,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/playground/*", "/*/playground/*", "/_next/", "/api/"],
+        disallow: ["/_next/"],
       },
     ],
     sitemap: `${SITE.url}/sitemap.xml`,

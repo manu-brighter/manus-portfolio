@@ -242,7 +242,17 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 ## Launch / SEO / metadata
 
 - **`src/lib/seo/metadata.ts`** builds per-locale `Metadata`. Hard-sets
-  `robots: { index: true, follow: true }` from this sprint forward.
+  `robots: { index: true, follow: true }` — the default for content routes.
+  Routes that should NOT be indexed override `robots` at the page level
+  (page-level metadata field-replaces the layout's `robots` object, not
+  deep-merges): `not-found.tsx`, root `page.tsx` (locale-redirect),
+  `[locale]/styleguide`, `[locale]/impressum`, `[locale]/datenschutz`,
+  `[locale]/playground/[slug]`. Legal pages use `index: false, follow: true`
+  (allow link discovery); playground + styleguide use `false, false`
+  (dead-end routes). `robots.txt` does NOT disallow these — noindex on a
+  crawl-allowed page is the only signal that reliably prevents snippet-less
+  URL listings when third parties link to the URL. Sitemap excludes them too
+  for the same coherence.
 - **`metadataBase` in both root layout and `[locale]` layout** — required
   by `next/og` for relative URL resolution.
 - **OG / Twitter images at `[locale]/opengraph-image.tsx` + `twitter-image.tsx`**

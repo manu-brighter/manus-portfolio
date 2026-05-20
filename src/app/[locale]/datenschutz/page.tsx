@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { use } from "react";
 import { LegalDocument } from "@/components/legal/LegalDocument";
 import { routing } from "@/i18n/routing";
+import { SITE } from "@/lib/site";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -18,6 +19,9 @@ export async function generateMetadata({ params }: DatenschutzPageProps): Promis
   return {
     title: t("metaTitle"),
     description: t("metaDescription"),
+    // See impressum/page.tsx — same rationale for canonical + robots.
+    alternates: { canonical: `${SITE.url}/${locale}/datenschutz/` },
+    robots: { index: false, follow: true },
   };
 }
 

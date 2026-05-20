@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
@@ -5,6 +6,14 @@ import { ExperimentRouter } from "@/components/playground/ExperimentRouter";
 import { loadNamespaceGroup } from "@/i18n/messages";
 import { routing } from "@/i18n/routing";
 import { EXPERIMENTS, getExperiment } from "@/lib/content/playground";
+
+// Playground experiments are decorative, not portfolio content. noindex stops
+// them from cluttering brand SERPs. We allow crawling (no robots.txt disallow)
+// so Google reliably sees this tag — relying solely on robots.txt risks
+// snippet-less URL listings when third parties link to an experiment.
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 /**
  * Per-experiment route. Static-export-friendly: every (locale × slug)
