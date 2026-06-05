@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Component, createContext, type ReactNode, useContext, useEffect, useState } from "react";
 import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useGPUCapability } from "@/hooks/useGPUCapability";
@@ -12,6 +13,13 @@ import { AmbientVideo } from "./AmbientVideo";
 import { FluidSim } from "./FluidSim";
 import { SceneCanvas } from "./SceneCanvas";
 import { StaticFallback } from "./StaticFallback";
+
+// Mobile-phone background sim — dynamic + ssr:false so the Desktop bundle
+// stays free of the orchestrator wiring (Desktop uses SceneCanvas + FluidSim).
+const MobileBackgroundSim = dynamic(
+  () => import("./MobileBackgroundSim").then((m) => m.MobileBackgroundSim),
+  { ssr: false },
+);
 
 type SceneContextValue = {
   tier: GPUTier;
@@ -164,7 +172,14 @@ export function SceneProvider({ children }: SceneProviderProps) {
         // immediately — no GPU cost to defer. Only the WebGL Canvas path
         // is gated on `canvasMounted` to skip mobile first-paint contention.
         <StaticFallback />
-      ) : isMobile ? null : !canvasMounted ? null : isCoarsePointer ? (
+      ) : !canvasMounted ? null : isMobile ? (
+        // Mobile-phone: one full-page background sim behind all content
+        // (replaces the per-section HeroMobileSim). The scroll-drain masks
+        // the iOS fixed-WebGL momentum-scroll cull. Gated on `canvasMounted`
+        // like Desktop so the WebGL context compiles after the loader, not
+        // during it. See MobileBackgroundSim.
+        <MobileBackgroundSim />
+      ) : isCoarsePointer ? (
         // Mobile / coarse-pointer: pre-recorded video loop instead of
         // live WebGL. Video element survives iOS Safari's tile-
         // compositor cull during momentum scroll where the WebGL

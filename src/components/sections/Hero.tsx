@@ -1,18 +1,8 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { OverprintReveal } from "@/components/motion/OverprintReveal";
-import { useMobileLayout } from "@/hooks/useMobileLayout";
-
-// HeroMobileSim is Mobile-only — lazy import keeps Desktop bundle free
-// of the per-section orchestrator wiring (Desktop uses the global
-// SceneProvider FluidSim instead, see spec §3.2 Mode-Split).
-const HeroMobileSim = dynamic(
-  () => import("@/components/scene/HeroMobileSim").then((m) => m.HeroMobileSim),
-  { ssr: false },
-);
 
 /**
  * Hero — Section 00.
@@ -34,7 +24,6 @@ const HeroMobileSim = dynamic(
  */
 export function Hero() {
   const t = useTranslations("hero");
-  const isMobile = useMobileLayout();
 
   return (
     <section
@@ -42,11 +31,6 @@ export function Hero() {
       aria-labelledby="hero-heading"
       className="container-page grid-12 relative min-h-[calc(100dvh-9rem)] items-end gap-y-12 py-16 md:py-24"
     >
-      {/* Mobile-Rework spec §4.1: scroll-attached sim canvas lives inside
-          the Hero section on Mobile only. Desktop keeps its global
-          fixed-position FluidSim via SceneProvider. */}
-      {isMobile && <HeroMobileSim />}
-
       <div className="stamp-column col-span-12 self-start text-ink-muted md:col-span-4">
         <span className="type-label">{t("statusStamps.section")}</span>
         <span className="type-label">{t("statusStamps.status")}</span>
