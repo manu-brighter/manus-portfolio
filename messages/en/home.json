@@ -423,6 +423,17 @@
     ]
   },
   "caseStudy": {
+    "carousel": {
+      "ariaLabel": "Case-Study Stationen",
+      "ariaPaginationLabel": "Stationswahl",
+      "ariaPrev": "Vorherige Station",
+      "ariaNext": "Nächste Station",
+      "ariaDot": "Station {index} von {total}",
+      "ariaSlideOf": "Station {index} von {total}: {label}",
+      "ariaLive": "Station {index} von {total}: {label}",
+      "swipeHint": "Seitlich wischen für die ganze Case-Study",
+      "stationLabels": ["Hook", "Kontext & Stack", "Highlights", "Öffentliche Schicht"]
+    },
     "sectionLabel": "Section 04 · Case Study",
     "headline": "From club chaos to a custom platform.",
     "hook": "All clubs fight the same mess: Excel sheets, static websites, file/info sharing, isolated tools. For Jogge di Balla I cleaned that up: a custom-built platform that covers everything from member management to a Twitch overlay. Vibecoded, self-hosted, over-engineered.",
@@ -662,8 +673,8 @@
       "requiredNote": "All fields required",
       "status": {
         "fromLabel": "From:",
-        "fallback": "Currently being set up — write me directly:",
-        "error": "Didn't go through. Please email me directly.",
+        "success": "Thanks, your message arrived — I'll be in touch.",
+        "error": "Didn't go through — write me directly:",
         "mailSubject": "Enquiry via manuelheller.dev"
       }
     }
