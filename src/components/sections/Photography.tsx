@@ -110,16 +110,33 @@ const SLIDES: readonly [Slide, Slide, Slide, Slide, Slide] = [
 ];
 
 /**
- * Reveal trigger band: the photo fires its ink-dissolve once its centre
- * lands inside the central viewport strip. `rootMargin: "-44% 0px -44% 0px"`
- * + `threshold: 0` gives us a 12vh-tall active band centred on the
- * viewport — same hysteresis as the previous rAF-throttled scroll
- * listener, but routed through a single shared IntersectionObserver so
- * the 5 PhotoFrame instances no longer each register their own
- * window-scroll listener (5x rAF coalescing → 1x browser-managed IO).
+ * Reveal trigger line: the photo fires its ink-dissolve only once the
+ * photo's OWN vertical centre crosses the viewport's vertical centre —
+ * i.e. after the middle of the photo has passed the middle of the screen.
+ * This leaves the still photo on screen long enough for the user to play
+ * with the live fluid sim over it before it auto-dissolves. (The earlier
+ * "-44%" band fired when the photo's *edge* merely reached the central
+ * strip, which read as revealing far too early.)
+ *
+ * Mechanic: `rootMargin: "-49.5% 0px -49.5% 0px"` shrinks the IO root to a
+ * ~1%-tall band straddling the viewport centre (a sliver of height, not a
+ * pure zero-height line — so the exact centre frame can't slip between IO
+ * samples and an edge-touch is never an ambiguous zero-area intersection).
+ * We do NOT observe the figure itself — a rising element (scroll-down)
+ * trips `isIntersecting` at its leading TOP edge, so the figure would fire
+ * when its top edge reached the line (way too early). Instead each frame
+ * exposes a sentinel that
+ * spans the figure's BOTTOM HALF, so the sentinel's leading *top* edge
+ * sits exactly on the photo's centre. Scrolling down, that top edge
+ * touches the centre line at the instant the photo's centre reaches it,
+ * and `isIntersecting` flips true there — firing the one-shot reveal.
+ * The sentinel is tall (~half the photo), so fast wheel flicks and
+ * Lenis smooth-scroll jumps can't skip the crossing the way a thin marker
+ * could. Still a single shared IntersectionObserver across all PhotoFrame
+ * instances (one browser-managed observer, no per-frame scroll listener).
  */
 const REVEAL_OBSERVER_OPTIONS: IntersectionObserverInit = {
-  rootMargin: "-44% 0px -44% 0px",
+  rootMargin: "-49.5% 0px -49.5% 0px",
   threshold: 0,
 };
 
@@ -159,6 +176,10 @@ function getRevealObserver(): IntersectionObserver {
 function PhotoFrame({ slide, index, total }: { slide: Slide; index: number; total: number }) {
   const t = useTranslations("photography");
   const ref = useRef<HTMLDivElement | null>(null);
+  // Centre sentinel (bottom-half overlay); its top edge sits on the photo's
+  // vertical centre. The shared reveal observer watches THIS, not the figure
+  // — see REVEAL_OBSERVER_OPTIONS for why.
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
   const [reveal, setReveal] = useState(false);
   const lenis = useLenis();
   const reducedMotion = useReducedMotion();
@@ -169,7 +190,10 @@ function PhotoFrame({ slide, index, total }: { slide: Slide; index: number; tota
   // that was 5 scroll listeners each spinning their own rAF chain on
   // every scroll event. One shared IO replaces all of it.
   useEffect(() => {
-    const el = ref.current;
+    // Observe the centre sentinel, not the figure: the reveal must fire
+    // when the photo's MIDDLE crosses the viewport middle, not when its
+    // top edge does (see REVEAL_OBSERVER_OPTIONS).
+    const el = sentinelRef.current;
     if (!el) return;
     const observer = getRevealObserver();
     revealCallbacks.set(el, () => setReveal(true));
@@ -242,6 +266,16 @@ function PhotoFrame({ slide, index, total }: { slide: Slide; index: number; tota
       role={reveal ? undefined : "button"}
       aria-label={reveal ? undefined : t(`slides.${slide.altKey}.alt`)}
     >
+      {/* Centre sentinel: spans the figure's bottom half, so its leading
+          top edge lands exactly on the photo's vertical centre. The shared
+          reveal observer watches this (not the figure) so the ink-dissolve
+          only fires once the photo's middle crosses the viewport middle.
+          Decorative + inert: aria-hidden, pointer-events-none, no paint. */}
+      <div
+        ref={sentinelRef}
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-1/2 bottom-0"
+      />
       <picture>
         <source type="image/avif" srcSet={avif} sizes={sizes} />
         <source type="image/webp" srcSet={webp} sizes={sizes} />

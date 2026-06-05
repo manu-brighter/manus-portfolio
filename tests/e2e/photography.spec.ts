@@ -86,8 +86,10 @@ test.describe("photography section", () => {
     // Confirm 5 canvases mount first.
     await expect(section.locator("canvas")).toHaveCount(5, { timeout: 5000 });
 
-    // Scroll the second photo slide into the center of the viewport so the
-    // IO trigger (rootMargin "-44% 0px -44% 0px") fires.
+    // Scroll the second photo slide so its centre sits at the viewport
+    // centre (block: "center") — the reveal now fires when the photo's
+    // middle crosses the viewport middle (centre sentinel + rootMargin
+    // "-49.5% 0px -49.5% 0px"), which block:"center" lands exactly on.
     const targetSlide = section.locator("[data-photo-slide]").nth(1);
     const handle = await targetSlide.elementHandle();
     if (handle) {
