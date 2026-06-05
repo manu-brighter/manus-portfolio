@@ -7,6 +7,16 @@ import { HookCard } from "@/components/case-study/cards/HookCard";
 import { PublicCard } from "@/components/case-study/cards/PublicCard";
 import { StackCard } from "@/components/case-study/cards/StackCard";
 import { WhatCard } from "@/components/case-study/cards/WhatCard";
+import {
+  CameraProp,
+  CoffeeProp,
+  FlashProp,
+  InkSplat,
+  MobileLupe,
+  PencilProp,
+  RulerProp,
+  TableLine,
+} from "@/components/case-study/MobileDioramaDecor";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import type { SpotColor } from "@/lib/palette";
 import type {
@@ -23,24 +33,20 @@ import type {
 /**
  * Mobile-Rework — Case-Study side-swipe carousel.
  *
- * Replaces the earlier vertical scrolly + per-station fluid sim
- * (CaseStudyMobileSim, removed) with a horizontal swipeable carousel of
- * the 4 narrative stations — the same content the Desktop Diorama lays out
- * horizontally, here reachable by touch side-swipes.
+ * Horizontal swipeable carousel of the 4 narrative stations (same content
+ * the Desktop Diorama lays out horizontally). Not height-pinned so a
+ * vertical drag scrolls the page past it; only horizontal drags blade
+ * through stations. Arrows + dots + swipe hint + aria-live.
  *
- * Same interaction model as the Photography mobile swiper (scroll-snap-x
- * track + pagination dots + prev/next + aria-live), with two deliberate
- * differences:
- *   - The swipe is NOT forced: the track is a fixed-height block in normal
- *     flow, so a vertical drag scrolls the page past it (tall stations
- *     scroll internally first, then chain to the page). Only horizontal
- *     drags move the carousel.
- *   - A "<- swipe ->" hint sits above the track (faded once the user leaves
- *     station 1) so the side-swipe affordance is discoverable.
+ * Flair: each slide is its own little "desk diorama" — a paper-tint surface
+ * (which also isolates the section from the full-page background sim) framed
+ * by comic table-edge lines, with the Desktop illustration's props (camera,
+ * pencil, ruler, flash, coffee mug), curated ink splats, and the animated
+ * magnifier (Lupe) scattered into the slides' empty space. Decor lives in a
+ * pointer-events-none layer behind the card content. See MobileDioramaDecor.
  *
- * Lightbox plumbing is shared with Desktop — the parent CaseStudy passes
- * `handleOpen` + `publicShots` so lightbox indices stay identical across
- * both views (hook=0, admin=1, overlay=2, public shots=3..5).
+ * Lightbox plumbing is shared with Desktop (hook=0, admin=1, overlay=2,
+ * public shots=3..5).
  */
 
 type PublicShot = {
@@ -69,6 +75,11 @@ const SPOT_BG_CLASS: Record<SpotColor, string> = {
   mint: "bg-spot-mint",
   violet: "bg-spot-violet",
 };
+
+/** Shared slide shell: paper-tint diorama surface + framing table lines. */
+const SLIDE_CLASS = "relative h-full w-full shrink-0 snap-center overflow-hidden bg-paper-tint";
+/** Scrollable content column above the decor layer. */
+const CONTENT_CLASS = "relative z-10 flex h-full flex-col justify-center overflow-y-auto px-6 py-8";
 
 export function CaseStudyMobileCarousel({ handleOpen, publicShots }: Props) {
   const t = useTranslations("caseStudy");
@@ -146,10 +157,8 @@ export function CaseStudyMobileCarousel({ handleOpen, publicShots }: Props) {
 
       <div className="relative">
         {/* Carousel track. Fixed-height block in normal flow: vertical drags
-            scroll the page past it (tall stations scroll internally first,
-            then chain to the page), only horizontal drags move the carousel
-            — so the side-swipe is never forced. Mirrors the Photography
-            mobile swiper, minus the height-pin trapping vertical scroll. */}
+            scroll the page past it, only horizontal drags move the carousel
+            — so the side-swipe is never forced. */}
         <section
           ref={trackRef as React.RefObject<HTMLElement>}
           data-testid="cs-carousel-track"
@@ -158,7 +167,7 @@ export function CaseStudyMobileCarousel({ handleOpen, publicShots }: Props) {
           // biome-ignore lint/a11y/noNoninteractiveTabindex: ARIA carousel pattern — region is tab stop for arrow-key nav
           tabIndex={0}
           onKeyDown={onKey}
-          className="flex h-[80vh] snap-x snap-mandatory overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-spot-mint)] focus-visible:ring-offset-2"
+          className="flex h-[82vh] snap-x snap-mandatory overflow-x-auto border-ink border-y-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-spot-mint)] focus-visible:ring-offset-2"
           style={{ scrollbarWidth: "none" }}
         >
           {/* Station 1 · Hook */}
@@ -167,15 +176,22 @@ export function CaseStudyMobileCarousel({ handleOpen, publicShots }: Props) {
             id="cs-station-hook"
             aria-roledescription="slide"
             aria-label={slideLabel(0)}
-            className="h-full w-full shrink-0 snap-center overflow-y-auto px-6 py-4"
+            className={SLIDE_CLASS}
           >
-            <HookCard
-              hookText={t("hook")}
-              datestamp={hookStation.datestamp}
-              polaroidCaption={hookStation.polaroidCaption ?? ""}
-              lightboxIndex={0}
-              onPolaroidClick={handleOpen(0)}
-            />
+            <SlideDecor>
+              <InkSplat color="rose" className="absolute top-[28%] left-[2%] w-24 opacity-60" />
+              <CameraProp className="absolute top-[1%] right-[-2%] w-28 rotate-6 opacity-90" />
+              <PencilProp className="absolute bottom-[9%] left-[-4%] w-36 -rotate-12 opacity-90" />
+            </SlideDecor>
+            <div className={CONTENT_CLASS}>
+              <HookCard
+                hookText={t("hook")}
+                datestamp={hookStation.datestamp}
+                polaroidCaption={hookStation.polaroidCaption ?? ""}
+                lightboxIndex={0}
+                onPolaroidClick={handleOpen(0)}
+              />
+            </div>
           </article>
 
           {/* Station 2 · Context + Stack */}
@@ -184,10 +200,17 @@ export function CaseStudyMobileCarousel({ handleOpen, publicShots }: Props) {
             id="cs-station-context"
             aria-roledescription="slide"
             aria-label={slideLabel(1)}
-            className="flex h-full w-full shrink-0 snap-center flex-col gap-8 overflow-y-auto px-6 py-4"
+            className={SLIDE_CLASS}
           >
-            <WhatCard label={t("context.label")} facts={facts} storyParas={storyParas} />
-            <StackCard heading={stackStation.heading} stack={stack} />
+            <SlideDecor>
+              <InkSplat color="amber" className="absolute top-[6%] right-[6%] w-32" />
+              <RulerProp className="absolute bottom-[10%] right-[-6%] w-48 rotate-[8deg]" />
+              <PencilProp className="absolute top-[2%] left-[6%] w-32 rotate-[10deg]" />
+            </SlideDecor>
+            <div className={`${CONTENT_CLASS} gap-6`}>
+              <WhatCard label={t("context.label")} facts={facts} storyParas={storyParas} />
+              <StackCard heading={stackStation.heading} stack={stack} />
+            </div>
           </article>
 
           {/* Station 3 · Highlights */}
@@ -196,38 +219,45 @@ export function CaseStudyMobileCarousel({ handleOpen, publicShots }: Props) {
             id="cs-station-highlights"
             aria-roledescription="slide"
             aria-label={slideLabel(2)}
-            className="flex h-full w-full shrink-0 snap-center flex-col gap-8 overflow-y-auto px-6 py-4"
+            className={SLIDE_CLASS}
           >
-            {adminHighlight ? (
-              <HighlightCard
-                slug="admin"
-                spot="rose"
-                kicker={adminHighlight.kicker}
-                title={adminHighlight.title}
-                lede={adminHighlight.lede}
-                features={adminHighlight.features}
-                screenshotAlt={adminHighlight.screenshotAlt}
-                datestamp={highlightAdmin.datestamp}
-                polaroidCaption={highlightAdmin.polaroidCaption ?? ""}
-                lightboxIndex={1}
-                onPolaroidClick={handleOpen(1)}
-              />
-            ) : null}
-            {overlayHighlight ? (
-              <HighlightCard
-                slug="twitchoverlay"
-                spot="amber"
-                kicker={overlayHighlight.kicker}
-                title={overlayHighlight.title}
-                lede={overlayHighlight.lede}
-                features={overlayHighlight.features}
-                screenshotAlt={overlayHighlight.screenshotAlt}
-                datestamp={highlightOverlay.datestamp}
-                polaroidCaption={highlightOverlay.polaroidCaption ?? ""}
-                lightboxIndex={2}
-                onPolaroidClick={handleOpen(2)}
-              />
-            ) : null}
+            <SlideDecor>
+              <InkSplat color="mint" className="absolute bottom-[12%] left-[6%] w-36" />
+              <FlashProp className="absolute right-[-2%] bottom-[6%] w-20 rotate-6" />
+              <MobileLupe className="absolute top-[4%] right-[8%] z-20 h-24 w-24" />
+            </SlideDecor>
+            <div className={`${CONTENT_CLASS} gap-6`}>
+              {adminHighlight ? (
+                <HighlightCard
+                  slug="admin"
+                  spot="rose"
+                  kicker={adminHighlight.kicker}
+                  title={adminHighlight.title}
+                  lede={adminHighlight.lede}
+                  features={adminHighlight.features}
+                  screenshotAlt={adminHighlight.screenshotAlt}
+                  datestamp={highlightAdmin.datestamp}
+                  polaroidCaption={highlightAdmin.polaroidCaption ?? ""}
+                  lightboxIndex={1}
+                  onPolaroidClick={handleOpen(1)}
+                />
+              ) : null}
+              {overlayHighlight ? (
+                <HighlightCard
+                  slug="twitchoverlay"
+                  spot="amber"
+                  kicker={overlayHighlight.kicker}
+                  title={overlayHighlight.title}
+                  lede={overlayHighlight.lede}
+                  features={overlayHighlight.features}
+                  screenshotAlt={overlayHighlight.screenshotAlt}
+                  datestamp={highlightOverlay.datestamp}
+                  polaroidCaption={highlightOverlay.polaroidCaption ?? ""}
+                  lightboxIndex={2}
+                  onPolaroidClick={handleOpen(2)}
+                />
+              ) : null}
+            </div>
           </article>
 
           {/* Station 4 · Public */}
@@ -236,19 +266,25 @@ export function CaseStudyMobileCarousel({ handleOpen, publicShots }: Props) {
             id="cs-station-public"
             aria-roledescription="slide"
             aria-label={slideLabel(3)}
-            className="h-full w-full shrink-0 snap-center overflow-y-auto px-6 py-4"
+            className={SLIDE_CLASS}
           >
-            <PublicCard
-              shots={publicShots}
-              reflectionLabel={t("reflection.label")}
-              reflectionBody={t("reflection.body")}
-              footerLabel={t("footerLink.label")}
-              footerDomain={t("footerLink.domain")}
-              footerUrl={t("footerLink.url")}
-              footerExternal={t("footerLink.external")}
-              lightboxBaseIndex={3}
-              onShotClick={(i) => handleOpen(3 + i)()}
-            />
+            <SlideDecor>
+              <InkSplat color="violet" className="absolute top-[8%] left-[8%] w-32" />
+              <CoffeeProp className="absolute right-[-6%] bottom-[4%] w-40 -rotate-6" />
+            </SlideDecor>
+            <div className={CONTENT_CLASS}>
+              <PublicCard
+                shots={publicShots}
+                reflectionLabel={t("reflection.label")}
+                reflectionBody={t("reflection.body")}
+                footerLabel={t("footerLink.label")}
+                footerDomain={t("footerLink.domain")}
+                footerUrl={t("footerLink.url")}
+                footerExternal={t("footerLink.external")}
+                lightboxBaseIndex={3}
+                onShotClick={(i) => handleOpen(3 + i)()}
+              />
+            </div>
           </article>
         </section>
 
@@ -323,6 +359,21 @@ export function CaseStudyMobileCarousel({ handleOpen, publicShots }: Props) {
         </div>
       </div>
     </section>
+  );
+}
+
+/**
+ * Per-slide decor layer: framing table-edge lines + the caller's scattered
+ * diorama props/splats. Inert (aria-hidden, pointer-events-none), painted
+ * behind the card content.
+ */
+function SlideDecor({ children }: { children: React.ReactNode }) {
+  return (
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+      <TableLine className="absolute top-[2%] left-0 h-3 w-full opacity-70" />
+      <TableLine className="absolute bottom-[2%] left-0 h-3 w-full opacity-70" />
+      {children}
+    </div>
   );
 }
 

@@ -22,8 +22,8 @@ export function HookCard({
   lightboxIndex,
 }: Props) {
   return (
-    <div className="flex h-full overflow-hidden gap-[clamp(0.625rem,1.5vh,1rem)]">
-      <div className="flex-shrink-0" style={{ width: "44%" }}>
+    <div className="flex h-full flex-col items-center gap-5 overflow-hidden md:flex-row md:items-stretch md:gap-[clamp(0.625rem,1.5vh,1rem)]">
+      <div className="w-[50%] shrink-0 md:w-[44%]">
         <Polaroid
           aspect="9/16"
           rotate={0}
@@ -54,8 +54,8 @@ export function HookCard({
           </picture>
         </Polaroid>
       </div>
-      <div className="flex flex-1 items-center min-w-0">
-        <blockquote className="font-display italic text-ink text-[clamp(0.9375rem,1.5vh,1.4rem)] leading-snug tracking-[-0.01em]">
+      <div className="flex min-w-0 flex-1 items-start md:items-center">
+        <blockquote className="font-display italic text-ink text-[1.2rem] leading-snug tracking-[-0.01em] md:text-[clamp(0.9375rem,1.5vh,1.4rem)]">
           <span aria-hidden="true" className="mr-1 text-spot-amber">
             «
           </span>
