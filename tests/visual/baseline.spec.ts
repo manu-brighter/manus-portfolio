@@ -26,9 +26,8 @@ import { expect, type Page, test } from "@playwright/test";
 async function hideCanvases(page: Page) {
   await page.addStyleTag({
     // canvas — global FluidSim + per-section mini-sim canvases
-    // video    — coarse-pointer AmbientVideo fallback on Mobile
-    // hero-skill-aura — conic-gradient halo, sub-pixel-drifts even under reducedMotion
-    content: "canvas, video, .hero-skill-aura { visibility: hidden !important; }",
+    // video  — coarse-pointer AmbientVideo fallback on Mobile
+    content: "canvas, video { visibility: hidden !important; }",
   });
   // Give the browser a frame to process the styleTag insertion + any
   // remaining layout/composite work before the screenshot stability poll.
@@ -57,13 +56,11 @@ test.describe("@visual phase 2 baseline", () => {
     await expect(page).toHaveScreenshot("home-de-desktop.png", {
       fullPage: true,
       animations: "disabled",
-      // Allowance for sub-pixel anti-aliasing drift on the conic-gradient
-      // hero-skill-aura halo. Layout regressions register at >> 5000px.
-      // Pragmatic budget — sub-pixel AA drift between consecutive captures
-      // exceeded 25k px in observed runs. Real layout regressions register
-      // at 100k+ pixels. 50000px is ~0.2% of home image area: lax enough to
-      // be deterministic, strict enough to catch genuine Desktop shifts
-      // during Mobile-Rework work.
+      // Allowance for sub-pixel anti-aliasing drift between consecutive
+      // captures (observed >25k px even with canvases hidden + reducedMotion).
+      // Real layout regressions register at 100k+ pixels. 50000px is ~0.2%
+      // of home image area: lax enough to be deterministic, strict enough to
+      // catch genuine Desktop shifts during Mobile-Rework work.
       maxDiffPixels: 50000,
     });
   });
