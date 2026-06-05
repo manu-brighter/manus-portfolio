@@ -29,11 +29,13 @@ import type {
   CaseStudyStory,
 } from "@/types/i18n-shapes";
 
-// Mobile-Rework spec §4.5: lazy-import the Mobile scrolly so Desktop
-// bundle stays free of the per-station Sim canvas wiring.
-const CaseStudyMobileScrolly = dynamic(
+// Mobile-Rework: lazy-import the Mobile case-study carousel so the Desktop
+// bundle stays free of the swiper wiring.
+const CaseStudyMobileCarousel = dynamic(
   () =>
-    import("@/components/case-study/CaseStudyMobileScrolly").then((m) => m.CaseStudyMobileScrolly),
+    import("@/components/case-study/CaseStudyMobileCarousel").then(
+      (m) => m.CaseStudyMobileCarousel,
+    ),
   { ssr: false },
 );
 
@@ -208,7 +210,7 @@ export function CaseStudy() {
   if (isMobile) {
     return (
       <>
-        <CaseStudyMobileScrolly handleOpen={handleOpen} publicShots={publicShots} />
+        <CaseStudyMobileCarousel handleOpen={handleOpen} publicShots={publicShots} />
         <Lightbox />
       </>
     );
