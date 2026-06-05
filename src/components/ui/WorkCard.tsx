@@ -366,11 +366,18 @@ export function WorkCard(props: WorkCardProps) {
         {...(href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       >
         <div ref={cardRef} className="relative will-change-transform">
-          {/* Backing block — riso underlay shifted bottom-right. */}
+          {/* Backing block — riso underlay shifted bottom-right on desktop.
+              On coarse pointers (mobile/touch) there is no cursor parallax
+              (gated by isCoarse below), so the static 12px shift would just
+              leave the colored panel poking out past the card. Drop the
+              shift there so the backing sits flush at inset-0 and fully
+              covers the card footprint. */}
           <div
             ref={backingRef}
             aria-hidden="true"
-            className="absolute inset-0 translate-x-3 translate-y-3 will-change-transform"
+            className={`absolute inset-0 will-change-transform ${
+              isCoarse ? "" : "translate-x-3 translate-y-3"
+            }`}
             style={{
               background: `var(--color-spot-${splatColor})`,
               opacity: 0.18,
