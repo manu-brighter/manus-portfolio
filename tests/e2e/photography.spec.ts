@@ -7,6 +7,16 @@ import { expect, test } from "@playwright/test";
 // and just shows the picture.
 
 test.describe("photography section", () => {
+  // This spec asserts the DESKTOP editorial layout (5 data-photo-slide
+  // figures, 5 PhotoInkMask canvases, centre-band scroll reveal). On the
+  // mobile-chrome project (Pixel 5, coarse pointer, 393px) Photography hands
+  // off entirely to the PhotographyMobile swiper — different DOM contract,
+  // covered separately by photography-swiper.spec.ts. Pin a wide viewport so
+  // useMobileLayout (coarse && width < 768) resolves false and the desktop
+  // branch renders here regardless of project — same convention as
+  // case-study-lightbox.spec.ts / legal-nav.spec.ts.
+  test.use({ viewport: { width: 1920, height: 1080 } });
+
   test("renders heading, lede, tech-stamp", async ({ page }) => {
     await page.goto("/de/");
     const section = page.locator("#photography");
