@@ -1,8 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { type CSSProperties, useEffect, useRef, useState } from "react";
+import { type CSSProperties, type KeyboardEvent, useEffect, useRef, useState } from "react";
 import { PlateCornerMarks } from "@/components/ui/PlateCornerMarks";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { AudiStamp } from "./stamps/AudiStamp";
 import { CameraStamp } from "./stamps/CameraStamp";
 import { JoggediballaStamp } from "./stamps/JoggediballaStamp";
@@ -82,6 +83,7 @@ export function ObjectGrid({ variant = "grid" }: ObjectGridProps) {
   const isStrip = variant === "mobile-strip";
   const stripRef = useRef<HTMLUListElement | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const reduced = useReducedMotion();
 
   // Track scrollLeft → compute active snap target index. Replaces the
   // viewport-IO mechanism that lit ALL tiles simultaneously when the
@@ -104,6 +106,31 @@ export function ObjectGrid({ variant = "grid" }: ObjectGridProps) {
     strip.addEventListener("scroll", onScroll, { passive: true });
     return () => strip.removeEventListener("scroll", onScroll);
   }, [isStrip]);
+
+  // Arrow-key navigation for the focusable strip. The horizontally
+  // scrollable region must be a keyboard tab stop anyway (axe
+  // `scrollable-region-focusable` — keyboard users can't reach a
+  // swipe-only scroller), so we wire Left/Right to the snap pitch and
+  // turn that mandatory focus stop into real keyboard parity with the
+  // touch-swipe. Mirrors the Photography + Case-Study mobile carousels.
+  const goTo = (target: number) => {
+    const strip = stripRef.current;
+    if (!strip) return;
+    const clamped = Math.max(0, Math.min(TILES.length - 1, target));
+    const pitch = strip.clientWidth * 0.72 + 16;
+    strip.scrollTo({ left: clamped * pitch, behavior: reduced ? "auto" : "smooth" });
+    setActiveIndex(clamped);
+  };
+
+  const onKey = (e: KeyboardEvent<HTMLUListElement>) => {
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      goTo(activeIndex + 1);
+    } else if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      goTo(activeIndex - 1);
+    }
+  };
 
   return (
     <section
@@ -131,10 +158,17 @@ export function ObjectGrid({ variant = "grid" }: ObjectGridProps) {
         ref={stripRef}
         className={
           isStrip
-            ? "flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pt-4 pr-8 pb-4"
+            ? "flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pt-4 pr-8 pb-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-spot-mint)] focus-visible:ring-offset-2"
             : "grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6"
         }
         style={isStrip ? { scrollbarWidth: "none" } : undefined}
+        // Strip mode is a horizontally scrollable region — it must be a
+        // keyboard tab stop (axe scrollable-region-focusable) with arrow-key
+        // nav. Grid mode is a plain list, so these stay off there.
+        aria-roledescription={isStrip ? "carousel" : undefined}
+        aria-label={isStrip ? t("ariaCarouselLabel") : undefined}
+        tabIndex={isStrip ? 0 : undefined}
+        onKeyDown={isStrip ? onKey : undefined}
       >
         {TILES.map((tile, i) => {
           const cssVars = { "--tile-spot": SPOT_VAR[tile.spot] } as CSSProperties;

@@ -328,6 +328,7 @@
       }
     },
     "objectGrid": {
+      "ariaCarouselLabel": "Galerie d'objets",
       "sectionLabel": "Hors de l'écran",
       "headline": "Quand l'écran est éteint.",
       "currentlyBand": "Snapshot 2026 · Voyage wildlife en préparation · Saison d'hiver · Pagaie à portée de main",
