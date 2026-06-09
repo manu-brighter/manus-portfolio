@@ -56,18 +56,33 @@ test.describe("photography section", () => {
   });
 
   test("reduced-motion: ink-mask canvas omitted, picture stays", async ({ browser }) => {
-    const context = await browser.newContext({ reducedMotion: "reduce" });
+    // Pin a wide viewport on this context too: the describe-level
+    // test.use({ viewport }) does NOT reach browser.newContext(), so without
+    // this the context falls back to Playwright's 1280x720 default. That's
+    // still desktop-width, but pinning here keeps the branch decision
+    // deterministic and matches the describe-level intent (force the desktop
+    // editorial layout, not the PhotographyMobile swiper).
+    const context = await browser.newContext({
+      reducedMotion: "reduce",
+      viewport: { width: 1920, height: 1080 },
+    });
     const page = await context.newPage();
     await page.goto("/de/");
 
     const section = page.locator("#photography");
-    // No mask canvases under reduced-motion (PhotoInkMask returns null).
-    const canvases = section.locator("canvas");
-    await expect(canvases).toHaveCount(0);
-
-    // The 5 photos themselves still render.
+    // Assert the desktop layout has hydrated first (5 figures present), then
+    // that the mask canvases are gone. Ordering matters: the static export
+    // ships the 5 PhotoInkMask <canvas> in the SSR HTML (useReducedMotion's
+    // server snapshot is false), and they only disappear once the client
+    // hydrates, reads prefers-reduced-motion, and React unmounts them. On a
+    // loaded CI runner that unmount can lag past the default 5s expect poll —
+    // the entire cause of the earlier webkit flake (canvases still present at
+    // assert time). The generous timeout absorbs that hydration window.
     const slots = section.locator("[data-photo-slide]");
     await expect(slots).toHaveCount(5);
+
+    // No mask canvases under reduced-motion (PhotoInkMask returns null).
+    await expect(section.locator("canvas")).toHaveCount(0, { timeout: 10_000 });
 
     await context.close();
   });
