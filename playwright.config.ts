@@ -15,6 +15,23 @@ const TARGET = process.env.E2E_TARGET ?? "dev";
 const SERVER_COMMAND =
   TARGET === "prod" ? `pnpm dlx serve out --listen ${PORT} --no-clipboard` : "pnpm dev";
 
+// Specs that hard-pin their own device via `test.use({ ...devices[...] })`
+// ignore the project's browser entirely, so running them under more than one
+// project is pure duplication — and it breaks a single-browser CI shard (the
+// pinned engine isn't installed there). Each runs under exactly ONE project.
+const I18N = /tests\/i18n\//; // node-only key-parity; chromium runs it once
+// Pixel-5-pinned mobile specs -> mobile-chrome only (they force Pixel 5 / the
+// chromium engine regardless of project, so a second run is identical).
+const PIXEL5_PINNED = [
+  /case-study-carousel-mobile\.spec\.ts/,
+  /mobile-bg-sim\.spec\.ts/,
+  /mobile-nav\.spec\.ts/,
+  /photography-swiper\.spec\.ts/,
+  /reduced-motion-mobile\.spec\.ts/,
+];
+// keyboard-nav pins Desktop Chrome -> runs under the chromium project only.
+const KEYBOARD_NAV = /keyboard-nav\.spec\.ts/;
+
 export default defineConfig({
   testDir: "./tests",
   testMatch: /.*\.spec\.ts/,
@@ -36,13 +53,18 @@ export default defineConfig({
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
+      // Pixel-5 specs force their own device — they run under mobile-chrome
+      // only, so an identical chromium-project run would just be duplication.
+      // keyboard-nav (Desktop Chrome) stays here; i18n runs here too.
+      testIgnore: PIXEL5_PINNED,
     },
     {
       name: "webkit",
       use: { ...devices["Desktop Safari"] },
-      // i18n key-parity is pure node (no browser fixture). Running it on
-      // every project doubles CI time for identical results. Chromium only.
-      testIgnore: /tests\/i18n\//,
+      // i18n is node-only (chromium runs it once). The Pixel-5 + Desktop-Chrome
+      // specs force the chromium engine, so they're meaningless under webkit
+      // (and would need chromium installed in the webkit shard) — run elsewhere.
+      testIgnore: [I18N, ...PIXEL5_PINNED, KEYBOARD_NAV],
     },
     // F-testing-coverage-2: Mobile Chrome project for hamburger nav and
     // coarse-pointer paths that are md:hidden on desktop (never exercised
@@ -51,8 +73,9 @@ export default defineConfig({
     {
       name: "mobile-chrome",
       use: { ...devices["Pixel 5"] },
-      // i18n is node-only (already runs in chromium); skip from mobile.
-      testIgnore: /tests\/i18n\//,
+      // i18n node-only (runs under chromium); keyboard-nav pins Desktop Chrome
+      // (runs under chromium). The Pixel-5 mobile specs run here.
+      testIgnore: [I18N, KEYBOARD_NAV],
     },
   ],
   webServer: {
