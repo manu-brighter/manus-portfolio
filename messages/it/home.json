@@ -426,7 +426,6 @@
   "caseStudy": {
     "carousel": {
       "ariaLabel": "Case-Study Stationen",
-      "ariaPaginationLabel": "Stationswahl",
       "ariaPrev": "Vorherige Station",
       "ariaNext": "Nächste Station",
       "ariaDot": "Station {index} von {total}",
@@ -599,7 +598,6 @@
     "prev": "Indietro",
     "next": "Avanti",
     "ariaCarouselLabel": "Carosello foto",
-    "ariaPaginationLabel": "Paginazione",
     "ariaPrev": "Foto precedente",
     "ariaNext": "Foto successiva",
     "ariaDot": "Foto {index} di {total}",
