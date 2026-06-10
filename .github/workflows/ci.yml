@@ -68,8 +68,12 @@ jobs:
         include:
           - project: chromium
             browser: chromium
+          # webkit installs chromium too: several specs pin
+          # `devices['Pixel 5']` (test.use), which forces the chromium engine
+          # even while running under the webkit project — without chromium
+          # those launches fail with "chrome-headless-shell doesn't exist".
           - project: webkit
-            browser: webkit
+            browser: webkit chromium
           - project: mobile-chrome
             browser: chromium
     env:
