@@ -1,5 +1,6 @@
 "use client";
 
+import gsap from "gsap";
 import { useEffect, useRef } from "react";
 import { useGPUCapability } from "@/hooks/useGPUCapability";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -184,37 +185,29 @@ export function MobileBackgroundSim() {
     if (!canvas) return;
     canvas.style.opacity = "1";
 
-    let opacityRafId: number | null = null;
+    let opacityTween: gsap.core.Tween | null = null;
     let idleTimerId: number | null = null;
     let settleTimerId: number | null = null;
     let drained = false;
     let scrollAccumulator = 0;
     let lastScrollY = window.scrollY;
 
-    const easeOutCubic = (t: number) => 1 - (1 - t) ** 3;
+    // Opacity fade rides the shared gsap.ticker (raf.ts wraps it) rather than
+    // a standalone requestAnimationFrame loop — keeps the "one RAF ticker"
+    // invariant. `power2.out` matches the prior easeOutCubic (1-(1-t)^3); the
+    // DRAIN_MS/REVEAL_MS timings are unchanged so the iOS cull-masking is too.
     const tweenOpacity = (to: number, durationMs: number, onComplete?: () => void) => {
-      if (opacityRafId !== null) {
-        cancelAnimationFrame(opacityRafId);
-        opacityRafId = null;
-      }
-      const from = Number.parseFloat(canvas.style.opacity || "1");
-      if (durationMs <= 0 || from === to) {
-        canvas.style.opacity = String(to);
-        onComplete?.();
-        return;
-      }
-      const start = performance.now();
-      const stepFn = (now: number) => {
-        const t = Math.min(1, (now - start) / durationMs);
-        canvas.style.opacity = String(from + (to - from) * easeOutCubic(t));
-        if (t < 1) {
-          opacityRafId = requestAnimationFrame(stepFn);
-        } else {
-          opacityRafId = null;
+      opacityTween?.kill();
+      opacityTween = gsap.to(canvas, {
+        opacity: to,
+        duration: durationMs / 1000,
+        ease: "power2.out",
+        overwrite: "auto",
+        onComplete: () => {
+          opacityTween = null;
           onComplete?.();
-        }
-      };
-      opacityRafId = requestAnimationFrame(stepFn);
+        },
+      });
     };
 
     const clearSettle = () => {
@@ -267,7 +260,7 @@ export function MobileBackgroundSim() {
 
     return () => {
       window.removeEventListener("scroll", onScroll);
-      if (opacityRafId !== null) cancelAnimationFrame(opacityRafId);
+      opacityTween?.kill();
       if (idleTimerId !== null) window.clearTimeout(idleTimerId);
       clearSettle();
       rafPausedRef.current = false;

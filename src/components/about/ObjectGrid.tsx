@@ -51,6 +51,18 @@ const SPOT_VAR: Record<Tile["spot"], string> = {
   violet: "var(--color-spot-violet)",
 };
 
+// Snap pitch for the mobile strip = first tile's rendered width + the flex
+// column-gap, measured from the DOM. Avoids re-encoding the `w-[72vw]` +
+// `gap-4` Tailwind values as a `clientWidth * 0.72 + 16` magic number, which
+// would silently desync the scrollLeft->index math and goTo() the moment
+// either class changes.
+function slidePitch(strip: HTMLUListElement): number {
+  const first = strip.firstElementChild as HTMLElement | null;
+  if (!first) return strip.clientWidth;
+  const gap = Number.parseFloat(getComputedStyle(strip).columnGap) || 0;
+  return first.offsetWidth + gap;
+}
+
 function TileStamp({ k, spotVar }: { k: StampKey; spotVar: string }) {
   switch (k) {
     case "camera":
@@ -96,9 +108,7 @@ export function ObjectGrid({ variant = "grid" }: ObjectGridProps) {
     const strip = stripRef.current;
     if (!strip) return;
     const onScroll = () => {
-      // 72vw tile + 16px gap (gap-4); approximate slide-width as a tile
-      // pitch from the first child's offset width and the gap-4 token.
-      const pitch = strip.clientWidth * 0.72 + 16;
+      const pitch = slidePitch(strip);
       const i = Math.round(strip.scrollLeft / pitch);
       setActiveIndex(Math.max(0, Math.min(TILES.length - 1, i)));
     };
@@ -117,7 +127,7 @@ export function ObjectGrid({ variant = "grid" }: ObjectGridProps) {
     const strip = stripRef.current;
     if (!strip) return;
     const clamped = Math.max(0, Math.min(TILES.length - 1, target));
-    const pitch = strip.clientWidth * 0.72 + 16;
+    const pitch = slidePitch(strip);
     strip.scrollTo({ left: clamped * pitch, behavior: reduced ? "auto" : "smooth" });
     setActiveIndex(clamped);
   };

@@ -174,17 +174,16 @@ export function PhotographyMobile() {
             <span aria-hidden="true">←</span>
           </button>
 
-          <div
-            className="flex items-center gap-1"
-            role="tablist"
-            aria-label={t("ariaPaginationLabel")}
-          >
+          {/* A plain group of go-to-slide buttons — NOT a role=tablist: the
+              slides carry aria-roledescription="slide", not tabpanels, so a
+              tablist would be a mismatched pattern. Each dot is self-labelled
+              (aria-label) and the active one is marked with aria-current. */}
+          <div className="flex items-center gap-1">
             {SLIDES.map((slide, i) => (
               <button
                 key={slide.baseName}
                 type="button"
                 data-testid="photo-dot"
-                role="tab"
                 aria-current={i === index ? "true" : "false"}
                 aria-label={t("ariaDot", { index: i + 1, total: SLIDES.length })}
                 onClick={() => goTo(i)}
