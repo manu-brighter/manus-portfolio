@@ -11,12 +11,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  quality:
-    name: Quality gates
+  # Static checks + the one static export, shared by every downstream job via
+  # the `static-export` artifact. Fails fast on lint/typecheck before we spend
+  # runner minutes on browsers.
+  build:
+    name: Build & static checks
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    env:
-      CI: "1"
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -44,11 +45,64 @@ jobs:
       - name: Build (static export)
         run: pnpm build
 
-      - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps chromium webkit
+      - name: Upload static export
+        uses: actions/upload-artifact@v7
+        with:
+          name: static-export
+          path: out
+          retention-days: 1
 
-      - name: Playwright (smoke + a11y) against ./out
-        run: pnpm test
+  # E2E split per Playwright project into parallel jobs. The full suite is
+  # single-worker (fluid-sim + SwiftShader stall on parallel Chromium — see
+  # playwright.config.ts), so the only way to cut wall-clock is to shard the
+  # projects across machines, not workers. webkit needs the webkit browser;
+  # mobile-chrome (Pixel 5) rides the chromium engine.
+  e2e:
+    name: E2E (${{ matrix.project }})
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - project: chromium
+            browser: chromium
+          - project: webkit
+            browser: webkit
+          - project: mobile-chrome
+            browser: chromium
+    env:
+      CI: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22.22.2
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download static export
+        uses: actions/download-artifact@v7
+        with:
+          name: static-export
+          path: out
+
+      - name: Install Playwright browser (${{ matrix.browser }})
+        run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
+
+      - name: Playwright ${{ matrix.project }} against ./out
+        run: pnpm exec playwright test --grep-invert @visual --project=${{ matrix.project }}
         env:
           E2E_TARGET: prod
 
@@ -56,9 +110,44 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.project }}
           path: playwright-report/
           retention-days: 7
+
+  # Lighthouse runs in its own job so the (slow) E2E suite can't starve it of
+  # the 30-min wall it used to share. lhci serves ./out itself (staticDistDir),
+  # so it only needs the artifact + a Chrome.
+  lighthouse:
+    name: Lighthouse
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22.22.2
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download static export
+        uses: actions/download-artifact@v7
+        with:
+          name: static-export
+          path: out
+
+      - name: Install Chromium for Lighthouse
+        run: pnpm exec playwright install --with-deps chromium
 
       - name: Lighthouse CI (budget from plan §8)
         run: pnpm lighthouse
