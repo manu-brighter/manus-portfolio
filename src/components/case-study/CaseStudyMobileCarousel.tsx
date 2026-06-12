@@ -110,17 +110,30 @@ export function CaseStudyMobileCarousel({ handleOpen, publicShots }: Props) {
   const adminHighlight = highlights.find((h) => h.id === "admin");
   const overlayHighlight = highlights.find((h) => h.id === "overlay");
 
-  // Sync index from native scroll-snap position. A touch side-swipe scrolls
-  // the track; we read scrollLeft -> slide index on each scroll event.
+  // Sync index from native scroll-snap position — but only once the swipe
+  // SETTLES, not on every scroll frame. The index drives a re-render (dots,
+  // prev/next disabled, and the swipe-hint opacity fade). Doing that mid-swipe
+  // landed a heavy synchronous re-render right as the first swipe crossed the
+  // halfway mark and stalled the native scroll momentum — the "first swipe
+  // stops halfway between slide 1 and 2" (only the first, because the hint
+  // fade only animates on the 0->1 change). Debouncing to scroll-end keeps the
+  // swipe gesture free of re-renders; the dots catch up ~120ms after release.
   useEffect(() => {
     const track = trackRef.current;
     if (!track) return;
+    let settleTimer = 0;
     const onScroll = () => {
-      const slide = Math.round(track.scrollLeft / track.clientWidth);
-      setIndex((current) => (current === slide ? current : slide));
+      window.clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(() => {
+        const slide = Math.round(track.scrollLeft / track.clientWidth);
+        setIndex((current) => (current === slide ? current : slide));
+      }, 120);
     };
     track.addEventListener("scroll", onScroll, { passive: true });
-    return () => track.removeEventListener("scroll", onScroll);
+    return () => {
+      track.removeEventListener("scroll", onScroll);
+      window.clearTimeout(settleTimer);
+    };
   }, []);
 
   const goTo = (newIndex: number) => {
@@ -166,14 +179,12 @@ export function CaseStudyMobileCarousel({ handleOpen, publicShots }: Props) {
       </div>
 
       <div className="relative">
-        {/* Carousel track — one screen tall (80svh). `touch-pan-x` is the fix
-            for the "first swipe stops halfway": without it the browser has to
-            arbitrate horizontal-swipe vs vertical-page-scroll on every touch
-            that starts on the track, and the first (cold) swipe gets partly
-            eaten by that arbitration. Declaring the track horizontal makes
-            side-swipes land cleanly from the first one. Trade-off: vertical
-            page-scroll is started off the track (swipe hint above, dots/arrows
-            below, neighbouring sections). */}
+        {/* Carousel track — one screen tall (80svh). Native scroll-snap; touch
+            scrolling stays default (touch-action: auto) so a vertical drag on
+            the track still scrolls the page past it. The "first swipe stops
+            halfway" was NOT a touch-action problem (the Photography swiper
+            works on auto) — it was the mid-swipe re-render; see the debounced
+            scroll handler above. */}
         <section
           ref={trackRef as React.RefObject<HTMLElement>}
           data-testid="cs-carousel-track"
@@ -182,7 +193,7 @@ export function CaseStudyMobileCarousel({ handleOpen, publicShots }: Props) {
           // biome-ignore lint/a11y/noNoninteractiveTabindex: ARIA carousel pattern — region is tab stop for arrow-key nav
           tabIndex={0}
           onKeyDown={onKey}
-          className="flex h-[80svh] snap-x snap-mandatory touch-pan-x overflow-x-auto border-ink border-y-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-spot-mint)] focus-visible:ring-offset-2"
+          className="flex h-[80svh] snap-x snap-mandatory overflow-x-auto border-ink border-y-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-spot-mint)] focus-visible:ring-offset-2"
           style={{ scrollbarWidth: "none" }}
         >
           {/* Station 1 · Hook */}
@@ -234,7 +245,8 @@ export function CaseStudyMobileCarousel({ handleOpen, publicShots }: Props) {
             className={SLIDE_CLASS}
           >
             <SlideDecor>
-              <InkSplat color="mint" className="absolute top-[7%] left-[6%] w-20 opacity-55" />
+              <InkSplat color="mint" className="absolute top-[8%] left-[6%] w-20 opacity-55" />
+              <FlashProp className="absolute top-[6%] right-[8%] w-16 rotate-6 opacity-90" />
               <RulerProp className="absolute right-[4%] bottom-[7%] w-40 rotate-[8deg] opacity-90" />
             </SlideDecor>
             <div className={CONTENT_CLASS}>
@@ -252,7 +264,6 @@ export function CaseStudyMobileCarousel({ handleOpen, publicShots }: Props) {
           >
             <SlideDecor>
               <InkSplat color="mint" className="absolute top-[5%] left-[5%] w-24 opacity-60" />
-              <FlashProp className="absolute right-[5%] bottom-[5%] w-14 rotate-6 opacity-90" />
             </SlideDecor>
             <div className={CONTENT_CLASS}>
               {adminHighlight ? (
