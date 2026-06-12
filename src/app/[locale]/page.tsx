@@ -1,4 +1,5 @@
-import { NextIntlClientProvider } from "next-intl";
+import { notFound } from "next/navigation";
+import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { About } from "@/components/sections/About";
 import { CaseStudy } from "@/components/sections/CaseStudy";
@@ -35,6 +36,15 @@ type HomePageProps = {
  */
 export default async function HomePage({ params }: HomePageProps) {
   const { locale } = await params;
+  // Guard before loadNamespaceGroup: the [locale] dynamic route also catches
+  // non-locale root requests (iOS probes /apple-touch-icon-precomposed.png and
+  // /apple-touch-icon.png), and without this the page calls
+  // loadNamespaceGroup("apple-touch-icon.png", ...) -> MODULE_NOT_FOUND crash
+  // before the layout's own notFound() guard can take effect. Mirrors the
+  // guard in [locale]/layout.tsx.
+  if (!hasLocale(routing.locales, locale)) {
+    notFound();
+  }
   setRequestLocale(locale);
 
   const [commonMessages, homeMessages, playgroundMessages] = await Promise.all([
