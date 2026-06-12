@@ -76,10 +76,18 @@ const SPOT_BG_CLASS: Record<SpotColor, string> = {
   violet: "bg-spot-violet",
 };
 
-/** Shared slide shell: paper-tint diorama surface + framing table lines. */
-const SLIDE_CLASS = "relative h-full w-full shrink-0 snap-center overflow-hidden bg-paper-tint";
-/** Scrollable content column above the decor layer. */
-const CONTENT_CLASS = "relative z-10 flex h-full flex-col justify-center overflow-y-auto px-6 py-8";
+/**
+ * Shared slide shell: paper-tint diorama surface + framing table lines.
+ * Content-driven height (min 78vh for presence + diorama room) instead of a
+ * fixed 82vh — the old fixed height + justify-center clipped tall stations
+ * (story prose, the two highlight cards) top and bottom. `snap-always` forces
+ * every swipe to land on a slide (kills the "first swipe stops halfway").
+ * `overflow-hidden` still clips props that bleed past the slide edge.
+ */
+const SLIDE_CLASS =
+  "relative flex min-h-[78vh] w-full shrink-0 snap-center snap-always flex-col overflow-hidden bg-paper-tint";
+/** Content column above the decor layer — top-aligned natural flow, no clip. */
+const CONTENT_CLASS = "relative z-10 flex flex-col px-6 py-12";
 
 export function CaseStudyMobileCarousel({ handleOpen, publicShots }: Props) {
   const t = useTranslations("caseStudy");
@@ -167,7 +175,7 @@ export function CaseStudyMobileCarousel({ handleOpen, publicShots }: Props) {
           // biome-ignore lint/a11y/noNoninteractiveTabindex: ARIA carousel pattern — region is tab stop for arrow-key nav
           tabIndex={0}
           onKeyDown={onKey}
-          className="flex h-[82vh] snap-x snap-mandatory overflow-x-auto border-ink border-y-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-spot-mint)] focus-visible:ring-offset-2"
+          className="flex snap-x snap-mandatory overflow-x-auto border-ink border-y-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-spot-mint)] focus-visible:ring-offset-2"
           style={{ scrollbarWidth: "none" }}
         >
           {/* Station 1 · Hook */}
