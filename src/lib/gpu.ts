@@ -88,21 +88,43 @@ export function getTierConfig(tier: Exclude<GPUTier, "static">): TierConfig {
 
 type RendererPattern = { pattern: string; tier: Exclude<GPUTier, "static"> };
 
+// Pattern order matters: first match wins. Mobile-flagship matches sit
+// above the broader `mali-g` / desktop-low patterns so e.g. "Mali-G715"
+// resolves to medium (Mobile-Rework spec §5.1 Flagship tier) instead of
+// minimal via the generic `mali-g` fallback.
 const RENDERER_PATTERNS: RendererPattern[] = [
+  // Desktop high tier — discrete GPUs + Apple Silicon Mx
   { pattern: "rtx", tier: "high" },
   { pattern: "rx 7", tier: "high" },
   { pattern: "apple m2", tier: "high" },
   { pattern: "apple m3", tier: "high" },
   { pattern: "apple m4", tier: "high" },
   { pattern: "radeon pro", tier: "high" },
+  // Mobile flagship → medium tier (256²)
+  // iPhone 15 Pro / 16 Pro (A17/A18) and flagship Android with Adreno 7xx
+  // (Snapdragon 8 Gen 2/3). Mali-G7xx is NOT in this list — naming
+  // overloads with much older "Mali-G7x" mid-tier GPUs (G71/G77/G78) that
+  // a generic `mali-g7` pattern would mis-elevate. Frametime fallback
+  // handles modern Mali devices.
+  { pattern: "apple a17", tier: "medium" },
+  { pattern: "apple a18", tier: "medium" },
+  { pattern: "adreno 7", tier: "medium" },
+  // Desktop low + Mid-mobile → low tier (128²)
+  // Iris Xe is hard-constraint per CLAUDE.md (Manuel's work laptop).
+  // iPhone 12-14 (A14/A15/A16), mid-tier Android (Adreno 6xx).
   { pattern: "iris xe", tier: "low" },
   { pattern: "iris plus", tier: "low" },
   { pattern: "uhd 6", tier: "low" },
   { pattern: "uhd 7", tier: "low" },
+  { pattern: "apple a14", tier: "low" },
+  { pattern: "apple a15", tier: "low" },
+  { pattern: "apple a16", tier: "low" },
+  { pattern: "adreno 6", tier: "low" },
+  // Older mobile / very old desktop → minimal tier (96²)
   { pattern: "mali-g", tier: "minimal" },
-  { pattern: "adreno 6", tier: "minimal" },
   { pattern: "adreno 5", tier: "minimal" },
   { pattern: "powervr", tier: "minimal" },
+  { pattern: "apple a13", tier: "minimal" },
 ];
 
 // Exported for unit tests (F-testing-coverage-10): Iris Xe → "low" is a

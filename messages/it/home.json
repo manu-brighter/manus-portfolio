@@ -328,6 +328,7 @@
       }
     },
     "objectGrid": {
+      "ariaCarouselLabel": "Galleria di oggetti",
       "sectionLabel": "Fuori dallo schermo",
       "headline": "Quando lo schermo è spento.",
       "currentlyBand": "Snapshot 2026 · Viaggio wildlife in pianificazione · Stagione invernale · Pagaia a portata di mano",
@@ -423,6 +424,23 @@
     ]
   },
   "caseStudy": {
+    "carousel": {
+      "ariaLabel": "Case-Study Stationen",
+      "ariaPrev": "Vorherige Station",
+      "ariaNext": "Nächste Station",
+      "ariaDot": "Station {index} von {total}",
+      "ariaSlideOf": "Station {index} von {total}: {label}",
+      "ariaLive": "Station {index} von {total}: {label}",
+      "swipeHint": "Seitlich wischen für die ganze Case-Study",
+      "stationLabels": [
+        "Hook",
+        "Kontext",
+        "Stack",
+        "Admin-Highlight",
+        "Twitch-Overlay",
+        "Öffentliche Schicht"
+      ]
+    },
     "sectionLabel": "Section 04 · Case Study",
     "headline": "Dal caos di un'associazione a una piattaforma dedicata.",
     "hook": "Tutte le associazioni combattono con lo stesso casino: fogli Excel, siti statici, condivisione di file e info, strumenti isolati. Per Jogge di Balla ho messo ordine: una piattaforma su misura che copre tutto, dalla gestione dei membri all'overlay Twitch. Vibecoded, auto-ospitata, esagerata.",
@@ -584,6 +602,14 @@
     "headline": "Attraverso l'obiettivo.",
     "lede": "Wildlife e auto, i miei due mondi. Il primo lo inseguo in solitaria nelle giungle del Costa Rica o della Thailandia, il secondo di solito mi trova più vicino a casa. Ciò che li unisce: pazienza, luce, e quel singolo momento che giustifica tutta la giornata.",
     "techLabel": "SONY α7 IV · 24–600mm · dal 2023",
+    "prev": "Indietro",
+    "next": "Avanti",
+    "ariaCarouselLabel": "Carosello foto",
+    "ariaPrev": "Foto precedente",
+    "ariaNext": "Foto successiva",
+    "ariaDot": "Foto {index} di {total}",
+    "ariaSlideOf": "Foto {index} di {total}",
+    "ariaLive": "Foto {index} di {total}",
     "ctaLabel": "Portfolio completo su manuelheller.myportfolio.com",
     "ctaHref": "https://manuelheller.myportfolio.com/portfolio",
     "ctaCaption": "",
@@ -653,8 +679,8 @@
       "requiredNote": "Tutti i campi sono obbligatori",
       "status": {
         "fromLabel": "Da:",
-        "fallback": "In fase di configurazione — scrivimi direttamente:",
-        "error": "Non è andato a buon fine. Scrivimi direttamente per e-mail.",
+        "success": "Grazie, il tuo messaggio è arrivato — ti rispondo presto.",
+        "error": "Non è andato a buon fine — scrivimi direttamente:",
         "mailSubject": "Richiesta tramite manuelheller.dev"
       }
     }

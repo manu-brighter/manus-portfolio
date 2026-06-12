@@ -328,6 +328,7 @@
       }
     },
     "objectGrid": {
+      "ariaCarouselLabel": "Objekt-Galerie",
       "sectionLabel": "Off the screen",
       "headline": "Wenn der Bildschirm aus ist.",
       "currentlyBand": "Snapshot 2026 · Wildlife-Reise in Planung · Wintersaison · Paddle griffbereit",
@@ -423,6 +424,23 @@
     ]
   },
   "caseStudy": {
+    "carousel": {
+      "ariaLabel": "Case-Study Stationen",
+      "ariaPrev": "Vorherige Station",
+      "ariaNext": "Nächste Station",
+      "ariaDot": "Station {index} von {total}",
+      "ariaSlideOf": "Station {index} von {total}: {label}",
+      "ariaLive": "Station {index} von {total}: {label}",
+      "swipeHint": "Seitlich wischen für die ganze Case-Study",
+      "stationLabels": [
+        "Hook",
+        "Kontext",
+        "Stack",
+        "Admin-Highlight",
+        "Twitch-Overlay",
+        "Öffentliche Schicht"
+      ]
+    },
     "sectionLabel": "Section 04 · Case Study",
     "headline": "Vom Vereins-Chaos zur eigenen Plattform.",
     "hook": "Alle Vereine kämpfen alle mit demselben Mist: Excel-Listen, statische Websites, File-/Information-Sharing, isolierte Tools. Für Jogge di Balla habe ich das aufgeräumt — eine massgeschneiderte Plattform, die von Mitgliederverwaltung bis Twitch-Overlay alles abdeckt. Vibecoded, selbst gehostet, übertrieben.",
@@ -584,6 +602,14 @@
     "headline": "Durch die Linse.",
     "lede": "Wildlife und Autos sind meine zwei Welten. Die einen jage ich solo durch den Dschungel von Costa Rica oder Thailand, die anderen finden mich meist näher zuhause. Was beide verbindet: Geduld, Licht, und der eine Moment, der den ganzen Tag rechtfertigt. Mit der Sony α7 IV seit 2023 unterwegs.",
     "techLabel": "SONY α7 IV · 24–600mm · seit 2023",
+    "prev": "Zurück",
+    "next": "Weiter",
+    "ariaCarouselLabel": "Fotostrecke",
+    "ariaPrev": "Vorheriges Bild",
+    "ariaNext": "Nächstes Bild",
+    "ariaDot": "Bild {index} von {total}",
+    "ariaSlideOf": "Bild {index} von {total}",
+    "ariaLive": "Bild {index} von {total}",
     "ctaLabel": "Volles Portfolio auf manuelheller.myportfolio.com",
     "ctaHref": "https://manuelheller.myportfolio.com/portfolio",
     "ctaCaption": "",
@@ -653,8 +679,8 @@
       "requiredNote": "Alle Felder erforderlich",
       "status": {
         "fromLabel": "Von:",
-        "fallback": "Momentan in Einrichtung — schreib mir direkt:",
-        "error": "Hat nicht geklappt. Bitte direkt per E-Mail.",
+        "success": "Danke, deine Nachricht ist angekommen — ich melde mich.",
+        "error": "Hat nicht geklappt — schreib mir direkt:",
         "mailSubject": "Anfrage über manuelheller.dev"
       }
     }

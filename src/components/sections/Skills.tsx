@@ -1,5 +1,4 @@
 import { useTranslations } from "next-intl";
-import { HeroSkillPulse } from "@/components/skills/HeroSkillPulse";
 import { VibecodedStamp } from "@/components/skills/VibecodedStamp";
 import type { SkillsTiers } from "@/types/i18n-shapes";
 
@@ -18,10 +17,6 @@ import type { SkillsTiers } from "@/types/i18n-shapes";
  * rose +2px) appear on `:hover` and `:focus-visible`, giving the live
  * Riso-misregistration twitch when the user hovers a word. `tabIndex=0`
  * on the wrapper makes the effect keyboard-equivalent.
- *
- * The XXL hero-skill block hosts an ambient `<HeroSkillPulse>` (C3) —
- * a continuously-cycling spot-color halo behind the headline that
- * keeps the section feeling "alive" without competing for attention.
  *
  * Items use `display: inline-block` with Instrument Serif upright so
  * they read as a mixed typographic column, not as list items. Between
@@ -58,27 +53,18 @@ export function Skills() {
         </div>
       </header>
 
-      {/* Hero-Skill: XXL feature block, Riso-stamped border. The
-          relative + isolate wrapper hosts the ambient `<HeroSkillPulse>`
-          (C3) which cycles through the 4 Riso spot-colors. `isolate`
-          establishes a stacking context so the halo (first DOM child)
-          paints behind subsequent siblings via document order, with
-          no negative z-index needed. */}
       <article
         aria-labelledby="skill-hero"
-        className="relative mb-20 isolate border-ink border-t-2 border-b-2 py-10 md:mb-28 md:py-16"
+        className="mb-20 border-ink border-t-2 border-b-2 py-10 md:mb-28 md:py-16"
       >
-        <HeroSkillPulse />
-        <p className="relative mb-4 text-ink-muted type-label">{t("heroSkill.eyebrow")}</p>
+        <p className="mb-4 text-ink-muted type-label">{t("heroSkill.eyebrow")}</p>
         <h3
           id="skill-hero"
-          className="relative font-display italic text-ink text-[clamp(3rem,8vw,6rem)] leading-[0.95] tracking-[-0.03em]"
+          className="font-display italic text-ink text-[clamp(3rem,8vw,6rem)] leading-[0.95] tracking-[-0.03em]"
         >
           {t("heroSkill.name")}
         </h3>
-        <p className="relative type-body-lg mt-6 max-w-2xl text-ink-soft">
-          {t("heroSkill.description")}
-        </p>
+        <p className="type-body-lg mt-6 max-w-2xl text-ink-soft">{t("heroSkill.description")}</p>
       </article>
 
       {/* Secondary tiers — flow as a stack, each with its own mono label. */}

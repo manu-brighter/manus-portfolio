@@ -8,27 +8,37 @@ import { SITE } from "@/lib/site";
 /**
  * Contact form — client component for submit-state choreography.
  *
- * Phase-11 wiring strategy: the form is fully built (validation, honeypot,
- * accessible labels, status announcements) but the submit handler does NOT
- * call Resend yet. The Cloudflare Worker that bridges browser -> Resend
- * lives in the Sprint 6 server pass; until then, submit always lands on
- * `mailto-fallback` state with a direct mail link to SITE.author.email.
+ * Submit posts the form as JSON to a SAME-ORIGIN endpoint (`/api/contact`),
+ * which nginx maps to a small self-hosted PHP endpoint (PHPMailer -> SMTP)
+ * that mails Manuel directly. Same-origin keeps it within the existing CSP
+ * `connect-src 'self'` — no CSP change, no third party sees submissions.
+ * See `infra/contact/` for the endpoint, config template and nginx snippet.
  *
- * Honoring the static-export constraint: there is no `/api/*` server route.
- * The eventual prod flow is `fetch("https://contact.manuelheller.dev",
- * { method: "POST", body: JSON.stringify(values) })` to a Worker that
- * proxies to Resend with the API key server-side. Public-key direct-call
- * was rejected (abuse risk, see prior briefing).
+ * Honoring the static-export constraint: there is no Next `/api/*` route at
+ * runtime (`output: "export"`). The endpoint is a sibling PHP file served by
+ * the same nginx, not part of the Next bundle.
+ *
+ * Graceful degrade: if the request fails (network, non-2xx, timeout, or the
+ * endpoint isn't wired up yet) the form drops to an `error` state with a
+ * pre-filled `mailto:` link to SITE.author.email — the visitor's message is
+ * never lost.
  *
  * Validation is intentionally light: HTML5 constraints (`required`, `type`,
- * `minLength`) plus the honeypot. Heavier client-side validation (Zod,
- * react-hook-form) would bloat the bundle for a contact form whose volume
- * will be measured in single digits per month.
+ * `minLength`) plus the honeypot client-side; the PHP endpoint re-validates
+ * everything server-side (a direct POST bypasses the client checks).
  *
  * Honeypot pattern: a field a real user never sees / focuses (`bot-trap`,
- * tabIndex=-1, aria-hidden, off-screen). Bots fill all fields blindly;
- * if it has a value, we silently swallow the submit.
+ * tabIndex=-1, aria-hidden, off-screen). Bots fill all fields blindly; if it
+ * has a value we silently swallow the submit (and the server does too).
  */
+
+/** Same-origin endpoint — nginx maps this to the PHP mailer (see infra/contact). */
+const CONTACT_ENDPOINT = "/api/contact";
+/** Abort the request after this long so a hung endpoint still degrades to mailto. */
+const SUBMIT_TIMEOUT_MS = 8000;
+
+type Status = "idle" | "sending" | "sent" | "error";
+
 export function ContactForm() {
   const t = useTranslations("contact.form");
   const nameId = useId();
@@ -38,21 +48,27 @@ export function ContactForm() {
 
   const requiredNoteId = useId();
 
-  const [status, setStatus] = useState<"idle" | "sending" | "fallback" | "error">("idle");
-  const fallbackTimerRef = useRef<number | null>(null);
+  const [status, setStatus] = useState<Status>("idle");
+  const abortTimerRef = useRef<number | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const mountedRef = useRef(true);
   const nameValueRef = useRef<string>("");
   const messageValueRef = useRef<string>("");
   const submitButtonRef = useRef<HTMLButtonElement>(null);
   const pulseTweenRef = useRef<gsap.core.Tween | null>(null);
 
-  // Cancel any in-flight stub timer + GSAP pulse on unmount so React
-  // doesn't warn about a state update on an unmounted component.
+  // Cancel any in-flight request + GSAP pulse on unmount so React doesn't
+  // warn about a state update on an unmounted component.
   useEffect(() => {
+    mountedRef.current = true;
     return () => {
-      if (fallbackTimerRef.current !== null) {
-        window.clearTimeout(fallbackTimerRef.current);
-        fallbackTimerRef.current = null;
+      mountedRef.current = false;
+      if (abortTimerRef.current !== null) {
+        window.clearTimeout(abortTimerRef.current);
+        abortTimerRef.current = null;
       }
+      abortRef.current?.abort();
+      abortRef.current = null;
       pulseTweenRef.current?.kill();
       pulseTweenRef.current = null;
     };
@@ -77,37 +93,68 @@ export function ContactForm() {
     }
   }, [status]);
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
+    const form = event.currentTarget;
+    const formData = new FormData(form);
 
-    // Honeypot tripped — silently swallow. Setting `fallback` here
-    // would hand the bot a visible mailto link with Manuel's address;
-    // the whole point of the trap is to look like a successful submit
-    // to the bot while doing nothing.
+    // Honeypot tripped — silently swallow. Setting a visible state here would
+    // hand the bot a mailto link with Manuel's address; the trap should look
+    // like a successful submit to the bot while doing nothing.
     if (formData.get("bot-trap")) return;
 
-    // Stash field values so the fallback mailto can pre-fill body.
-    nameValueRef.current = String(formData.get("name") ?? "");
-    messageValueRef.current = String(formData.get("message") ?? "");
+    const name = String(formData.get("name") ?? "");
+    const email = String(formData.get("email") ?? "");
+    const message = String(formData.get("message") ?? "");
+    // Stash for the error-state mailto pre-fill.
+    nameValueRef.current = name;
+    messageValueRef.current = message;
 
     setStatus("sending");
-    // Phase-11 Sprint-1 stub: Resend Worker not deployed yet — graceful
-    // fallback to direct email. Replaced in Sprint 6 with real fetch.
-    // When the real fetch is wired (Sprint 6 Cloudflare Worker):
-    // wrap in try/catch + AbortController timeout, call setStatus("error")
-    // on network failure, non-2xx response, or timeout.
-    fallbackTimerRef.current = window.setTimeout(() => {
-      setStatus("fallback");
-      fallbackTimerRef.current = null;
-    }, 800);
+
+    const controller = new AbortController();
+    abortRef.current = controller;
+    abortTimerRef.current = window.setTimeout(() => controller.abort(), SUBMIT_TIMEOUT_MS);
+
+    try {
+      const res = await fetch(CONTACT_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, message }),
+        signal: controller.signal,
+      });
+      // Only a genuine `{ "ok": true }` JSON 2xx counts as sent; anything
+      // else (404 because the endpoint isn't wired, an HTML error page, a
+      // validation 4xx) drops to the mailto fallback.
+      let sent = false;
+      if (res.ok) {
+        const data = (await res.json().catch(() => null)) as { ok?: boolean } | null;
+        sent = data?.ok === true;
+      }
+      if (!mountedRef.current) return;
+      if (sent) {
+        setStatus("sent");
+        form.reset();
+      } else {
+        setStatus("error");
+      }
+    } catch {
+      // Network failure, timeout/abort, or unreachable endpoint.
+      if (!mountedRef.current) return;
+      setStatus("error");
+    } finally {
+      if (abortTimerRef.current !== null) {
+        window.clearTimeout(abortTimerRef.current);
+        abortTimerRef.current = null;
+      }
+      if (abortRef.current === controller) abortRef.current = null;
+    }
   }
 
   const isSending = status === "sending";
 
   return (
     <form
-      noValidate
       onSubmit={handleSubmit}
       className="grid grid-cols-1 gap-5"
       aria-describedby={status !== "idle" ? "contact-status" : undefined}
@@ -197,22 +244,12 @@ export function ContactForm() {
         aria-live="polite"
         className="min-h-[1.5rem] type-body-sm text-ink-soft"
       >
-        {status === "fallback" && (
-          <span>
-            {t("status.fallback")}{" "}
-            <a
-              href={`mailto:${SITE.author.email}?subject=${encodeURIComponent(t("status.mailSubject"))}&body=${encodeURIComponent(`${nameValueRef.current ? `${t("status.fromLabel")} ${nameValueRef.current}\n\n` : ""}${messageValueRef.current}`)}`}
-              className="underline decoration-spot-rose decoration-2 underline-offset-4 transition-colors hover:text-ink"
-            >
-              {SITE.author.email}
-            </a>
-          </span>
-        )}
+        {status === "sent" && <span>{t("status.success")}</span>}
         {status === "error" && (
           <span>
             {t("status.error")}{" "}
             <a
-              href={`mailto:${SITE.author.email}`}
+              href={`mailto:${SITE.author.email}?subject=${encodeURIComponent(t("status.mailSubject"))}&body=${encodeURIComponent(`${nameValueRef.current ? `${t("status.fromLabel")} ${nameValueRef.current}\n\n` : ""}${messageValueRef.current}`)}`}
               className="underline decoration-spot-rose decoration-2 underline-offset-4 transition-colors hover:text-ink"
             >
               {SITE.author.email}

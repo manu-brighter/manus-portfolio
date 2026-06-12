@@ -5,6 +5,9 @@
 
 # Claude Code per-machine permission overrides (not shared)
 .claude/settings.local.json
+# Claude Code agent worktrees + per-session lock files — tooling state only
+.claude/worktrees/
+.claude/scheduled_tasks.lock
 
 # OS / editor
 .DS_Store
@@ -43,3 +46,8 @@ test-results/
 # Raw content inputs (large photos, screenshots, audio) — not for git
 content-input/*
 !content-input/README.md
+
+# Contact endpoint — server-side secrets + PHP deps (applied on the box,
+# never committed). See infra/contact/README.md.
+infra/contact/config.php
+infra/contact/vendor/

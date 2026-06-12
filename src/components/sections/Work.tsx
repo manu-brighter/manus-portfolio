@@ -90,7 +90,7 @@ export function Work() {
                       width={800}
                       height={450}
                       loading="lazy"
-                      className="block h-full w-full object-cover object-top"
+                      className="block h-full w-full object-cover object-center md:object-top"
                     />
                   </picture>
                 )

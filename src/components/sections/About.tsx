@@ -1,3 +1,5 @@
+"use client";
+
 import { useTranslations } from "next-intl";
 import type { CSSProperties } from "react";
 import { AboutBlock } from "@/components/about/AboutBlock";
@@ -7,6 +9,7 @@ import { StampDivider } from "@/components/about/StampDivider";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { PlateCornerMarks } from "@/components/ui/PlateCornerMarks";
 import { Portrait } from "@/components/ui/Portrait";
+import { useMobileLayout } from "@/hooks/useMobileLayout";
 import type { AboutAnfangenStamps, AboutParts, CurrentlyItems } from "@/types/i18n-shapes";
 
 /**
@@ -69,6 +72,13 @@ export function About() {
   const partsById = Object.fromEntries(parts.map((p) => [p.id, p]));
   const currentlyItems = tCurrently.raw("items") as CurrentlyItems;
 
+  // Mobile-Rework Phase 6: condense the 8-spine flow to 5 spines on
+  // Mobile (drop "Anfangen" mint + "Antrieb" violet blocks + their
+  // StampDividers). Spec: keep the strongest identity opener
+  // (wer-ich-bin rose) + the loud-centered signature (ai-workflow amber).
+  // ObjectGrid switches to horizontal-strip variant.
+  const isMobile = useMobileLayout();
+
   // Helpers — body prose lookup (stays verbatim from briefing).
   const bodyOf = (id: string) => partsById[id]?.body ?? [];
 
@@ -110,27 +120,31 @@ export function About() {
 
       <StampDivider spot="rose" />
 
-      {/* 02 Anfangen */}
-      <AboutBlock
-        id="wie-angefangen"
-        spot="mint"
-        layout="content-left-marg-right"
-        marginalia={
-          <div className="flex flex-col gap-3">
-            <span className="type-label-stamp">{t("marginalia.anfangen.counter")}</span>
-            {(t.raw("marginalia.anfangen.stamps") as AboutAnfangenStamps).map((s) => (
-              <span key={s.label} className="type-label-stamp">
-                {s.label} · {s.year}
-              </span>
-            ))}
-          </div>
-        }
-      >
-        <PullQuote text={t("pullQuotes.anfangen")} />
-        <BodyProse paragraphs={bodyOf("wie-angefangen")} />
-      </AboutBlock>
+      {/* 02 Anfangen — hidden on Mobile (Phase 6 compression) */}
+      {!isMobile && (
+        <>
+          <AboutBlock
+            id="wie-angefangen"
+            spot="mint"
+            layout="content-left-marg-right"
+            marginalia={
+              <div className="flex flex-col gap-3">
+                <span className="type-label-stamp">{t("marginalia.anfangen.counter")}</span>
+                {(t.raw("marginalia.anfangen.stamps") as AboutAnfangenStamps).map((s) => (
+                  <span key={s.label} className="type-label-stamp">
+                    {s.label} · {s.year}
+                  </span>
+                ))}
+              </div>
+            }
+          >
+            <PullQuote text={t("pullQuotes.anfangen")} />
+            <BodyProse paragraphs={bodyOf("wie-angefangen")} />
+          </AboutBlock>
 
-      <StampDivider spot="mint" />
+          <StampDivider spot="mint" />
+        </>
+      )}
 
       {/* 03 Portrait-Anchor — editorial composition: portrait left,
           editorial-flank right (plate-stamp -> asterism -> label ->
@@ -197,16 +211,20 @@ export function About() {
 
       <StampDivider spot="amber" />
 
-      {/* 05 Antrieb (short-centered) */}
-      <AboutBlock id="antrieb" spot="violet" layout="short-centered">
-        <PullQuote text={t("pullQuotes.antrieb")} />
-        <BodyProse paragraphs={bodyOf("antrieb")} />
-      </AboutBlock>
+      {/* 05 Antrieb — hidden on Mobile (Phase 6 compression) */}
+      {!isMobile && (
+        <>
+          <AboutBlock id="antrieb" spot="violet" layout="short-centered">
+            <PullQuote text={t("pullQuotes.antrieb")} />
+            <BodyProse paragraphs={bodyOf("antrieb")} />
+          </AboutBlock>
 
-      <StampDivider spot="violet" />
+          <StampDivider spot="violet" />
+        </>
+      )}
 
-      {/* 06 Object-Grid (replaces part 5 + Currently) */}
-      <ObjectGrid />
+      {/* 06 Object-Grid — horizontal-strip variant on Mobile */}
+      <ObjectGrid variant={isMobile ? "mobile-strip" : "grid"} />
     </section>
   );
 }

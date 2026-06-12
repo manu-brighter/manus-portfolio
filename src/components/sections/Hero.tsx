@@ -1,3 +1,5 @@
+"use client";
+
 import { useTranslations } from "next-intl";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { OverprintReveal } from "@/components/motion/OverprintReveal";

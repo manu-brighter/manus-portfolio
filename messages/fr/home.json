@@ -328,6 +328,7 @@
       }
     },
     "objectGrid": {
+      "ariaCarouselLabel": "Galerie d'objets",
       "sectionLabel": "Hors de l'écran",
       "headline": "Quand l'écran est éteint.",
       "currentlyBand": "Snapshot 2026 · Voyage wildlife en préparation · Saison d'hiver · Pagaie à portée de main",
@@ -423,6 +424,23 @@
     ]
   },
   "caseStudy": {
+    "carousel": {
+      "ariaLabel": "Case-Study Stationen",
+      "ariaPrev": "Vorherige Station",
+      "ariaNext": "Nächste Station",
+      "ariaDot": "Station {index} von {total}",
+      "ariaSlideOf": "Station {index} von {total}: {label}",
+      "ariaLive": "Station {index} von {total}: {label}",
+      "swipeHint": "Seitlich wischen für die ganze Case-Study",
+      "stationLabels": [
+        "Hook",
+        "Kontext",
+        "Stack",
+        "Admin-Highlight",
+        "Twitch-Overlay",
+        "Öffentliche Schicht"
+      ]
+    },
     "sectionLabel": "Section 04 · Case Study",
     "headline": "Du chaos associatif à une plateforme dédiée.",
     "hook": "Toutes les associations se battent avec la même galère : feuilles Excel, sites statiques, partage de fichiers et d'infos, outils isolés. Pour Jogge di Balla, j'ai mis ça au propre : une plateforme sur mesure qui couvre tout, de la gestion des membres jusqu'à l'overlay Twitch. Vibecoded, auto-hébergée, surdimensionnée.",
@@ -584,6 +602,14 @@
     "headline": "À travers l'objectif.",
     "lede": "Wildlife et voitures, mes deux mondes. Les uns, je les traque seul dans la jungle du Costa Rica ou de Thaïlande, les autres me trouvent en général plus près de chez moi. Ce qui les relie : la patience, la lumière, et le moment qui justifie toute la journée.",
     "techLabel": "SONY α7 IV · 24–600mm · depuis 2023",
+    "prev": "Précédent",
+    "next": "Suivant",
+    "ariaCarouselLabel": "Carrousel photo",
+    "ariaPrev": "Photo précédente",
+    "ariaNext": "Photo suivante",
+    "ariaDot": "Photo {index} sur {total}",
+    "ariaSlideOf": "Photo {index} sur {total}",
+    "ariaLive": "Photo {index} sur {total}",
     "ctaLabel": "Portfolio complet sur manuelheller.myportfolio.com",
     "ctaHref": "https://manuelheller.myportfolio.com/portfolio",
     "ctaCaption": "",
@@ -653,8 +679,8 @@
       "requiredNote": "Tous les champs sont obligatoires",
       "status": {
         "fromLabel": "De :",
-        "fallback": "En cours de configuration — écris-moi directement :",
-        "error": "Ça n'a pas fonctionné. Écris-moi directement par e-mail.",
+        "success": "Merci, ton message est bien arrivé — je te recontacte.",
+        "error": "Ça n'a pas fonctionné — écris-moi directement :",
         "mailSubject": "Demande via manuelheller.dev"
       }
     }
