@@ -432,7 +432,14 @@
       "ariaSlideOf": "Station {index} von {total}: {label}",
       "ariaLive": "Station {index} von {total}: {label}",
       "swipeHint": "Seitlich wischen für die ganze Case-Study",
-      "stationLabels": ["Hook", "Kontext", "Stack", "Admin-Highlight", "Twitch-Overlay", "Öffentliche Schicht"]
+      "stationLabels": [
+        "Hook",
+        "Kontext",
+        "Stack",
+        "Admin-Highlight",
+        "Twitch-Overlay",
+        "Öffentliche Schicht"
+      ]
     },
     "sectionLabel": "Section 04 · Case Study",
     "headline": "Dal caos di un'associazione a una piattaforma dedicata.",
