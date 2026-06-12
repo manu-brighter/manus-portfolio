@@ -95,6 +95,10 @@ export function CaseStudyMobileCarousel({ handleOpen, publicShots }: Props) {
   const t = useTranslations("caseStudy");
   const reduced = useReducedMotion();
   const trackRef = useRef<HTMLDivElement | null>(null);
+  // Pending debounced scroll->index timer, held in a ref so goTo() can cancel
+  // it — otherwise a timer armed by a prior user swipe could fire mid-goTo and
+  // clobber the index goTo just set authoritatively.
+  const settleTimerRef = useRef(0);
   const [index, setIndex] = useState(0);
 
   const facts = t.raw("context.facts") as CaseStudyFacts;
@@ -121,10 +125,10 @@ export function CaseStudyMobileCarousel({ handleOpen, publicShots }: Props) {
   useEffect(() => {
     const track = trackRef.current;
     if (!track) return;
-    let settleTimer = 0;
+    const timerRef = settleTimerRef;
     const onScroll = () => {
-      window.clearTimeout(settleTimer);
-      settleTimer = window.setTimeout(() => {
+      window.clearTimeout(timerRef.current);
+      timerRef.current = window.setTimeout(() => {
         const slide = Math.round(track.scrollLeft / track.clientWidth);
         setIndex((current) => (current === slide ? current : slide));
       }, 120);
@@ -132,7 +136,7 @@ export function CaseStudyMobileCarousel({ handleOpen, publicShots }: Props) {
     track.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       track.removeEventListener("scroll", onScroll);
-      window.clearTimeout(settleTimer);
+      window.clearTimeout(timerRef.current);
     };
   }, []);
 
@@ -140,6 +144,8 @@ export function CaseStudyMobileCarousel({ handleOpen, publicShots }: Props) {
     const clamped = Math.max(0, Math.min(TOTAL - 1, newIndex));
     const track = trackRef.current;
     if (!track) return;
+    // Cancel any pending swipe-settle so it can't overwrite this index.
+    window.clearTimeout(settleTimerRef.current);
     track.scrollTo({
       left: clamped * track.clientWidth,
       behavior: reduced ? "auto" : "smooth",

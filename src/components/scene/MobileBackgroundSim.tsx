@@ -191,6 +191,16 @@ export function MobileBackgroundSim() {
     let drained = false;
     let scrollAccumulator = 0;
     let lastScrollY = window.scrollY;
+    // Horizontal-gesture guard: a side-swipe on the Case-Study / Photography
+    // carousels can drag `window.scrollY` a few px diagonally, which would
+    // otherwise trip drain() — fading the background AND doing GSAP+GL work
+    // right in the middle of the carousel's first swipe (a second stall source
+    // on top of the React re-render the carousel already debounced away). We
+    // only drain on a vertical-dominant gesture, so horizontal swipes leave
+    // the sim alone and the iOS cull-mask still kicks in for real page scroll.
+    let horizontalGesture = false;
+    let gestureStartX = 0;
+    let gestureStartY = 0;
 
     // Opacity fade rides the shared gsap.ticker (raf.ts wraps it) rather than
     // a standalone requestAnimationFrame loop — keeps the "one RAF ticker"
@@ -243,7 +253,7 @@ export function MobileBackgroundSim() {
       const y = window.scrollY;
       scrollAccumulator += Math.abs(y - lastScrollY);
       lastScrollY = y;
-      if (scrollAccumulator > SCROLL_DISTANCE_THRESHOLD) drain();
+      if (!horizontalGesture && scrollAccumulator > SCROLL_DISTANCE_THRESHOLD) drain();
 
       // Reveal only after a full SCROLL_IDLE_COOLDOWN_MS of stillness — the
       // timer is reset on every scroll event, so slow/stop-start scrolling
@@ -256,10 +266,31 @@ export function MobileBackgroundSim() {
       }, SCROLL_IDLE_COOLDOWN_MS);
     };
 
+    // Classify each touch gesture by dominant axis; a clearly-horizontal drag
+    // (carousel swipe) is flagged so onScroll skips drain() for its duration.
+    const onTouchStart = (e: TouchEvent) => {
+      const t = e.touches[0];
+      if (!t) return;
+      gestureStartX = t.clientX;
+      gestureStartY = t.clientY;
+      horizontalGesture = false;
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      const t = e.touches[0];
+      if (!t) return;
+      const dx = Math.abs(t.clientX - gestureStartX);
+      const dy = Math.abs(t.clientY - gestureStartY);
+      if (dx > dy && dx > 10) horizontalGesture = true;
+    };
+
     window.addEventListener("scroll", onScroll, { passive: true });
+    document.addEventListener("touchstart", onTouchStart, { passive: true });
+    document.addEventListener("touchmove", onTouchMove, { passive: true });
 
     return () => {
       window.removeEventListener("scroll", onScroll);
+      document.removeEventListener("touchstart", onTouchStart);
+      document.removeEventListener("touchmove", onTouchMove);
       opacityTween?.kill();
       if (idleTimerId !== null) window.clearTimeout(idleTimerId);
       clearSettle();

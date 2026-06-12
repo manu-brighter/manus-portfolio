@@ -79,4 +79,24 @@ test.describe("Case Study mobile carousel", () => {
     // mount because Mobile takes the early-return branch in CaseStudy.tsx.
     await expect(page.locator('[data-testid="diorama-track"]')).toHaveCount(0);
   });
+
+  test("arrow keys navigate stations (keyboard parity for the focusable track)", async ({
+    page,
+  }) => {
+    await page.goto("/de/#case-study");
+    await page.waitForLoadState("networkidle");
+
+    const track = page.locator('[data-testid="cs-carousel-track"]');
+    const dots = page.locator('[data-testid="cs-carousel-dot"]');
+    await track.focus();
+    await expect(dots.nth(0)).toHaveAttribute("aria-current", "true");
+
+    await track.press("ArrowRight");
+    await page.waitForTimeout(600);
+    await expect(dots.nth(1)).toHaveAttribute("aria-current", "true");
+
+    await track.press("ArrowLeft");
+    await page.waitForTimeout(600);
+    await expect(dots.nth(0)).toHaveAttribute("aria-current", "true");
+  });
 });

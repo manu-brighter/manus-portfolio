@@ -74,4 +74,22 @@ test.describe("Photography mobile swiper", () => {
     const simCanvas = page.locator('canvas[data-testid="photo-swiper-sim"]');
     await expect(simCanvas).toBeVisible();
   });
+
+  test("arrow keys navigate slides (keyboard parity for the focusable track)", async ({ page }) => {
+    await page.goto("/de/#photography");
+    await page.waitForLoadState("networkidle");
+
+    const track = page.locator('#photography [aria-roledescription="carousel"]');
+    const dots = page.locator('[data-testid="photo-dot"]');
+    await track.focus();
+    await expect(dots.nth(0)).toHaveAttribute("aria-current", "true");
+
+    await track.press("ArrowRight");
+    await page.waitForTimeout(600);
+    await expect(dots.nth(1)).toHaveAttribute("aria-current", "true");
+
+    await track.press("ArrowLeft");
+    await page.waitForTimeout(600);
+    await expect(dots.nth(0)).toHaveAttribute("aria-current", "true");
+  });
 });
