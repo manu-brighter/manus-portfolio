@@ -64,10 +64,10 @@ type Props = {
   publicShots: PublicShot[];
 };
 
-const TOTAL = 4;
+const TOTAL = 6;
 
-/** Dot color per station — echoes the retired sim's transition sequence. */
-const STATION_DOT_SPOT: SpotColor[] = ["mint", "rose", "amber", "violet"];
+/** Dot color per station — one spot per slide across the 6-station flow. */
+const STATION_DOT_SPOT: SpotColor[] = ["mint", "violet", "amber", "rose", "amber", "violet"];
 
 const SPOT_BG_CLASS: Record<SpotColor, string> = {
   rose: "bg-spot-rose",
@@ -77,17 +77,17 @@ const SPOT_BG_CLASS: Record<SpotColor, string> = {
 };
 
 /**
- * Shared slide shell: paper-tint diorama surface + framing table lines.
- * Content-driven height (min 78vh for presence + diorama room) instead of a
- * fixed 82vh — the old fixed height + justify-center clipped tall stations
- * (story prose, the two highlight cards) top and bottom. `snap-always` forces
- * every swipe to land on a slide (kills the "first swipe stops halfway").
- * `overflow-hidden` still clips props that bleed past the slide edge.
+ * Shared slide shell: one diorama panel == exactly one screen (h-full of the
+ * 80svh track). Each slide holds a SINGLE card now (the dense stations were
+ * split — highlights into admin + overlay, context into what + stack) so the
+ * content fits one screen and is vertically centred without clipping or the
+ * runaway empty space the equal-height-to-tallest approach produced.
+ * `overflow-hidden` clips props that bleed past the slide edge.
  */
 const SLIDE_CLASS =
-  "relative flex min-h-[78vh] w-full shrink-0 snap-center snap-always flex-col overflow-hidden bg-paper-tint";
-/** Content column above the decor layer — top-aligned natural flow, no clip. */
-const CONTENT_CLASS = "relative z-10 flex flex-col px-6 py-12";
+  "relative flex h-full w-full shrink-0 snap-center snap-always flex-col justify-center overflow-hidden bg-paper-tint";
+/** Content column above the decor layer — centred single card. */
+const CONTENT_CLASS = "relative z-10 flex flex-col px-6";
 
 export function CaseStudyMobileCarousel({ handleOpen, publicShots }: Props) {
   const t = useTranslations("caseStudy");
@@ -164,9 +164,14 @@ export function CaseStudyMobileCarousel({ handleOpen, publicShots }: Props) {
       </div>
 
       <div className="relative">
-        {/* Carousel track. Fixed-height block in normal flow: vertical drags
-            scroll the page past it, only horizontal drags move the carousel
-            — so the side-swipe is never forced. */}
+        {/* Carousel track — one screen tall (80svh). `touch-pan-x` is the fix
+            for the "first swipe stops halfway": without it the browser has to
+            arbitrate horizontal-swipe vs vertical-page-scroll on every touch
+            that starts on the track, and the first (cold) swipe gets partly
+            eaten by that arbitration. Declaring the track horizontal makes
+            side-swipes land cleanly from the first one. Trade-off: vertical
+            page-scroll is started off the track (swipe hint above, dots/arrows
+            below, neighbouring sections). */}
         <section
           ref={trackRef as React.RefObject<HTMLElement>}
           data-testid="cs-carousel-track"
@@ -175,7 +180,7 @@ export function CaseStudyMobileCarousel({ handleOpen, publicShots }: Props) {
           // biome-ignore lint/a11y/noNoninteractiveTabindex: ARIA carousel pattern — region is tab stop for arrow-key nav
           tabIndex={0}
           onKeyDown={onKey}
-          className="flex snap-x snap-mandatory overflow-x-auto border-ink border-y-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-spot-mint)] focus-visible:ring-offset-2"
+          className="flex h-[80svh] snap-x snap-mandatory touch-pan-x overflow-x-auto border-ink border-y-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-spot-mint)] focus-visible:ring-offset-2"
           style={{ scrollbarWidth: "none" }}
         >
           {/* Station 1 · Hook */}
@@ -187,9 +192,8 @@ export function CaseStudyMobileCarousel({ handleOpen, publicShots }: Props) {
             className={SLIDE_CLASS}
           >
             <SlideDecor>
-              <InkSplat color="rose" className="absolute top-[28%] left-[2%] w-24 opacity-60" />
-              <CameraProp className="absolute top-[1%] right-[-2%] w-28 rotate-6 opacity-90" />
-              <PencilProp className="absolute bottom-[9%] left-[-4%] w-36 -rotate-12 opacity-90" />
+              <InkSplat color="rose" className="absolute top-[6%] left-[5%] w-20 opacity-60" />
+              <CameraProp className="absolute top-[4%] right-[5%] w-24 rotate-6 opacity-90" />
             </SlideDecor>
             <div className={CONTENT_CLASS}>
               <HookCard
@@ -202,39 +206,53 @@ export function CaseStudyMobileCarousel({ handleOpen, publicShots }: Props) {
             </div>
           </article>
 
-          {/* Station 2 · Context + Stack */}
+          {/* Station 2 · Context (What) */}
           <article
-            data-testid="cs-station-context"
-            id="cs-station-context"
+            data-testid="cs-station-what"
+            id="cs-station-what"
             aria-roledescription="slide"
             aria-label={slideLabel(1)}
             className={SLIDE_CLASS}
           >
             <SlideDecor>
-              <InkSplat color="amber" className="absolute top-[6%] right-[6%] w-32" />
-              <RulerProp className="absolute bottom-[10%] right-[-6%] w-48 rotate-[8deg]" />
-              <PencilProp className="absolute top-[2%] left-[6%] w-32 rotate-[10deg]" />
+              <InkSplat color="amber" className="absolute top-[5%] right-[6%] w-24 opacity-60" />
+              <PencilProp className="absolute bottom-[5%] left-[4%] w-28 -rotate-6 opacity-90" />
             </SlideDecor>
-            <div className={`${CONTENT_CLASS} gap-6`}>
+            <div className={CONTENT_CLASS}>
               <WhatCard label={t("context.label")} facts={facts} storyParas={storyParas} />
-              <StackCard heading={stackStation.heading} stack={stack} />
             </div>
           </article>
 
-          {/* Station 3 · Highlights */}
+          {/* Station 3 · Stack */}
           <article
-            data-testid="cs-station-highlights"
-            id="cs-station-highlights"
+            data-testid="cs-station-stack"
+            id="cs-station-stack"
             aria-roledescription="slide"
             aria-label={slideLabel(2)}
             className={SLIDE_CLASS}
           >
             <SlideDecor>
-              <InkSplat color="mint" className="absolute bottom-[12%] left-[6%] w-36" />
-              <FlashProp className="absolute right-[-2%] bottom-[6%] w-20 rotate-6" />
-              <MobileLupe className="absolute top-[4%] right-[8%] z-20 h-24 w-24" />
+              <InkSplat color="mint" className="absolute top-[7%] left-[6%] w-20 opacity-55" />
+              <RulerProp className="absolute right-[4%] bottom-[7%] w-40 rotate-[8deg] opacity-90" />
             </SlideDecor>
-            <div className={`${CONTENT_CLASS} gap-6`}>
+            <div className={CONTENT_CLASS}>
+              <StackCard heading={stackStation.heading} stack={stack} />
+            </div>
+          </article>
+
+          {/* Station 4 · Highlight · Admin */}
+          <article
+            data-testid="cs-station-admin"
+            id="cs-station-admin"
+            aria-roledescription="slide"
+            aria-label={slideLabel(3)}
+            className={SLIDE_CLASS}
+          >
+            <SlideDecor>
+              <InkSplat color="mint" className="absolute top-[5%] left-[5%] w-24 opacity-60" />
+              <FlashProp className="absolute right-[5%] bottom-[5%] w-14 rotate-6 opacity-90" />
+            </SlideDecor>
+            <div className={CONTENT_CLASS}>
               {adminHighlight ? (
                 <HighlightCard
                   slug="admin"
@@ -250,6 +268,22 @@ export function CaseStudyMobileCarousel({ handleOpen, publicShots }: Props) {
                   onPolaroidClick={handleOpen(1)}
                 />
               ) : null}
+            </div>
+          </article>
+
+          {/* Station 5 · Highlight · Twitch-Overlay */}
+          <article
+            data-testid="cs-station-overlay"
+            id="cs-station-overlay"
+            aria-roledescription="slide"
+            aria-label={slideLabel(4)}
+            className={SLIDE_CLASS}
+          >
+            <SlideDecor>
+              <InkSplat color="amber" className="absolute bottom-[6%] left-[5%] w-20 opacity-55" />
+              <MobileLupe className="absolute top-[5%] right-[6%] z-20 h-20 w-20" />
+            </SlideDecor>
+            <div className={CONTENT_CLASS}>
               {overlayHighlight ? (
                 <HighlightCard
                   slug="twitchoverlay"
@@ -268,17 +302,17 @@ export function CaseStudyMobileCarousel({ handleOpen, publicShots }: Props) {
             </div>
           </article>
 
-          {/* Station 4 · Public */}
+          {/* Station 6 · Public */}
           <article
             data-testid="cs-station-public"
             id="cs-station-public"
             aria-roledescription="slide"
-            aria-label={slideLabel(3)}
+            aria-label={slideLabel(5)}
             className={SLIDE_CLASS}
           >
             <SlideDecor>
-              <InkSplat color="violet" className="absolute top-[8%] left-[8%] w-32" />
-              <CoffeeProp className="absolute right-[-6%] bottom-[4%] w-40 -rotate-6" />
+              <InkSplat color="violet" className="absolute top-[5%] left-[5%] w-24 opacity-60" />
+              <CoffeeProp className="absolute right-[3%] bottom-[4%] w-28 -rotate-6 opacity-90" />
             </SlideDecor>
             <div className={CONTENT_CLASS}>
               <PublicCard

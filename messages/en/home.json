@@ -432,7 +432,7 @@
       "ariaSlideOf": "Station {index} von {total}: {label}",
       "ariaLive": "Station {index} von {total}: {label}",
       "swipeHint": "Seitlich wischen für die ganze Case-Study",
-      "stationLabels": ["Hook", "Kontext & Stack", "Highlights", "Öffentliche Schicht"]
+      "stationLabels": ["Hook", "Kontext", "Stack", "Admin-Highlight", "Twitch-Overlay", "Öffentliche Schicht"]
     },
     "sectionLabel": "Section 04 · Case Study",
     "headline": "From club chaos to a custom platform.",

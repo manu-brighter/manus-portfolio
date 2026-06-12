@@ -16,12 +16,14 @@ import { devices, expect, test } from "@playwright/test";
 test.use({ ...devices["Pixel 5"] });
 
 test.describe("Case Study mobile carousel", () => {
-  test("renders 4 station slides + 4 pagination dots", async ({ page }) => {
+  test("renders 6 station slides + 6 pagination dots", async ({ page }) => {
     await page.goto("/de/#case-study");
     await page.waitForLoadState("networkidle");
 
-    await expect(page.locator('[data-testid^="cs-station-"]')).toHaveCount(4);
-    await expect(page.locator('[data-testid="cs-carousel-dot"]')).toHaveCount(4);
+    // 6 slides: the dense stations were split so each fits one screen —
+    // hook, context (what), stack, admin-highlight, overlay-highlight, public.
+    await expect(page.locator('[data-testid^="cs-station-"]')).toHaveCount(6);
+    await expect(page.locator('[data-testid="cs-carousel-dot"]')).toHaveCount(6);
   });
 
   test("prev/next exist; start state has prev disabled, next enabled", async ({ page }) => {
@@ -58,8 +60,8 @@ test.describe("Case Study mobile carousel", () => {
     const live = page.locator('[data-testid="cs-carousel-live"]');
     await page.locator('[data-testid="cs-carousel-next"]').click();
     await page.waitForTimeout(400);
-    // DE locale: "Station 2 von 4: …"
-    await expect(live).toContainText(/2.*4/);
+    // DE locale: "Station 2 von 6: …" (6 stations after the dense-slide split)
+    await expect(live).toContainText(/2.*6/);
   });
 
   test("no fluid-sim canvas mounts in the carousel", async ({ page }) => {
