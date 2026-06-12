@@ -68,6 +68,8 @@ const TOTAL = 6;
 
 /** Dot color per station — one spot per slide across the 6-station flow. */
 const STATION_DOT_SPOT: SpotColor[] = ["mint", "violet", "amber", "rose", "amber", "violet"];
+/** Stable React keys for the dots — spot colours repeat, so can't key by them. */
+const STATION_KEYS = ["hook", "what", "stack", "admin", "overlay", "public"] as const;
 
 const SPOT_BG_CLASS: Record<SpotColor, string> = {
   rose: "bg-spot-rose",
@@ -352,7 +354,7 @@ export function CaseStudyMobileCarousel({ handleOpen, publicShots }: Props) {
           <div className="flex items-center gap-1">
             {STATION_DOT_SPOT.map((spot, i) => (
               <button
-                key={spot}
+                key={STATION_KEYS[i]}
                 type="button"
                 data-testid="cs-carousel-dot"
                 aria-current={i === index ? "true" : "false"}
