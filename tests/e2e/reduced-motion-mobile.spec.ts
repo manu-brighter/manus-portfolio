@@ -37,12 +37,14 @@ test.describe("Mobile reduced-motion", () => {
     await expect(page.locator('canvas[data-testid="photo-swiper-sim"]')).toHaveCount(0);
   });
 
-  test("Case-Study carousel renders 4 stations without any sim canvas", async ({ page }) => {
+  test("Case-Study carousel renders 6 stations without any sim canvas", async ({ page }) => {
     await page.goto("/de/#case-study");
     await page.waitForLoadState("networkidle");
 
-    await expect(page.locator('[data-testid^="cs-station-"]')).toHaveCount(4);
-    await expect(page.locator('[data-testid="cs-carousel-dot"]')).toHaveCount(4);
+    // 6 stations after the dense-slide split (hook · what · stack · admin ·
+    // overlay · public) — see case-study-carousel-mobile.spec.ts.
+    await expect(page.locator('[data-testid^="cs-station-"]')).toHaveCount(6);
+    await expect(page.locator('[data-testid="cs-carousel-dot"]')).toHaveCount(6);
     // The per-station sim was removed entirely — no canvas in the carousel.
     await expect(page.locator("#case-study canvas")).toHaveCount(0);
   });
