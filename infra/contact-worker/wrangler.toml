@@ -1,0 +1,36 @@
+# Cloudflare Worker config for the manuelheller.dev contact endpoint.
+#
+# Primary deploy path is the Cloudflare dashboard (paste worker.js) — see
+# README.md. This file documents the same bindings/config and is here for the
+# `wrangler deploy` alternative.
+
+name = "manuelheller-contact"
+main = "worker.js"
+compatibility_date = "2025-09-01"
+
+# Route: intercept the contact endpoint at the edge, before nginx origin.
+# The zone must be on Cloudflare (manuelheller.dev already is, proxy ON).
+routes = [
+  { pattern = "manuelheller.dev/api/contact", zone_name = "manuelheller.dev" }
+]
+
+# KV namespace for the per-IP rate limiter. Create it once with:
+#   wrangler kv namespace create CONTACT_RL
+# then paste the returned id below. (Dashboard: Workers & Pages -> KV.)
+[[kv_namespaces]]
+binding = "CONTACT_RL"
+id = "<PASTE_KV_NAMESPACE_ID>"
+
+# Non-secret config. Defaults baked into worker.js match these — only override
+# here if you want different values.
+[vars]
+FROM_ADDRESS = "kontakt@manuelheller.dev"
+FROM_NAME = "manuelheller.dev Kontakt"
+TO_ADDRESS = "manuelheller@bluewin.ch"
+SUBJECT = "Neue Nachricht über manuelheller.dev"
+RATE_LIMIT_MAX = "5"
+RATE_LIMIT_WINDOW = "3600"
+
+# RESEND_API_KEY is a SECRET — never put it in this file. Set it with:
+#   wrangler secret put RESEND_API_KEY
+# (Dashboard: the Worker -> Settings -> Variables -> add as "Encrypt".)

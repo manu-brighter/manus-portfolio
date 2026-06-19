@@ -225,11 +225,16 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   Mini-sims on cards stay paused after first hover/focus for instant
   re-hovers. Dynamic-imported in `/playground/[slug]` so home pays zero
   cost.
-- **Contact**: form is fully built but submit is **stubbed** (320ms graceful
-  fallback → mailto:`SITE.author.email`). Cloudflare Worker → Resend bridge
-  is the next sprint. Honeypot field (`bot-trap`, off-screen, `tabIndex=-1`,
-  `aria-hidden`) — trip silently swallows (`return` after `preventDefault`),
-  never expose mailto fallback to bots.
+- **Contact**: form POSTs JSON `{name,email,message}` same-origin to
+  `/api/contact`, handled by a **Cloudflare Worker → Resend** bridge (live
+  2026-06-19). The Worker is bound to route `manuelheller.dev/api/contact` and
+  intercepts at the CF edge **before** nginx — no server runtime, no nginx edit
+  (the box has no PHP; the old `infra/contact/` PHP-FPM template is superseded
+  and unused). Worker code + setup in `infra/contact-worker/`. On any failure
+  the form degrades to a `mailto:`SITE.author.email` link (messages never
+  lost). Honeypot field (`bot-trap`, off-screen, `tabIndex=-1`, `aria-hidden`)
+  — trip silently swallows (`return` after `preventDefault`), re-checked
+  server-side in the Worker; never expose mailto fallback to bots.
 - **Legal**: `/[locale]/impressum` + `/[locale]/datenschutz` as separate
   routes through shared `<LegalDocument namespace>` server component.
   CH-conform DSG/revDSG + EU DSGVO informational. No cookie banner (site
