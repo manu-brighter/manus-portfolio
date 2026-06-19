@@ -9,22 +9,24 @@ import { SITE } from "@/lib/site";
  * Contact form — client component for submit-state choreography.
  *
  * Submit posts the form as JSON to a SAME-ORIGIN endpoint (`/api/contact`),
- * which nginx maps to a small self-hosted PHP endpoint (PHPMailer -> SMTP)
- * that mails Manuel directly. Same-origin keeps it within the existing CSP
- * `connect-src 'self'` — no CSP change, no third party sees submissions.
- * See `infra/contact/` for the endpoint, config template and nginx snippet.
+ * handled by a Cloudflare Worker bound to the route `manuelheller.dev/api/contact`
+ * that sends the message via Resend. The Worker intercepts at the CF edge,
+ * before nginx — so the static export needs no server runtime. Same-origin
+ * keeps it within the existing CSP `connect-src 'self'` — no CSP change, and
+ * no third party beyond Resend sees submissions. See `infra/contact-worker/`
+ * for the Worker, config and setup.
  *
  * Honoring the static-export constraint: there is no Next `/api/*` route at
- * runtime (`output: "export"`). The endpoint is a sibling PHP file served by
- * the same nginx, not part of the Next bundle.
+ * runtime (`output: "export"`). The endpoint is the edge Worker, not part of
+ * the Next bundle.
  *
  * Graceful degrade: if the request fails (network, non-2xx, timeout, or the
- * endpoint isn't wired up yet) the form drops to an `error` state with a
+ * endpoint isn't reachable) the form drops to an `error` state with a
  * pre-filled `mailto:` link to SITE.author.email — the visitor's message is
  * never lost.
  *
  * Validation is intentionally light: HTML5 constraints (`required`, `type`,
- * `minLength`) plus the honeypot client-side; the PHP endpoint re-validates
+ * `minLength`) plus the honeypot client-side; the Worker re-validates
  * everything server-side (a direct POST bypasses the client checks).
  *
  * Honeypot pattern: a field a real user never sees / focuses (`bot-trap`,
@@ -32,7 +34,7 @@ import { SITE } from "@/lib/site";
  * has a value we silently swallow the submit (and the server does too).
  */
 
-/** Same-origin endpoint — nginx maps this to the PHP mailer (see infra/contact). */
+/** Same-origin endpoint — a Cloudflare Worker (Resend) handles this at the edge (see infra/contact-worker). */
 const CONTACT_ENDPOINT = "/api/contact";
 /** Abort the request after this long so a hung endpoint still degrades to mailto. */
 const SUBMIT_TIMEOUT_MS = 8000;
