@@ -34,9 +34,10 @@ import { useSimPresetStore } from "@/lib/simPresetStore";
 
 // Appear after the canvas is up and the hero reveal has settled —
 // SceneProvider defers the canvas 1700ms (fresh) / 200ms (returning)
-// past loader-complete, the sim opens its warmup gate ~2400ms in.
-// The switcher slots in just after so it never announces a sim that
-// isn't running yet.
+// past loader-complete. On the fresh path the pill lands after the
+// sim's warmup gate opens (~2400ms); the returning path shows it a
+// beat earlier, which is fine — preset writes persist in the store
+// and land at orchestrator init.
 const FRESH_APPEAR_MS = 2800;
 const RETURNING_APPEAR_MS = 600;
 
@@ -50,6 +51,13 @@ export function SimPresetSwitcher() {
   const setPreset = useSimPresetStore((s) => s.setPreset);
 
   const [visible, setVisible] = useState(false);
+  // Hydration guard: `config` and the persisted presetId both read
+  // localStorage synchronously on the client, so their server values
+  // can differ (e.g. cached "static" tier -> config null -> element
+  // vs null structural mismatch). Render nothing until mounted — the
+  // pill is invisible for >=600ms after mount anyway.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     let timer: number | null = null;
@@ -64,7 +72,7 @@ export function SimPresetSwitcher() {
     };
   }, []);
 
-  if (!config || reducedMotion || coarsePointer || sceneHidden) return null;
+  if (!mounted || !config || reducedMotion || coarsePointer || sceneHidden) return null;
 
   return (
     <div

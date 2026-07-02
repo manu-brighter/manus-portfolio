@@ -74,12 +74,14 @@ export function FadeIn({
     const el = ref.current;
     if (!el) return;
 
-    // display:inline can't carry transforms — promote spans to
-    // inline-block only when a transform entrance is requested so
-    // plain fades keep their layout-neutral inline behavior. Divs
-    // already carry transforms.
+    // display:inline can't carry transforms — promote plain-inline
+    // elements to inline-block when a transform entrance is requested.
+    // Decided from COMPUTED display, not tag name: a span the caller
+    // styled inline-flex/inline-block is already an atomic inline box
+    // (transformable) and overriding it would clobber flex layout
+    // (gap/align) — bit the SectionHeader eyebrow in review.
     const hasTransform = y !== 0 || scale !== 1;
-    const needsInlineBlock = hasTransform && el.tagName === "SPAN";
+    const needsInlineBlock = hasTransform && getComputedStyle(el).display === "inline";
     gsap.set(el, {
       opacity: 0,
       ...(hasTransform ? { y, scale } : {}),
@@ -131,6 +133,10 @@ export function FadeIn({
       tween?.kill();
       if (settleTimer !== null) window.clearTimeout(settleTimer);
       unsubLoader?.();
+      // Clear primed inline styles so a mid-session reduced-motion
+      // flip (which reuses the same node in the static branch) can't
+      // strand the content at opacity 0.
+      gsap.set(el, { clearProps: "opacity,transform,display" });
     };
   }, [reducedMotion, delay, duration, threshold, waitForLoader, y, scale]);
 

@@ -20,7 +20,7 @@ type Props = {
   spot?: SpotColor;
 };
 
-// Outer dots lead, asterisk (index 2) lands last — stamp cadence.
+// Dots pop first (left pair, then right pair), asterisk lands last.
 const POP_ORDER = [0, 1, 4, 2, 3] as const;
 
 export function StampDivider({ spot }: Props) {
