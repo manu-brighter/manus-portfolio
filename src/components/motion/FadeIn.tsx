@@ -40,6 +40,16 @@ type FadeInProps = {
   /** Pass-through to the rendered span — for `aria-hidden="true"` on
    * decorative glyphs, etc. */
   ariaHidden?: boolean;
+  /** Vertical entrance offset in px — the element settles up (positive
+   * value = starts below). 0 keeps the pure opacity fade. */
+  y?: number;
+  /** Entrance scale — the element grows/shrinks to 1. 1 keeps the pure
+   * opacity fade. Used by stamp-style pops (StampDivider). */
+  scale?: number;
+  /** Rendered element. Default `span` (inline, safe inside <p>); use
+   * `div` when wrapping block content — a span around blocks is
+   * invalid HTML and trips hydration. */
+  as?: "span" | "div";
 };
 
 export function FadeIn({
@@ -50,8 +60,13 @@ export function FadeIn({
   threshold = 0.35,
   waitForLoader = false,
   ariaHidden,
+  y = 0,
+  scale = 1,
+  as: Tag = "span",
 }: FadeInProps) {
-  const ref = useRef<HTMLSpanElement>(null);
+  // Intersection covers both render tags (structurally identical —
+  // both are bare HTMLElement extensions).
+  const ref = useRef<HTMLSpanElement & HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
 
   useEffect(() => {
@@ -59,7 +74,17 @@ export function FadeIn({
     const el = ref.current;
     if (!el) return;
 
-    gsap.set(el, { opacity: 0 });
+    // display:inline can't carry transforms — promote spans to
+    // inline-block only when a transform entrance is requested so
+    // plain fades keep their layout-neutral inline behavior. Divs
+    // already carry transforms.
+    const hasTransform = y !== 0 || scale !== 1;
+    const needsInlineBlock = hasTransform && el.tagName === "SPAN";
+    gsap.set(el, {
+      opacity: 0,
+      ...(hasTransform ? { y, scale } : {}),
+      ...(needsInlineBlock ? { display: "inline-block" } : {}),
+    });
 
     let fired = false;
     let tween: gsap.core.Tween | null = null;
@@ -69,6 +94,7 @@ export function FadeIn({
     const start = () => {
       tween = gsap.to(el, {
         opacity: 1,
+        ...(hasTransform ? { y: 0, scale: 1 } : {}),
         duration,
         delay,
         ease: "power2.out",
@@ -106,19 +132,19 @@ export function FadeIn({
       if (settleTimer !== null) window.clearTimeout(settleTimer);
       unsubLoader?.();
     };
-  }, [reducedMotion, delay, duration, threshold, waitForLoader]);
+  }, [reducedMotion, delay, duration, threshold, waitForLoader, y, scale]);
 
   if (reducedMotion) {
     return (
-      <span className={className} aria-hidden={ariaHidden}>
+      <Tag className={className} aria-hidden={ariaHidden}>
         {children}
-      </span>
+      </Tag>
     );
   }
 
   return (
-    <span ref={ref} className={className} aria-hidden={ariaHidden}>
+    <Tag ref={ref} className={className} aria-hidden={ariaHidden}>
       {children}
-    </span>
+    </Tag>
   );
 }

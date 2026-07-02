@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 import { WorkCard } from "@/components/ui/WorkCard";
 import { PortfolioCardReveal } from "@/components/work/PortfolioCardReveal";
 import type { WorkProjects } from "@/types/i18n-shapes";
@@ -38,15 +39,13 @@ export function Work() {
       aria-labelledby="work-heading"
       className="container-page-wide relative py-20 md:py-28"
     >
-      <header className="grid-12 mb-16 gap-y-4 md:mb-20">
-        <p className="col-span-12 text-ink-muted type-label md:col-span-4">{t("sectionLabel")}</p>
-        <div className="col-span-12 md:col-span-8">
-          <h2 id="work-heading" className="type-h1 text-ink">
-            {t("headline")}
-          </h2>
-          <p className="type-body-lg mt-4 text-ink-soft">{t("subhead")}</p>
-        </div>
-      </header>
+      <SectionHeader
+        className="mb-16 md:mb-20"
+        label={t("sectionLabel")}
+        headingId="work-heading"
+        headline={t("headline")}
+        subhead={t("subhead")}
+      />
 
       <div className="grid-12 gap-y-16 md:gap-y-24">
         {portfolio ? (

@@ -3,6 +3,7 @@
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useTranslations } from "next-intl";
 import type { MouseEvent as ReactMouseEvent } from "react";
+import { FadeIn } from "@/components/motion/FadeIn";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 
 /**
@@ -69,38 +70,46 @@ export function Footer() {
     <footer className="relative z-10 border-paper-line border-t-2 bg-paper-shade">
       <div className="container-page flex flex-col items-start justify-between gap-6 py-12 md:flex-row md:items-center">
         <p className="type-label text-ink-muted">
-          © Manuel Heller
-          <span aria-hidden="true"> · </span>
-          {t("location")}
-          <span aria-hidden="true" className="mx-3">
-            ·
-          </span>
-          {LEGAL_LINKS.map((link, i) => (
-            <span key={link.key}>
-              {i > 0 ? <span aria-hidden="true"> · </span> : null}
-              <Link
-                href={link.href}
-                onClick={onLegalLinkClick(link.href)}
-                className="text-ink underline decoration-ink-soft underline-offset-2 transition-colors hover:decoration-ink"
-                aria-label={tNav(link.key)}
-              >
-                {tNav(link.key)}
-              </Link>
+          <FadeIn y={8}>
+            © Manuel Heller
+            <span aria-hidden="true"> · </span>
+            {t("location")}
+            <span aria-hidden="true" className="mx-3">
+              ·
             </span>
-          ))}
+            {LEGAL_LINKS.map((link, i) => (
+              <span key={link.key}>
+                {i > 0 ? <span aria-hidden="true"> · </span> : null}
+                <Link
+                  href={link.href}
+                  onClick={onLegalLinkClick(link.href)}
+                  className="text-ink underline decoration-ink-soft underline-offset-2 transition-colors hover:decoration-ink"
+                  aria-label={tNav(link.key)}
+                >
+                  {tNav(link.key)}
+                </Link>
+              </span>
+            ))}
+          </FadeIn>
         </p>
 
         <p className="type-label-stamp text-ink-muted">
-          {SIGNATURE_STAMPS.map((stamp, i) => (
-            <span key={stamp}>
-              {i > 0 ? (
-                <span aria-hidden="true" className="mx-2">
-                  ·
+          <FadeIn delay={0.15} y={8}>
+            {SIGNATURE_STAMPS.map((stamp, i) => (
+              <span key={stamp}>
+                {i > 0 ? (
+                  <span aria-hidden="true" className="mx-2">
+                    ·
+                  </span>
+                ) : null}
+                {/* Hover-only misregistration twitch — decorative, no
+                    tabIndex (documented keyboard-noise trap). */}
+                <span className="misreg-hover" data-text={stamp}>
+                  {stamp}
                 </span>
-              ) : null}
-              {stamp}
-            </span>
-          ))}
+              </span>
+            ))}
+          </FadeIn>
         </p>
       </div>
     </footer>

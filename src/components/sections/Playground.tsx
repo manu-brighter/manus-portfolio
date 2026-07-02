@@ -4,6 +4,7 @@ import { InkDropMiniSim } from "@/components/playground/InkDropMiniSim";
 import { PlaygroundCard } from "@/components/playground/PlaygroundCard";
 import { TypeAsFluidCardVisual } from "@/components/playground/TypeAsFluidCardVisual";
 import { TypeAsFluidMiniSim } from "@/components/playground/TypeAsFluidMiniSim";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 import { EXPERIMENTS } from "@/lib/content/playground";
 
 /**
@@ -32,19 +33,16 @@ export function Playground() {
       aria-labelledby="playground-heading"
       className="container-page relative py-24 md:py-32"
     >
-      <header className="grid-12 mb-16 gap-y-4 md:mb-20">
-        <p className="col-span-12 text-ink-muted type-label md:col-span-4">{t("sectionLabel")}</p>
-        <div className="col-span-12 md:col-span-8">
-          <p className="type-label inline-flex items-center gap-2 text-ink">
-            <span aria-hidden="true" className="inline-block size-2 bg-spot-violet" />
-            {t("eyebrow")}
-          </p>
-          <h2 id="playground-heading" className="type-h1 mt-4 italic text-ink">
-            {t("headline")}
-          </h2>
-          <p className="type-body-lg mt-6 max-w-[55ch] text-ink-soft">{t("lede")}</p>
-        </div>
-      </header>
+      <SectionHeader
+        className="mb-16 md:mb-20"
+        label={t("sectionLabel")}
+        headingId="playground-heading"
+        headline={t("headline")}
+        eyebrow={t("eyebrow")}
+        eyebrowSpot="violet"
+        italicHeadline
+        lede={t("lede")}
+      />
 
       <div className="grid-12 gap-y-20 md:gap-y-0">
         {inkDrop ? (

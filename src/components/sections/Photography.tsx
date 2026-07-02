@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
 import { PhotoInkMask, type SpotColor } from "@/components/scene/PhotoInkMask";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 import { useLenis } from "@/hooks/useLenis";
 import { useMobileLayout } from "@/hooks/useMobileLayout";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -340,20 +341,17 @@ export function Photography() {
       aria-labelledby="photography-heading"
       className="relative py-24 md:py-36"
     >
-      <header className="container-page grid-12 mb-24 gap-y-4 md:mb-32">
-        <p className="col-span-12 text-ink-muted type-label md:col-span-4">{t("sectionLabel")}</p>
-        <div className="col-span-12 md:col-span-8">
-          <p className="type-label inline-flex items-center gap-2 text-ink">
-            <span aria-hidden="true" className="inline-block size-2 bg-spot-amber" />
-            {t("eyebrow")}
-          </p>
-          <h2 id="photography-heading" className="type-h1 mt-4 italic text-ink">
-            {t("headline")}
-          </h2>
-          <p className="type-body-lg mt-6 max-w-[55ch] text-ink-soft">{t("lede")}</p>
-          <p className="type-label-stamp mt-8">{t("techLabel")}</p>
-        </div>
-      </header>
+      <SectionHeader
+        className="container-page mb-24 md:mb-32"
+        label={t("sectionLabel")}
+        headingId="photography-heading"
+        headline={t("headline")}
+        eyebrow={t("eyebrow")}
+        eyebrowSpot="amber"
+        italicHeadline
+        lede={t("lede")}
+        techLabel={t("techLabel")}
+      />
 
       {/* Slot 1 · Egret · full-bleed */}
       {/* Bottom margins bumped to mb-36/md:mb-44 (was mb-32/mb-40) so
