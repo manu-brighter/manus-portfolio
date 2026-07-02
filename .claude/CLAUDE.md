@@ -16,6 +16,13 @@ force source. Static export → Nginx. Full spec in [`docs/plan.md`](../docs/pla
 
 **Package manager is pnpm**, not Bun — plan deviation (§3 still says Bun).
 
+**When pnpm scripts break via WSL** (see "Tooling / Windows specifics"),
+invoke the tools directly: `node node_modules/typescript/bin/tsc --noEmit`,
+`node node_modules/@biomejs/biome/bin/biome check .`,
+`node node_modules/next/dist/bin/next build`,
+`node node_modules/@playwright/test/cli.js test --grep-invert "@visual"`
+(with `$env:E2E_TARGET='prod'; $env:PORT=<free port>`).
+
 ## Folder conventions
 
 - `src/app/` — App Router pages & layouts (locale segment lives here)
@@ -156,6 +163,36 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   ts-runner in devDeps). Per-task `quality` field for AVIF override on
   detail-heavy shots (q38–q50 vs default q60).
 - **Override note**: `docs/content-briefing.md` §§2.4, 5.2, 6.2 still describe a Riso-Duotone shader treatment — that direction was reversed. The framing-only rule above wins.
+
+## Sim presets & night theme
+
+- **4 user-switchable presets** (riso/turbulenz/aquarell/nachtdruck) defined in
+  `src/lib/content/simPresets.ts`; persisted selection in
+  `src/lib/simPresetStore.ts` (zustand + localStorage `manus-sim-preset`).
+- **Two-channel application**: physics subset via `setParams()` (reset to tier
+  baseline first — never touches gridSize/halfRate/pressureIterations, so weak
+  GPUs can't regress), look via `setVisuals(FluidVisuals)` (posterize levels,
+  outline, grain, paper, 4-slot color ladder, splat scales, ambient
+  multipliers). `DEFAULT_FLUID_VISUALS` reproduces the pre-preset literals.
+- **FluidSim re-applies the preset after every orchestrator init** (tier
+  auto-tune re-creates the orchestrator) and fires a center splat-burst on
+  live switches only.
+- **Playground/mini-sims inherit look only** via `syncPresetVisuals()` —
+  their tuned physics stays authoritative.
+- **Ladder contrast rule**: light-theme ladder bands must never approach
+  text-ink luminance — DOM text sits on top of the sim; a near-black pool
+  under near-black type is unreadable (screenshot-verified).
+- **Nachtdruck = night mode**: preset `theme: "night"` → `SimThemeSync` sets
+  `<html data-sim-theme="night">` → CSS var overrides in globals.css flip the
+  whole token set (dark paper / light ink). Sim paints near-black paper with
+  an ascending (glowing) posterized ladder.
+- **LightningCSS trap**: `color-scheme` inside a non-`:root` rule makes the
+  Turbopack CSS pipeline's polyfill drop the ENTIRE rule silently. Never add
+  `color-scheme: dark` to the night block.
+- **Visual tuning workflow**: headless-Playwright screenshot scripts against
+  the dev server (pin tier via localStorage `manus-gpu-tier`, set preset,
+  synthesize pointer churn, screenshot) — used for the turbulenz/nachtdruck
+  retunes; far faster than eyeballing param changes blind.
 
 ## Tailwind / dynamic classes
 
