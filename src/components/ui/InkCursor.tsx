@@ -28,6 +28,11 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 const DOT_SIZE_PX = 10;
 const DOWN_SCALE = 1.6;
+/** Over interactive elements the dot swells and thins — ink spreading
+ *  toward the thing you can press. */
+const HOVER_SCALE = 2.4;
+const HOVER_OPACITY = 0.35;
+const INTERACTIVE_SELECTOR = "a, button, label, input, textarea, select, [role='button']";
 
 export function InkCursor() {
   const reducedMotion = useReducedMotion();
@@ -57,22 +62,41 @@ export function InkCursor() {
     const yTo = gsap.quickTo(dot, "y", { duration: 0.35, ease: "power3.out" });
 
     let shown = false;
+    let overInteractive = false;
+    const restingScale = () => (overInteractive ? HOVER_SCALE : 1);
+    const restingOpacity = () => (overInteractive ? HOVER_OPACITY : 1);
+
     const onMove = (event: PointerEvent) => {
       if (!shown) {
         // First move: snap to position before fading in so the dot
         // doesn't streak across the viewport from its parking spot.
         shown = true;
         gsap.set(dot, { x: event.clientX, y: event.clientY });
-        gsap.to(dot, { opacity: 1, duration: 0.3, ease: "power2.out" });
+        gsap.to(dot, { opacity: restingOpacity(), duration: 0.3, ease: "power2.out" });
       }
       xTo(event.clientX);
       yTo(event.clientY);
+    };
+    // Swell + thin over anything pressable — the ink "spreads toward"
+    // the affordance. pointerover bubbles from the real target, so a
+    // closest() check per boundary-cross is enough (no per-move cost).
+    const onOver = (event: PointerEvent) => {
+      const target = event.target instanceof Element ? event.target : null;
+      const next = Boolean(target?.closest(INTERACTIVE_SELECTOR));
+      if (next === overInteractive) return;
+      overInteractive = next;
+      gsap.to(dot, {
+        scale: restingScale(),
+        opacity: shown ? restingOpacity() : 0,
+        duration: 0.25,
+        ease: "power2.out",
+      });
     };
     const onDown = () => {
       gsap.to(dot, { scale: DOWN_SCALE, duration: 0.18, ease: "power2.out" });
     };
     const onUp = () => {
-      gsap.to(dot, { scale: 1, duration: 0.3, ease: "power2.out" });
+      gsap.to(dot, { scale: restingScale(), duration: 0.3, ease: "power2.out" });
     };
     const onLeave = () => {
       shown = false;
@@ -80,12 +104,14 @@ export function InkCursor() {
     };
 
     document.addEventListener("pointermove", onMove, { passive: true });
+    document.addEventListener("pointerover", onOver, { passive: true });
     document.addEventListener("pointerdown", onDown, { passive: true });
     document.addEventListener("pointerup", onUp, { passive: true });
     document.documentElement.addEventListener("pointerleave", onLeave);
 
     return () => {
       document.removeEventListener("pointermove", onMove);
+      document.removeEventListener("pointerover", onOver);
       document.removeEventListener("pointerdown", onDown);
       document.removeEventListener("pointerup", onUp);
       document.documentElement.removeEventListener("pointerleave", onLeave);
