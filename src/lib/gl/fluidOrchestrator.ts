@@ -114,6 +114,65 @@ const AMBIENT_PARAMS = {
 } as const;
 
 // ---------------------------------------------------------------------------
+// Visual look parameters
+// ---------------------------------------------------------------------------
+
+export type RGB = readonly [number, number, number];
+
+/**
+ * Look-side knobs of the sim — everything that shapes how the dye field
+ * is *rendered* plus how strongly splats inject, as opposed to the
+ * physics params in `TierConfig` (which stay tier-owned, see gpu.ts).
+ * Pure JS state read every frame by runSplat()/runRenderToon()/the
+ * ambient rig — no GL resources involved, so overrides are live and
+ * safe at any time via setVisuals().
+ *
+ * `DEFAULT_FLUID_VISUALS` reproduces the pre-preset hard-coded literals
+ * exactly: an orchestrator that never calls setVisuals() renders
+ * byte-identical to before the preset system existed. (`levels` was
+ * historically fed as 4.0 but the uniform was dead in the shader; the
+ * live default is 0 = soft ladder, matching the shipped look.)
+ */
+export type FluidVisuals = {
+  /** Density pre-quantization bands in render-toon. 0 = soft ladder
+   *  (default look); >0 = hard screen-printed separations. */
+  levels: number;
+  outlineThreshold: number;
+  grainStrength: number;
+  paper: RGB;
+  ink: RGB;
+  /** Density color ladder low -> high, fed to the uSpotMint/Amber/
+   *  Rose/Violet uniform slots (legacy names; presets re-assign which
+   *  RGB sits in each slot). */
+  ladder: readonly [RGB, RGB, RGB, RGB];
+  /** Multiplier on pointer/splat velocity injection. */
+  velocityScale: number;
+  /** How much dye a splat deposits (kept well below 1 so dye stays in
+   *  range and the toon shader's Sobel pass isn't overwhelmed). */
+  dyeScale: number;
+  /** Multiplier on AMBIENT_PARAMS.timeScale (rig wander speed). */
+  ambientTimeScale: number;
+  /** Multiplier on each ambient point's forceStrength. */
+  ambientForceScale: number;
+};
+
+// Frozen: instances hold this object by reference until the first
+// setVisuals() — an accidental in-place mutation would poison every
+// orchestrator plus the default itself.
+export const DEFAULT_FLUID_VISUALS: FluidVisuals = Object.freeze<FluidVisuals>({
+  levels: 0,
+  outlineThreshold: 0.15,
+  grainStrength: 0.07,
+  paper: PAPER_COLOR,
+  ink: INK_COLOR,
+  ladder: [SPOT_RGB.mint, SPOT_RGB.amber, SPOT_RGB.rose, SPOT_RGB.violet],
+  velocityScale: 10.0,
+  dyeScale: 0.15,
+  ambientTimeScale: 1,
+  ambientForceScale: 1,
+});
+
+// ---------------------------------------------------------------------------
 // GL utility functions
 // ---------------------------------------------------------------------------
 
@@ -282,6 +341,7 @@ export class FluidOrchestrator {
   // injectSplat() so it can split click-burst from drag-trail behavior.
   private ambientEnabled = true;
   private pointerSplatEnabled = true;
+  private visuals: FluidVisuals = DEFAULT_FLUID_VISUALS;
   private splatColorOverride: readonly [number, number, number] | null = null;
 
   // External splat queue — drained inside step(). Used by Work-cards to
@@ -473,6 +533,16 @@ export class FluidOrchestrator {
   setParams(partial: Partial<TierConfig>): void {
     const state = this.requireState();
     state.config = { ...state.config, ...partial };
+  }
+
+  /**
+   * Live-tunable look overrides — the preset-facing sibling of
+   * setParams(). Pure JS state read by runSplat()/runRenderToon()/the
+   * ambient rig on the next frame; no GL resources touched, so unlike
+   * setParams() this is safe to call before init().
+   */
+  setVisuals(partial: Partial<FluidVisuals>): void {
+    this.visuals = { ...this.visuals, ...partial };
   }
 
   /**
@@ -727,18 +797,18 @@ export class FluidOrchestrator {
     this.activateProgram(p);
 
     // Velocity splat
+    const { velocityScale, dyeScale } = this.visuals;
     this.bindTexture(p, "uTarget", state.velocity.read.texture, 0);
     this.setFloat(p, "uAspectRatio", this.canvasWidth / this.canvasHeight);
     this.setVec2(p, "uPoint", x, y);
     this.setFloat(p, "uRadius", radiusOverride ?? state.config.splatRadius);
-    this.setVec3(p, "uColor", dx * 10.0, dy * 10.0, 0.0);
+    this.setVec3(p, "uColor", dx * velocityScale, dy * velocityScale, 0.0);
     this.renderToFBO(state.velocity.write);
     this.drawQuad();
     state.velocity.swap();
 
-    // Dye splat — scale intensity down so dye stays in [0,1] range
-    // and doesn't overwhelm the toon shader's Sobel edge detection.
-    const dyeScale = 0.15;
+    // Dye splat — dyeScale keeps dye in [0,1] range so it doesn't
+    // overwhelm the toon shader's Sobel edge detection.
     this.bindTexture(p, "uTarget", state.dye.read.texture, 0);
     this.setVec3(p, "uColor", color[0] * dyeScale, color[1] * dyeScale, color[2] * dyeScale);
     this.renderToFBO(state.dye.write);
@@ -827,23 +897,21 @@ export class FluidOrchestrator {
     this.activateProgram(p);
     this.bindTexture(p, "uDye", state.dye.read.texture, 0);
     this.setVec2(p, "uTexelSize", 1.0 / this.canvasWidth, 1.0 / this.canvasHeight);
-    this.setFloat(p, "uLevels", 4.0);
-    this.setFloat(p, "uOutlineThreshold", 0.15);
-    this.setFloat(p, "uGrainStrength", 0.07);
+    const v = this.visuals;
+    this.setFloat(p, "uLevels", v.levels);
+    this.setFloat(p, "uOutlineThreshold", v.outlineThreshold);
+    this.setFloat(p, "uGrainStrength", v.grainStrength);
     this.setFloat(p, "uTime", elapsed * 0.001);
 
-    this.setVec3(p, "uPaperColor", PAPER_COLOR[0], PAPER_COLOR[1], PAPER_COLOR[2]);
-    this.setVec3(p, "uInkColor", INK_COLOR[0], INK_COLOR[1], INK_COLOR[2]);
-    this.setVec3(p, "uSpotRose", SPOT_COLORS.rose[0], SPOT_COLORS.rose[1], SPOT_COLORS.rose[2]);
-    this.setVec3(p, "uSpotAmber", SPOT_COLORS.amber[0], SPOT_COLORS.amber[1], SPOT_COLORS.amber[2]);
-    this.setVec3(p, "uSpotMint", SPOT_COLORS.mint[0], SPOT_COLORS.mint[1], SPOT_COLORS.mint[2]);
-    this.setVec3(
-      p,
-      "uSpotViolet",
-      SPOT_COLORS.violet[0],
-      SPOT_COLORS.violet[1],
-      SPOT_COLORS.violet[2],
-    );
+    this.setVec3(p, "uPaperColor", v.paper[0], v.paper[1], v.paper[2]);
+    this.setVec3(p, "uInkColor", v.ink[0], v.ink[1], v.ink[2]);
+    // Ladder slots low -> high density. Uniform names keep their legacy
+    // spot names (mint = lowest band, violet = highest); presets decide
+    // which RGB sits in each slot via visuals.ladder.
+    this.setVec3(p, "uSpotMint", v.ladder[0][0], v.ladder[0][1], v.ladder[0][2]);
+    this.setVec3(p, "uSpotAmber", v.ladder[1][0], v.ladder[1][1], v.ladder[1][2]);
+    this.setVec3(p, "uSpotRose", v.ladder[2][0], v.ladder[2][1], v.ladder[2][2]);
+    this.setVec3(p, "uSpotViolet", v.ladder[3][0], v.ladder[3][1], v.ladder[3][2]);
 
     // Render directly to screen (default framebuffer)
     const gl = state.gl;
@@ -976,23 +1044,31 @@ export class FluidOrchestrator {
       // for an organic, breathing feel like layered Riso ink settling.
       // Studio mode disables this entirely (flag is false).
       if (this.ambientEnabled && this.ambientStrength > 0.01) {
-        const t = elapsed * AMBIENT_PARAMS.timeScale;
+        // Preset multipliers: time scales the whole rig's wander speed,
+        // force scales injection strength — but NOT `s` itself, so the
+        // point-C gate below keeps its ambient-strength semantics.
+        const t = elapsed * AMBIENT_PARAMS.timeScale * this.visuals.ambientTimeScale;
         const s = this.ambientStrength;
+        const fs = this.visuals.ambientForceScale;
 
         const { pointA, pointB, pointC } = AMBIENT_PARAMS;
 
         // Point A: slow wide orbit (upper-right quadrant tendency)
         const ax = pointA.center[0] + pointA.range * Math.sin(t * pointA.freqX + pointA.phaseX);
         const ay = pointA.center[1] + pointA.range * Math.cos(t * pointA.freqY + pointA.phaseY);
-        const adx = Math.cos(t * pointA.forceFreqX + pointA.phaseFX) * s * pointA.forceStrength;
-        const ady = Math.sin(t * pointA.forceFreqY + pointA.phaseFY) * s * pointA.forceStrength;
+        const adx =
+          Math.cos(t * pointA.forceFreqX + pointA.phaseFX) * s * fs * pointA.forceStrength;
+        const ady =
+          Math.sin(t * pointA.forceFreqY + pointA.phaseFY) * s * fs * pointA.forceStrength;
         this.runSplat(ax, ay, adx, ady, this.nextSplatColor());
 
         // Point B: faster small orbit (lower-left tendency) — offset phase
         const bx = pointB.center[0] + pointB.range * Math.sin(t * pointB.freqX + pointB.phaseX);
         const by = pointB.center[1] + pointB.range * Math.cos(t * pointB.freqY + pointB.phaseY);
-        const bdx = Math.cos(t * pointB.forceFreqX + pointB.phaseFX) * s * pointB.forceStrength;
-        const bdy = Math.sin(t * pointB.forceFreqY + pointB.phaseFY) * s * pointB.forceStrength;
+        const bdx =
+          Math.cos(t * pointB.forceFreqX + pointB.phaseFX) * s * fs * pointB.forceStrength;
+        const bdy =
+          Math.sin(t * pointB.forceFreqY + pointB.phaseFY) * s * fs * pointB.forceStrength;
         this.runSplat(bx, by, bdx, bdy, this.nextSplatColor());
 
         // Point C: very slow drift (center) — appears only at full ambient
@@ -1000,8 +1076,10 @@ export class FluidOrchestrator {
           const cs = s - pointC.gateThreshold;
           const cx = pointC.center[0] + pointC.range * Math.sin(t * pointC.freqX + pointC.phaseX);
           const cy = pointC.center[1] + pointC.range * Math.cos(t * pointC.freqY + pointC.phaseY);
-          const cdx = Math.cos(t * pointC.forceFreqX + pointC.phaseFX) * cs * pointC.forceStrength;
-          const cdy = Math.sin(t * pointC.forceFreqY + pointC.phaseFY) * cs * pointC.forceStrength;
+          const cdx =
+            Math.cos(t * pointC.forceFreqX + pointC.phaseFX) * cs * fs * pointC.forceStrength;
+          const cdy =
+            Math.sin(t * pointC.forceFreqY + pointC.phaseFY) * cs * fs * pointC.forceStrength;
           this.runSplat(cx, cy, cdx, cdy, this.nextSplatColor());
         }
       }

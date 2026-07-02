@@ -42,7 +42,18 @@ void main() {
   vec3 dyeClamped = clamp(dye.rgb, vec3(0.0), vec3(1.0));
   float density = length(dyeClamped);
 
-  vec3 color = mapToSpotColor(density);
+  // Optional hard Riso separations: uLevels > 0.5 quantizes the value
+  // fed into the color ladder into discrete print bands. Only the
+  // ladder input is posterized -- the Sobel normalization and the
+  // paper blend below keep the raw density, otherwise the quantized
+  // iso-contours shimmer as advection moves them (hard rim flicker).
+  // 0.0 (default) keeps the soft overlapping-band look.
+  float band = density;
+  if (uLevels > 0.5) {
+    band = posterize(density, uLevels);
+  }
+
+  vec3 color = mapToSpotColor(band);
 
   // Subtle Sobel edges — just a gentle ink-pooling darkening,
   // not outlines. Edges feel like where Riso ink settles thicker.

@@ -3,11 +3,47 @@
 import { useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import { useCoarsePointer } from "@/hooks/useCoarsePointer";
+import { applySimPreset, getSimPreset, type SimPreset } from "@/lib/content/simPresets";
 import { subscribeToSplats } from "@/lib/fluidBus";
-import { FluidOrchestrator, type PointerState } from "@/lib/gl/fluidOrchestrator";
+import {
+  DEFAULT_FLUID_VISUALS,
+  FluidOrchestrator,
+  type PointerState,
+} from "@/lib/gl/fluidOrchestrator";
 import type { TierConfig } from "@/lib/gpu";
 import { subscribeToLoaderComplete } from "@/lib/loaderSession";
 import { MAX_DT_S, subscribe } from "@/lib/raf";
+import { useSimPresetStore } from "@/lib/simPresetStore";
+
+// Preset-switch celebration: a radial ring of splats from screen
+// center, colored from the incoming preset's ladder, so the switch
+// itself detonates in the new palette. Queued via injectSplat — the
+// warmup gate drops queued splats while the sim hasn't started, so a
+// switch during the loader can't leak into the hero reveal.
+const BURST_COUNT = 8;
+function firePresetBurst(
+  orchestrator: FluidOrchestrator,
+  preset: SimPreset,
+  baseRadius: number,
+): void {
+  const ladder = preset.visuals.ladder ?? DEFAULT_FLUID_VISUALS.ladder;
+  for (let i = 0; i < BURST_COUNT; i++) {
+    const angle = (i / BURST_COUNT) * Math.PI * 2;
+    // Safe: `i % ladder.length` is always 0..3 (ladder has 4 entries)
+    const color = ladder[i % ladder.length] as readonly [number, number, number];
+    // Radius intentionally uses the tier baseline (not the preset's
+    // splatRadiusScale) — the burst should feel identical regardless
+    // of which preset is incoming.
+    orchestrator.injectSplat(
+      0.5,
+      0.5,
+      color,
+      Math.cos(angle) * 1.2,
+      Math.sin(angle) * 1.2,
+      baseRadius * 2,
+    );
+  }
+}
 
 type FluidSimProps = {
   config: TierConfig;
@@ -67,6 +103,18 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
     }
     orchestratorRef.current = orchestrator;
 
+    // Preset: apply the persisted selection on every fresh init (first
+    // mount, tier auto-tune re-init, locale switch) and re-apply live
+    // on store change. Only live changes fire the celebration burst —
+    // the initial application must stay silent.
+    applySimPreset(orchestrator, getSimPreset(useSimPresetStore.getState().presetId), config);
+    const unsubPreset = useSimPresetStore.subscribe((current, previous) => {
+      if (current.presetId === previous.presetId) return;
+      const preset = getSimPreset(current.presetId);
+      applySimPreset(orchestrator, preset, config);
+      firePresetBurst(orchestrator, preset, config.splatRadius);
+    });
+
     // Ambient warmup-trigger — short residual settle (~100ms) after
     // init. The long wait (matching the loader+hero-reveal cadence)
     // already lives in SceneProvider's deferred-mount path.
@@ -84,6 +132,7 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
     return () => {
       if (ambientTimer !== null) window.clearTimeout(ambientTimer);
       unsubLoader();
+      unsubPreset();
       orchestrator.dispose();
       orchestratorRef.current = null;
     };
