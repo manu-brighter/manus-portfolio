@@ -14,6 +14,7 @@ import { Loader } from "@/components/ui/Loader";
 import { Nav } from "@/components/ui/Nav";
 import { ScrollProgress } from "@/components/ui/ScrollProgress";
 import { SimPresetSwitcher } from "@/components/ui/SimPresetSwitcher";
+import { SimThemeSync } from "@/components/ui/SimThemeSync";
 import { loadNamespaceGroup } from "@/i18n/messages";
 import { routing } from "@/i18n/routing";
 import { escapeForScript } from "@/lib/seo/escapeForScript";
@@ -84,6 +85,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
               <Footer />
               <ScrollProgress />
               <SimPresetSwitcher />
+              <SimThemeSync />
               <InkCursor />
               <ScrollInkCoupling />
               <Loader />

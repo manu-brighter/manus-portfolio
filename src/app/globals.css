@@ -53,6 +53,39 @@
   color-scheme: light;
 }
 
+/* ---------------------------------------------------------------
+ * Night theme — coupled to the "Nachtdruck" sim preset.
+ *
+ * Applied as `data-sim-theme="night"` on <html> by SimThemeSync
+ * (client-side, same gates as the preset switcher). Tailwind v4
+ * utilities resolve to var(--color-*) at use-time, so overriding the
+ * custom properties here re-skins every token consumer without
+ * touching components. Spot colors stay identical — they're
+ * mid-luminance and read on both papers.
+ *
+ * Contrast: ink #f0e8dc on paper #140f1a ≈ 14:1; ink-muted at 0.72
+ * alpha ≈ 9:1 — both comfortably AA.
+ *
+ * TRAP: do NOT add `color-scheme: dark` here — LightningCSS's
+ * color-scheme polyfill (Turbopack CSS pipeline) silently drops the
+ * ENTIRE rule when color-scheme appears in a non-:root selector
+ * (verified against the compiled chunk). Native form controls stay
+ * light-scheme; all our controls are custom-styled anyway.
+ * -------------------------------------------------------------- */
+[data-sim-theme="night"] {
+  --color-paper: #140f1a;
+  --color-paper-tint: #1d1626;
+  --color-paper-shade: #0d0a12;
+  --color-paper-line: #352b45;
+
+  --color-ink: #f0e8dc;
+  --color-ink-soft: #e4dbcd;
+  --color-ink-muted: rgba(240, 232, 220, 0.72);
+  --color-ink-faint: rgba(240, 232, 220, 0.28);
+
+  --selection-fg: #140f1a;
+}
+
 @media (min-width: 768px) {
   :root {
     --container-gutter: 2rem;

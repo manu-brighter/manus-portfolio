@@ -43,6 +43,12 @@ export type SimPreset = {
   i18nKey: string;
   /** Two spot colors for the switcher's two-tone dot (fills only). */
   swatch: readonly [SpotColor, SpotColor];
+  /**
+   * Page-level theme coupling. "night" flips the DOM design tokens to
+   * the dark paper set (see `[data-sim-theme="night"]` in globals.css)
+   * so dark dye and dark text never fight — applied by SimThemeSync.
+   */
+  theme?: "night";
   physics: SimPresetPhysics;
   visuals: Partial<FluidVisuals>;
 };
@@ -50,12 +56,18 @@ export type SimPreset = {
 // Off-palette ladder colors (normalized RGB). The four Riso spots in
 // `@/lib/palette` stay canonical for DOM/UI; these exist only as dye
 // ladder bands inside the sim rendering.
-const INK_DEEP: RGB = [0.16, 0.1, 0.2]; // deep violet-ink top band
+//
+// Contrast rule for light-theme ladders: no band may approach the
+// text-ink luminance — DOM text sits ON TOP of the sim, and a
+// near-black pool under near-black type is a total wipeout (first
+// Turbulenz/Nachtdruck cut proved it in screenshots).
+const VIOLET_DEEP: RGB = [0.42, 0.3, 0.62]; // darkest light-theme band
 const MINT_TINT: RGB = [0.78, 0.94, 0.88]; // washed-out mint, near paper
 const ROSE_SOFT: RGB = [1.0, 0.62, 0.75]; // diluted rose
 const ROSE_DEEP: RGB = [0.85, 0.25, 0.45]; // saturated print rose
 const WINE: RGB = [0.45, 0.12, 0.28]; // dense over-inked band
-const NEAR_INK: RGB = [0.12, 0.05, 0.1]; // almost solid ink
+/** Night paper — mirrors `--color-paper` in the night token set. */
+const NIGHT_PAPER: RGB = [0.08, 0.06, 0.1];
 
 export const SIM_PRESETS: readonly SimPreset[] = [
   {
@@ -68,24 +80,30 @@ export const SIM_PRESETS: readonly SimPreset[] = [
     visuals: {},
   },
   {
-    // High-energy: long-lived velocity + strong vorticity confinement
-    // produce fine fingering eddies; smaller, harder splats; ambient
-    // rig wanders fast and pushes hard.
+    // High-energy: long-lived velocity + raised vorticity confinement
+    // produce visible swirling structure. Tuned against screenshots:
+    // the first cut (dyeDis 0.94 / radius 0.65 / confinement 30) left
+    // only thin torn streaks -- dye died before the eddies could read
+    // and confinement amplified grid-scale noise. Full-size splats +
+    // longer-lived dye keep the swirls legible ("clean wild").
     id: "turbulenz",
     i18nKey: "turbulenz",
     swatch: ["amber", "violet"],
     physics: {
       velocityDissipation: 0.99,
-      dyeDissipation: 0.94,
-      confinement: 30,
-      splatRadiusScale: 0.65,
+      dyeDissipation: 0.965,
+      confinement: 20,
+      splatRadiusScale: 1.0,
     },
     visuals: {
-      ladder: [SPOT_RGB.amber, SPOT_RGB.rose, SPOT_RGB.violet, INK_DEEP],
+      // Top band stays a readable deep violet — see contrast rule
+      // above. dyeScale kept moderate so the center doesn't saturate
+      // into one flat pool.
+      ladder: [SPOT_RGB.amber, SPOT_RGB.rose, SPOT_RGB.violet, VIOLET_DEEP],
       velocityScale: 14,
-      dyeScale: 0.18,
+      dyeScale: 0.16,
       grainStrength: 0.06,
-      ambientTimeScale: 1.8,
+      ambientTimeScale: 1.4,
       ambientForceScale: 1.5,
     },
   },
@@ -111,22 +129,29 @@ export const SIM_PRESETS: readonly SimPreset[] = [
     },
   },
   {
-    // Dense posterized print: hard band separations (levels > 0),
-    // deep wine-dark ladder, heavy ink deposit. Paper stays light on
-    // purpose — the canvas paints paper fullscreen behind all DOM
-    // content, so a dark paper would break AA contrast site-wide.
+    // Night mode: the page flips to the dark token set (theme:
+    // "night" -> SimThemeSync), the sim paints near-black paper and
+    // a ladder that BRIGHTENS with density — posterized neon
+    // screen-print glowing out of the dark. Dark dye under dark text
+    // was unreadable (screenshot-verified), hence the full theme
+    // flip instead of a dark-ink-on-light-paper compromise.
     id: "nachtdruck",
     i18nKey: "nachtdruck",
     swatch: ["violet", "rose"],
+    theme: "night",
     physics: {
       dyeDissipation: 0.97,
       confinement: 12,
       splatRadiusScale: 1.1,
     },
     visuals: {
-      ladder: [SPOT_RGB.violet, ROSE_DEEP, WINE, NEAR_INK],
+      paper: NIGHT_PAPER,
+      // Ascending brightness — high density GLOWS out of the dark.
+      // Top band slightly deeper than spot violet so the light hero
+      // text keeps reading over saturated pools.
+      ladder: [WINE, VIOLET_DEEP, ROSE_DEEP, [0.65, 0.5, 0.95]],
       levels: 4,
-      dyeScale: 0.24,
+      dyeScale: 0.16,
       grainStrength: 0.09,
     },
   },
