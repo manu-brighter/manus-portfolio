@@ -7,6 +7,7 @@ import { TYPE_AS_FLUID_DEFAULTS } from "@/lib/content/playground";
 import { FluidOrchestrator, type PointerState } from "@/lib/gl/fluidOrchestrator";
 import { capDPR, DPR_MINI, getTierConfig } from "@/lib/gpu";
 import { randomSpot } from "@/lib/palette";
+import { syncPresetVisuals } from "@/lib/simPresetStore";
 import { TextStamper } from "@/lib/textStamp";
 
 type Props = {
@@ -92,6 +93,9 @@ export function TypeAsFluidMiniSim({ paused }: Props) {
       return;
     }
     orchestratorRef.current = orchestrator;
+    // Inherit the active preset's look (visuals only) so the card
+    // matches the hero sim's current character.
+    const unsubPreset = syncPresetVisuals(orchestrator);
 
     const onResize = () => {
       const ratio = capDPR(DPR_MINI);
@@ -106,6 +110,7 @@ export function TypeAsFluidMiniSim({ paused }: Props) {
 
     return () => {
       ro.disconnect();
+      unsubPreset();
       stamperRef.current?.dispose();
       stamperRef.current = null;
       orchestrator.dispose();

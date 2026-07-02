@@ -1,5 +1,11 @@
 import { create } from "zustand";
-import { DEFAULT_PRESET_ID, isSimPresetId, type SimPresetId } from "@/lib/content/simPresets";
+import {
+  DEFAULT_PRESET_ID,
+  getSimPreset,
+  isSimPresetId,
+  type SimPresetId,
+} from "@/lib/content/simPresets";
+import { DEFAULT_FLUID_VISUALS, type FluidOrchestrator } from "@/lib/gl/fluidOrchestrator";
 
 /**
  * Active sim-preset selection, persisted across sessions.
@@ -44,3 +50,21 @@ export const useSimPresetStore = create<SimPresetStore>((set) => ({
     }
   },
 }));
+
+/**
+ * Give a secondary orchestrator (playground experiments, card
+ * mini-sims) the active preset's LOOK and keep it in sync with store
+ * changes. Visuals only — physics stays owned by the caller (the
+ * studio's Tweakpane sliders and the mini-sims' tier configs must not
+ * be clobbered by preset physics). Call after `init()`; returns the
+ * unsubscribe for effect cleanup.
+ */
+export function syncPresetVisuals(orchestrator: FluidOrchestrator): () => void {
+  const apply = (id: SimPresetId) => {
+    orchestrator.setVisuals({ ...DEFAULT_FLUID_VISUALS, ...getSimPreset(id).visuals });
+  };
+  apply(useSimPresetStore.getState().presetId);
+  return useSimPresetStore.subscribe((current, previous) => {
+    if (current.presetId !== previous.presetId) apply(current.presetId);
+  });
+}

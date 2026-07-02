@@ -9,6 +9,7 @@ import { INK_DROP_STUDIO_DEFAULTS } from "@/lib/content/playground";
 import { FluidOrchestrator, type PointerState } from "@/lib/gl/fluidOrchestrator";
 import { capDPR, DPR_FULL, getTierConfig } from "@/lib/gpu";
 import { randomSpot } from "@/lib/palette";
+import { syncPresetVisuals } from "@/lib/simPresetStore";
 import { ExperimentChrome } from "../ExperimentChrome";
 
 /**
@@ -137,6 +138,9 @@ function InkDropStudioCanvas() {
     // with the rotating Riso-spot cycle (override stays null). Click-
     // burst + bomb layer additional splats on top via injectSplat().
     orchestratorRef.current = orchestrator;
+    // Active preset's look carries into the studio (visuals only —
+    // the Tweakpane physics sliders stay authoritative).
+    const unsubPreset = syncPresetVisuals(orchestrator);
 
     const onResize = () => {
       const ratio = capDPR(DPR_FULL);
@@ -154,6 +158,7 @@ function InkDropStudioCanvas() {
 
     return () => {
       ro.disconnect();
+      unsubPreset();
       orchestrator.dispose();
       orchestratorRef.current = null;
     };

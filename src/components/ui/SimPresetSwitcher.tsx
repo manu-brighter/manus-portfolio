@@ -8,7 +8,6 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { SIM_PRESETS } from "@/lib/content/simPresets";
 import { isLoaderComplete, subscribeToLoaderComplete } from "@/lib/loaderSession";
 import { SPOT_HEX } from "@/lib/palette";
-import { useSceneVisibilityStore } from "@/lib/sceneVisibilityStore";
 import { useSimPresetStore } from "@/lib/simPresetStore";
 
 /**
@@ -20,11 +19,13 @@ import { useSimPresetStore } from "@/lib/simPresetStore";
  * orchestrator side (apply + celebration burst) so no scene refs leak
  * out here.
  *
- * Rendered only where the live desktop sim actually runs: fine
- * pointer, motion allowed, WebGL tier resolved (`config` non-null),
- * scene not hidden by a playground route. Everywhere else there is
- * nothing to switch — StaticFallback / AmbientVideo / mobile sims
- * intentionally stay on the default look.
+ * Rendered wherever a live desktop sim runs: fine pointer, motion
+ * allowed, WebGL tier resolved (`config` non-null). Playground
+ * experiment routes keep the switcher too — their orchestrators
+ * inherit the preset look via syncPresetVisuals(), so the pill stays
+ * meaningful there (`data-no-splat` keeps pill clicks from splatting
+ * the experiment canvas underneath). StaticFallback / AmbientVideo /
+ * mobile sims intentionally stay on the default look.
  *
  * A11y: radiogroup pattern with roving tabindex + arrow keys.
  * Accessible names come from sr-only children (never `aria-label` on
@@ -46,7 +47,6 @@ export function SimPresetSwitcher() {
   const { config } = useScene();
   const reducedMotion = useReducedMotion();
   const coarsePointer = useCoarsePointer();
-  const sceneHidden = useSceneVisibilityStore((s) => s.hidden);
   const presetId = useSimPresetStore((s) => s.presetId);
   const setPreset = useSimPresetStore((s) => s.setPreset);
 
@@ -72,12 +72,13 @@ export function SimPresetSwitcher() {
     };
   }, []);
 
-  if (!mounted || !config || reducedMotion || coarsePointer || sceneHidden) return null;
+  if (!mounted || !config || reducedMotion || coarsePointer) return null;
 
   return (
     <div
       role="radiogroup"
       aria-label={t("label")}
+      data-no-splat
       className={`fixed bottom-5 left-5 z-40 hidden flex-col items-center gap-3 rounded-full border-2 border-paper-line bg-paper/90 px-2 py-3 backdrop-blur-sm transition-opacity duration-700 md:flex ${
         // `invisible` keeps the not-yet-appeared pill out of the tab
         // order too (visibility transitions cleanly alongside opacity).

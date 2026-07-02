@@ -5,6 +5,7 @@ import { useOrchestratorRAF } from "@/hooks/useOrchestratorRAF";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { FluidOrchestrator, type PointerState } from "@/lib/gl/fluidOrchestrator";
 import { capDPR, DPR_MINI, getTierConfig } from "@/lib/gpu";
+import { syncPresetVisuals } from "@/lib/simPresetStore";
 
 type Props = {
   /** True while the parent card is NOT hovered/focused — orchestrator
@@ -79,6 +80,9 @@ export function InkDropMiniSim({ paused }: Props) {
       return;
     }
     orchestratorRef.current = orchestrator;
+    // Inherit the active preset's look (visuals only) so the card
+    // matches the hero sim's current character.
+    const unsubPreset = syncPresetVisuals(orchestrator);
 
     const onResize = () => {
       const ratio = capDPR(DPR_MINI);
@@ -93,6 +97,7 @@ export function InkDropMiniSim({ paused }: Props) {
 
     return () => {
       ro.disconnect();
+      unsubPreset();
       orchestrator.dispose();
       orchestratorRef.current = null;
     };
