@@ -71,5 +71,12 @@
     "ariaLabel": "Navigazione sezioni",
     "heroLabel": "Hero",
     "aboutObjectsLabel": "Off the Screen"
+  },
+  "simPresets": {
+    "label": "Carattere dell'inchiostro",
+    "riso": "Riso",
+    "turbulenz": "Turbolenza",
+    "aquarell": "Acquerello",
+    "nachtdruck": "Stampa notturna"
   }
 }

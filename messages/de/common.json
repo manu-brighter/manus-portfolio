@@ -71,5 +71,12 @@
     "ariaLabel": "Abschnitt-Navigation",
     "heroLabel": "Hero",
     "aboutObjectsLabel": "Off the Screen"
+  },
+  "simPresets": {
+    "label": "Tinten-Charakter",
+    "riso": "Riso",
+    "turbulenz": "Turbulenz",
+    "aquarell": "Aquarell",
+    "nachtdruck": "Nachtdruck"
   }
 }
