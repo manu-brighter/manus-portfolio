@@ -117,10 +117,21 @@ export function Loader() {
     // default preset reproduces the four Riso spots). GSAP animates
     // backgroundColor directly and CSS custom properties can't be
     // interpolated without a plugin, so we convert to raw hex.
-    const ladder =
-      getSimPreset(useSimPresetStore.getState().presetId).visuals.ladder ??
-      DEFAULT_FLUID_VISUALS.ladder;
-    const [c0, c1, c2, c3] = ladder.map(rgbToHex);
+    const preset = getSimPreset(useSimPresetStore.getState().presetId);
+    const ladder = preset.visuals.ladder ?? DEFAULT_FLUID_VISUALS.ladder;
+    // Night preset: the drop's `multiply` blend collapses every color
+    // toward black on the near-black night paper (drop ~= background,
+    // screenshot-verified). Flip to `screen` so the ink GLOWS out of
+    // the dark — same night treatment as `.ink-cursor-layer` — and
+    // pulse the ladder brightest-first (night ladders ascend dark ->
+    // bright), ending on the pink band so the phase-5 flood stays
+    // luminous instead of draining into wine-on-black.
+    const isNight = preset.theme === "night";
+    drop.style.mixBlendMode = isNight ? "screen" : "multiply";
+    const pulseLadder = isNight
+      ? [ladder[3], ladder[2], ladder[1], ladder[2]].map((c) => c ?? ladder[0])
+      : ladder;
+    const [c0, c1, c2, c3] = pulseLadder.map((c) => rgbToHex(c as RGB));
 
     const tl = gsap.timeline({ onComplete });
 
