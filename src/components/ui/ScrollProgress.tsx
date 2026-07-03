@@ -4,6 +4,7 @@ import gsap from "gsap";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLenis } from "@/hooks/useLenis";
+import { useMobileLayout } from "@/hooks/useMobileLayout";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { usePathname } from "@/i18n/navigation";
 import { SECTIONS } from "@/lib/content/sections";
@@ -49,6 +50,7 @@ type ActiveSection = SectionDef & { el: HTMLElement };
 export function ScrollProgress() {
   const lenis = useLenis();
   const reducedMotion = useReducedMotion();
+  const isMobile = useMobileLayout();
   const pathname = usePathname();
   const t = useTranslations("scrollProgress");
   const navT = useTranslations("nav.items");
@@ -152,6 +154,12 @@ export function ScrollProgress() {
 
   // Hidden under reduced-motion — native scrollbar is restored via CSS
   if (reducedMotion) return null;
+
+  // Mobile phones have no page margin — the fixed right-edge rail sat
+  // ON TOP of full-width photos/cards (screenshot-verified in the
+  // mobile wow-pass). Desktop/tablet keep it: there it lives in the
+  // whitespace beside the content column.
+  if (isMobile) return null;
 
   // Playground experiment routes: fullscreen fixed-frame canvas, the
   // section-dot strip carries no information and crowds the stage.

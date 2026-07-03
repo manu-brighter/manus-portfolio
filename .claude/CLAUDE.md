@@ -194,6 +194,38 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   synthesize pointer churn, screenshot) — used for the turbulenz/nachtdruck
   retunes; far faster than eyeballing param changes blind.
 
+## Mobile architecture (post mobile-wow-pass)
+
+- **All coarse-pointer devices (phone + tablet) run the live
+  `MobileBackgroundSim`** — one fixed full-viewport WebGL2 canvas behind all
+  content, own orchestrator. The `AmbientVideo` tablet fallback (8MB mp4) is
+  retired; SceneProvider routes coarse → MobileBackgroundSim, fine-pointer →
+  SceneCanvas+FluidSim.
+- **Scroll behavior is platform-split** in MobileBackgroundSim: the
+  fade-out/in scroll-drain runs on iOS/iPadOS ONLY (masks the fixed-WebGL
+  momentum-scroll cull — a real iOS Safari bug). Everywhere else the sim
+  stays visible while scrolling and scroll velocity injects an invisible
+  force splat (zero-dye) so ink drifts with the page. Don't reintroduce a
+  blanket drain — the blank-on-scroll flicker was explicit user feedback.
+- **Presets + themes are pointer-agnostic**: MobileBackgroundSim applies the
+  persisted preset on init + live on store change (same wiring as FluidSim);
+  SimThemeSync and SimPresetSwitcher gate only on `config && !reducedMotion`.
+  Switcher renders as a horizontal bottom-left row with 44px touch targets
+  below `md`, vertical dot pill from `md` up.
+- **Tap-to-splat** reads touch at document level; taps on interactive UI
+  (`a/button/input/label/[data-no-splat]`) are ignored; color is a random
+  spot per tap.
+- **No side-swipe carousels.** All three were replaced by vertical flows in
+  the mobile wow-pass: ObjectGrid = responsive 2-col grid, Photography =
+  vertical editorial stack (`PhotographyMobile`), Case Study = stacked
+  stations (`CaseStudyMobileStations`). Don't add new horizontal swipers —
+  explicit user feedback ("zu viele Sideswiper").
+- **FadeIn on potentially-viewport-tall blocks needs a low `threshold`**
+  (~0.15): IO `intersectionRatio` can never reach the default 0.35 when the
+  element is taller than the viewport → entrance never fires.
+- **ScrollProgress is Desktop/Tablet-only** (`useMobileLayout` gate) — on
+  phones the fixed right-edge rail sat on top of full-width content.
+
 ## Tailwind / dynamic classes
 
 - **Never `bg-spot-${slot}` interpolated**. Tailwind v4 JIT scans literal

@@ -11,6 +11,7 @@ import {
   type PointerState,
 } from "@/lib/gl/fluidOrchestrator";
 import { subscribeToLoaderComplete } from "@/lib/loaderSession";
+import { SPOT_COLORS } from "@/lib/palette";
 import { MAX_DT_S, subscribe } from "@/lib/raf";
 import { useSimPresetStore } from "@/lib/simPresetStore";
 
@@ -211,7 +212,11 @@ export function MobileBackgroundSim() {
       if (!orchestrator) return;
       const u = startX / window.innerWidth;
       const v = 1 - startY / window.innerHeight;
-      orchestrator.injectSplat(u, v, [1, 1, 1], 0, 0);
+      // Random spot color per tap — the injected RGB's magnitude picks
+      // the ladder band, so varying spots gives varied bands instead of
+      // the flat all-white -> always-top-band look the first cut had.
+      const color = SPOT_COLORS[Math.floor(Math.random() * SPOT_COLORS.length)] ?? "rose";
+      orchestrator.injectSplat(u, v, color, 0, 0);
     };
 
     document.addEventListener("touchstart", onStart, { passive: true });
