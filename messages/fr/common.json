@@ -71,5 +71,12 @@
     "ariaLabel": "Navigation des sections",
     "heroLabel": "Hero",
     "aboutObjectsLabel": "Off the Screen"
+  },
+  "simPresets": {
+    "label": "Caractère d'encre",
+    "riso": "Riso",
+    "turbulenz": "Turbulence",
+    "aquarell": "Aquarelle",
+    "nachtdruck": "Impression nocturne"
   }
 }

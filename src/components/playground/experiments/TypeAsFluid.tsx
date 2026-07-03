@@ -8,6 +8,7 @@ import { TYPE_AS_FLUID_DEFAULTS } from "@/lib/content/playground";
 import { FluidOrchestrator, type PointerState } from "@/lib/gl/fluidOrchestrator";
 import { capDPR, DPR_FULL, getTierConfig } from "@/lib/gpu";
 import { randomSpot } from "@/lib/palette";
+import { syncPresetVisuals } from "@/lib/simPresetStore";
 import { TextStamper } from "@/lib/textStamp";
 import { ExperimentChrome } from "../ExperimentChrome";
 
@@ -150,6 +151,9 @@ function TypeAsFluidCanvas() {
     // gate landed.
     orchestrator.start();
     orchestratorRef.current = orchestrator;
+    // Active preset's look carries into the experiment (visuals only
+    // — the calm-paper physics above stays authoritative).
+    const unsubPreset = syncPresetVisuals(orchestrator);
 
     stamperRef.current = new TextStamper(gl, orchestrator);
 
@@ -187,6 +191,7 @@ function TypeAsFluidCanvas() {
       stampTimersRef.current.clear();
       stamperRef.current?.dispose();
       stamperRef.current = null;
+      unsubPreset();
       orchestrator.dispose();
       orchestratorRef.current = null;
     };

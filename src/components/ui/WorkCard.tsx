@@ -91,6 +91,26 @@ const PARALLAX = {
   title: 0,
 } as const;
 
+/**
+ * Resting bottom-right overhang of the colored backing panel (CSS px).
+ * The panel is pinned to the card's top-left corner and oversized by
+ * this amount, so the riso offset look comes from the overhang — NOT
+ * from translating an equal-sized box. Translating the box (the old
+ * approach) let the cursor parallax slide the color out from under the
+ * text: card text starts at x=0, so any positive x-offset uncovers the
+ * first pixels of every line (up to ~26px at full parallax). On top of
+ * that, GSAP's first x/y tween clears the CSS `translate` property that
+ * carried the base offset, so the resting look degraded after one hover.
+ * Parallax now scales the panel from `transform-origin: 0 0` instead —
+ * only the overhang breathes, the text stays covered by construction.
+ * The panel also bleeds 8px past the card's left edge (`-left-2` +
+ * wider calc) to cover the italic titles' negative side bearing; the
+ * scale math below ignores that constant bleed (sub-pixel error).
+ * Keep in sync with the literal sizing classes on the backing div
+ * (Tailwind can't interpolate class names).
+ */
+const BACKING_OVERHANG_PX = 12;
+
 export function WorkCard(props: WorkCardProps) {
   const {
     id,
@@ -220,9 +240,15 @@ export function WorkCard(props: WorkCardProps) {
           const magX = targetX * MAGNET_MAX_PX * mag;
           const magY = targetY * MAGNET_MAX_PX * mag;
           gsap.to(card, { x: magX, y: magY + offsetY, duration: dur.short, ease: "power2.out" });
+          // Backing parallax varies the bottom-right overhang via scale
+          // from the pinned top-left corner (see BACKING_OVERHANG_PX).
+          // Clamped at 0 so the panel never retreats past the card edge.
+          const overX = Math.max(0, BACKING_OVERHANG_PX + targetX * PARALLAX.backing);
+          const overY = Math.max(0, BACKING_OVERHANG_PX + targetY * PARALLAX.backing);
           gsap.to(backing, {
-            x: targetX * PARALLAX.backing,
-            y: targetY * PARALLAX.backing,
+            scaleX: (rect.width + overX) / (rect.width + BACKING_OVERHANG_PX),
+            scaleY: (rect.height + overY) / (rect.height + BACKING_OVERHANG_PX),
+            transformOrigin: "0 0",
             duration: dur.medium,
             ease: "power2.out",
           });
@@ -248,7 +274,8 @@ export function WorkCard(props: WorkCardProps) {
       if (raf !== 0) cancelAnimationFrame(raf);
       // Snap back to rest on hover-leave
       gsap.to(card, { x: 0, y: offsetY, duration: dur.medium, ease: "power3.out" });
-      gsap.to([backing, mediaEl, titleEl], {
+      gsap.to(backing, { scaleX: 1, scaleY: 1, duration: dur.medium, ease: "power3.out" });
+      gsap.to([mediaEl, titleEl], {
         x: 0,
         y: 0,
         duration: dur.medium,
@@ -366,17 +393,22 @@ export function WorkCard(props: WorkCardProps) {
         {...(href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       >
         <div ref={cardRef} className="relative will-change-transform">
-          {/* Backing block — riso underlay shifted bottom-right on desktop.
-              On coarse pointers (mobile/touch) there is no cursor parallax
-              (gated by isCoarse below), so the static 12px shift would just
-              leave the colored panel poking out past the card. Drop the
-              shift there so the backing sits flush at inset-0 and fully
-              covers the card footprint. */}
+          {/* Backing block — riso underlay pinned at the card's top-left,
+              oversized bottom-right by BACKING_OVERHANG_PX so the offset
+              look never uncovers card text (see the constant's comment).
+              The panel additionally bleeds 8px past the LEFT edge: the
+              Instrument Serif italic titles paint left of their text box
+              (negative side bearing — the "J" in "Jogge di Balla" poked
+              out of the color). Extending the panel beats indenting the
+              text, which would break the shared left edge with the media
+              frame. On coarse pointers (mobile/touch) there is no cursor
+              parallax (gated by isCoarse below), so the bottom-right
+              overhang is dropped and only the left bleed remains. */}
           <div
             ref={backingRef}
             aria-hidden="true"
-            className={`absolute inset-0 will-change-transform ${
-              isCoarse ? "" : "translate-x-3 translate-y-3"
+            className={`-left-2 absolute top-0 will-change-transform ${
+              isCoarse ? "h-full w-[calc(100%+8px)]" : "h-[calc(100%+12px)] w-[calc(100%+20px)]"
             }`}
             style={{
               background: `var(--color-spot-${splatColor})`,

@@ -4,12 +4,10 @@ import dynamic from "next/dynamic";
 import { Component, createContext, type ReactNode, useContext, useEffect, useState } from "react";
 import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useGPUCapability } from "@/hooks/useGPUCapability";
-import { useMobileLayout } from "@/hooks/useMobileLayout";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import type { GPUTier, TierConfig } from "@/lib/gpu";
 import { isLoaderComplete, subscribeToLoaderComplete } from "@/lib/loaderSession";
 import { useSceneVisibilityStore } from "@/lib/sceneVisibilityStore";
-import { AmbientVideo } from "./AmbientVideo";
 import { FluidSim } from "./FluidSim";
 import { SceneCanvas } from "./SceneCanvas";
 import { StaticFallback } from "./StaticFallback";
@@ -107,19 +105,17 @@ export function SceneProvider({ children }: SceneProviderProps) {
   //     visit). Just enough time for hydration to settle.
   const [canvasMounted, setCanvasMounted] = useState(false);
 
-  // Coarse-pointer (mobile/touch) plays a pre-recorded loop video
-  // instead of running the WebGL pipeline live. iOS Safari was
-  // culling the position:fixed WebGL layer during momentum scroll
-  // (visible blink); <video> elements use the platform media
-  // compositor which handles scroll without cull. Trade-off is
-  // mobile loses pointer-driven sim interactivity, but that was
-  // already disabled on coarse-pointer per earlier UX decisions.
+  // Coarse-pointer (mobile/touch) runs the live MobileBackgroundSim —
+  // its scroll-drain + layer-promotion stack masks the iOS Safari
+  // position:fixed WebGL momentum-scroll cull that once forced the
+  // pre-recorded <video> fallback (AmbientVideo, retired: an 8MB
+  // asset with none of the preset/theme coupling).
   //
   // The `?record-bg` query param (consumed by AmbientRecorder)
-  // bypasses the coarse-pointer branch — recording requires the
-  // live WebGL canvas to be present. Lets Manuel record at mobile-
-  // portrait viewport via DevTools resize without DevTools also
-  // flipping pointer:coarse and routing to the video path.
+  // bypasses the coarse-pointer branch — recording captures the
+  // Desktop SceneCanvas. Lets Manuel record at mobile-portrait
+  // viewport via DevTools resize without DevTools also flipping
+  // pointer:coarse and routing to the mobile sim.
   const rawCoarsePointer = useCoarsePointer();
   const [recordOverride, setRecordOverride] = useState(false);
   useEffect(() => {
@@ -129,14 +125,11 @@ export function SceneProvider({ children }: SceneProviderProps) {
   }, []);
   const isCoarsePointer = recordOverride ? false : rawCoarsePointer;
 
-  // Mobile-Rework mode-split: on Mobile-phone layouts (coarse + viewport
-  // < 768) the global background sim/video is suppressed entirely. Each
-  // section that wants its own sim mounts a scroll-attached canvas in
-  // its own DOM scope (Hero, Photography, Case-Study). Tablets and
-  // larger coarse-pointer devices fall through to the existing
-  // AmbientVideo path; fine-pointer Desktop falls through to the live
-  // SceneCanvas + FluidSim path.
-  const isMobile = useMobileLayout();
+  // NOTE: useMobileLayout (coarse + < 768) is no longer consulted for
+  // scene routing — every coarse-pointer device (phone AND tablet)
+  // gets the same MobileBackgroundSim; fine-pointer Desktop gets the
+  // live SceneCanvas + FluidSim path. Section-level layout splits
+  // still use useMobileLayout independently.
 
   useEffect(() => {
     if (canvasMounted) return;
@@ -172,19 +165,18 @@ export function SceneProvider({ children }: SceneProviderProps) {
         // immediately — no GPU cost to defer. Only the WebGL Canvas path
         // is gated on `canvasMounted` to skip mobile first-paint contention.
         <StaticFallback />
-      ) : !canvasMounted ? null : isMobile ? (
-        // Mobile-phone: one full-page background sim behind all content
-        // (replaces the per-section HeroMobileSim). The scroll-drain masks
-        // the iOS fixed-WebGL momentum-scroll cull. Gated on `canvasMounted`
-        // like Desktop so the WebGL context compiles after the loader, not
-        // during it. See MobileBackgroundSim.
-        <MobileBackgroundSim />
-      ) : isCoarsePointer ? (
-        // Mobile / coarse-pointer: pre-recorded video loop instead of
-        // live WebGL. Video element survives iOS Safari's tile-
-        // compositor cull during momentum scroll where the WebGL
-        // canvas does not.
-        <AmbientVideo />
+      ) : !canvasMounted ? null : isCoarsePointer ? (
+        // Coarse-pointer (phone + tablet): one full-page background sim
+        // behind all content. The scroll-drain masks the iOS fixed-WebGL
+        // momentum-scroll cull. Gated on `canvasMounted` like Desktop so
+        // the WebGL context compiles after the loader, not during it.
+        // Same error boundary as Desktop: orchestrator.init() throws on
+        // shader-compile failure / missing EXT_color_buffer_float, and
+        // older mobile GPUs are the most likely cohort to hit exactly
+        // that — degrade to StaticFallback, not a route-level crash.
+        <SceneErrorBoundary fallback={<StaticFallback />}>
+          <MobileBackgroundSim />
+        </SceneErrorBoundary>
       ) : (
         <SceneErrorBoundary fallback={<StaticFallback />}>
           <SceneCanvas>

@@ -24,6 +24,12 @@
    * never use it for text content. See .claude/CLAUDE.md. */
   --color-ink-muted: rgba(10, 6, 8, 0.7);
   --color-ink-faint: rgba(10, 6, 8, 0.28);
+  /* Constant print-ink for text ON spot-color fills. Deliberately NOT
+   * overridden by any [data-sim-theme] block: spot fills stay
+   * mid-luminance in every theme, so their label must stay dark —
+   * theme-following --color-ink flips light in night mode and washed
+   * out against amber (caught on the Photography CTA). */
+  --color-ink-print: #0a0608;
 
   /* Spot colors — the 4 Riso inks, posterized in the fluid shader */
   --color-spot-rose: #ff6ba0;
@@ -51,6 +57,72 @@
   --grid-gap: 1.5rem;
 
   color-scheme: light;
+}
+
+/* ---------------------------------------------------------------
+ * Night theme — coupled to the "Nachtdruck" sim preset.
+ *
+ * Applied as `data-sim-theme="night"` on <html> by SimThemeSync
+ * (client-side, same gates as the preset switcher). Tailwind v4
+ * utilities resolve to var(--color-*) at use-time, so overriding the
+ * custom properties here re-skins every token consumer without
+ * touching components. Spot colors stay identical — they're
+ * mid-luminance and read on both papers.
+ *
+ * Contrast: ink #f0e8dc on paper #140f1a ≈ 14:1; ink-muted at 0.72
+ * alpha ≈ 9:1 — both comfortably AA.
+ *
+ * TRAP: do NOT add `color-scheme: dark` here — LightningCSS's
+ * color-scheme polyfill (Turbopack CSS pipeline) silently drops the
+ * ENTIRE rule when color-scheme appears in a non-:root selector
+ * (verified against the compiled chunk). Native form controls stay
+ * light-scheme; all our controls are custom-styled anyway.
+ * -------------------------------------------------------------- */
+[data-sim-theme="night"] {
+  --color-paper: #140f1a;
+  --color-paper-tint: #1d1626;
+  --color-paper-shade: #0d0a12;
+  --color-paper-line: #352b45;
+
+  --color-ink: #f0e8dc;
+  --color-ink-soft: #e4dbcd;
+  --color-ink-muted: rgba(240, 232, 220, 0.72);
+  --color-ink-faint: rgba(240, 232, 220, 0.28);
+
+  --selection-fg: #140f1a;
+}
+
+/* Light-theme paper tints — every preset re-colors the page, not just
+ * the sim. Ink stays canonical (contrast unchanged, >13:1 on both). */
+
+/* "warm" — Turbulenz: sun-baked apricot paper */
+[data-sim-theme="warm"] {
+  --color-paper: #f6e3cc;
+  --color-paper-tint: #fdedd6;
+  --color-paper-shade: #ecd5b6;
+  --color-paper-line: #dcc19c;
+}
+
+/* "wash" — Aquarell: cool rinsed mint-grey paper */
+[data-sim-theme="wash"] {
+  --color-paper: #e9efe8;
+  --color-paper-tint: #f3f8f1;
+  --color-paper-shade: #dce6db;
+  --color-paper-line: #c3d4c2;
+}
+
+/* Hand-made object-grid photos are dark line-art PNGs — CSS can't
+ * re-token them like the SVG stamps, so night mode inverts them
+ * (hue-rotate keeps the spot accents roughly in family). */
+[data-sim-theme="night"] .ink-lineart {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* The ink cursor multiplies over light papers; on the night theme a
+ * light-ink trail would multiply to black — flip to screen so it
+ * glows instead. */
+[data-sim-theme="night"] .ink-cursor-layer {
+  mix-blend-mode: screen;
 }
 
 @media (min-width: 768px) {
@@ -575,12 +647,32 @@
     --tp-button-background-color-active: var(--color-spot-amber);
     --tp-button-background-color-focus: var(--color-spot-amber);
     --tp-button-background-color-hover: var(--color-spot-amber);
-    --tp-button-foreground-color: var(--color-ink);
+    /* ink-print: label on a spot fill must stay dark in every theme */
+    --tp-button-foreground-color: var(--color-ink-print);
 
     --tp-groove-foreground-color: var(--color-paper-line);
-    --tp-label-foreground-color: rgba(10, 6, 8, 0.7);
+    /* var (not the rgba literal) so pane labels follow the sim theme —
+       the hardcoded ink-rgba was invisible in night mode. */
+    --tp-label-foreground-color: var(--color-ink-muted);
     --tp-monitor-background-color: var(--color-paper-tint);
     --tp-monitor-foreground-color: var(--color-ink);
+  }
+}
+
+/* While the ink cursor is active the native cursor is fully hidden —
+ * the ink stroke IS the cursor (explicit user decision; the head dot
+ * hugs the pointer with near-zero lag as the click reference).
+ * InkCursor sets the attribute only on fine-pointer, motion-enabled
+ * sessions and removes it on cleanup.
+ * Media-gated to Tailwind's `md` (48rem): the cursor layers are
+ * `hidden md:block`, so below md a fine-pointer user (half-snapped
+ * desktop window, docked DevTools) would otherwise lose the native
+ * cursor with NO replacement — a fully cursorless page. */
+@media (min-width: 48rem) {
+  html[data-ink-cursor],
+  html[data-ink-cursor] * {
+    /* biome-ignore lint/complexity/noImportantStyles: must beat cursor-pointer utilities and form-control UA styles everywhere */
+    cursor: none !important;
   }
 }
 

@@ -25,7 +25,7 @@ export function PingPongStamp({ spotVar: _spotVar }: Props) {
       decoding="async"
       width={120}
       height={115}
-      className="block h-16 w-auto max-w-[140px] object-contain"
+      className="ink-lineart block h-16 w-auto max-w-[140px] object-contain"
       style={{ transform: "rotate(-2deg)" }}
     />
   );

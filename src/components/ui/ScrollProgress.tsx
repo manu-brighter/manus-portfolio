@@ -4,7 +4,9 @@ import gsap from "gsap";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLenis } from "@/hooks/useLenis";
+import { useMobileLayout } from "@/hooks/useMobileLayout";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { usePathname } from "@/i18n/navigation";
 import { SECTIONS } from "@/lib/content/sections";
 import { SPOT_CSS_VAR } from "@/lib/palette";
 
@@ -48,6 +50,8 @@ type ActiveSection = SectionDef & { el: HTMLElement };
 export function ScrollProgress() {
   const lenis = useLenis();
   const reducedMotion = useReducedMotion();
+  const isMobile = useMobileLayout();
+  const pathname = usePathname();
   const t = useTranslations("scrollProgress");
   const navT = useTranslations("nav.items");
   const containerRef = useRef<HTMLElement>(null);
@@ -58,15 +62,26 @@ export function ScrollProgress() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [fillProgress, setFillProgress] = useState(0);
 
-  // Discover which sections exist in the DOM
+  // Discover which sections exist in the DOM. Re-runs on route change:
+  // the component lives in the locale layout and survives client
+  // navigation, so home -> playground -> home would otherwise keep
+  // stale element refs from the unmounted home tree (frozen dots).
+  // biome-ignore lint/correctness/useExhaustiveDependencies(pathname): deliberate re-run trigger — home sections unmount/remount across client navigation
   useEffect(() => {
+    // Component renders null on Mobile-phone layouts (see below) —
+    // empty the section list too so the IO effect stays dormant
+    // instead of churning setActiveIndex on a null-rendering component.
+    if (isMobile) {
+      setSections([]);
+      return;
+    }
     const found: ActiveSection[] = [];
     for (const def of SECTION_DEFS) {
       const el = document.getElementById(def.id);
       if (el) found.push({ ...def, el });
     }
     setSections(found);
-  }, []);
+  }, [pathname, isMobile]);
 
   // IntersectionObserver for active section detection
   useEffect(() => {
@@ -101,16 +116,17 @@ export function ScrollProgress() {
     return () => observer.disconnect();
   }, [sections]);
 
-  // Scroll progress tracking via Lenis
+  // Scroll progress tracking via Lenis. Mobile-gated like discovery —
+  // no point re-rendering a null component on every scroll event.
   useEffect(() => {
-    if (!lenis) return;
+    if (!lenis || isMobile) return;
 
     const onScroll = () => {
       setFillProgress(lenis.progress);
     };
     lenis.on("scroll", onScroll);
     return () => lenis.off("scroll", onScroll);
-  }, [lenis]);
+  }, [lenis, isMobile]);
 
   // Animate active dot — GSAP durations set to 0 under reduced-motion
   // (component is hidden, but guard defensively).
@@ -146,6 +162,18 @@ export function ScrollProgress() {
 
   // Hidden under reduced-motion — native scrollbar is restored via CSS
   if (reducedMotion) return null;
+
+  // Mobile phones have no page margin — the fixed right-edge rail sat
+  // ON TOP of full-width photos/cards (screenshot-verified in the
+  // mobile wow-pass). Desktop/tablet keep it: there it lives in the
+  // whitespace beside the content column.
+  if (isMobile) return null;
+
+  // Playground experiment routes: fullscreen fixed-frame canvas, the
+  // section-dot strip carries no information and crowds the stage.
+  // (The component survives client navigation in the locale layout,
+  // so without this guard the home-page dots linger over experiments.)
+  if (pathname.startsWith("/playground/")) return null;
 
   // Don't render if no sections found
   if (sections.length < 1) return null;

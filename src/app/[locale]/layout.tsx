@@ -7,10 +7,14 @@ import { MotionProvider } from "@/components/motion/MotionProvider";
 import { AmbientRecorderDevGate } from "@/components/scene/AmbientRecorderDevGate";
 import { InkWipeOverlay } from "@/components/scene/InkWipeOverlay";
 import { SceneProvider } from "@/components/scene/SceneProvider";
+import { ScrollInkCoupling } from "@/components/scene/ScrollInkCoupling";
 import { Footer } from "@/components/ui/Footer";
+import { InkCursor } from "@/components/ui/InkCursor";
 import { Loader } from "@/components/ui/Loader";
 import { Nav } from "@/components/ui/Nav";
 import { ScrollProgress } from "@/components/ui/ScrollProgress";
+import { SimPresetSwitcher } from "@/components/ui/SimPresetSwitcher";
+import { SimThemeSync } from "@/components/ui/SimThemeSync";
 import { loadNamespaceGroup } from "@/i18n/messages";
 import { routing } from "@/i18n/routing";
 import { escapeForScript } from "@/lib/seo/escapeForScript";
@@ -80,6 +84,10 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
               </main>
               <Footer />
               <ScrollProgress />
+              <SimPresetSwitcher />
+              <SimThemeSync />
+              <InkCursor />
+              <ScrollInkCoupling />
               <Loader />
               <InkWipeOverlay />
               <AmbientRecorderDevGate />

@@ -12,6 +12,7 @@ uniform vec2 uTexelSize;
 uniform float uLevels;
 uniform float uOutlineThreshold;
 uniform float uGrainStrength;
+uniform float uEdgeStrength;
 uniform float uTime;
 
 uniform vec3 uPaperColor;
@@ -42,15 +43,28 @@ void main() {
   vec3 dyeClamped = clamp(dye.rgb, vec3(0.0), vec3(1.0));
   float density = length(dyeClamped);
 
-  vec3 color = mapToSpotColor(density);
+  // Optional hard Riso separations: uLevels > 0.5 quantizes the value
+  // fed into the color ladder into discrete print bands. Only the
+  // ladder input is posterized -- the Sobel normalization and the
+  // paper blend below keep the raw density, otherwise the quantized
+  // iso-contours shimmer as advection moves them (hard rim flicker).
+  // 0.0 (default) keeps the soft overlapping-band look.
+  float band = density;
+  if (uLevels > 0.5) {
+    band = posterize(density, uLevels);
+  }
 
-  // Subtle Sobel edges — just a gentle ink-pooling darkening,
-  // not outlines. Edges feel like where Riso ink settles thicker.
+  vec3 color = mapToSpotColor(band);
+
+  // Sobel edges — ink-pooling darkening where dye gradients are
+  // steep. uEdgeStrength is a preset knob: ~0.1 reads as soft
+  // watercolor washes, 0.35 is the default Riso settle, ~0.7 turns
+  // the contours inky/drawn (Turbulenz).
   vec2 edgeTexel = uTexelSize * (1.0 + length(vec2(dFdx(vUv.x), dFdy(vUv.y))) * 100.0);
   float edge = sobelEdge(uDye, vUv, edgeTexel);
   float edgeMask = smoothstep(uOutlineThreshold * 0.5, uOutlineThreshold, edge / (density + 1.0));
   vec3 edgeTint = color * 0.85;
-  color = mix(color, edgeTint, edgeMask * 0.35);
+  color = mix(color, edgeTint, edgeMask * uEdgeStrength);
 
   // Blend to paper at low density
   color = mix(uPaperColor, color, smoothstep(0.0, 0.08, density));

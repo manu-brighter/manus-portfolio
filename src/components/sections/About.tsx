@@ -9,6 +9,7 @@ import { StampDivider } from "@/components/about/StampDivider";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { PlateCornerMarks } from "@/components/ui/PlateCornerMarks";
 import { Portrait } from "@/components/ui/Portrait";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 import { useMobileLayout } from "@/hooks/useMobileLayout";
 import type { AboutAnfangenStamps, AboutParts, CurrentlyItems } from "@/types/i18n-shapes";
 
@@ -76,7 +77,6 @@ export function About() {
   // Mobile (drop "Anfangen" mint + "Antrieb" violet blocks + their
   // StampDividers). Spec: keep the strongest identity opener
   // (wer-ich-bin rose) + the loud-centered signature (ai-workflow amber).
-  // ObjectGrid switches to horizontal-strip variant.
   const isMobile = useMobileLayout();
 
   // Helpers — body prose lookup (stays verbatim from briefing).
@@ -91,15 +91,13 @@ export function About() {
       <PlateCornerMarks />
 
       {/* 00 Header */}
-      <header className="container-page grid-12 mb-16 gap-y-4 md:mb-20">
-        <p className="col-span-12 text-ink-muted type-label md:col-span-4">{t("sectionLabel")}</p>
-        <div className="col-span-12 md:col-span-8">
-          <h2 id="about-heading" className="type-h1 text-ink">
-            {t("headline")}
-          </h2>
-          <p className="type-body-lg mt-4 text-ink-soft">{t("subhead")}</p>
-        </div>
-      </header>
+      <SectionHeader
+        className="container-page mb-16 md:mb-20"
+        label={t("sectionLabel")}
+        headingId="about-heading"
+        headline={t("headline")}
+        subhead={t("subhead")}
+      />
 
       {/* 01 Wer ich bin */}
       <AboutBlock
@@ -224,7 +222,7 @@ export function About() {
       )}
 
       {/* 06 Object-Grid — horizontal-strip variant on Mobile */}
-      <ObjectGrid variant={isMobile ? "mobile-strip" : "grid"} />
+      <ObjectGrid />
     </section>
   );
 }

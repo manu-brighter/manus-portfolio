@@ -26,7 +26,7 @@ const PIXEL5_PINNED = [
   /case-study-carousel-mobile\.spec\.ts/,
   /mobile-bg-sim\.spec\.ts/,
   /mobile-nav\.spec\.ts/,
-  /photography-swiper\.spec\.ts/,
+  /photography-mobile\.spec\.ts/,
   /reduced-motion-mobile\.spec\.ts/,
 ];
 // keyboard-nav pins Desktop Chrome -> runs under the chromium project only.

@@ -29,6 +29,10 @@ test.describe("home playground section", () => {
     const context = await browser.newContext({ reducedMotion: "reduce" });
     const page = await context.newPage();
     await page.goto("/de/");
+    // Loader-overlay detach = deterministic post-hydration marker; the
+    // SSR markup still contains the overlay canvas until the client RM
+    // flip drops it (raced hydration on slow CI runners otherwise).
+    await expect(page.getByTestId("loader-overlay")).toHaveCount(0, { timeout: 20_000 });
     await expect(page.locator('canvas[data-scene="ink-wipe"]')).toHaveCount(0);
     await context.close();
   });

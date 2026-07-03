@@ -29,8 +29,11 @@ import type {
   CaseStudyStory,
 } from "@/types/i18n-shapes";
 
-// Mobile-Rework: lazy-import the Mobile case-study carousel so the Desktop
-// bundle stays free of the swiper wiring.
+// Lazy-import the Mobile case-study carousel so the Desktop bundle
+// stays free of the swiper wiring. NOTE: this is the deliberate
+// exception to the mobile no-carousel rule — the side-swipe IS the
+// diorama metaphor (desk slides), mirroring the Desktop horizontal-pin
+// track. Photography + ObjectGrid stay vertical.
 const CaseStudyMobileCarousel = dynamic(
   () =>
     import("@/components/case-study/CaseStudyMobileCarousel").then(
@@ -204,9 +207,9 @@ export function CaseStudy() {
     </div>
   );
 
-  // Mobile-Rework spec §4.5: vertical scrolly with per-station Sim
-  // transitions replaces the horizontal-pin Diorama. Desktop branch
-  // (Tablet + fine-pointer) is unchanged.
+  // Mobile: side-swipe diorama carousel (deliberately kept — see the
+  // dynamic-import note above). Desktop branch (Tablet + fine-pointer)
+  // is unchanged.
   if (isMobile) {
     return (
       <>

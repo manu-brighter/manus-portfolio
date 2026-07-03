@@ -5,13 +5,24 @@ import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { getSimPreset } from "@/lib/content/simPresets";
+import { DEFAULT_FLUID_VISUALS, type RGB } from "@/lib/gl/fluidOrchestrator";
 import { isLoaderComplete, markLoaderComplete } from "@/lib/loaderSession";
-import { SPOT_HEX } from "@/lib/palette";
+import { useSimPresetStore } from "@/lib/simPresetStore";
 
 // Re-exported so existing consumers that imported `isLoaderComplete`
 // from this file keep working. The canonical implementation lives in
 // `@/lib/loaderSession` together with the typed pub/sub.
 export { isLoaderComplete };
+
+/** Normalized RGB tuple -> #rrggbb for GSAP backgroundColor tweens. */
+function rgbToHex(rgb: RGB): string {
+  return `#${Array.from(rgb, (v) =>
+    Math.round(v * 255)
+      .toString(16)
+      .padStart(2, "0"),
+  ).join("")}`;
+}
 
 /** sessionStorage key — survives locale switches that re-mount the
  *  whole locale layout subtree (Next swaps `<html lang>` between /de
@@ -100,22 +111,48 @@ export function Loader() {
       return () => window.clearTimeout(timer);
     }
 
-    // Spot color hex values from `@/lib/palette` — GSAP animates
+    // Drop colors follow the active sim preset's dye ladder so the
+    // loader speaks the same palette as the sim it introduces
+    // (Nachtdruck pulses its glow ladder, Aquarell its washes; the
+    // default preset reproduces the four Riso spots). GSAP animates
     // backgroundColor directly and CSS custom properties can't be
-    // interpolated without a plugin, so we feed the raw hex.
-    const { rose, amber, mint, violet } = SPOT_HEX;
+    // interpolated without a plugin, so we convert to raw hex.
+    const preset = getSimPreset(useSimPresetStore.getState().presetId);
+    const ladder = preset.visuals.ladder ?? DEFAULT_FLUID_VISUALS.ladder;
+    // Night preset: the drop's `multiply` blend collapses every color
+    // toward black on the near-black night paper (drop ~= background,
+    // screenshot-verified). Flip to `screen` so the ink GLOWS out of
+    // the dark — same night treatment as `.ink-cursor-layer` — and
+    // pulse the ladder brightest-first (night ladders ascend dark ->
+    // bright), ending on the pink band so the phase-5 flood stays
+    // luminous instead of draining into wine-on-black.
+    // Gate on the theme actually being APPLIED, not just persisted:
+    // SimThemeSync only sets data-sim-theme when a live sim runs
+    // (config && !reducedMotion). A user whose tier later degraded to
+    // static keeps "nachtdruck" in the store but gets a light page —
+    // the screen-blend night drop would be near-invisible on light
+    // paper. Reading the attribute is safe here: SimThemeSync is a
+    // sibling mounted BEFORE the Loader in the locale layout, so its
+    // effect has already run when this one fires.
+    const isNight =
+      preset.theme === "night" && document.documentElement.dataset.simTheme === "night";
+    drop.style.mixBlendMode = isNight ? "screen" : "multiply";
+    const pulseLadder = isNight
+      ? [ladder[3], ladder[2], ladder[1], ladder[2]].map((c) => c ?? ladder[0])
+      : ladder;
+    const [c0, c1, c2, c3] = pulseLadder.map((c) => rgbToHex(c as RGB));
 
     const tl = gsap.timeline({ onComplete });
 
     tl
       // Phase 1: Ink drop blooms from nothing (0 – 0.5s)
-      .set(drop, { scale: 0.2, opacity: 0, backgroundColor: rose })
+      .set(drop, { scale: 0.2, opacity: 0, backgroundColor: c0 })
       .to(drop, { scale: 1, opacity: 0.85, duration: 0.5, ease: "expo.out" })
 
-      // Phase 2: Color pulse through Riso inks (0.3 – 1.3s)
-      .to(drop, { backgroundColor: amber, duration: 0.28, ease: "none" }, 0.35)
-      .to(drop, { backgroundColor: mint, duration: 0.28, ease: "none" }, 0.63)
-      .to(drop, { backgroundColor: violet, duration: 0.28, ease: "none" }, 0.91)
+      // Phase 2: Color pulse through the ladder (0.3 – 1.3s)
+      .to(drop, { backgroundColor: c1, duration: 0.28, ease: "none" }, 0.35)
+      .to(drop, { backgroundColor: c2, duration: 0.28, ease: "none" }, 0.63)
+      .to(drop, { backgroundColor: c3, duration: 0.28, ease: "none" }, 0.91)
 
       // Subtle breathing during color phase
       .to(

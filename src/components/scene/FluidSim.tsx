@@ -3,11 +3,13 @@
 import { useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import { useCoarsePointer } from "@/hooks/useCoarsePointer";
+import { applySimPreset, firePresetBurst, getSimPreset } from "@/lib/content/simPresets";
 import { subscribeToSplats } from "@/lib/fluidBus";
 import { FluidOrchestrator, type PointerState } from "@/lib/gl/fluidOrchestrator";
 import type { TierConfig } from "@/lib/gpu";
 import { subscribeToLoaderComplete } from "@/lib/loaderSession";
 import { MAX_DT_S, subscribe } from "@/lib/raf";
+import { useSimPresetStore } from "@/lib/simPresetStore";
 
 type FluidSimProps = {
   config: TierConfig;
@@ -67,6 +69,18 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
     }
     orchestratorRef.current = orchestrator;
 
+    // Preset: apply the persisted selection on every fresh init (first
+    // mount, tier auto-tune re-init, locale switch) and re-apply live
+    // on store change. Only live changes fire the celebration burst —
+    // the initial application must stay silent.
+    applySimPreset(orchestrator, getSimPreset(useSimPresetStore.getState().presetId), config);
+    const unsubPreset = useSimPresetStore.subscribe((current, previous) => {
+      if (current.presetId === previous.presetId) return;
+      const preset = getSimPreset(current.presetId);
+      applySimPreset(orchestrator, preset, config);
+      firePresetBurst(orchestrator, preset, config.splatRadius);
+    });
+
     // Ambient warmup-trigger — short residual settle (~100ms) after
     // init. The long wait (matching the loader+hero-reveal cadence)
     // already lives in SceneProvider's deferred-mount path.
@@ -84,6 +98,7 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
     return () => {
       if (ambientTimer !== null) window.clearTimeout(ambientTimer);
       unsubLoader();
+      unsubPreset();
       orchestrator.dispose();
       orchestratorRef.current = null;
     };
@@ -173,7 +188,14 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
   // Splats land in FluidOrchestrator's queue and are drained next step.
   useEffect(() => {
     return subscribeToSplats((req) => {
-      orchestratorRef.current?.injectSplat(req.x, req.y, req.color, req.dx ?? 0, req.dy ?? 0);
+      orchestratorRef.current?.injectSplat(
+        req.x,
+        req.y,
+        req.color,
+        req.dx ?? 0,
+        req.dy ?? 0,
+        req.radius,
+      );
     });
   }, []);
 

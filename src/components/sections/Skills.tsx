@@ -1,5 +1,8 @@
 import { useTranslations } from "next-intl";
+import { FadeIn } from "@/components/motion/FadeIn";
+import { OverprintReveal } from "@/components/motion/OverprintReveal";
 import { VibecodedStamp } from "@/components/skills/VibecodedStamp";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 import type { SkillsTiers } from "@/types/i18n-shapes";
 
 /**
@@ -43,28 +46,34 @@ export function Skills() {
       aria-labelledby="skills-heading"
       className="container-page relative py-20 md:py-28"
     >
-      <header className="grid-12 mb-16 gap-y-4 md:mb-20">
-        <p className="col-span-12 text-ink-muted type-label md:col-span-4">{t("sectionLabel")}</p>
-        <div className="col-span-12 md:col-span-8">
-          <h2 id="skills-heading" className="type-h1 text-ink">
-            {t("headline")}
-          </h2>
-          <p className="type-body-lg mt-4 text-ink-soft">{t("subhead")}</p>
-        </div>
-      </header>
+      <SectionHeader
+        className="mb-16 md:mb-20"
+        label={t("sectionLabel")}
+        headingId="skills-heading"
+        headline={t("headline")}
+        subhead={t("subhead")}
+      />
 
       <article
         aria-labelledby="skill-hero"
         className="mb-20 border-ink border-t-2 border-b-2 py-10 md:mb-28 md:py-16"
       >
-        <p className="mb-4 text-ink-muted type-label">{t("heroSkill.eyebrow")}</p>
+        <p className="mb-4 text-ink-muted type-label">
+          <FadeIn y={10}>{t("heroSkill.eyebrow")}</FadeIn>
+        </p>
+        {/* The largest type on the page earns the full misregistration
+            reveal — same signature language as the section headlines. */}
         <h3
           id="skill-hero"
           className="font-display italic text-ink text-[clamp(3rem,8vw,6rem)] leading-[0.95] tracking-[-0.03em]"
         >
-          {t("heroSkill.name")}
+          <OverprintReveal text={t("heroSkill.name")} threshold={0.2} />
         </h3>
-        <p className="type-body-lg mt-6 max-w-2xl text-ink-soft">{t("heroSkill.description")}</p>
+        <p className="type-body-lg mt-6 max-w-2xl text-ink-soft">
+          <FadeIn delay={0.35} y={10}>
+            {t("heroSkill.description")}
+          </FadeIn>
+        </p>
       </article>
 
       {/* Secondary tiers — flow as a stack, each with its own mono label. */}

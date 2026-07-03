@@ -16,6 +16,13 @@ force source. Static export → Nginx. Full spec in [`docs/plan.md`](../docs/pla
 
 **Package manager is pnpm**, not Bun — plan deviation (§3 still says Bun).
 
+**When pnpm scripts break via WSL** (see "Tooling / Windows specifics"),
+invoke the tools directly: `node node_modules/typescript/bin/tsc --noEmit`,
+`node node_modules/@biomejs/biome/bin/biome check .`,
+`node node_modules/next/dist/bin/next build`,
+`node node_modules/@playwright/test/cli.js test --grep-invert "@visual"`
+(with `$env:E2E_TARGET='prod'; $env:PORT=<free port>`).
+
 ## Folder conventions
 
 - `src/app/` — App Router pages & layouts (locale segment lives here)
@@ -156,6 +163,72 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   ts-runner in devDeps). Per-task `quality` field for AVIF override on
   detail-heavy shots (q38–q50 vs default q60).
 - **Override note**: `docs/content-briefing.md` §§2.4, 5.2, 6.2 still describe a Riso-Duotone shader treatment — that direction was reversed. The framing-only rule above wins.
+
+## Sim presets & night theme
+
+- **4 user-switchable presets** (riso/turbulenz/aquarell/nachtdruck) defined in
+  `src/lib/content/simPresets.ts`; persisted selection in
+  `src/lib/simPresetStore.ts` (zustand + localStorage `manus-sim-preset`).
+- **Two-channel application**: physics subset via `setParams()` (reset to tier
+  baseline first — never touches gridSize/halfRate/pressureIterations, so weak
+  GPUs can't regress), look via `setVisuals(FluidVisuals)` (posterize levels,
+  outline, grain, paper, 4-slot color ladder, splat scales, ambient
+  multipliers). `DEFAULT_FLUID_VISUALS` reproduces the pre-preset literals.
+- **FluidSim re-applies the preset after every orchestrator init** (tier
+  auto-tune re-creates the orchestrator) and fires a center splat-burst on
+  live switches only.
+- **Playground/mini-sims inherit look only** via `syncPresetVisuals()` —
+  their tuned physics stays authoritative.
+- **Ladder contrast rule**: light-theme ladder bands must never approach
+  text-ink luminance — DOM text sits on top of the sim; a near-black pool
+  under near-black type is unreadable (screenshot-verified).
+- **Nachtdruck = night mode**: preset `theme: "night"` → `SimThemeSync` sets
+  `<html data-sim-theme="night">` → CSS var overrides in globals.css flip the
+  whole token set (dark paper / light ink). Sim paints near-black paper with
+  an ascending (glowing) posterized ladder.
+- **LightningCSS trap**: `color-scheme` inside a non-`:root` rule makes the
+  Turbopack CSS pipeline's polyfill drop the ENTIRE rule silently. Never add
+  `color-scheme: dark` to the night block.
+- **Visual tuning workflow**: headless-Playwright screenshot scripts against
+  the dev server (pin tier via localStorage `manus-gpu-tier`, set preset,
+  synthesize pointer churn, screenshot) — used for the turbulenz/nachtdruck
+  retunes; far faster than eyeballing param changes blind.
+
+## Mobile architecture (post mobile-wow-pass)
+
+- **All coarse-pointer devices (phone + tablet) run the live
+  `MobileBackgroundSim`** — one fixed full-viewport WebGL2 canvas behind all
+  content, own orchestrator. The `AmbientVideo` tablet fallback (8MB mp4) is
+  retired; SceneProvider routes coarse → MobileBackgroundSim, fine-pointer →
+  SceneCanvas+FluidSim.
+- **Scroll behavior is platform-split** in MobileBackgroundSim: the
+  fade-out/in scroll-drain runs on iOS/iPadOS ONLY (masks the fixed-WebGL
+  momentum-scroll cull — a real iOS Safari bug). Everywhere else the sim
+  stays visible while scrolling and scroll velocity injects an invisible
+  force splat (zero-dye) so ink drifts with the page. Don't reintroduce a
+  blanket drain — the blank-on-scroll flicker was explicit user feedback.
+- **Presets + themes are pointer-agnostic**: MobileBackgroundSim applies the
+  persisted preset on init + live on store change (same wiring as FluidSim);
+  SimThemeSync and SimPresetSwitcher gate only on `config && !reducedMotion`.
+  Switcher renders as a horizontal bottom-left row with 44px touch targets
+  below `md`, vertical dot pill from `md` up.
+- **Tap-to-splat** reads touch at document level; taps on interactive UI
+  (`a/button/input/label/[data-no-splat]`) are ignored; color is a random
+  spot per tap.
+- **Side-swipe carousels: use sparingly, not never.** Manuel finds them
+  genuinely cool in the right situation — three at once was just too
+  many. ObjectGrid (responsive 2-col grid) and Photography (vertical
+  editorial stack, `PhotographyMobile`) went vertical in the mobile
+  wow-pass; the Case-Study `CaseStudyMobileCarousel` deliberately keeps
+  its side-swipe because the horizontal movement IS the diorama metaphor
+  (desk slides, mirroring the Desktop horizontal-pin track) — Manuel
+  explicitly asked for it back after a first cut removed it. A new
+  carousel needs a reason like that, not just "content overflows".
+- **FadeIn on potentially-viewport-tall blocks needs a low `threshold`**
+  (~0.15): IO `intersectionRatio` can never reach the default 0.35 when the
+  element is taller than the viewport → entrance never fires.
+- **ScrollProgress is Desktop/Tablet-only** (`useMobileLayout` gate) — on
+  phones the fixed right-edge rail sat on top of full-width content.
 
 ## Tailwind / dynamic classes
 

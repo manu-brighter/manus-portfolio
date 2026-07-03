@@ -6,9 +6,11 @@ import { Pane } from "tweakpane";
 import { useOrchestratorRAF } from "@/hooks/useOrchestratorRAF";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { INK_DROP_STUDIO_DEFAULTS } from "@/lib/content/playground";
+import { getSimPreset, type SimPresetId } from "@/lib/content/simPresets";
 import { FluidOrchestrator, type PointerState } from "@/lib/gl/fluidOrchestrator";
 import { capDPR, DPR_FULL, getTierConfig } from "@/lib/gpu";
 import { randomSpot } from "@/lib/palette";
+import { syncPresetVisuals, useSimPresetStore } from "@/lib/simPresetStore";
 import { ExperimentChrome } from "../ExperimentChrome";
 
 /**
@@ -137,6 +139,9 @@ function InkDropStudioCanvas() {
     // with the rotating Riso-spot cycle (override stays null). Click-
     // burst + bomb layer additional splats on top via injectSplat().
     orchestratorRef.current = orchestrator;
+    // Active preset's look carries into the studio (visuals only —
+    // the Tweakpane physics sliders stay authoritative).
+    const unsubPreset = syncPresetVisuals(orchestrator);
 
     const onResize = () => {
       const ratio = capDPR(DPR_FULL);
@@ -154,6 +159,7 @@ function InkDropStudioCanvas() {
 
     return () => {
       ro.disconnect();
+      unsubPreset();
       orchestrator.dispose();
       orchestratorRef.current = null;
     };
@@ -201,7 +207,7 @@ function InkDropStudioCanvas() {
       max: 4.0,
       step: 0.1,
     });
-    pane.on("change", () => {
+    const pushParams = () => {
       const orchestrator = orchestratorRef.current;
       if (!orchestrator) return;
       orchestrator.setParams({
@@ -211,8 +217,36 @@ function InkDropStudioCanvas() {
         pressureIterations: params.pressureIterations,
         splatRadius: params.splatRadius * BASE_SPLAT_RADIUS,
       });
+    };
+    pane.on("change", pushParams);
+
+    // Preset physics flow INTO the sliders: switching the preset pill
+    // loads that preset's physics as the new slider values (visible
+    // via pane.refresh — Tweakpane reads params by reference) and
+    // pushes them to the orchestrator. "riso" restores the studio's
+    // own tuned defaults. The user keeps full slider freedom after.
+    const applyPresetPhysics = (id: SimPresetId) => {
+      const preset = getSimPreset(id);
+      if (preset.id === "riso") {
+        Object.assign(params, INK_DROP_STUDIO_DEFAULTS);
+      } else {
+        const base = getTierConfig("medium");
+        params.velocityDissipation = preset.physics.velocityDissipation ?? base.velocityDissipation;
+        params.dyeDissipation = preset.physics.dyeDissipation ?? base.dyeDissipation;
+        params.vorticity = preset.physics.confinement ?? base.confinement;
+        params.splatRadius = preset.physics.splatRadiusScale ?? 1;
+      }
+      pane.refresh();
+      pushParams();
+    };
+    const initialPresetId = useSimPresetStore.getState().presetId;
+    if (initialPresetId !== "riso") applyPresetPhysics(initialPresetId);
+    const unsubPresetPane = useSimPresetStore.subscribe((current, previous) => {
+      if (current.presetId !== previous.presetId) applyPresetPhysics(current.presetId);
     });
+
     return () => {
+      unsubPresetPane();
       pane.dispose();
     };
   }, []);
@@ -382,12 +416,14 @@ function InkDropStudioCanvas() {
           them at first paint). Mounted in our DOM tree so `data-no-splat`
           stops pointer events here from triggering ink splats underneath
           (vs. Leva which portaled-to-body and needed CSS-selector hacks).
-          Positioning: top-right, below the sticky navbar on mobile,
-          tighter under the chrome on desktop. */}
+          Positioning: clearly below the sticky navbar (the old md:top-6
+          tucked it half-under the nav and read as broken), dressed as a
+          Riso card (ink border + offset shadow) like the toolbar
+          buttons so it belongs to the composition. */}
       <div
         ref={paneContainerRef}
         data-no-splat
-        className="riso-tweakpane pointer-events-auto absolute top-20 right-4 z-20 w-[300px] md:top-6"
+        className="riso-tweakpane pointer-events-auto absolute top-24 right-4 z-20 w-[300px] border-[1.5px] border-ink bg-paper shadow-[3px_3px_0_var(--color-ink)] md:right-6"
       />
     </ExperimentChrome>
   );

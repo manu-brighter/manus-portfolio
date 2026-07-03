@@ -268,10 +268,19 @@ export function CaseStudyMobileCarousel({ handleOpen, publicShots }: Props) {
             aria-label={slideLabel(3)}
             className={SLIDE_CLASS}
           >
-            <SlideDecor>
-              <InkSplat color="mint" className="absolute top-[5%] left-[5%] w-24 opacity-60" />
-            </SlideDecor>
+            {/* Table-edge lines only — the mint splat moved into the
+                content column below so it anchors to the card. */}
+            <SlideDecor>{null}</SlideDecor>
             <div className={CONTENT_CLASS}>
+              {/* Splat anchored to the CARD (not the slide): slide-relative
+                  percent positions land behind the card on short viewports
+                  (invisible on iPhone, real-device report). As a child of
+                  the content column it always peeks over the card's
+                  top-left corner — riso overprint style. */}
+              <InkSplat
+                color="mint"
+                className="pointer-events-none absolute -top-7 left-1 z-20 w-24 opacity-60"
+              />
               {adminHighlight ? (
                 <HighlightCard
                   slug="admin"
@@ -300,9 +309,14 @@ export function CaseStudyMobileCarousel({ handleOpen, publicShots }: Props) {
           >
             <SlideDecor>
               <InkSplat color="amber" className="absolute bottom-[6%] left-[5%] w-20 opacity-55" />
-              <MobileLupe className="absolute top-[5%] right-[6%] z-20 h-20 w-20" />
             </SlideDecor>
             <div className={CONTENT_CLASS}>
+              {/* Lupe rides ON TOP of the card (inspecting the screenshot).
+                  Inside SlideDecor its z-20 was trapped in the decor
+                  layer's z-0 stacking context -> rendered behind the card.
+                  As a content-column child it shares the z-10 context and
+                  the z-20 wins over the card. */}
+              <MobileLupe className="pointer-events-none absolute -top-9 right-2 z-20 h-20 w-20" />
               {overlayHighlight ? (
                 <HighlightCard
                   slug="twitchoverlay"

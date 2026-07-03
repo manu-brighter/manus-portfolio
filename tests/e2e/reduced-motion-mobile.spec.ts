@@ -2,14 +2,14 @@
 import { devices, expect, test } from "@playwright/test";
 
 /**
- * Mobile-Rework Phase 8.2 — Reduced-motion verification.
+ * Mobile — Reduced-motion verification.
  *
- * Under `prefers-reduced-motion: reduce` the Mobile sim spots must skip the
- * WebGL pipeline; the sections still render, just without the orchestrator-
- * backed canvases. The full-page MobileBackgroundSim never mounts (SceneProvider
- * routes reduced-motion to StaticFallback), the Photography swiper suppresses
- * its PhotoSwiperSim, and the Case-Study carousel has no sim at all (removed) —
- * so all three render with no canvas under reduced motion.
+ * Under `prefers-reduced-motion: reduce` the Mobile sim must skip the
+ * WebGL pipeline; the sections still render, just without the
+ * orchestrator-backed canvas. The full-page MobileBackgroundSim never
+ * mounts (SceneProvider routes reduced-motion to StaticFallback), and
+ * the Photography stack / Case-Study stations are canvas-free by
+ * design — so everything renders with no canvas under reduced motion.
  */
 
 test.use({
@@ -26,15 +26,14 @@ test.describe("Mobile reduced-motion", () => {
     await expect(sim).toHaveCount(0);
   });
 
-  test("Photography swiper renders without sim canvas", async ({ page }) => {
+  test("Photography stack renders all photos without sim canvas", async ({ page }) => {
     await page.goto("/de/#photography");
     await page.waitForLoadState("networkidle");
 
-    // Swiper UI still works (5 slides, dots, prev/next) — sim canvas alone
-    // is suppressed.
+    // FadeIn renders children statically under reduced motion, so all
+    // 5 photos are present and visible without any animation plumbing.
     await expect(page.locator('[data-testid="photo-slide"]')).toHaveCount(5);
-    await expect(page.locator('[data-testid="photo-dot"]')).toHaveCount(5);
-    await expect(page.locator('canvas[data-testid="photo-swiper-sim"]')).toHaveCount(0);
+    await expect(page.locator("#photography canvas")).toHaveCount(0);
   });
 
   test("Case-Study carousel renders 6 stations without any sim canvas", async ({ page }) => {

@@ -6,7 +6,6 @@ import "@fontsource-variable/inter";
 import "@fontsource-variable/jetbrains-mono";
 
 import type { Metadata } from "next";
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { NotFoundAnimation } from "./not-found-animation";
@@ -41,31 +40,36 @@ export default async function NotFound() {
             <p className="type-body text-ink-soft">{t("body")}</p>
           </div>
 
+          {/* Plain <a> instead of next/link: the 404 page owns its own
+              <html> shell, and the client router's soft navigation
+              across that root-shell boundary silently no-ops (links
+              did nothing on click). A full-page load is the correct
+              behavior when leaving the error document anyway. */}
           <div className="flex flex-wrap justify-center gap-3">
-            <Link
+            <a
               href="/de/"
               className="type-label-stamp transition-colors hover:bg-ink hover:text-paper-tint focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
             >
               Deutsch
-            </Link>
-            <Link
+            </a>
+            <a
               href="/en/"
               className="type-label-stamp transition-colors hover:bg-ink hover:text-paper-tint focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
             >
               English
-            </Link>
-            <Link
+            </a>
+            <a
               href="/fr/"
               className="type-label-stamp transition-colors hover:bg-ink hover:text-paper-tint focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
             >
               Français
-            </Link>
-            <Link
+            </a>
+            <a
               href="/it/"
               className="type-label-stamp transition-colors hover:bg-ink hover:text-paper-tint focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
             >
               Italiano
-            </Link>
+            </a>
           </div>
         </main>
       </body>
