@@ -4,6 +4,7 @@ import gsap from "gsap";
 import { useEffect, useRef } from "react";
 import { useGPUCapability } from "@/hooks/useGPUCapability";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { applySimPreset, firePresetBurst, getSimPreset } from "@/lib/content/simPresets";
 import {
   createFluidOrchestrator,
   type FluidOrchestrator,
@@ -11,6 +12,7 @@ import {
 } from "@/lib/gl/fluidOrchestrator";
 import { subscribeToLoaderComplete } from "@/lib/loaderSession";
 import { MAX_DT_S, subscribe } from "@/lib/raf";
+import { useSimPresetStore } from "@/lib/simPresetStore";
 
 /**
  * Mobile full-page background fluid sim.
@@ -97,6 +99,18 @@ export function MobileBackgroundSim() {
     orchestrator.init(gl, config);
     orchestratorRef.current = orchestrator;
 
+    // Preset: mirror the Desktop FluidSim wiring — apply the persisted
+    // selection on every fresh init and re-apply live on store change
+    // (the switcher is available on Mobile-phone layouts too). Only
+    // live changes fire the celebration burst.
+    applySimPreset(orchestrator, getSimPreset(useSimPresetStore.getState().presetId), config);
+    const unsubPreset = useSimPresetStore.subscribe((current, previous) => {
+      if (current.presetId === previous.presetId) return;
+      const preset = getSimPreset(current.presetId);
+      applySimPreset(orchestrator, preset, config);
+      firePresetBurst(orchestrator, preset, config.splatRadius);
+    });
+
     // Warmup splat off-screen — compiles shaders silently so the first
     // visible frame doesn't trigger an iOS Safari compile freeze.
     orchestrator.injectSplat(-1, -1, [0, 0, 0], 0, 0);
@@ -127,6 +141,7 @@ export function MobileBackgroundSim() {
       if (ambientTimer !== null) window.clearTimeout(ambientTimer);
       if (resizeRaf !== null) cancelAnimationFrame(resizeRaf);
       unsubLoader();
+      unsubPreset();
       orchestrator.dispose();
       orchestratorRef.current = null;
     };
@@ -141,6 +156,7 @@ export function MobileBackgroundSim() {
     let startY = 0;
     let startT = 0;
     let moved = false;
+    let onChrome = false;
 
     const onStart = (e: TouchEvent) => {
       const t = e.touches[0];
@@ -149,6 +165,12 @@ export function MobileBackgroundSim() {
       startY = t.clientY;
       startT = performance.now();
       moved = false;
+      // Taps on interactive UI (nav, links, the preset switcher's
+      // [data-no-splat] pill, form fields) act on that UI — poking a
+      // splat under it reads as an accident, not a feature.
+      onChrome =
+        e.target instanceof Element &&
+        e.target.closest("[data-no-splat], a, button, input, textarea, select, label") !== null;
     };
     const onMove = (e: TouchEvent) => {
       const t = e.touches[0];
@@ -158,7 +180,7 @@ export function MobileBackgroundSim() {
       }
     };
     const onEnd = () => {
-      if (moved || performance.now() - startT > TAP_MAX_MS) return;
+      if (onChrome || moved || performance.now() - startT > TAP_MAX_MS) return;
       const orchestrator = orchestratorRef.current;
       if (!orchestrator) return;
       const u = startX / window.innerWidth;
