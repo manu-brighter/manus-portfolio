@@ -22,21 +22,24 @@ import { useSimPresetStore } from "@/lib/simPresetStore";
  * same "the sim IS the background" model the Desktop uses, brought back to
  * Mobile now that the scroll-drain choreography is clean.
  *
- * The scroll-drain does double duty:
- *   1. Perf — pauses the orchestrator while the user scrolls.
- *   2. iOS cull masking — iOS Safari drops `position:fixed` WebGL layers
- *      during momentum scroll (the documented blink that pushed the rework
- *      to per-section canvases / a <video> on tablets). Here the canvas is
- *      already faded to opacity 0 while scrolling, so the cull lands on a
- *      transparent layer and is invisible. When scrolling stops it fades
- *      back in — past the momentum, so no cull. Combined with the same
- *      layer-promotion stack SceneCanvas uses (translateZ / will-change /
- *      contain:paint / isolation / preserveDrawingBuffer / alpha).
- *
- * Smoothness (vs the old hero choreography): a single clean fade-out on
- * scroll-start and a single fade-in once still — no staggered re-emergence
- * splats that read as a flicker. The reveal holds at opacity 0 through a
- * short settle window so the orchestrator's wall-clock reset stays hidden.
+ * Scroll behavior is platform-split:
+ *   - iOS/iPadOS ONLY: the scroll-drain choreography (fade to 0 while
+ *     scrolling, fade back after stillness). It masks a real platform
+ *     bug — iOS Safari drops `position:fixed` WebGL layers during
+ *     momentum scroll (the documented blink that pushed the first
+ *     rework to per-section canvases / a <video> on tablets). The
+ *     canvas is already transparent when the cull lands, so it's
+ *     invisible. Combined with the same layer-promotion stack
+ *     SceneCanvas uses (translateZ / will-change / contain:paint /
+ *     isolation / preserveDrawingBuffer / alpha).
+ *   - Everywhere else (Android Chrome etc.): NO drain — the compositor
+ *     handles fixed WebGL layers fine, and blanking the background on
+ *     every scroll read as a bumpy flicker (Manuel's feedback). The
+ *     sim keeps running and instead couples to the scroll: velocity
+ *     injects an invisible whole-canvas force splat (color [0,0,0] =
+ *     zero dye) so the ink drifts with the page, mirroring the
+ *     Desktop ScrollInkCoupling feel. Tier configs already right-size
+ *     the GPU cost, so scrolling with a live sim stays in budget.
  *
  * `pointer-events: none` so the canvas never eats taps/scrolls; touch input
  * is read at the document level — a genuine tap (no drag) pokes one splat,
@@ -54,6 +57,29 @@ const REVEAL_MS = 560; // smooth fade-in once scrolling has stopped
 const SCROLL_IDLE_COOLDOWN_MS = 1000; // stillness required before revealing
 const TAP_MOVE_TOLERANCE_PX = 12; // beyond this a touch is a scroll, not a tap
 const TAP_MAX_MS = 400; // longer than this is a long-press, not a tap
+
+// Scroll → ink coupling (non-iOS path). Mirrors the Desktop
+// ScrollInkCoupling constants, adjusted for native-scroll velocity
+// (px per event batch) instead of Lenis's smoothed px/frame.
+const COUPLE_VELOCITY_THRESHOLD = 10; // |px/16ms| below this never fires
+const COUPLE_MIN_INTERVAL_MS = 120; // min gap between force injections
+const COUPLE_VELOCITY_TO_FORCE = 0.008;
+const COUPLE_MAX_FORCE = 0.5;
+const COUPLE_FORCE_RADIUS = 1.2; // whole-canvas soft force field
+const NO_DYE: readonly [number, number, number] = [0, 0, 0]; // pure velocity, zero dye
+
+/**
+ * iOS/iPadOS detection — the drain choreography masks an iOS-Safari-
+ * specific compositor bug, so it must not punish other platforms.
+ * iPadOS 13+ masquerades as MacIntel, hence the maxTouchPoints probe.
+ */
+function isIOS(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return (
+    /iP(hone|ad|od)/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  );
+}
 
 export function MobileBackgroundSim() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -199,10 +225,53 @@ export function MobileBackgroundSim() {
     };
   }, [reduced]);
 
-  // Scroll-drain / reveal choreography. Direct style manipulation (no React
-  // state) — this is a per-frame animation, not a render concern.
+  // Non-iOS scroll → ink coupling: the sim stays visible and running
+  // while scrolling; velocity injects an invisible force splat so the
+  // ink drifts with the page (see header comment). iOS gets the drain
+  // choreography below instead — injecting into a paused orchestrator
+  // would batch-release queued force on reveal.
   useEffect(() => {
-    if (reduced) return;
+    if (reduced || isIOS()) return;
+
+    let lastY = window.scrollY;
+    let lastT = performance.now();
+    let lastInjectT = 0;
+
+    const onScroll = () => {
+      const now = performance.now();
+      const dtMs = now - lastT;
+      const dy = window.scrollY - lastY;
+      lastY = window.scrollY;
+      lastT = now;
+      if (dtMs <= 0) return;
+
+      // Normalize to px per 16ms frame so thresholds match Desktop feel.
+      const velocity = (dy / dtMs) * 16;
+      if (Math.abs(velocity) < COUPLE_VELOCITY_THRESHOLD) return;
+      if (now - lastInjectT < COUPLE_MIN_INTERVAL_MS) return;
+      lastInjectT = now;
+
+      const force = Math.min(Math.abs(velocity) * COUPLE_VELOCITY_TO_FORCE, COUPLE_MAX_FORCE);
+      // y origin is canvas-bottom: scroll-down (velocity > 0) moves
+      // content up, so the ink drifts up with it; scroll-up mirrors.
+      orchestratorRef.current?.injectSplat(
+        0.5,
+        0.5,
+        NO_DYE,
+        0,
+        velocity > 0 ? force : -force,
+        COUPLE_FORCE_RADIUS,
+      );
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [reduced]);
+
+  // iOS-ONLY scroll-drain / reveal choreography. Direct style manipulation
+  // (no React state) — this is a per-frame animation, not a render concern.
+  useEffect(() => {
+    if (reduced || !isIOS()) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     canvas.style.opacity = "1";
