@@ -105,6 +105,20 @@
   --color-paper-line: #c3d4c2;
 }
 
+/* Hand-made object-grid photos are dark line-art PNGs — CSS can't
+ * re-token them like the SVG stamps, so night mode inverts them
+ * (hue-rotate keeps the spot accents roughly in family). */
+[data-sim-theme="night"] .ink-lineart {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* The ink cursor multiplies over light papers; on the night theme a
+ * light-ink trail would multiply to black — flip to screen so it
+ * glows instead. */
+[data-sim-theme="night"] .ink-cursor-layer {
+  mix-blend-mode: screen;
+}
+
 @media (min-width: 768px) {
   :root {
     --container-gutter: 2rem;
@@ -630,7 +644,9 @@
     --tp-button-foreground-color: var(--color-ink);
 
     --tp-groove-foreground-color: var(--color-paper-line);
-    --tp-label-foreground-color: rgba(10, 6, 8, 0.7);
+    /* var (not the rgba literal) so pane labels follow the sim theme —
+       the hardcoded ink-rgba was invisible in night mode. */
+    --tp-label-foreground-color: var(--color-ink-muted);
     --tp-monitor-background-color: var(--color-paper-tint);
     --tp-monitor-foreground-color: var(--color-ink);
   }
