@@ -63,6 +63,12 @@ export function SimPresetSwitcher() {
   // and the toggle is display:none — `expanded` simply has no effect.
   const [expanded, setExpanded] = useState(false);
   const toggleRef = useRef<HTMLButtonElement>(null);
+  // Set on pointerdown, consumed in onChange: distinguishes tap/click
+  // selection from keyboard (arrow-key) selection. Only keyboard
+  // selection restores focus to the toggle — a programmatic .focus()
+  // after a TAP makes iOS Safari paint the :focus-visible ring as a
+  // persistent teal rectangle on the collapsed pill (real-device bug).
+  const pointerSelectRef = useRef(false);
   // Hydration guard: `config` and the persisted presetId both read
   // localStorage synchronously on the client, so their server values
   // can differ (e.g. cached "static" tier -> config null -> element
@@ -112,7 +118,10 @@ export function SimPresetSwitcher() {
             // text.
             <label
               key={preset.id}
-              className="group relative flex size-11 cursor-pointer items-center justify-center md:size-7"
+              onPointerDown={() => {
+                pointerSelectRef.current = true;
+              }}
+              className="group relative flex size-11 cursor-pointer items-center justify-center [-webkit-tap-highlight-color:transparent] md:size-7"
             >
               <input
                 type="radio"
@@ -121,13 +130,22 @@ export function SimPresetSwitcher() {
                 checked={active}
                 onChange={() => {
                   setPreset(preset.id);
-                  // Mobile: selection collapses the row again; restore
-                  // focus to the toggle so keyboard users don't drop to
-                  // <body> when the focused radio turns display:none.
-                  // No-op from `md` up (toggle is display:none there and
-                  // the group ignores `expanded`).
+                  // Mobile: selection collapses the row again. KEYBOARD
+                  // selection restores focus to the toggle so users
+                  // don't drop to <body> when the focused radio turns
+                  // display:none; tap/click skips the restore (see
+                  // pointerSelectRef — iOS paints a persistent
+                  // focus-visible rectangle otherwise). No-op from `md`
+                  // up (toggle is display:none there and the group
+                  // ignores `expanded`).
                   setExpanded(false);
-                  if (toggleRef.current && getComputedStyle(toggleRef.current).display !== "none") {
+                  const viaPointer = pointerSelectRef.current;
+                  pointerSelectRef.current = false;
+                  if (
+                    !viaPointer &&
+                    toggleRef.current &&
+                    getComputedStyle(toggleRef.current).display !== "none"
+                  ) {
                     toggleRef.current.focus();
                   }
                 }}
@@ -181,7 +199,7 @@ export function SimPresetSwitcher() {
         type="button"
         aria-expanded={expanded}
         onClick={() => setExpanded((v) => !v)}
-        className="relative flex size-11 cursor-pointer items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring) md:hidden"
+        className="relative flex size-11 cursor-pointer items-center justify-center rounded-full [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring) md:hidden"
       >
         <span className="sr-only">{t("label")}</span>
         <span
