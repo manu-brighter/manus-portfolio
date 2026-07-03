@@ -30,6 +30,10 @@ type MobileSlide = {
   stampKey: string;
   spot: SpotColor;
   widths: number[];
+  /** width / height — mirrors Photography.tsx. Feeds the `<img>`
+   *  width/height attributes so lazy images reserve their layout box
+   *  before load (no CLS, no zero-height figures). */
+  aspect: number;
   /** Editorial rhythm: full-bleed-ish vs inset, alternating sides. */
   layout: "full" | "inset-left" | "inset-right";
 };
@@ -40,6 +44,7 @@ const SLIDES: readonly MobileSlide[] = [
     stampKey: "pelican",
     spot: "amber",
     widths: [800, 1200],
+    aspect: 3 / 2,
     layout: "full",
   },
   {
@@ -47,6 +52,7 @@ const SLIDES: readonly MobileSlide[] = [
     stampKey: "koenigsegg",
     spot: "violet",
     widths: [800, 1200],
+    aspect: 2 / 3,
     layout: "inset-right",
   },
   {
@@ -54,6 +60,7 @@ const SLIDES: readonly MobileSlide[] = [
     stampKey: "panorama",
     spot: "amber",
     widths: [1200, 1920],
+    aspect: 3.72,
     layout: "full",
   },
   {
@@ -61,6 +68,7 @@ const SLIDES: readonly MobileSlide[] = [
     stampKey: "treeLake",
     spot: "mint",
     widths: [800, 1200],
+    aspect: 2 / 3,
     layout: "inset-left",
   },
   {
@@ -68,6 +76,7 @@ const SLIDES: readonly MobileSlide[] = [
     stampKey: "crocodile",
     spot: "rose",
     widths: [800, 1200],
+    aspect: 16 / 9,
     layout: "inset-right",
   },
 ];
@@ -118,6 +127,8 @@ export function PhotographyMobile() {
                 <img
                   src={`/photography/${slide.baseName}-1200w.jpg`}
                   alt={t(`slides.${slide.stampKey}.alt`)}
+                  width={slide.widths[1] ?? 1200}
+                  height={Math.round((slide.widths[1] ?? 1200) / slide.aspect)}
                   loading={i === 0 ? "eager" : "lazy"}
                   decoding="async"
                   className={`block h-auto w-full outline outline-[1.5px] outline-ink ${SPOT_SHADOW_CLASS[slide.spot]}`}
