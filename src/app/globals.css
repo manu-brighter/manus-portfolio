@@ -24,6 +24,12 @@
    * never use it for text content. See .claude/CLAUDE.md. */
   --color-ink-muted: rgba(10, 6, 8, 0.7);
   --color-ink-faint: rgba(10, 6, 8, 0.28);
+  /* Constant print-ink for text ON spot-color fills. Deliberately NOT
+   * overridden by any [data-sim-theme] block: spot fills stay
+   * mid-luminance in every theme, so their label must stay dark —
+   * theme-following --color-ink flips light in night mode and washed
+   * out against amber (caught on the Photography CTA). */
+  --color-ink-print: #0a0608;
 
   /* Spot colors — the 4 Riso inks, posterized in the fluid shader */
   --color-spot-rose: #ff6ba0;
@@ -641,7 +647,8 @@
     --tp-button-background-color-active: var(--color-spot-amber);
     --tp-button-background-color-focus: var(--color-spot-amber);
     --tp-button-background-color-hover: var(--color-spot-amber);
-    --tp-button-foreground-color: var(--color-ink);
+    /* ink-print: label on a spot fill must stay dark in every theme */
+    --tp-button-foreground-color: var(--color-ink-print);
 
     --tp-groove-foreground-color: var(--color-paper-line);
     /* var (not the rgba literal) so pane labels follow the sim theme —

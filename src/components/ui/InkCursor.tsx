@@ -241,16 +241,21 @@ export function InkCursor() {
 
   return (
     <>
+      {/* z-[10001]: above EVERYTHING incl. Nav (50), Loader (9999) and
+          InkWipeOverlay (10000) — the native cursor is hidden, so this
+          IS the cursor and must never disappear behind chrome.
+          pointer-events-none + multiply/screen blend keep it from
+          obscuring anything meaningfully. */}
       <canvas
         ref={canvasRef}
         aria-hidden="true"
         tabIndex={-1}
-        className="ink-cursor-layer pointer-events-none fixed top-0 left-0 z-30 hidden text-ink mix-blend-multiply md:block"
+        className="ink-cursor-layer pointer-events-none fixed top-0 left-0 z-[10001] hidden text-ink mix-blend-multiply md:block"
       />
       <div
         ref={dotRef}
         aria-hidden="true"
-        className="ink-cursor-layer pointer-events-none fixed top-0 left-0 z-30 hidden rounded-full bg-ink mix-blend-multiply md:block"
+        className="ink-cursor-layer pointer-events-none fixed top-0 left-0 z-[10001] hidden rounded-full bg-ink mix-blend-multiply md:block"
         style={{ width: DOT_SIZE_PX, height: DOT_SIZE_PX }}
       />
     </>
