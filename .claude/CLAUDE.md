@@ -215,11 +215,14 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 - **Tap-to-splat** reads touch at document level; taps on interactive UI
   (`a/button/input/label/[data-no-splat]`) are ignored; color is a random
   spot per tap.
-- **No side-swipe carousels.** All three were replaced by vertical flows in
-  the mobile wow-pass: ObjectGrid = responsive 2-col grid, Photography =
-  vertical editorial stack (`PhotographyMobile`), Case Study = stacked
-  stations (`CaseStudyMobileStations`). Don't add new horizontal swipers —
-  explicit user feedback ("zu viele Sideswiper").
+- **Side-swipe carousels: Case Study ONLY.** ObjectGrid (responsive 2-col
+  grid) and Photography (vertical editorial stack, `PhotographyMobile`)
+  were converted to vertical flows in the mobile wow-pass — explicit user
+  feedback ("zu viele Sideswiper"). The Case-Study
+  `CaseStudyMobileCarousel` deliberately KEEPS its side-swipe: the
+  horizontal movement IS the diorama metaphor (desk slides), mirroring
+  the Desktop horizontal-pin track — Manuel explicitly asked for it back
+  after a first cut removed it. Don't add further horizontal swipers.
 - **FadeIn on potentially-viewport-tall blocks needs a low `threshold`**
   (~0.15): IO `intersectionRatio` can never reach the default 0.35 when the
   element is taller than the viewport → entrance never fires.

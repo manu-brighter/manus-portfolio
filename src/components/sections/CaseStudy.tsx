@@ -29,12 +29,15 @@ import type {
   CaseStudyStory,
 } from "@/types/i18n-shapes";
 
-// Lazy-import the Mobile vertical station flow so the Desktop bundle
-// stays free of the mobile wiring.
-const CaseStudyMobileStations = dynamic(
+// Lazy-import the Mobile case-study carousel so the Desktop bundle
+// stays free of the swiper wiring. NOTE: this is the deliberate
+// exception to the mobile no-carousel rule — the side-swipe IS the
+// diorama metaphor (desk slides), mirroring the Desktop horizontal-pin
+// track. Photography + ObjectGrid stay vertical.
+const CaseStudyMobileCarousel = dynamic(
   () =>
-    import("@/components/case-study/CaseStudyMobileStations").then(
-      (m) => m.CaseStudyMobileStations,
+    import("@/components/case-study/CaseStudyMobileCarousel").then(
+      (m) => m.CaseStudyMobileCarousel,
     ),
   { ssr: false },
 );
@@ -204,13 +207,13 @@ export function CaseStudy() {
     </div>
   );
 
-  // Mobile: vertical station flow (the side-swipe carousel was retired
-  // in the mobile wow-pass). Desktop branch (Tablet + fine-pointer) is
-  // unchanged.
+  // Mobile: side-swipe diorama carousel (deliberately kept — see the
+  // dynamic-import note above). Desktop branch (Tablet + fine-pointer)
+  // is unchanged.
   if (isMobile) {
     return (
       <>
-        <CaseStudyMobileStations handleOpen={handleOpen} publicShots={publicShots} />
+        <CaseStudyMobileCarousel handleOpen={handleOpen} publicShots={publicShots} />
         <Lightbox />
       </>
     );
