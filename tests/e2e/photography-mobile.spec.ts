@@ -34,6 +34,9 @@ test.describe("Photography mobile stack", () => {
     await page.waitForLoadState("networkidle");
 
     const slides = page.locator('[data-testid="photo-slide"]');
+    // PhotographyMobile is a dynamic ssr:false chunk — `.all()` doesn't
+    // retry, so wait for the hydrated count before reading geometry.
+    await expect(slides).toHaveCount(5);
     const boxes = [];
     for (const slide of await slides.all()) {
       const box = await slide.boundingBox();
