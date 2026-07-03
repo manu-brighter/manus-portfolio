@@ -4,11 +4,11 @@ import { devices, expect, test } from "@playwright/test";
 /**
  * Mobile-Rework — full-page background fluid sim.
  *
- * On Mobile-phone layouts (coarse + viewport < 768) the global SceneProvider
- * mounts ONE fixed, full-viewport MobileBackgroundSim behind all content
- * (replacing the old per-section HeroMobileSim). This spec verifies:
+ * On coarse-pointer devices the global SceneProvider mounts ONE fixed,
+ * full-viewport MobileBackgroundSim behind all content. This spec verifies:
  *   - the page-global canvas mounts with data-testid="mobile-bg-sim"
- *   - the tablet <AmbientVideo> path does NOT mount on Mobile-phone
+ *   - no <video> fallback mounts (the AmbientVideo path is retired;
+ *     this is the regression net against reintroducing one)
  *   - a tap doesn't crash the orchestrator (touch read at document level)
  */
 
@@ -24,12 +24,12 @@ test.describe("Mobile background sim", () => {
     await expect(sim).toBeVisible({ timeout: 12000 });
   });
 
-  test("AmbientVideo NOT mounted on Mobile-phone layout", async ({ page }) => {
+  test("no <video> background fallback mounts (AmbientVideo retired)", async ({ page }) => {
     await page.goto("/de/");
     await page.waitForLoadState("networkidle");
 
-    // Mobile-phone (coarse + < 768) renders MobileBackgroundSim, not the
-    // tablet / coarse-desktop <AmbientVideo> path.
+    // All coarse-pointer devices run the live MobileBackgroundSim; the
+    // pre-recorded <video> loop was deleted in the mobile wow-pass.
     await expect(page.locator("video")).toHaveCount(0);
   });
 

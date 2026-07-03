@@ -126,7 +126,16 @@ export function Loader() {
     // pulse the ladder brightest-first (night ladders ascend dark ->
     // bright), ending on the pink band so the phase-5 flood stays
     // luminous instead of draining into wine-on-black.
-    const isNight = preset.theme === "night";
+    // Gate on the theme actually being APPLIED, not just persisted:
+    // SimThemeSync only sets data-sim-theme when a live sim runs
+    // (config && !reducedMotion). A user whose tier later degraded to
+    // static keeps "nachtdruck" in the store but gets a light page —
+    // the screen-blend night drop would be near-invisible on light
+    // paper. Reading the attribute is safe here: SimThemeSync is a
+    // sibling mounted BEFORE the Loader in the locale layout, so its
+    // effect has already run when this one fires.
+    const isNight =
+      preset.theme === "night" && document.documentElement.dataset.simTheme === "night";
     drop.style.mixBlendMode = isNight ? "screen" : "multiply";
     const pulseLadder = isNight
       ? [ladder[3], ladder[2], ladder[1], ladder[2]].map((c) => c ?? ladder[0])

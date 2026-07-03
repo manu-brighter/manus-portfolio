@@ -137,7 +137,12 @@ export function MobileBackgroundSim() {
       if (current.presetId === previous.presetId) return;
       const preset = getSimPreset(current.presetId);
       applySimPreset(orchestrator, preset, config);
-      firePresetBurst(orchestrator, preset, config.splatRadius);
+      // Same drained-guard as tap-to-splat: during the iOS drain window
+      // compute is gated via rafPausedRef, so a burst queued now would
+      // batch-release on reveal. The preset itself still applies.
+      if (!rafPausedRef.current) {
+        firePresetBurst(orchestrator, preset, config.splatRadius);
+      }
     });
 
     // Warmup splat off-screen — compiles shaders silently so the first

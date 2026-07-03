@@ -663,11 +663,17 @@
  * the ink stroke IS the cursor (explicit user decision; the head dot
  * hugs the pointer with near-zero lag as the click reference).
  * InkCursor sets the attribute only on fine-pointer, motion-enabled
- * sessions and removes it on cleanup. */
-html[data-ink-cursor],
-html[data-ink-cursor] * {
-  /* biome-ignore lint/complexity/noImportantStyles: must beat cursor-pointer utilities and form-control UA styles everywhere */
-  cursor: none !important;
+ * sessions and removes it on cleanup.
+ * Media-gated to Tailwind's `md` (48rem): the cursor layers are
+ * `hidden md:block`, so below md a fine-pointer user (half-snapped
+ * desktop window, docked DevTools) would otherwise lose the native
+ * cursor with NO replacement — a fully cursorless page. */
+@media (min-width: 48rem) {
+  html[data-ink-cursor],
+  html[data-ink-cursor] * {
+    /* biome-ignore lint/complexity/noImportantStyles: must beat cursor-pointer utilities and form-control UA styles everywhere */
+    cursor: none !important;
+  }
 }
 
 @layer components {

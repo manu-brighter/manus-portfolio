@@ -106,6 +106,13 @@ export function SimPresetSwitcher() {
       <div
         role="radiogroup"
         aria-label={t("label")}
+        // Any keydown re-arms the keyboard path: a tap on the ALREADY
+        // active preset fires no onChange, so pointerSelectRef would
+        // stay stale-true and misclassify the next arrow-key selection
+        // (skipping its focus restore).
+        onKeyDown={() => {
+          pointerSelectRef.current = false;
+        }}
         className={`${expanded ? "flex" : "hidden"} flex-row items-center gap-1 md:flex md:flex-col md:gap-3`}
       >
         {SIM_PRESETS.map((preset) => {
