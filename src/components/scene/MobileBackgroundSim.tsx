@@ -51,6 +51,8 @@ import { useSimPresetStore } from "@/lib/simPresetStore";
  * suspenders).
  */
 
+// NOTE: the drain/reveal timings below are iOS-cull-masking values, not
+// design-cadence tokens — deliberately NOT in lib/motion/tokens.ts.
 const SCROLL_DISTANCE_THRESHOLD = 24; // px of travel before draining (ignore jitter)
 const DRAIN_MS = 240; // fade-out on scroll-start (fast enough to beat the cull)
 const REVEAL_SETTLE_MS = 360; // hold at 0 after resume so the orchestrator re-settles unseen
@@ -208,6 +210,11 @@ export function MobileBackgroundSim() {
     };
     const onEnd = () => {
       if (onChrome || moved || performance.now() - startT > TAP_MAX_MS) return;
+      // iOS drain window: compute is gated via rafPausedRef (not
+      // orchestrator.pause(), so its paused-queue-drop never engages) —
+      // a splat queued now would batch-release on reveal as a visible
+      // artifact. Drop the tap instead; the canvas is invisible anyway.
+      if (rafPausedRef.current) return;
       const orchestrator = orchestratorRef.current;
       if (!orchestrator) return;
       const u = startX / window.innerWidth;

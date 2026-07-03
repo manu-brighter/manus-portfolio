@@ -68,13 +68,20 @@ export function ScrollProgress() {
   // stale element refs from the unmounted home tree (frozen dots).
   // biome-ignore lint/correctness/useExhaustiveDependencies(pathname): deliberate re-run trigger — home sections unmount/remount across client navigation
   useEffect(() => {
+    // Component renders null on Mobile-phone layouts (see below) —
+    // empty the section list too so the IO effect stays dormant
+    // instead of churning setActiveIndex on a null-rendering component.
+    if (isMobile) {
+      setSections([]);
+      return;
+    }
     const found: ActiveSection[] = [];
     for (const def of SECTION_DEFS) {
       const el = document.getElementById(def.id);
       if (el) found.push({ ...def, el });
     }
     setSections(found);
-  }, [pathname]);
+  }, [pathname, isMobile]);
 
   // IntersectionObserver for active section detection
   useEffect(() => {
@@ -109,16 +116,17 @@ export function ScrollProgress() {
     return () => observer.disconnect();
   }, [sections]);
 
-  // Scroll progress tracking via Lenis
+  // Scroll progress tracking via Lenis. Mobile-gated like discovery —
+  // no point re-rendering a null component on every scroll event.
   useEffect(() => {
-    if (!lenis) return;
+    if (!lenis || isMobile) return;
 
     const onScroll = () => {
       setFillProgress(lenis.progress);
     };
     lenis.on("scroll", onScroll);
     return () => lenis.off("scroll", onScroll);
-  }, [lenis]);
+  }, [lenis, isMobile]);
 
   // Animate active dot — GSAP durations set to 0 under reduced-motion
   // (component is hidden, but guard defensively).

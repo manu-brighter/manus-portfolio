@@ -170,7 +170,13 @@ export function SceneProvider({ children }: SceneProviderProps) {
         // behind all content. The scroll-drain masks the iOS fixed-WebGL
         // momentum-scroll cull. Gated on `canvasMounted` like Desktop so
         // the WebGL context compiles after the loader, not during it.
-        <MobileBackgroundSim />
+        // Same error boundary as Desktop: orchestrator.init() throws on
+        // shader-compile failure / missing EXT_color_buffer_float, and
+        // older mobile GPUs are the most likely cohort to hit exactly
+        // that — degrade to StaticFallback, not a route-level crash.
+        <SceneErrorBoundary fallback={<StaticFallback />}>
+          <MobileBackgroundSim />
+        </SceneErrorBoundary>
       ) : (
         <SceneErrorBoundary fallback={<StaticFallback />}>
           <SceneCanvas>
