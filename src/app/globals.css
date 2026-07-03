@@ -652,6 +652,17 @@
   }
 }
 
+/* While the ink cursor is active the native cursor is fully hidden —
+ * the ink stroke IS the cursor (explicit user decision; the head dot
+ * hugs the pointer with near-zero lag as the click reference).
+ * InkCursor sets the attribute only on fine-pointer, motion-enabled
+ * sessions and removes it on cleanup. */
+html[data-ink-cursor],
+html[data-ink-cursor] * {
+  /* biome-ignore lint/complexity/noImportantStyles: must beat cursor-pointer utilities and form-control UA styles everywhere */
+  cursor: none !important;
+}
+
 @layer components {
   /* View Transitions API: crossfade between locales. Browsers without
      support fall back to no animation (synchronous swap). */

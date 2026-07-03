@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLenis } from "@/hooks/useLenis";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { usePathname } from "@/i18n/navigation";
 import { SECTIONS } from "@/lib/content/sections";
 import { SPOT_CSS_VAR } from "@/lib/palette";
 
@@ -48,6 +49,7 @@ type ActiveSection = SectionDef & { el: HTMLElement };
 export function ScrollProgress() {
   const lenis = useLenis();
   const reducedMotion = useReducedMotion();
+  const pathname = usePathname();
   const t = useTranslations("scrollProgress");
   const navT = useTranslations("nav.items");
   const containerRef = useRef<HTMLElement>(null);
@@ -58,7 +60,11 @@ export function ScrollProgress() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [fillProgress, setFillProgress] = useState(0);
 
-  // Discover which sections exist in the DOM
+  // Discover which sections exist in the DOM. Re-runs on route change:
+  // the component lives in the locale layout and survives client
+  // navigation, so home -> playground -> home would otherwise keep
+  // stale element refs from the unmounted home tree (frozen dots).
+  // biome-ignore lint/correctness/useExhaustiveDependencies(pathname): deliberate re-run trigger — home sections unmount/remount across client navigation
   useEffect(() => {
     const found: ActiveSection[] = [];
     for (const def of SECTION_DEFS) {
@@ -66,7 +72,7 @@ export function ScrollProgress() {
       if (el) found.push({ ...def, el });
     }
     setSections(found);
-  }, []);
+  }, [pathname]);
 
   // IntersectionObserver for active section detection
   useEffect(() => {
@@ -146,6 +152,12 @@ export function ScrollProgress() {
 
   // Hidden under reduced-motion — native scrollbar is restored via CSS
   if (reducedMotion) return null;
+
+  // Playground experiment routes: fullscreen fixed-frame canvas, the
+  // section-dot strip carries no information and crowds the stage.
+  // (The component survives client navigation in the locale layout,
+  // so without this guard the home-page dots linger over experiments.)
+  if (pathname.startsWith("/playground/")) return null;
 
   // Don't render if no sections found
   if (sections.length < 1) return null;

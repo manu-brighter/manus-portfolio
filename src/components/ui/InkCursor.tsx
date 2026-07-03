@@ -8,30 +8,32 @@ import { capDPR } from "@/lib/gpu";
 import { subscribe } from "@/lib/raf";
 
 /**
- * InkCursor — an ink head dot with a continuous tapering trail.
+ * InkCursor — the cursor IS an ink stroke.
  *
- * The design thesis is "the cursor IS the force source"; this makes
- * that visible in the DOM layer too. The trail is a Canvas2D polyline
- * through the last ~350ms of (smoothed) pointer positions, stroked
- * with width and alpha tapering toward the tail — a clean single
- * brush stroke, not a chain of dots (v1 used staggered follower dots
- * and read as exactly that; user feedback killed it). At rest the
- * history collapses onto one point and the stroke vanishes.
+ * The native cursor is hidden site-wide while this is active
+ * (`html[data-ink-cursor] * { cursor: none }` in globals.css — user
+ * decision: only the ink cursor should be visible), replaced by a
+ * head dot that hugs the pointer tightly plus a continuous tapering
+ * trail.
  *
- * Color comes from the canvas' computed `color` (text-ink class), so
- * it follows the sim theme; the `.ink-cursor-layer` class flips
- * multiply -> screen blending in night mode (light ink would multiply
- * to black on dark paper).
+ * Trail rendering: a single FILLED variable-width polygon around the
+ * smoothed pointer history — per-point normals offset by half the
+ * tapered width, one `fill()` per frame. One fill means no
+ * overlapping segment caps, which is what made the v2 stroke-per-
+ * segment approach read as "dots connected by lines" (user feedback).
+ * Coordinates are canvas-rect-relative (not raw client coords), which
+ * kills the offset users saw when the fixed canvas didn't sit exactly
+ * at the viewport origin.
  *
- * The head dot stays a DOM element driven by gsap.quickTo: it swells
- * over interactive elements (ink spreading toward the affordance) and
- * pulses on press. Trail sampling rides the shared RAF (`subscribe`),
- * quickTo rides gsap.ticker — same frame, one clock.
+ * Color comes from the canvas' computed `color` (text-ink class) so
+ * it follows the sim theme; `.ink-cursor-layer` flips multiply ->
+ * screen blending in night mode (light ink would multiply to black).
  *
- * Not mounted on coarse pointers (no cursor to trail) or under
- * reduced motion. `pointer-events-none` + `aria-hidden` + z-30 (under
- * Nav z-50 / ScrollProgress z-40) — it can never intercept input or
- * cover focus rings.
+ * Trail sampling rides the shared RAF (`subscribe`), the head dot
+ * rides gsap.quickTo on gsap.ticker — same frame, one clock.
+ *
+ * Not mounted on coarse pointers or under reduced motion (both also
+ * skip the cursor-hiding attribute, so the native cursor stays).
  */
 
 const DOT_SIZE_PX = 10;
@@ -42,14 +44,18 @@ const HOVER_SCALE = 2.4;
 const HOVER_OPACITY = 0.35;
 const INTERACTIVE_SELECTOR = "a, button, label, input, textarea, select, [role='button']";
 
-/** Trail history length (samples at ~60Hz ≈ 350ms of movement). */
-const TRAIL_SAMPLES = 22;
-/** Max stroke width at the head end. */
-const TRAIL_WIDTH_PX = 7;
-/** Max stroke alpha at the head end. */
-const TRAIL_ALPHA = 0.45;
+/** Trail history length (samples at ~60Hz ≈ 400ms of movement). */
+const TRAIL_SAMPLES = 26;
+/** Stroke width at the head end (tapers to 0 at the tail). */
+const TRAIL_WIDTH_PX = 8;
+/** Fill alpha — single fill, so this is the exact on-screen alpha. */
+const TRAIL_ALPHA = 0.5;
 /** Pointer-chase smoothing factor per 16ms frame. */
-const CHASE = 0.32;
+const CHASE = 0.35;
+/** Head dot lag — near-instant since it replaces the native cursor. */
+const HEAD_LAG_S = 0.08;
+
+type Point = { x: number; y: number };
 
 export function InkCursor() {
   const reducedMotion = useReducedMotion();
@@ -59,8 +65,8 @@ export function InkCursor() {
 
   useEffect(() => {
     // Guard inside the effect (not only via the null render) so a
-    // mid-session preference flip re-runs cleanup and detaches the
-    // document listeners.
+    // mid-session preference flip re-runs cleanup, detaches the
+    // document listeners and restores the native cursor.
     if (reducedMotion || coarsePointer) return;
     const dot = dotRef.current;
     const canvas = canvasRef.current;
@@ -68,14 +74,19 @@ export function InkCursor() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    // Hide the native cursor while the ink cursor is alive.
+    document.documentElement.setAttribute("data-ink-cursor", "");
+
     // --- canvas sizing -------------------------------------------------
     const dpr = capDPR(1.5);
     const resize = () => {
       canvas.width = Math.floor(window.innerWidth * dpr);
       canvas.height = Math.floor(window.innerHeight * dpr);
+      // Explicit CSS size so backing-store scale is exactly `dpr`
+      // regardless of how inset-0 resolves.
+      canvas.style.width = `${window.innerWidth}px`;
+      canvas.style.height = `${window.innerHeight}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
     };
     resize();
     window.addEventListener("resize", resize);
@@ -89,8 +100,8 @@ export function InkCursor() {
       scale: 1,
       opacity: 0,
     });
-    const xTo = gsap.quickTo(dot, "x", { duration: 0.18, ease: "power3.out" });
-    const yTo = gsap.quickTo(dot, "y", { duration: 0.18, ease: "power3.out" });
+    const xTo = gsap.quickTo(dot, "x", { duration: HEAD_LAG_S, ease: "power2.out" });
+    const yTo = gsap.quickTo(dot, "y", { duration: HEAD_LAG_S, ease: "power2.out" });
 
     let shown = false;
     let overInteractive = false;
@@ -98,13 +109,16 @@ export function InkCursor() {
     const restOpacity = () => (overInteractive ? HOVER_OPACITY : 1);
 
     // --- trail state ---------------------------------------------------
-    const target = { x: -100, y: -100 };
-    const smooth = { x: -100, y: -100 };
-    const trail: { x: number; y: number }[] = [];
+    const target: Point = { x: -100, y: -100 };
+    const smooth: Point = { x: -100, y: -100 };
+    const trail: Point[] = [];
 
     const onMove = (event: PointerEvent) => {
-      target.x = event.clientX;
-      target.y = event.clientY;
+      // Rect-relative coordinates: immune to any offset between the
+      // fixed canvas box and the viewport origin.
+      const rect = canvas.getBoundingClientRect();
+      target.x = event.clientX - rect.left;
+      target.y = event.clientY - rect.top;
       if (!shown) {
         // First move: snap everything to position before fading in so
         // nothing streaks across from the parking spot.
@@ -112,11 +126,11 @@ export function InkCursor() {
         smooth.x = target.x;
         smooth.y = target.y;
         trail.length = 0;
-        gsap.set(dot, { x: target.x, y: target.y });
+        gsap.set(dot, { x: event.clientX, y: event.clientY });
         gsap.to(dot, { opacity: restOpacity(), duration: 0.3, ease: "power2.out" });
       }
-      xTo(target.x);
-      yTo(target.y);
+      xTo(event.clientX);
+      yTo(event.clientY);
     };
     // Swell + thin over anything pressable. pointerover bubbles from
     // the real target, so a closest() check per boundary-cross is
@@ -156,25 +170,51 @@ export function InkCursor() {
       smooth.y += (target.y - smooth.y) * k;
       trail.push({ x: smooth.x, y: smooth.y });
       if (trail.length > TRAIL_SAMPLES) trail.shift();
-      if (trail.length < 2) return;
 
-      // Computed color follows the theme (text-ink on the canvas);
-      // cheap enough to read per frame and immune to theme switches.
-      ctx.strokeStyle = getComputedStyle(canvas).color;
+      const n = trail.length;
+      if (n < 3) return;
 
-      // One segment per sample pair, width + alpha tapering toward
-      // the tail. Round caps overlap into a continuous brush stroke.
-      for (let i = 1; i < trail.length; i++) {
-        const prev = trail[i - 1] as { x: number; y: number };
-        const point = trail[i] as { x: number; y: number };
-        const progress = i / (trail.length - 1);
-        ctx.globalAlpha = TRAIL_ALPHA * progress;
-        ctx.lineWidth = Math.max(1, TRAIL_WIDTH_PX * progress);
-        ctx.beginPath();
-        ctx.moveTo(prev.x, prev.y);
-        ctx.lineTo(point.x, point.y);
-        ctx.stroke();
+      // Variable-width ribbon: offset each point along its local
+      // normal by half the tapered width, walk the left edge tail ->
+      // head, then the right edge head -> tail, single fill.
+      const left: Point[] = [];
+      const right: Point[] = [];
+      for (let i = 0; i < n; i++) {
+        // Safe: indices are clamped into 0..n-1
+        const point = trail[i] as Point;
+        const prev = trail[Math.max(0, i - 1)] as Point;
+        const next = trail[Math.min(n - 1, i + 1)] as Point;
+        let dx = next.x - prev.x;
+        let dy = next.y - prev.y;
+        const len = Math.hypot(dx, dy);
+        if (len < 0.0001) {
+          dx = 1;
+          dy = 0;
+        } else {
+          dx /= len;
+          dy /= len;
+        }
+        const t = i / (n - 1);
+        const half = (TRAIL_WIDTH_PX * t * t) / 2 + 0.2;
+        left.push({ x: point.x - dy * half, y: point.y + dx * half });
+        right.push({ x: point.x + dy * half, y: point.y - dx * half });
       }
+
+      ctx.fillStyle = getComputedStyle(canvas).color;
+      ctx.globalAlpha = TRAIL_ALPHA;
+      ctx.beginPath();
+      const start = left[0] as Point;
+      ctx.moveTo(start.x, start.y);
+      for (let i = 1; i < n; i++) {
+        const p = left[i] as Point;
+        ctx.lineTo(p.x, p.y);
+      }
+      for (let i = n - 1; i >= 0; i--) {
+        const p = right[i] as Point;
+        ctx.lineTo(p.x, p.y);
+      }
+      ctx.closePath();
+      ctx.fill();
       ctx.globalAlpha = 1;
     }, 40);
 
@@ -185,6 +225,7 @@ export function InkCursor() {
     document.documentElement.addEventListener("pointerleave", onLeave);
 
     return () => {
+      document.documentElement.removeAttribute("data-ink-cursor");
       unsubscribe();
       window.removeEventListener("resize", resize);
       document.removeEventListener("pointermove", onMove);
@@ -204,7 +245,7 @@ export function InkCursor() {
         ref={canvasRef}
         aria-hidden="true"
         tabIndex={-1}
-        className="ink-cursor-layer pointer-events-none fixed inset-0 z-30 hidden text-ink mix-blend-multiply md:block"
+        className="ink-cursor-layer pointer-events-none fixed top-0 left-0 z-30 hidden text-ink mix-blend-multiply md:block"
       />
       <div
         ref={dotRef}
