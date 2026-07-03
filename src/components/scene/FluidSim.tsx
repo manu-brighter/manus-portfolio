@@ -222,7 +222,14 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
   // Splats land in FluidOrchestrator's queue and are drained next step.
   useEffect(() => {
     return subscribeToSplats((req) => {
-      orchestratorRef.current?.injectSplat(req.x, req.y, req.color, req.dx ?? 0, req.dy ?? 0);
+      orchestratorRef.current?.injectSplat(
+        req.x,
+        req.y,
+        req.color,
+        req.dx ?? 0,
+        req.dy ?? 0,
+        req.radius,
+      );
     });
   }, []);
 

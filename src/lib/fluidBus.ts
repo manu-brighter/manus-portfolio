@@ -25,6 +25,10 @@ export type SplatRequest = {
   dx?: number;
   /** Velocity-y injected into the splat (default 0). */
   dy?: number;
+  /** Splat radius override (normalised, like TierConfig.splatRadius).
+   *  Large values (~1+) make a soft whole-canvas force field — pair
+   *  with color [0,0,0] for an invisible push on existing ink. */
+  radius?: number;
 };
 
 type Listener = (req: SplatRequest) => void;
