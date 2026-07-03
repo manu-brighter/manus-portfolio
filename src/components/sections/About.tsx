@@ -77,7 +77,6 @@ export function About() {
   // Mobile (drop "Anfangen" mint + "Antrieb" violet blocks + their
   // StampDividers). Spec: keep the strongest identity opener
   // (wer-ich-bin rose) + the loud-centered signature (ai-workflow amber).
-  // ObjectGrid switches to horizontal-strip variant.
   const isMobile = useMobileLayout();
 
   // Helpers — body prose lookup (stays verbatim from briefing).
@@ -223,7 +222,7 @@ export function About() {
       )}
 
       {/* 06 Object-Grid — horizontal-strip variant on Mobile */}
-      <ObjectGrid variant={isMobile ? "mobile-strip" : "grid"} />
+      <ObjectGrid />
     </section>
   );
 }

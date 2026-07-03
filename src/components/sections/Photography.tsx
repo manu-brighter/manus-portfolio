@@ -9,9 +9,9 @@ import { useLenis } from "@/hooks/useLenis";
 import { useMobileLayout } from "@/hooks/useMobileLayout";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
-// Mobile-Rework spec §4.6: Mobile-phone layout collapses 5 vertical slots
-// into a horizontal swiper. Lazy-imported so Desktop bundle stays free of
-// the swiper component + its own PhotoSwiperSim canvas wiring.
+// Mobile-phone layout renders a vertical editorial stack (the first
+// rework's horizontal swiper was retired in the mobile wow-pass).
+// Lazy-imported so the Desktop bundle stays free of the mobile variant.
 const PhotographyMobile = dynamic(
   () => import("@/components/sections/PhotographyMobile").then((m) => m.PhotographyMobile),
   { ssr: false },

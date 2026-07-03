@@ -29,12 +29,12 @@ import type {
   CaseStudyStory,
 } from "@/types/i18n-shapes";
 
-// Mobile-Rework: lazy-import the Mobile case-study carousel so the Desktop
-// bundle stays free of the swiper wiring.
-const CaseStudyMobileCarousel = dynamic(
+// Lazy-import the Mobile vertical station flow so the Desktop bundle
+// stays free of the mobile wiring.
+const CaseStudyMobileStations = dynamic(
   () =>
-    import("@/components/case-study/CaseStudyMobileCarousel").then(
-      (m) => m.CaseStudyMobileCarousel,
+    import("@/components/case-study/CaseStudyMobileStations").then(
+      (m) => m.CaseStudyMobileStations,
     ),
   { ssr: false },
 );
@@ -204,13 +204,13 @@ export function CaseStudy() {
     </div>
   );
 
-  // Mobile-Rework spec §4.5: vertical scrolly with per-station Sim
-  // transitions replaces the horizontal-pin Diorama. Desktop branch
-  // (Tablet + fine-pointer) is unchanged.
+  // Mobile: vertical station flow (the side-swipe carousel was retired
+  // in the mobile wow-pass). Desktop branch (Tablet + fine-pointer) is
+  // unchanged.
   if (isMobile) {
     return (
       <>
-        <CaseStudyMobileCarousel handleOpen={handleOpen} publicShots={publicShots} />
+        <CaseStudyMobileStations handleOpen={handleOpen} publicShots={publicShots} />
         <Lightbox />
       </>
     );
