@@ -139,6 +139,9 @@ export type FluidVisuals = {
   levels: number;
   outlineThreshold: number;
   grainStrength: number;
+  /** Sobel ink-pooling intensity: ~0.1 soft washes, 0.35 default
+   *  Riso settle, ~0.7 inky drawn contours. */
+  edgeStrength: number;
   paper: RGB;
   ink: RGB;
   /** Density color ladder low -> high, fed to the uSpotMint/Amber/
@@ -163,6 +166,7 @@ export const DEFAULT_FLUID_VISUALS: FluidVisuals = Object.freeze<FluidVisuals>({
   levels: 0,
   outlineThreshold: 0.15,
   grainStrength: 0.07,
+  edgeStrength: 0.35,
   paper: PAPER_COLOR,
   ink: INK_COLOR,
   ladder: [SPOT_RGB.mint, SPOT_RGB.amber, SPOT_RGB.rose, SPOT_RGB.violet],
@@ -901,6 +905,7 @@ export class FluidOrchestrator {
     this.setFloat(p, "uLevels", v.levels);
     this.setFloat(p, "uOutlineThreshold", v.outlineThreshold);
     this.setFloat(p, "uGrainStrength", v.grainStrength);
+    this.setFloat(p, "uEdgeStrength", v.edgeStrength);
     this.setFloat(p, "uTime", elapsed * 0.001);
 
     this.setVec3(p, "uPaperColor", v.paper[0], v.paper[1], v.paper[2]);

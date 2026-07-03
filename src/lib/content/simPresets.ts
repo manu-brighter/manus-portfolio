@@ -44,11 +44,14 @@ export type SimPreset = {
   /** Two spot colors for the switcher's two-tone dot (fills only). */
   swatch: readonly [SpotColor, SpotColor];
   /**
-   * Page-level theme coupling. "night" flips the DOM design tokens to
-   * the dark paper set (see `[data-sim-theme="night"]` in globals.css)
-   * so dark dye and dark text never fight — applied by SimThemeSync.
+   * Page-level theme coupling — applied by SimThemeSync as
+   * `<html data-sim-theme>`; token overrides live in globals.css.
+   * "night" flips to the dark paper set (dark dye and dark text must
+   * never fight); "warm"/"wash" are light-theme paper tints so every
+   * preset re-colors the page, not just the sim. Riso (undefined)
+   * keeps the canonical palette.
    */
-  theme?: "night";
+  theme?: "night" | "warm" | "wash";
   physics: SimPresetPhysics;
   visuals: Partial<FluidVisuals>;
 };
@@ -66,8 +69,15 @@ const MINT_TINT: RGB = [0.78, 0.94, 0.88]; // washed-out mint, near paper
 const ROSE_SOFT: RGB = [1.0, 0.62, 0.75]; // diluted rose
 const ROSE_DEEP: RGB = [0.85, 0.25, 0.45]; // saturated print rose
 const WINE: RGB = [0.45, 0.12, 0.28]; // dense over-inked band
-/** Night paper — mirrors `--color-paper` in the night token set. */
+// Sim paper MUST mirror the theme's `--color-paper` (globals.css) —
+// the canvas paints the page background fullscreen, and a mismatched
+// paper shows as a visible seam against DOM bg-paper surfaces.
+/** Night paper — `--color-paper` of `[data-sim-theme="night"]`. */
 const NIGHT_PAPER: RGB = [0.08, 0.06, 0.1];
+/** Warm paper (#f6e3cc) — `[data-sim-theme="warm"]` (Turbulenz). */
+const WARM_PAPER: RGB = [0.965, 0.89, 0.8];
+/** Wash paper (#e9efe8) — `[data-sim-theme="wash"]` (Aquarell). */
+const WASH_PAPER: RGB = [0.914, 0.937, 0.91];
 
 export const SIM_PRESETS: readonly SimPreset[] = [
   {
@@ -80,31 +90,32 @@ export const SIM_PRESETS: readonly SimPreset[] = [
     visuals: {},
   },
   {
-    // High-energy: long-lived velocity + raised vorticity confinement
-    // produce visible swirling structure. Tuned against screenshots:
-    // the first cut (dyeDis 0.94 / radius 0.65 / confinement 30) left
-    // only thin torn streaks -- dye died before the eddies could read
-    // and confinement amplified grid-scale noise. Full-size splats +
-    // longer-lived dye keep the swirls legible ("clean wild").
+    // High-energy, FINE-GRAINED: small hard splats + strong
+    // confinement + inky Sobel contours — deliberately far from
+    // Riso's broad soft blobs. The trap from the first cut was dye
+    // dying before the eddies could read (dyeDis 0.94); small splats
+    // stay legible as long as the dye lives (0.975) and deposits
+    // punchy (dyeScale 0.22).
     id: "turbulenz",
     i18nKey: "turbulenz",
     swatch: ["amber", "violet"],
+    theme: "warm",
     physics: {
       velocityDissipation: 0.99,
-      dyeDissipation: 0.965,
-      confinement: 20,
-      splatRadiusScale: 1.0,
+      dyeDissipation: 0.975,
+      confinement: 26,
+      splatRadiusScale: 0.55,
     },
     visuals: {
-      // Top band stays a readable deep violet — see contrast rule
-      // above. dyeScale kept moderate so the center doesn't saturate
-      // into one flat pool.
+      paper: WARM_PAPER,
+      // Top band stays a readable deep violet — see contrast rule.
       ladder: [SPOT_RGB.amber, SPOT_RGB.rose, SPOT_RGB.violet, VIOLET_DEEP],
-      velocityScale: 14,
-      dyeScale: 0.16,
+      velocityScale: 15,
+      dyeScale: 0.22,
       grainStrength: 0.06,
-      ambientTimeScale: 1.4,
-      ambientForceScale: 1.5,
+      edgeStrength: 0.7,
+      ambientTimeScale: 1.6,
+      ambientForceScale: 1.6,
     },
   },
   {
@@ -113,6 +124,7 @@ export const SIM_PRESETS: readonly SimPreset[] = [
     id: "aquarell",
     i18nKey: "aquarell",
     swatch: ["mint", "violet"],
+    theme: "wash",
     physics: {
       velocityDissipation: 0.95,
       dyeDissipation: 0.985,
@@ -120,10 +132,15 @@ export const SIM_PRESETS: readonly SimPreset[] = [
       splatRadiusScale: 1.7,
     },
     visuals: {
+      paper: WASH_PAPER,
       ladder: [MINT_TINT, SPOT_RGB.mint, SPOT_RGB.violet, ROSE_SOFT],
       velocityScale: 7,
       dyeScale: 0.09,
       grainStrength: 0.04,
+      // Near-zero edge darkening + wide outline threshold: washes
+      // blend without contour lines — true watercolor softness.
+      edgeStrength: 0.1,
+      outlineThreshold: 0.3,
       ambientTimeScale: 0.5,
       ambientForceScale: 0.7,
     },
@@ -153,6 +170,7 @@ export const SIM_PRESETS: readonly SimPreset[] = [
       levels: 4,
       dyeScale: 0.16,
       grainStrength: 0.09,
+      edgeStrength: 0.5,
     },
   },
 ];

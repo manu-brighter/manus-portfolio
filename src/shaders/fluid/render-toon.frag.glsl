@@ -12,6 +12,7 @@ uniform vec2 uTexelSize;
 uniform float uLevels;
 uniform float uOutlineThreshold;
 uniform float uGrainStrength;
+uniform float uEdgeStrength;
 uniform float uTime;
 
 uniform vec3 uPaperColor;
@@ -55,13 +56,15 @@ void main() {
 
   vec3 color = mapToSpotColor(band);
 
-  // Subtle Sobel edges — just a gentle ink-pooling darkening,
-  // not outlines. Edges feel like where Riso ink settles thicker.
+  // Sobel edges — ink-pooling darkening where dye gradients are
+  // steep. uEdgeStrength is a preset knob: ~0.1 reads as soft
+  // watercolor washes, 0.35 is the default Riso settle, ~0.7 turns
+  // the contours inky/drawn (Turbulenz).
   vec2 edgeTexel = uTexelSize * (1.0 + length(vec2(dFdx(vUv.x), dFdy(vUv.y))) * 100.0);
   float edge = sobelEdge(uDye, vUv, edgeTexel);
   float edgeMask = smoothstep(uOutlineThreshold * 0.5, uOutlineThreshold, edge / (density + 1.0));
   vec3 edgeTint = color * 0.85;
-  color = mix(color, edgeTint, edgeMask * 0.35);
+  color = mix(color, edgeTint, edgeMask * uEdgeStrength);
 
   // Blend to paper at low density
   color = mix(uPaperColor, color, smoothstep(0.0, 0.08, density));

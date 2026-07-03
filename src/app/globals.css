@@ -86,6 +86,25 @@
   --selection-fg: #140f1a;
 }
 
+/* Light-theme paper tints — every preset re-colors the page, not just
+ * the sim. Ink stays canonical (contrast unchanged, >13:1 on both). */
+
+/* "warm" — Turbulenz: sun-baked apricot paper */
+[data-sim-theme="warm"] {
+  --color-paper: #f6e3cc;
+  --color-paper-tint: #fdedd6;
+  --color-paper-shade: #ecd5b6;
+  --color-paper-line: #dcc19c;
+}
+
+/* "wash" — Aquarell: cool rinsed mint-grey paper */
+[data-sim-theme="wash"] {
+  --color-paper: #e9efe8;
+  --color-paper-tint: #f3f8f1;
+  --color-paper-shade: #dce6db;
+  --color-paper-line: #c3d4c2;
+}
+
 @media (min-width: 768px) {
   :root {
     --container-gutter: 2rem;
