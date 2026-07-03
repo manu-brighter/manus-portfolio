@@ -54,6 +54,14 @@ test.describe("ink-wipe transition — reduced-motion", () => {
   test("navigation completes, overlay canvas absent (no wipe)", async ({ page }) => {
     await page.goto("/de/");
 
+    // SSR ships the overlay markup (the server can't know the RM
+    // preference); the client drops it post-hydration. Wait for the
+    // loader overlay to unmount first — it detaches via the same
+    // post-hydration effect cascade, so it's a deterministic "React
+    // effects ran" marker. Without it the count assertion races
+    // hydration on slow CI runners (webkit shard under load).
+    await expect(page.getByTestId("loader-overlay")).toHaveCount(0, { timeout: 20_000 });
+
     // Under reduced-motion InkWipeOverlay does not mount (confirmed by
     // playground.spec.ts "reduced-motion: ink-wipe overlay is not mounted").
     await expect(page.locator('canvas[data-scene="ink-wipe"]')).toHaveCount(0);

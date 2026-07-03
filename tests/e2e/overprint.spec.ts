@@ -90,9 +90,12 @@ test.describe("overprint — reducedMotion: reduce", () => {
 
     // useReducedMotion's getServerSnapshot returns false (server can't
     // know the user's preference), so SSR markup includes the ghost
-    // layers and they live in the DOM during the brief window between
-    // hydration and the post-mount RM flip. Use auto-retrying matchers
-    // so the assertion waits for the client to drop the ghosts.
+    // layers and they live in the DOM until the post-hydration RM flip.
+    // Wait for the loader overlay to unmount first — it detaches via
+    // the same effect cascade, so it's a deterministic "hydration done"
+    // marker; the plain 5s matcher timeout raced hydration on slow CI
+    // runners (webkit shard under load).
+    await expect(page.getByTestId("loader-overlay")).toHaveCount(0, { timeout: 20_000 });
     await expect(h1.locator("[data-layer='rose']")).toHaveCount(0);
     await expect(h1.locator("[data-layer='mint']")).toHaveCount(0);
     await expect(h1.locator("[data-layer='ink']")).toHaveCount(0);
