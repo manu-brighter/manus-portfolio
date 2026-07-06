@@ -5,7 +5,6 @@ import { createProgram as linkProgram } from "@/lib/gl/createProgram";
 import type { TierConfig } from "@/lib/gpu";
 import { INK_COLOR, PAPER_COLOR, SPOT_RGB, type SpotColor } from "@/lib/palette";
 import noiseSrc from "@/shaders/common/noise.glsl";
-import posterizeSrc from "@/shaders/common/posterize.glsl";
 import quadVert from "@/shaders/common/quad.vert.glsl";
 import sobelSrc from "@/shaders/common/sobel.glsl";
 import advectFrag from "@/shaders/fluid/advect.frag.glsl";
@@ -14,7 +13,10 @@ import divergenceFrag from "@/shaders/fluid/divergence.frag.glsl";
 import gradientSubFrag from "@/shaders/fluid/gradient-subtract.frag.glsl";
 import injectDensityFrag from "@/shaders/fluid/inject-density.frag.glsl";
 import pressureFrag from "@/shaders/fluid/pressure.frag.glsl";
-import renderToonFrag from "@/shaders/fluid/render-toon.frag.glsl";
+import renderAquarellFrag from "@/shaders/fluid/render-aquarell.frag.glsl";
+import renderNachtdruckFrag from "@/shaders/fluid/render-nachtdruck.frag.glsl";
+import renderRisoFrag from "@/shaders/fluid/render-riso.frag.glsl";
+import renderTurbulenzFrag from "@/shaders/fluid/render-turbulenz.frag.glsl";
 import splatFrag from "@/shaders/fluid/splat.frag.glsl";
 import vorticityFrag from "@/shaders/fluid/vorticity.frag.glsl";
 
@@ -52,7 +54,13 @@ type Programs = {
   divergence: WebGLProgram;
   pressure: WebGLProgram;
   gradientSub: WebGLProgram;
-  renderToon: WebGLProgram;
+  // One genuinely distinct render shader per preset style — not one
+  // parametrized shader. All four compile at init (cheap, one-time)
+  // so a live preset switch is just a program swap in runRender().
+  renderRiso: WebGLProgram;
+  renderTurbulenz: WebGLProgram;
+  renderAquarell: WebGLProgram;
+  renderNachtdruck: WebGLProgram;
   injectDensity: WebGLProgram;
 };
 
@@ -120,27 +128,37 @@ const AMBIENT_PARAMS = {
 export type RGB = readonly [number, number, number];
 
 /**
+ * The four style-specific render shaders. Each is a genuinely
+ * different fragment shader, not a parameter set on one shader:
+ * riso = overprint plates with misregistration + ink bleed,
+ * turbulenz = screenprint comic (hard bands, halftone, ink contours),
+ * aquarell = wet watercolor (wide blur, granulation, wet-edge rims),
+ * nachtdruck = neon print (hard bands, additive glow, chroma fringes).
+ * Ids mirror `SimPresetId` today but stay a separate type — a future
+ * preset may reuse an existing style.
+ */
+export type FluidRenderStyle = "riso" | "turbulenz" | "aquarell" | "nachtdruck";
+
+/**
  * Look-side knobs of the sim — everything that shapes how the dye field
  * is *rendered* plus how strongly splats inject, as opposed to the
  * physics params in `TierConfig` (which stay tier-owned, see gpu.ts).
- * Pure JS state read every frame by runSplat()/runRenderToon()/the
+ * Pure JS state read every frame by runSplat()/runRender()/the
  * ambient rig — no GL resources involved, so overrides are live and
  * safe at any time via setVisuals().
  *
- * `DEFAULT_FLUID_VISUALS` reproduces the pre-preset hard-coded literals
- * exactly: an orchestrator that never calls setVisuals() renders
- * byte-identical to before the preset system existed. (`levels` was
- * historically fed as 4.0 but the uniform was dead in the shader; the
- * live default is 0 = soft ladder, matching the shipped look.)
+ * Some knobs are interpreted per style (documented on the field);
+ * a shader that doesn't declare a uniform simply ignores it (null
+ * location = no-op).
  */
 export type FluidVisuals = {
-  /** Density pre-quantization bands in render-toon. 0 = soft ladder
-   *  (default look); >0 = hard screen-printed separations. */
-  levels: number;
+  /** Which of the four render shaders draws the dye field. */
+  style: FluidRenderStyle;
   outlineThreshold: number;
   grainStrength: number;
-  /** Sobel ink-pooling intensity: ~0.1 soft washes, 0.35 default
-   *  Riso settle, ~0.7 inky drawn contours. */
+  /** Per-style intensity knob: riso ignores it, turbulenz = ink
+   *  contour-line strength, aquarell = wet-edge rim darkening,
+   *  nachtdruck = glow-halo gain. */
   edgeStrength: number;
   paper: RGB;
   ink: RGB;
@@ -151,8 +169,14 @@ export type FluidVisuals = {
   /** Multiplier on pointer/splat velocity injection. */
   velocityScale: number;
   /** How much dye a splat deposits (kept well below 1 so dye stays in
-   *  range and the toon shader's Sobel pass isn't overwhelmed). */
+   *  range and the render shaders' edge passes aren't overwhelmed). */
   dyeScale: number;
+  /** Splats emitted per pointer-move frame (>= 1). Above 1 the splats
+   *  scatter around the pointer (see splatScatter) — Turbulenz throws
+   *  a swarm of small droplets instead of one stroke. */
+  splatCount: number;
+  /** UV jitter radius for the multi-splat scatter (0 = all stack). */
+  splatScatter: number;
   /** Multiplier on AMBIENT_PARAMS.timeScale (rig wander speed). */
   ambientTimeScale: number;
   /** Multiplier on each ambient point's forceStrength. */
@@ -163,7 +187,7 @@ export type FluidVisuals = {
 // setVisuals() — an accidental in-place mutation would poison every
 // orchestrator plus the default itself.
 export const DEFAULT_FLUID_VISUALS: FluidVisuals = Object.freeze<FluidVisuals>({
-  levels: 0,
+  style: "riso",
   outlineThreshold: 0.15,
   grainStrength: 0.07,
   edgeStrength: 0.35,
@@ -172,6 +196,8 @@ export const DEFAULT_FLUID_VISUALS: FluidVisuals = Object.freeze<FluidVisuals>({
   ladder: [SPOT_RGB.mint, SPOT_RGB.amber, SPOT_RGB.rose, SPOT_RGB.violet],
   velocityScale: 10.0,
   dyeScale: 0.15,
+  splatCount: 1,
+  splatScatter: 0,
   ambientTimeScale: 1,
   ambientForceScale: 1,
 });
@@ -389,12 +415,6 @@ export class FluidOrchestrator {
     }
 
     // Compile all programs
-    const toonFrag = injectIncludes(renderToonFrag, {
-      noise: noiseSrc,
-      posterize: posterizeSrc,
-      sobel: sobelSrc,
-    });
-
     const programs: Programs = {
       splat: createProgram(gl, quadVert, splatFrag, "fluid.splat"),
       curl: createProgram(gl, quadVert, curlFrag, "fluid.curl"),
@@ -403,7 +423,30 @@ export class FluidOrchestrator {
       divergence: createProgram(gl, quadVert, divergenceFrag, "fluid.divergence"),
       pressure: createProgram(gl, quadVert, pressureFrag, "fluid.pressure"),
       gradientSub: createProgram(gl, quadVert, gradientSubFrag, "fluid.gradient-sub"),
-      renderToon: createProgram(gl, quadVert, toonFrag, "fluid.render-toon"),
+      renderRiso: createProgram(
+        gl,
+        quadVert,
+        injectIncludes(renderRisoFrag, { noise: noiseSrc }),
+        "fluid.render-riso",
+      ),
+      renderTurbulenz: createProgram(
+        gl,
+        quadVert,
+        injectIncludes(renderTurbulenzFrag, { noise: noiseSrc, sobel: sobelSrc }),
+        "fluid.render-turbulenz",
+      ),
+      renderAquarell: createProgram(
+        gl,
+        quadVert,
+        injectIncludes(renderAquarellFrag, { noise: noiseSrc }),
+        "fluid.render-aquarell",
+      ),
+      renderNachtdruck: createProgram(
+        gl,
+        quadVert,
+        injectIncludes(renderNachtdruckFrag, { noise: noiseSrc }),
+        "fluid.render-nachtdruck",
+      ),
       injectDensity: createProgram(gl, quadVert, injectDensityFrag, "fluid.inject-density"),
     };
 
@@ -541,7 +584,7 @@ export class FluidOrchestrator {
 
   /**
    * Live-tunable look overrides — the preset-facing sibling of
-   * setParams(). Pure JS state read by runSplat()/runRenderToon()/the
+   * setParams(). Pure JS state read by runSplat()/runRender()/the
    * ambient rig on the next frame; no GL resources touched, so unlike
    * setParams() this is safe to call before init().
    */
@@ -895,14 +938,35 @@ export class FluidOrchestrator {
     state.velocity.swap();
   }
 
-  private runRenderToon(elapsed: number): void {
+  /** The render program for the active visual style. Exhaustive switch
+   *  keeps TS honest when a fifth style is added. */
+  private renderProgram(state: GLState): WebGLProgram {
+    switch (this.visuals.style) {
+      case "turbulenz":
+        return state.programs.renderTurbulenz;
+      case "aquarell":
+        return state.programs.renderAquarell;
+      case "nachtdruck":
+        return state.programs.renderNachtdruck;
+      case "riso":
+        return state.programs.renderRiso;
+    }
+  }
+
+  private runRender(elapsed: number): void {
     const state = this.requireState();
-    const p = state.programs.renderToon;
+    const p = this.renderProgram(state);
     this.activateProgram(p);
     this.bindTexture(p, "uDye", state.dye.read.texture, 0);
     this.setVec2(p, "uTexelSize", 1.0 / this.canvasWidth, 1.0 / this.canvasHeight);
+    // Sim-grid texel for passes that step the dye texture (Sobel in
+    // render-turbulenz) — canvas-texel steps starve at high viewport
+    // resolutions because the dye FBO is sim-resolution.
+    this.setVec2(p, "uSimTexel", 1.0 / this.simWidth, 1.0 / this.simHeight);
+    // Uniforms a style's shader doesn't declare resolve to a null
+    // location — setting them is a spec-defined no-op, so one uniform
+    // pass serves all four programs.
     const v = this.visuals;
-    this.setFloat(p, "uLevels", v.levels);
     this.setFloat(p, "uOutlineThreshold", v.outlineThreshold);
     this.setFloat(p, "uGrainStrength", v.grainStrength);
     this.setFloat(p, "uEdgeStrength", v.edgeStrength);
@@ -977,16 +1041,16 @@ export class FluidOrchestrator {
 
     // Pre-warmup gate: while !started, skip all expensive sim passes
     // (curl + vorticity + 2 advects + divergence + N-iter pressure +
-    // gradient-subtract) and only paint render-toon so the canvas shows
-    // paper + grain instead of WebGL's opaque-black default-clear (the
-    // R3F Canvas is `alpha: false`). Splat queue drains on the first
-    // started step so any buffered Work-card clicks during the loader
-    // don't dump as a glitch when ambient kicks in.
+    // gradient-subtract) and only paint the render pass so the canvas
+    // shows paper + grain instead of WebGL's opaque-black default-clear
+    // (the R3F Canvas is `alpha: false`). Splat queue drains on the
+    // first started step so any buffered Work-card clicks during the
+    // loader don't dump as a glitch when ambient kicks in.
     if (!this.started) {
       this.pendingSplats.length = 0;
       gl.bindVertexArray(state.emptyVAO);
       gl.disable(gl.BLEND);
-      this.runRenderToon(elapsed);
+      this.runRender(elapsed);
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
       gl.bindVertexArray(null);
       return;
@@ -1030,10 +1094,19 @@ export class FluidOrchestrator {
     if (runSim) {
       // Splat from pointer (hero default; studio mode disables this and
       // drives splats manually via injectSplat() so click-burst and
-      // drag-trail can have distinct behaviour).
+      // drag-trail can have distinct behaviour). splatCount > 1 throws
+      // a scattered swarm per frame: position AND direction jitter,
+      // otherwise N splats read as N parallel copies of one stroke.
       if (this.pointerSplatEnabled && (pointer.moved || pointer.down)) {
-        const color = this.splatColorOverride ?? this.nextSplatColor();
-        this.runSplat(pointer.x, pointer.y, pointer.dx, pointer.dy, color);
+        const { splatCount, splatScatter } = this.visuals;
+        for (let i = 0; i < splatCount; i++) {
+          const color = this.splatColorOverride ?? this.nextSplatColor();
+          const jx = (Math.random() - 0.5) * 2 * splatScatter;
+          const jy = (Math.random() - 0.5) * 2 * splatScatter;
+          const jdx = pointer.dx + (Math.random() - 0.5) * splatScatter * 0.8;
+          const jdy = pointer.dy + (Math.random() - 0.5) * splatScatter * 0.8;
+          this.runSplat(pointer.x + jx, pointer.y + jy, jdx, jdy, color);
+        }
       }
 
       // Drain external splats queued via injectSplat() — Work-card click
@@ -1106,8 +1179,8 @@ export class FluidOrchestrator {
       this.runAdvect(state.dye, state.config.dyeDissipation, dt);
     }
 
-    // Render-toon always runs (even at half-rate)
-    this.runRenderToon(elapsed);
+    // The render pass always runs (even at half-rate)
+    this.runRender(elapsed);
 
     // Restore GL state for R3F
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);

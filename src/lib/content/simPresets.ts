@@ -81,8 +81,9 @@ const WASH_PAPER: RGB = [0.914, 0.937, 0.91];
 
 export const SIM_PRESETS: readonly SimPreset[] = [
   {
-    // Today's shipped look, verbatim — DEFAULT_FLUID_VISUALS + tier
-    // baseline physics. Empty overrides keep it byte-identical.
+    // Overprint-plate riso (render-riso.frag.glsl): four misregistered
+    // drum passes with ink bleed + needle speckle. Style comes from
+    // DEFAULT_FLUID_VISUALS ("riso"); physics stays tier baseline.
     id: "riso",
     i18nKey: "riso",
     swatch: ["mint", "rose"],
@@ -90,12 +91,12 @@ export const SIM_PRESETS: readonly SimPreset[] = [
     visuals: {},
   },
   {
-    // High-energy, FINE-GRAINED: small hard splats + strong
-    // confinement + inky Sobel contours — deliberately far from
-    // Riso's broad soft blobs. The trap from the first cut was dye
-    // dying before the eddies could read (dyeDis 0.94); small splats
-    // stay legible as long as the dye lives (0.975) and deposits
-    // punchy (dyeScale 0.22).
+    // Screenprint comic (render-turbulenz.frag.glsl): hard bands,
+    // halftone ramps, true ink contour lines. Feel-side it throws a
+    // SWARM — 7 tiny scattered droplets per pointer frame instead of
+    // one stroke (splatCount/splatScatter), radius well below every
+    // other preset. dye/velocityScale are per-droplet, hence far
+    // lower than the old single-splat 0.22/15.
     id: "turbulenz",
     i18nKey: "turbulenz",
     swatch: ["amber", "violet"],
@@ -104,23 +105,29 @@ export const SIM_PRESETS: readonly SimPreset[] = [
       velocityDissipation: 0.99,
       dyeDissipation: 0.975,
       confinement: 26,
-      splatRadiusScale: 0.55,
+      splatRadiusScale: 0.3,
     },
     visuals: {
+      style: "turbulenz",
       paper: WARM_PAPER,
       // Top band stays a readable deep violet — see contrast rule.
       ladder: [SPOT_RGB.amber, SPOT_RGB.rose, SPOT_RGB.violet, VIOLET_DEEP],
-      velocityScale: 15,
-      dyeScale: 0.22,
-      grainStrength: 0.06,
+      velocityScale: 8,
+      dyeScale: 0.08,
+      splatCount: 7,
+      splatScatter: 0.035,
+      grainStrength: 0.07,
+      // Ink contour-line strength (per-style meaning of edgeStrength).
       edgeStrength: 0.7,
       ambientTimeScale: 1.6,
       ambientForceScale: 1.6,
     },
   },
   {
-    // Calm watercolor: velocity dies quickly but dye lingers, broad
-    // soft blooms, barely-there grain, slow gentle ambient drift.
+    // Wet watercolor (render-aquarell.frag.glsl): the dye field is
+    // read through a wide blur with granulation and wet-edge rims —
+    // by far the softest of the four styles. Single HUGE blooms
+    // (radius 2.6x tier baseline), velocity dies fast, dye lingers.
     id: "aquarell",
     i18nKey: "aquarell",
     swatch: ["mint", "violet"],
@@ -129,28 +136,27 @@ export const SIM_PRESETS: readonly SimPreset[] = [
       velocityDissipation: 0.95,
       dyeDissipation: 0.985,
       confinement: 4,
-      splatRadiusScale: 1.7,
+      splatRadiusScale: 2.6,
     },
     visuals: {
+      style: "aquarell",
       paper: WASH_PAPER,
       ladder: [MINT_TINT, SPOT_RGB.mint, SPOT_RGB.violet, ROSE_SOFT],
       velocityScale: 7,
-      dyeScale: 0.09,
+      dyeScale: 0.08,
       grainStrength: 0.04,
-      // Near-zero edge darkening + wide outline threshold: washes
-      // blend without contour lines — true watercolor softness.
-      edgeStrength: 0.1,
-      outlineThreshold: 0.3,
+      // Wet-edge rim darkening (per-style meaning of edgeStrength).
+      edgeStrength: 0.3,
       ambientTimeScale: 0.5,
       ambientForceScale: 0.7,
     },
   },
   {
-    // Night mode: the page flips to the dark token set (theme:
-    // "night" -> SimThemeSync), the sim paints near-black paper and
-    // a ladder that BRIGHTENS with density — posterized neon
-    // screen-print glowing out of the dark. Dark dye under dark text
-    // was unreadable (screenshot-verified), hence the full theme
+    // Neon print (render-nachtdruck.frag.glsl): the page flips to the
+    // dark token set (theme: "night" -> SimThemeSync), the sim paints
+    // near-black paper with hard ascending-brightness bands, additive
+    // glow halos and chromatic misreg fringes. Dark dye under dark
+    // text was unreadable (screenshot-verified), hence the full theme
     // flip instead of a dark-ink-on-light-paper compromise.
     id: "nachtdruck",
     i18nKey: "nachtdruck",
@@ -162,15 +168,16 @@ export const SIM_PRESETS: readonly SimPreset[] = [
       splatRadiusScale: 1.1,
     },
     visuals: {
+      style: "nachtdruck",
       paper: NIGHT_PAPER,
       // Ascending brightness — high density GLOWS out of the dark.
       // Top band slightly deeper than spot violet so the light hero
       // text keeps reading over saturated pools.
       ladder: [WINE, VIOLET_DEEP, ROSE_DEEP, [0.65, 0.5, 0.95]],
-      levels: 4,
       dyeScale: 0.16,
       grainStrength: 0.09,
-      edgeStrength: 0.5,
+      // Glow-halo gain (per-style meaning of edgeStrength).
+      edgeStrength: 0.6,
     },
   },
 ];
