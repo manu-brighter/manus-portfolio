@@ -4,10 +4,17 @@ import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { useScene } from "@/components/scene/SceneProvider";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { getSimPreset, SIM_PRESETS } from "@/lib/content/simPresets";
+import { getSimPreset, SIM_PRESETS, type SimPreset } from "@/lib/content/simPresets";
 import { isLoaderComplete, subscribeToLoaderComplete } from "@/lib/loaderSession";
 import { SPOT_HEX } from "@/lib/palette";
 import { useSimPresetStore } from "@/lib/simPresetStore";
+
+/** Two-tone dot fill. `swatchHex` (Wave's blues) wins over the
+ *  canonical spot pair — spot colors as fills only, decorative. */
+function swatchGradient(preset: SimPreset): string {
+  const [c0, c1] = preset.swatchHex ?? [SPOT_HEX[preset.swatch[0]], SPOT_HEX[preset.swatch[1]]];
+  return `linear-gradient(135deg, ${c0} 50%, ${c1} 50%)`;
+}
 
 /**
  * Ink Character Switcher — user-facing sim preset selection.
@@ -27,12 +34,17 @@ import { useSimPresetStore } from "@/lib/simPresetStore";
  * (`data-no-splat` keeps pill clicks from splatting the experiment
  * canvas underneath). Only StaticFallback stays on the default look.
  *
- * Layout is breakpoint-adaptive: below md a COLLAPSIBLE pill in the
- * bottom-RIGHT corner — at rest a single active-swatch toggle button
- * (the 4-dot row eats real phone estate), tap to expand the row
- * leftwards, selection re-collapses; >=44px touch targets throughout
- * (the name flag is hover/focus-only, so it stays Desktop-only).
- * From md up the original always-open vertical dot pill bottom-left.
+ * Layout is breakpoint-adaptive and collapsible on BOTH sides of md:
+ * below md a tap-to-expand pill in the bottom-RIGHT corner — at rest
+ * a single active-swatch toggle button (the dot row eats real phone
+ * estate), tap to expand leftwards, selection re-collapses; >=44px
+ * touch targets throughout (the name flag is hover/focus-only, so it
+ * stays Desktop-only). From md up a vertical pill bottom-left that
+ * rests as the active dot alone and expands upward on :hover OR
+ * :focus-within — the focus trigger is what keeps the native-radio
+ * arrow-key pattern working: the collapsed dots are h-0 (NOT
+ * display:none), so their sr-only inputs stay focusable, and focus
+ * expands the pill before the user can notice.
  *
  * A11y: radiogroup pattern with roving tabindex + arrow keys.
  * Accessible names come from sr-only children (never `aria-label` on
@@ -97,7 +109,7 @@ export function SimPresetSwitcher() {
   return (
     <div
       data-no-splat
-      className={`fixed right-4 bottom-4 z-40 flex flex-row items-center gap-1 rounded-full border-2 border-paper-line bg-paper/90 px-1 py-1 backdrop-blur-sm transition-opacity duration-700 md:right-auto md:bottom-5 md:left-5 md:flex-col md:gap-3 md:px-2 md:py-3 ${
+      className={`group/pill fixed right-4 bottom-4 z-40 flex flex-row items-center gap-1 rounded-full border-2 border-paper-line bg-paper/90 px-1 py-1 backdrop-blur-sm transition-opacity duration-700 md:right-auto md:bottom-5 md:left-5 md:flex-col md:gap-0 md:px-2 md:py-2 ${
         // `invisible` keeps the not-yet-appeared pill out of the tab
         // order too (visibility transitions cleanly alongside opacity).
         visible ? "visible opacity-100" : "pointer-events-none invisible opacity-0"
@@ -113,7 +125,7 @@ export function SimPresetSwitcher() {
         onKeyDown={() => {
           pointerSelectRef.current = false;
         }}
-        className={`${expanded ? "flex" : "hidden"} flex-row items-center gap-1 md:flex md:flex-col md:gap-3`}
+        className={`${expanded ? "flex" : "hidden"} flex-row items-center gap-1 md:flex md:flex-col md:gap-0`}
       >
         {SIM_PRESETS.map((preset) => {
           const active = preset.id === presetId;
@@ -128,7 +140,14 @@ export function SimPresetSwitcher() {
               onPointerDown={() => {
                 pointerSelectRef.current = true;
               }}
-              className="group relative flex size-11 cursor-pointer items-center justify-center [-webkit-tap-highlight-color:transparent] md:size-7"
+              // Desktop collapse: non-active dots rest at h-0 and fade
+              // in when the pill is hovered or holds focus. Heights are
+              // explicit (h-0 <-> h-10) so the transition animates.
+              className={`group relative flex size-11 cursor-pointer items-center justify-center transition-[height,opacity] duration-300 [-webkit-tap-highlight-color:transparent] md:w-7 ${
+                active
+                  ? "md:h-10"
+                  : "md:h-0 md:overflow-hidden md:opacity-0 md:group-focus-within/pill:h-10 md:group-focus-within/pill:overflow-visible md:group-focus-within/pill:opacity-100 md:group-hover/pill:h-10 md:group-hover/pill:overflow-visible md:group-hover/pill:opacity-100"
+              }`}
             >
               <input
                 type="radio"
@@ -166,7 +185,7 @@ export function SimPresetSwitcher() {
                 read as a huge circle — the visible ring hugs the dot. */}
               <span
                 aria-hidden="true"
-                className={`absolute inset-2 rounded-full border-2 transition-[border-color,transform] duration-300 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-(--focus-ring) md:inset-0 ${
+                className={`absolute inset-2 size-7 rounded-full border-2 transition-[border-color,transform] duration-300 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-(--focus-ring) md:inset-auto ${
                   active ? "scale-100 border-ink" : "scale-75 border-transparent"
                 }`}
               />
@@ -176,11 +195,7 @@ export function SimPresetSwitcher() {
                 className={`size-3.5 rounded-full transition-transform duration-300 ${
                   active ? "scale-110" : "scale-100 opacity-70"
                 }`}
-                style={{
-                  background: `linear-gradient(135deg, ${SPOT_HEX[preset.swatch[0]]} 50%, ${
-                    SPOT_HEX[preset.swatch[1]]
-                  } 50%)`,
-                }}
+                style={{ background: swatchGradient(preset) }}
               />
               {/* Hover/focus name flag — ink on paper, decorative only
                 (the sr-only text above carries the accessible name).
@@ -218,11 +233,7 @@ export function SimPresetSwitcher() {
         <span
           aria-hidden="true"
           className="size-3.5 rounded-full"
-          style={{
-            background: `linear-gradient(135deg, ${SPOT_HEX[activePreset.swatch[0]]} 50%, ${
-              SPOT_HEX[activePreset.swatch[1]]
-            } 50%)`,
-          }}
+          style={{ background: swatchGradient(activePreset) }}
         />
       </button>
     </div>
