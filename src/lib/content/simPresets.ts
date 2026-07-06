@@ -22,7 +22,7 @@ import { SPOT_RGB, type SpotColor } from "@/lib/palette";
  * `@/lib/content/playground.ts`.
  */
 
-export type SimPresetId = "riso" | "turbulenz" | "aquarell" | "nachtdruck";
+export type SimPresetId = "riso" | "wave" | "turbulenz" | "aquarell" | "nachtdruck";
 
 export type SimPresetPhysics = {
   velocityDissipation?: number;
@@ -44,14 +44,21 @@ export type SimPreset = {
   /** Two spot colors for the switcher's two-tone dot (fills only). */
   swatch: readonly [SpotColor, SpotColor];
   /**
+   * Custom dot colors for the switcher when the preset's character
+   * sits outside the four canonical spots (Wave is blue — no blue
+   * spot exists). Fills only, decorative. Overrides `swatch`.
+   */
+  swatchHex?: readonly [string, string];
+  /**
    * Page-level theme coupling — applied by SimThemeSync as
    * `<html data-sim-theme>`; token overrides live in globals.css.
    * "night" flips to the dark paper set (dark dye and dark text must
-   * never fight); "warm"/"wash" are light-theme paper tints so every
+   * never fight); "warm"/"wash" are light-theme paper tints; "wave"
+   * re-inks the whole page cool blue (paper AND ink family) so every
    * preset re-colors the page, not just the sim. Riso (undefined)
    * keeps the canonical palette.
    */
-  theme?: "night" | "warm" | "wash";
+  theme?: "night" | "warm" | "wash" | "wave";
   physics: SimPresetPhysics;
   visuals: Partial<FluidVisuals>;
 };
@@ -78,17 +85,42 @@ const NIGHT_PAPER: RGB = [0.08, 0.06, 0.1];
 const WARM_PAPER: RGB = [0.965, 0.89, 0.8];
 /** Wash paper (#e9efe8) — `[data-sim-theme="wash"]` (Aquarell). */
 const WASH_PAPER: RGB = [0.914, 0.937, 0.91];
+/** Wave paper (#e6edf4) — `[data-sim-theme="wave"]`. */
+const WAVE_PAPER: RGB = [0.902, 0.929, 0.957];
+// Wave plate inks (multiply-overprint transmittances, low -> high).
+const WAVE_SKY: RGB = [0.55, 0.83, 0.94]; // pale sky-cyan
+const WAVE_ULTRA: RGB = [0.3, 0.45, 0.9]; // ultramarine
 
 export const SIM_PRESETS: readonly SimPreset[] = [
   {
-    // Overprint-plate riso (render-riso.frag.glsl): four misregistered
-    // drum passes with ink bleed + needle speckle. Style comes from
-    // DEFAULT_FLUID_VISUALS ("riso"); physics stays tier baseline.
+    // The original shipped look (render-riso.frag.glsl): soft
+    // overlapping ladder + Sobel ink pooling. Deliberately the
+    // quietest of the five — it's the default under the hero text.
+    // The louder overprint rework moved to Wave.
     id: "riso",
     i18nKey: "riso",
     swatch: ["mint", "rose"],
     physics: {},
     visuals: {},
+  },
+  {
+    // Overprint-plate print (render-wave.frag.glsl): four
+    // misregistered drum passes with ink bleed + needle speckle, in a
+    // cool blue plate ladder. Full page theme — cool blue-white paper
+    // AND blue-black ink family (globals.css "wave" block).
+    id: "wave",
+    i18nKey: "wave",
+    swatch: ["mint", "violet"],
+    swatchHex: ["#7cc4e8", "#3b5bd9"],
+    theme: "wave",
+    physics: {},
+    visuals: {
+      style: "wave",
+      paper: WAVE_PAPER,
+      ladder: [WAVE_SKY, SPOT_RGB.mint, WAVE_ULTRA, SPOT_RGB.violet],
+      ambientPointCount: 6,
+      ambientChurn: 0.7,
+    },
   },
   {
     // Screenprint comic (render-turbulenz.frag.glsl): hard bands,
@@ -119,8 +151,14 @@ export const SIM_PRESETS: readonly SimPreset[] = [
       grainStrength: 0.07,
       // Ink contour-line strength (per-style meaning of edgeStrength).
       edgeStrength: 0.7,
+      // The swarm persists while idle: 8 ambient points with full
+      // spawn/despawn churn (~5-8 alive at any moment). Force scale
+      // dropped from the 3-point era's 1.6 — 8 sources at 1.6 over-
+      // energize the field.
+      ambientPointCount: 8,
+      ambientChurn: 1,
       ambientTimeScale: 1.6,
-      ambientForceScale: 1.6,
+      ambientForceScale: 1.3,
     },
   },
   {
@@ -139,14 +177,14 @@ export const SIM_PRESETS: readonly SimPreset[] = [
       // dry out while the huge blooms spread.
       dyeDissipation: 0.978,
       confinement: 4,
-      splatRadiusScale: 2.6,
+      splatRadiusScale: 4.5,
     },
     visuals: {
       style: "aquarell",
       paper: WASH_PAPER,
       ladder: [MINT_TINT, SPOT_RGB.mint, SPOT_RGB.violet, ROSE_SOFT],
       velocityScale: 7,
-      dyeScale: 0.05,
+      dyeScale: 0.045,
       grainStrength: 0.04,
       // Wet-edge rim darkening (per-style meaning of edgeStrength).
       edgeStrength: 0.3,
@@ -181,6 +219,9 @@ export const SIM_PRESETS: readonly SimPreset[] = [
       grainStrength: 0.09,
       // Glow-halo gain (per-style meaning of edgeStrength).
       edgeStrength: 0.85,
+      // Neon terraces breathe: 6 points, most cycling in and out.
+      ambientPointCount: 6,
+      ambientChurn: 0.8,
     },
   },
 ];

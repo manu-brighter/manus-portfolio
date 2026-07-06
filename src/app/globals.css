@@ -111,6 +111,24 @@
   --color-paper-line: #c3d4c2;
 }
 
+/* "wave" — Overprint-plate print: unlike warm/wash this re-inks the
+ * whole page, not just the paper — cool print-shop blue-white stock
+ * with a blue-black ink family, so switching reads as a full theme.
+ * Contrast: ink #101a2e on paper #e6edf4 ≈ 14:1; muted at 0.72 ≈ 9:1.
+ * TRAP: no `color-scheme` here (LightningCSS drops the whole rule —
+ * see the night block). */
+[data-sim-theme="wave"] {
+  --color-paper: #e6edf4;
+  --color-paper-tint: #f0f5fa;
+  --color-paper-shade: #d8e2ec;
+  --color-paper-line: #b7c8da;
+
+  --color-ink: #101a2e;
+  --color-ink-soft: #1c2a44;
+  --color-ink-muted: rgba(16, 26, 46, 0.72);
+  --color-ink-faint: rgba(16, 26, 46, 0.28);
+}
+
 /* Ink-cursor accent — dot + trail follow the active sim theme with a
  * high-contrast accent instead of plain ink. Riso (no data-sim-theme)
  * stays canonical ink. Decorative, not text: picked for visibility on
@@ -124,6 +142,9 @@
 }
 [data-sim-theme="wash"] {
   --color-ink-cursor: #0e5c49; /* deep pine teal on mint-grey paper */
+}
+[data-sim-theme="wave"] {
+  --color-ink-cursor: #1f4fd0; /* ultramarine on blue-white paper */
 }
 [data-sim-theme="night"] {
   --color-ink-cursor: #ff9fc8; /* neon rose — screen-blended, glows */
