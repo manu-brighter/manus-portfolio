@@ -169,11 +169,35 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 - **4 user-switchable presets** (riso/turbulenz/aquarell/nachtdruck) defined in
   `src/lib/content/simPresets.ts`; persisted selection in
   `src/lib/simPresetStore.ts` (zustand + localStorage `manus-sim-preset`).
+- **One render shader per preset** (theme-differentiation pass): riso =
+  overprint ring-band plates + misreg seams + ink bleed, turbulenz =
+  screenprint comic (hard bands, halftone, ink contour lines), aquarell =
+  wet blur + granulation + wet-edge rims, nachtdruck = neon terraces +
+  additive glow + chroma fringes. All four compile at `init()`; selection
+  via `FluidVisuals.style` (exhaustive switch in `renderProgram()`).
+  `render-toon.frag.glsl` is retired. Blur hierarchy is deliberate:
+  aquarell >> riso > turbulenz/nachtdruck (crisp).
+- **Render shaders are `precision highp float`** — the shared noise include
+  overflows fp16 internally (`permute` ~3e6) and pixel-space halftone
+  coords exceed fp16 range; sim passes stay mediump. Halftone uses
+  `gl_FragCoord.xy` (spec-guaranteed highp), Sobel steps in SIM texels
+  (`uSimTexel`) so edge response is viewport-independent.
+- **Per-style knob reuse**: `FluidVisuals.edgeStrength` means contour-line
+  strength (turbulenz), wet-edge darkening (aquarell), glow gain
+  (nachtdruck); riso ignores it. A shader that doesn't declare a uniform
+  no-ops it (null location).
 - **Two-channel application**: physics subset via `setParams()` (reset to tier
   baseline first — never touches gridSize/halfRate/pressureIterations, so weak
-  GPUs can't regress), look via `setVisuals(FluidVisuals)` (posterize levels,
-  outline, grain, paper, 4-slot color ladder, splat scales, ambient
-  multipliers). `DEFAULT_FLUID_VISUALS` reproduces the pre-preset literals.
+  GPUs can't regress), look via `setVisuals(FluidVisuals)` (style,
+  outline, grain, paper, 4-slot color ladder, splat scales/count/scatter,
+  ambient multipliers).
+- **Multi-splat swarm**: `splatCount`/`splatScatter` in FluidVisuals —
+  turbulenz throws 7 tiny jittered droplets per pointer frame (position AND
+  direction jitter; N parallel copies of one stroke otherwise).
+  dye/velocityScale are per-droplet — retune them when changing count.
+- **Ink cursor follows the theme** via `--color-ink-cursor` (globals.css,
+  `:root` + per-`data-sim-theme` overrides; decorative, visibility-picked,
+  not AA). InkCursor reads computed color per frame — live on switch.
 - **FluidSim re-applies the preset after every orchestrator init** (tier
   auto-tune re-creates the orchestrator) and fires a center splat-burst on
   live switches only.
@@ -192,7 +216,10 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 - **Visual tuning workflow**: headless-Playwright screenshot scripts against
   the dev server (pin tier via localStorage `manus-gpu-tier`, set preset,
   synthesize pointer churn, screenshot) — used for the turbulenz/nachtdruck
-  retunes; far faster than eyeballing param changes blind.
+  retunes and the per-preset shader pass; far faster than eyeballing param
+  changes blind. Verify at BOTH high and low tier — blur radii and band
+  edges are constant in UV, so their ratio to a sim texel swings ~4x
+  between 512^2 and 128^2 grids.
 
 ## Mobile architecture (post mobile-wow-pass)
 
