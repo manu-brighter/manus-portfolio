@@ -27,7 +27,7 @@ out vec4 fragColor;
 // core plus glow; deliberately the only additive style of the four.
 
 const float FRINGE_UV = 0.004;
-const float GLOW_UV = 0.014;
+const float GLOW_UV = 0.02;
 // 4 ink bands over paper -- matches the 4-slot ladder exactly.
 const float BANDS = 4.0;
 
@@ -54,15 +54,21 @@ void main() {
   // density (first band at d >= 0.125), not wait for a full band.
   vec3 color = bandColor(floor(density * BANDS + 0.5));
 
-  // Glow halo: wide 4-tap bloom OUTSIDE the ink (max(halo - density)
-  // keeps dense pools from brightening further -- the light hero text
-  // must keep reading over saturated areas).
+  // Glow halo: wide 8-tap ring bloom OUTSIDE the ink (max(halo -
+  // density) keeps dense pools from brightening further -- the light
+  // hero text must keep reading over saturated areas). A 4-tap cross
+  // read faintly cross-shaped on small blobs.
+  float diag = GLOW_UV * 0.7071;
   float halo = (
     densityAt(vUv + vec2( GLOW_UV, 0.0)) +
     densityAt(vUv + vec2(-GLOW_UV, 0.0)) +
     densityAt(vUv + vec2(0.0,  GLOW_UV)) +
-    densityAt(vUv + vec2(0.0, -GLOW_UV))
-  ) * 0.25;
+    densityAt(vUv + vec2(0.0, -GLOW_UV)) +
+    densityAt(vUv + vec2( diag,  diag)) +
+    densityAt(vUv + vec2( diag, -diag)) +
+    densityAt(vUv + vec2(-diag,  diag)) +
+    densityAt(vUv + vec2(-diag, -diag))
+  ) * 0.125;
   color += uSpotViolet * max(0.0, halo - density) * uEdgeStrength;
 
   // Chromatic misregistration: offset samples split into a rose fringe

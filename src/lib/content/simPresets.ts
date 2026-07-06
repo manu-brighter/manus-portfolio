@@ -134,7 +134,10 @@ export const SIM_PRESETS: readonly SimPreset[] = [
     theme: "wash",
     physics: {
       velocityDissipation: 0.95,
-      dyeDissipation: 0.985,
+      // 0.985 saturated the whole viewport into one flat pool under
+      // sustained pointer input (screenshot-verified) — washes must
+      // dry out while the huge blooms spread.
+      dyeDissipation: 0.978,
       confinement: 4,
       splatRadiusScale: 2.6,
     },
@@ -143,7 +146,7 @@ export const SIM_PRESETS: readonly SimPreset[] = [
       paper: WASH_PAPER,
       ladder: [MINT_TINT, SPOT_RGB.mint, SPOT_RGB.violet, ROSE_SOFT],
       velocityScale: 7,
-      dyeScale: 0.08,
+      dyeScale: 0.05,
       grainStrength: 0.04,
       // Wet-edge rim darkening (per-style meaning of edgeStrength).
       edgeStrength: 0.3,
@@ -177,7 +180,7 @@ export const SIM_PRESETS: readonly SimPreset[] = [
       dyeScale: 0.16,
       grainStrength: 0.09,
       // Glow-halo gain (per-style meaning of edgeStrength).
-      edgeStrength: 0.6,
+      edgeStrength: 0.85,
     },
   },
 ];

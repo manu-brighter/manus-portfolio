@@ -60,8 +60,10 @@ void main() {
   float outer = (center * 2.0 + ringDensity(vUv, radius * 1.6)) * 0.1;
 
   // Granulation: pigment settles into the paper tooth at two scales.
-  float tooth = snoise(vUv * 320.0) * 0.6 + snoise(vUv * 90.0 + 7.0) * 0.4;
-  float density = clamp(inner * (1.0 + tooth * 0.22), 0.0, 1.0);
+  // Kept coarse and gentle -- at 320/0.22 the band transitions
+  // speckled like TV static (screenshot-verified).
+  float tooth = snoise(vUv * 180.0) * 0.6 + snoise(vUv * 70.0 + 7.0) * 0.4;
+  float density = clamp(inner * (1.0 + tooth * 0.12), 0.0, 1.0);
 
   // Extra-wide soft ladder: washes bleed into each other wet-in-wet.
   vec3 color = uPaperColor;
