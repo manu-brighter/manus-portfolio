@@ -111,6 +111,24 @@
   --color-paper-line: #c3d4c2;
 }
 
+/* Ink-cursor accent — dot + trail follow the active sim theme with a
+ * high-contrast accent instead of plain ink. Riso (no data-sim-theme)
+ * stays canonical ink. Decorative, not text: picked for visibility on
+ * each theme's paper, not for AA. InkCursor reads the resolved color
+ * per frame via getComputedStyle, so switches are live. */
+:root {
+  --color-ink-cursor: var(--color-ink);
+}
+[data-sim-theme="warm"] {
+  --color-ink-cursor: #9c3a0d; /* burnt sienna on apricot paper */
+}
+[data-sim-theme="wash"] {
+  --color-ink-cursor: #0e5c49; /* deep pine teal on mint-grey paper */
+}
+[data-sim-theme="night"] {
+  --color-ink-cursor: #ff9fc8; /* neon rose — screen-blended, glows */
+}
+
 /* Hand-made object-grid photos are dark line-art PNGs — CSS can't
  * re-token them like the SVG stamps, so night mode inverts them
  * (hue-rotate keeps the spot accents roughly in family). */
