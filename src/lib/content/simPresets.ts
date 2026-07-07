@@ -265,6 +265,16 @@ export function applySimPreset(
   ) {
     absolute.velocityDissipation = HALF_RATE_VEL_DISSIPATION_MAX;
   }
+  // Dye needs the same treatment or half-rate tiers keep ~sqrt the
+  // retention: aquarell's 0.978 at 30Hz behaves like 0.989 at 60Hz —
+  // past the 0.985 that screenshot-verified as viewport-flooding.
+  // Squaring is the exact 30Hz<->60Hz equivalence (30 applications of
+  // r^2 == 60 applications of r), so the preset keeps its tuned feel
+  // instead of hitting an arbitrary clamp. Tier BASELINES are already
+  // tuned per tier; only preset overrides are 60Hz-tuned values.
+  if (tierBaseline.halfRate && absolute.dyeDissipation !== undefined) {
+    absolute.dyeDissipation = absolute.dyeDissipation ** 2;
+  }
   orchestrator.setParams({
     velocityDissipation: tierBaseline.velocityDissipation,
     dyeDissipation: tierBaseline.dyeDissipation,

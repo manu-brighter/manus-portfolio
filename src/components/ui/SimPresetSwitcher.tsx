@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { useScene } from "@/components/scene/SceneProvider";
+import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { getSimPreset, SIM_PRESETS, type SimPreset } from "@/lib/content/simPresets";
 import { isLoaderComplete, subscribeToLoaderComplete } from "@/lib/loaderSession";
@@ -78,6 +79,12 @@ export function SimPresetSwitcher() {
   const t = useTranslations("simPresets");
   const { config } = useScene();
   const reducedMotion = useReducedMotion();
+  // Coarse pointers at md+ (touch tablets) keep the pill always
+  // expanded: iOS Safari doesn't focus radios on tap, so the
+  // hover/focus-within collapse mechanic has no reliable expand
+  // trigger there — after one selection the pill would dead-end
+  // until a stray tap elsewhere re-armed the emulated hover.
+  const isCoarse = useCoarsePointer();
   const presetId = useSimPresetStore((s) => s.presetId);
   const setPreset = useSimPresetStore((s) => s.setPreset);
 
@@ -118,13 +125,17 @@ export function SimPresetSwitcher() {
       timer = window.setTimeout(() => {
         setVisible(true);
         // Discoverability peek — unfold the whole row for a beat
-        // (`expanded` drives the mobile row, `introPeek` the md: pill).
-        setExpanded(true);
-        setIntroPeek(true);
-        peekTimerRef.current = window.setTimeout(() => {
-          setExpanded(false);
-          setIntroPeek(false);
-        }, INTRO_PEEK_MS);
+        // (`expanded` drives the mobile row, `introPeek` the md:
+        // pill). Fresh loads only: replaying it on every same-session
+        // return (locale switch, back-nav) is noise, not teaching.
+        if (!wasComplete) {
+          setExpanded(true);
+          setIntroPeek(true);
+          peekTimerRef.current = window.setTimeout(() => {
+            setExpanded(false);
+            setIntroPeek(false);
+          }, INTRO_PEEK_MS);
+        }
       }, delay);
     });
     return () => {
@@ -189,7 +200,7 @@ export function SimPresetSwitcher() {
               // peek. Heights are explicit (h-0 <-> h-10) so the
               // transition animates.
               className={`group relative flex size-11 cursor-pointer items-center justify-center transition-[height,opacity] duration-300 [-webkit-tap-highlight-color:transparent] md:w-7 ${
-                active || introPeek
+                active || introPeek || isCoarse
                   ? "md:h-10"
                   : `md:h-0 md:overflow-hidden md:opacity-0 md:group-focus-within/pill:h-10 md:group-focus-within/pill:overflow-visible md:group-focus-within/pill:opacity-100${
                       hoverArmed

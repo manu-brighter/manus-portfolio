@@ -74,6 +74,12 @@ export function PrintJamOverlay() {
 
     const run = () => {
       if (phaseRef.current !== "idle") return;
+      // Flip the guard SYNCHRONOUSLY — setPhase only reaches phaseRef
+      // on the next render, so two triggers in one task (e.g.
+      // `manus.fehldruck(); manus.fehldruck()` pasted as one console
+      // statement) would otherwise both pass the guard and the second
+      // interval would orphan the first: a permanent splat storm.
+      phaseRef.current = "jam";
 
       if (reducedMotionRef.current) {
         setPhase("jam");
@@ -120,10 +126,14 @@ export function PrintJamOverlay() {
           progress = 0;
           run();
         }
+      } else if (e.code === "ArrowUp") {
+        // Mismatch on Up can only happen at progress >= 2 (indices 0
+        // and 1 ARE Up and would have matched), and the longest
+        // sequence-prefix that is a suffix of "...Up Up Up" is the
+        // double Up — so "Up Up Up Down ..." still completes.
+        progress = 2;
       } else {
-        // A wrong key can still be the sequence START (e.g. Up Up Up
-        // Down...) — re-check against index 0 instead of hard reset.
-        progress = e.code === KONAMI[0] ? 1 : 0;
+        progress = 0;
       }
     };
 
