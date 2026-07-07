@@ -136,18 +136,21 @@ export function PortfolioCardReveal({
       className="relative h-full w-full"
     >
       <div ref={screenshotRef} className="absolute inset-0">
+        {/* Five-theme split: the homepage sliced into the five sim
+            inkings (switcher order) — whatever theme the visitor has
+            active, its slice is in the picture. */}
         <picture className="block h-full w-full">
           <source
             type="image/avif"
-            srcSet="/projects/portfolio/homepage-480w.avif 480w, /projects/portfolio/homepage-800w.avif 800w, /projects/portfolio/homepage-1200w.avif 1200w"
+            srcSet="/projects/portfolio/homepage-themes-480w.avif 480w, /projects/portfolio/homepage-themes-800w.avif 800w, /projects/portfolio/homepage-themes-1200w.avif 1200w"
             sizes="(min-width: 1024px) 40rem, (min-width: 640px) 60vw, 100vw"
           />
           <source
             type="image/webp"
-            srcSet="/projects/portfolio/homepage-480w.webp 480w, /projects/portfolio/homepage-800w.webp 800w, /projects/portfolio/homepage-1200w.webp 1200w"
+            srcSet="/projects/portfolio/homepage-themes-480w.webp 480w, /projects/portfolio/homepage-themes-800w.webp 800w, /projects/portfolio/homepage-themes-1200w.webp 1200w"
           />
           <img
-            src="/projects/portfolio/homepage-800w.jpg"
+            src="/projects/portfolio/homepage-themes-800w.jpg"
             alt={alt}
             width={800}
             height={450}
