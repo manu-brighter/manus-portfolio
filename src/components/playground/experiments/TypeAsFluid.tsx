@@ -8,7 +8,7 @@ import { TYPE_AS_FLUID_DEFAULTS } from "@/lib/content/playground";
 import { FluidOrchestrator, type PointerState } from "@/lib/gl/fluidOrchestrator";
 import { capDPR, DPR_FULL, getTierConfig } from "@/lib/gpu";
 import { randomSpot } from "@/lib/palette";
-import { syncPresetVisuals } from "@/lib/simPresetStore";
+import { syncPresetVisuals, useSimPresetStore } from "@/lib/simPresetStore";
 import { TextStamper } from "@/lib/textStamp";
 import { ExperimentChrome } from "../ExperimentChrome";
 
@@ -31,6 +31,12 @@ import { ExperimentChrome } from "../ExperimentChrome";
  *
  * Reduced motion: instant-fade replacement (no sim, no stamp pipeline).
  */
+
+// Delicate hover-trail splat radius. Preset switches re-scale THIS by
+// the preset's splatRadiusScale (via syncPresetVisuals) so the cursor
+// follows the theme — tiny for turbulenz, a big bloom for aquarell —
+// while the calm-paper text physics stays authoritative.
+const CURSOR_SPLAT_RADIUS = 0.005;
 
 export function TypeAsFluid() {
   const reducedMotion = useReducedMotion();
@@ -138,7 +144,7 @@ function TypeAsFluidCanvas() {
       // for the home page hero where cursor ink is a feature; in
       // type-as-fluid the typed word is the star and the cursor
       // should be a delicate accent rather than competing with it.
-      splatRadius: 0.005,
+      splatRadius: CURSOR_SPLAT_RADIUS,
     });
     orchestrator.setAmbientEnabled(false);
     // Open the warmup gate so step() runs the full sim pipeline
@@ -151,19 +157,21 @@ function TypeAsFluidCanvas() {
     // gate landed.
     orchestrator.start();
     orchestratorRef.current = orchestrator;
-    // Active preset's look carries into the experiment (visuals only
-    // — the calm-paper physics above stays authoritative).
-    const unsubPreset = syncPresetVisuals(orchestrator);
+    // Active preset's LOOK carries into the experiment (shader, paper,
+    // ladder), and the cursor splat radius follows the theme — but the
+    // swarm feel (turbulenz's 7 droplets / high dyeScale) is left out:
+    // it's tuned for the hero's fast dye fade and would pile into a
+    // solid blob under this experiment's slow-fade text physics.
+    const unsubPreset = syncPresetVisuals(orchestrator, {
+      lookOnly: true,
+      cursorSplatRadiusBase: CURSOR_SPLAT_RADIUS,
+    });
 
     stamperRef.current = new TextStamper(gl, orchestrator);
 
     // Stamp an initial default word so the canvas isn't empty on first
     // paint. Picks a random one each mount so the experience varies.
-    const initial =
-      TYPE_AS_FLUID_DEFAULTS.defaultWords[
-        Math.floor(Math.random() * TYPE_AS_FLUID_DEFAULTS.defaultWords.length)
-      ] ?? "MANUEL";
-    stampWord(stamperRef.current, orchestrator, initial, stampTimersRef.current, disposedRef);
+    stampWord(stamperRef.current, orchestrator, pickWord(""), stampTimersRef.current, disposedRef);
 
     const onResize = () => {
       const ratio = capDPR(DPR_FULL);
@@ -240,26 +248,25 @@ function TypeAsFluidCanvas() {
     return () => window.clearTimeout(handle);
   }, [text]);
 
-  // ---- Idle re-stamp: 5s after the last keystroke (reset on every
-  // keystroke), refresh whichever word is currently most relevant. If
-  // the user has typed something, the rotation re-stamps THAT word (in
-  // a fresh random Riso ink each time); otherwise pulls the next
-  // default from TYPE_AS_FLUID_DEFAULTS.
+  // ---- Idle re-stamp: 5s after the last keystroke ----
+  // One re-stamp per idle window: `text` change re-runs the effect,
+  // the cleanup clears the prior timer, and a fresh 5s window starts
+  // from the current keystroke. Refreshes whatever word is most
+  // relevant — the typed word (fresh random Riso ink) if present, else
+  // a default from TYPE_AS_FLUID_DEFAULTS.
   //
-  // setTimeout + per-keystroke reset (vs the previous setInterval +
-  // inline elapsed-check) matches the documented intent: the comment
-  // for years claimed "every 5s after the last keystroke", but the
-  // interval-with-gate path could fire ~5s of one steady cadence
-  // regardless of typing rhythm. Now `text` change re-runs this
-  // effect, the cleanup clears the prior timer, and a new 5s window
-  // starts from the current keystroke.
+  // Deliberately NOT a continuous every-5s rotation: each stamped word
+  // blooms + spreads across the viewport, and repeated stamping piles
+  // the dye into a solid mass under turbulenz's density-to-dark shader
+  // (screenshot-verified — a single word is clean, three fill the
+  // screen). One word per idle window keeps every theme readable. The
+  // switch-refresh effect below covers the "keep working after a theme
+  // switch" case the user reported without the pile-up.
   //
-  // Race protection: skip the stamp if a stamp-reveal is already in
-  // flight (stampTimersRef non-empty). Without this, the typing-
-  // debounce reveal that runs ~2.45s could collide with the idle
-  // re-stamp and produce two overlapping 23-timer animations with
-  // cross-colour bleed.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: `text` is the reset trigger — each keystroke re-runs the effect, the cleanup clears the prior timer, and a fresh 5s window starts. The effect body reads textRef so the rotation always sees the latest input even if it fires mid-typing.
+  // Race protection: skip if a stamp-reveal is already in flight
+  // (stampTimersRef non-empty) so two 23-timer reveals can't overlap
+  // with cross-colour bleed.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `text` is the reset trigger — each keystroke re-runs the effect, the cleanup clears the prior timer, and a fresh 5s window starts. The body reads textRef so it always sees the latest input even if it fires mid-typing.
   useEffect(() => {
     const timers = stampTimersRef.current;
     const id = window.setTimeout(() => {
@@ -268,13 +275,7 @@ function TypeAsFluidCanvas() {
       const stamper = stamperRef.current;
       const orchestrator = orchestratorRef.current;
       if (!stamper || !orchestrator) return;
-      const word =
-        textRef.current.length > 0
-          ? textRef.current
-          : (TYPE_AS_FLUID_DEFAULTS.defaultWords[
-              Math.floor(Math.random() * TYPE_AS_FLUID_DEFAULTS.defaultWords.length)
-            ] ?? "MANUEL");
-      stampWord(stamper, orchestrator, word, timers, disposedRef);
+      stampWord(stamper, orchestrator, pickWord(textRef.current), timers, disposedRef);
     }, 5000);
     timers.add(id);
     return () => {
@@ -282,6 +283,30 @@ function TypeAsFluidCanvas() {
       timers.delete(id);
     };
   }, [text]);
+
+  // ---- Re-stamp on preset switch ----
+  // A theme switch is not a keystroke, so the idle re-stamp above never
+  // re-armed after one — the canvas went static once the user switched
+  // presets (user-reported "auto-writing stops after switching"). This
+  // stamps a fresh word in the incoming theme so the switch itself
+  // re-inks the canvas. Subscribes AFTER the mount effect's
+  // syncPresetVisuals subscriber (registration order), so the new look
+  // is applied before the word lands.
+  useEffect(() => {
+    return useSimPresetStore.subscribe((current, previous) => {
+      if (current.presetId === previous.presetId || disposedRef.current) return;
+      const stamper = stamperRef.current;
+      const orchestrator = orchestratorRef.current;
+      if (!stamper || !orchestrator) return;
+      stampWord(
+        stamper,
+        orchestrator,
+        pickWord(textRef.current),
+        stampTimersRef.current,
+        disposedRef,
+      );
+    });
+  }, []);
 
   return (
     <ExperimentChrome i18nKey="typeAsFluid">
@@ -319,13 +344,13 @@ function TypeAsFluidCanvas() {
               const stamper = stamperRef.current;
               const orchestrator = orchestratorRef.current;
               if (!stamper || !orchestrator) return;
-              const word =
-                textRef.current.length > 0
-                  ? textRef.current
-                  : (TYPE_AS_FLUID_DEFAULTS.defaultWords[
-                      Math.floor(Math.random() * TYPE_AS_FLUID_DEFAULTS.defaultWords.length)
-                    ] ?? "MANUEL");
-              stampWord(stamper, orchestrator, word, stampTimersRef.current, disposedRef);
+              stampWord(
+                stamper,
+                orchestrator,
+                pickWord(textRef.current),
+                stampTimersRef.current,
+                disposedRef,
+              );
             }}
             className="grid aspect-square shrink-0 min-w-[4.5rem] place-items-center border-[1.5px] border-ink bg-paper text-ink text-2xl leading-none shadow-[3px_3px_0_var(--color-ink)] transition-[transform,box-shadow] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[1px_1px_0_var(--color-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
           >
@@ -356,6 +381,18 @@ const RADIUS_BLOOM = 0.055;
 const RADIUS_STIR = 0.04;
 
 const TRANSPARENT = [0, 0, 0] as const;
+
+/** The word to stamp: the user's typed input if any, else a random
+ *  default from the rotation list. Shared by the initial stamp, the
+ *  idle re-stamp, the preset-switch re-stamp, and the button. */
+function pickWord(current: string): string {
+  if (current.length > 0) return current;
+  return (
+    TYPE_AS_FLUID_DEFAULTS.defaultWords[
+      Math.floor(Math.random() * TYPE_AS_FLUID_DEFAULTS.defaultWords.length)
+    ] ?? "MANUEL"
+  );
+}
 
 /**
  * Stamp a word calligraphy-style: progressive left→right strip-reveal,
