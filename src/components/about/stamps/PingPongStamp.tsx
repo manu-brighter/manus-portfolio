@@ -1,32 +1,16 @@
 /**
- * Ping-pong icon — replaced the inline SVG paddle with the hand-
- * designed PNG icon under public/about/objects/. Source asset:
- * content-input/icons/ping pong.png (688×660, transparent bg).
- * 1x + 2x retina variants.
+ * Ping-pong icon — hand-designed PNG under public/about/objects/.
+ * Source asset: content-input/icons/ping pong.png (688×660,
+ * transparent bg); Nachtdruck-recolored variant pingpong-dark.
  *
- * See AudiStamp.tsx for the rationale on keeping width 140 x height
- * 90 (grid alignment) and the unused-but-preserved spotVar prop
- * (parent dispatcher uniformity).
- *
- * Plain <img> with 1x + 2x srcSet — no <picture>/AVIF/WebP wrap yet
- * (see AudiStamp.tsx header for the rationale).
+ * Rendering (night-swap, 1x/2x srcSet, unused-but-preserved spotVar
+ * prop for parent dispatcher uniformity) lives in RasterStamp.
  */
+
+import { RasterStamp } from "./RasterStamp";
 
 type Props = { spotVar: string };
 
 export function PingPongStamp({ spotVar: _spotVar }: Props) {
-  return (
-    <img
-      src="/about/objects/pingpong-120w.png"
-      srcSet="/about/objects/pingpong-120w.png 1x, /about/objects/pingpong-240w.png 2x"
-      alt=""
-      aria-hidden="true"
-      loading="lazy"
-      decoding="async"
-      width={120}
-      height={115}
-      className="ink-lineart block h-16 w-auto max-w-[140px] object-contain"
-      style={{ transform: "rotate(-2deg)" }}
-    />
-  );
+  return <RasterStamp slug="pingpong" width={120} height={115} rotate="-2deg" />;
 }

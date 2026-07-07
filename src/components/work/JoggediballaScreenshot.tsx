@@ -1,33 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useScene } from "@/components/scene/SceneProvider";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { useSimPresetStore } from "@/lib/simPresetStore";
+import { useNightTheme } from "@/hooks/useNightTheme";
 
 /**
- * JoggediballaScreenshot — the Work-card `<picture>` that follows the
+ * JoggediballaScreenshot — the Work-card <picture> that follows the
  * sim theme: Nachtdruck swaps in the site's real darkmode homepage
  * shot, every other preset shows the canonical light one.
  *
- * Gating mirrors SimThemeSync (live sim only: motion allowed + WebGL
- * tier resolved) so StaticFallback and reduced-motion keep the light
- * shot even when a night preset persists in the store — the page
- * around it never flips to night there either.
- *
- * Hydration: `mounted` starts false so the first client render
- * matches the server's light-shot markup; the swap lands in the
- * effect pass. Swapping `srcSet` re-fetches lazily — acceptable, the
- * preset switch itself is a deliberate, infrequent act.
+ * Night detection + hydration gating live in useNightTheme (shared
+ * with the object-grid raster stamps): live sim only, so static tier
+ * and reduced-motion keep the light shot even when a night preset
+ * persists. Swapping srcSet re-fetches lazily — acceptable, the
+ * preset switch is a deliberate, infrequent act.
  */
 export function JoggediballaScreenshot({ alt }: { alt: string }) {
-  const presetId = useSimPresetStore((s) => s.presetId);
-  const { config } = useScene();
-  const reducedMotion = useReducedMotion();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-
-  const night = mounted && Boolean(config) && !reducedMotion && presetId === "nachtdruck";
+  const night = useNightTheme();
   const base = night ? "/projects/joggediballa/homepage-dark" : "/projects/joggediballa/homepage";
 
   return (

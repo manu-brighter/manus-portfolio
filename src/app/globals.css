@@ -168,25 +168,6 @@
   --color-spot-amber: #7cc4e8;
 }
 
-/* Hand-made object-grid photos are dark line-art PNGs — CSS can't
- * re-token them like the SVG stamps. Night mode seats them on a
- * light paper sticker chip instead of inverting: invert(1)
- * hue-rotate(180deg) corrupted the raster accent colors (pingpong
- * ball turned brown, joggediballa mint turned dark green). The chip
- * uses the CANONICAL light paper literal (the token flips dark under
- * night) plus the tile's spot as a riso offset shadow — framing, not
- * pixel recolor. Padding + radius live in the BASE rule so the box
- * metrics are identical in every theme — a night-only padding made
- * the tiles jump on switch (review finding). */
-.ink-lineart {
-  border-radius: 0.375rem;
-  padding: 0.375rem 0.625rem;
-}
-[data-sim-theme="night"] .ink-lineart {
-  background: #f0e8dc;
-  box-shadow: 4px 4px 0 var(--tile-spot, var(--color-paper-line));
-}
-
 /* The ink cursor multiplies over light papers; on the night theme a
  * light-ink trail would multiply to black — flip to screen so it
  * glows instead. */

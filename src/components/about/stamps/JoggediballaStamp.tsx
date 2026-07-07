@@ -1,32 +1,17 @@
 /**
- * Jogge di Balla icon — replaced the inline SVG cocktail-glass-in-
- * oval-frame with the hand-designed PNG logo under
+ * Jogge di Balla icon — hand-designed PNG logo under
  * public/about/objects/. Source asset: content-input/icons/jogge di
- * balla.PNG (3500×3500, transparent bg). 1x + 2x retina variants.
+ * balla.PNG (3500×3500, transparent bg); Nachtdruck-recolored variant
+ * joggediballa-dark.
  *
- * See AudiStamp.tsx for the rationale on keeping width 140 x height
- * 90 (grid alignment) and the unused-but-preserved spotVar prop
- * (parent dispatcher uniformity).
- *
- * Plain <img> with 1x + 2x srcSet — no <picture>/AVIF/WebP wrap yet
- * (see AudiStamp.tsx header for the rationale).
+ * Rendering (night-swap, 1x/2x srcSet, unused-but-preserved spotVar
+ * prop for parent dispatcher uniformity) lives in RasterStamp.
  */
+
+import { RasterStamp } from "./RasterStamp";
 
 type Props = { spotVar: string };
 
 export function JoggediballaStamp({ spotVar: _spotVar }: Props) {
-  return (
-    <img
-      src="/about/objects/joggediballa-120w.png"
-      srcSet="/about/objects/joggediballa-120w.png 1x, /about/objects/joggediballa-240w.png 2x"
-      alt=""
-      aria-hidden="true"
-      loading="lazy"
-      decoding="async"
-      width={120}
-      height={120}
-      className="ink-lineart block h-16 w-auto max-w-[140px] object-contain"
-      style={{ transform: "rotate(-0.5deg)" }}
-    />
-  );
+  return <RasterStamp slug="joggediballa" width={120} height={120} rotate="-0.5deg" />;
 }

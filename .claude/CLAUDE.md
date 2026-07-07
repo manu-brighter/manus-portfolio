@@ -231,10 +231,15 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   (`homepage-themes-*`, five vertical hero slices in switcher order with
   ink seams — composed via scratchpad Playwright + sharp, master in
   content-input, pipeline task in `optimize-assets.mjs`). Night theme
-  seats the PNG object-grid stamps on a light paper sticker chip
-  (`.ink-lineart` night block) instead of inverting — invert corrupted
-  raster accents. Warm/Turbulenz adds a layered paper `text-shadow` halo
-  on main/header/footer for glyph contrast over hard bands.
+  swaps the three raster object-grid stamps (car/joggediballa/pingpong)
+  to hand-recolored `-dark` PNG variants (generate-icons.mjs emits them;
+  masters in content-input/icons) — CSS filters can't re-ink raster
+  accents (invert turned the pingpong ball brown, joggediballa mint dark
+  green). Swap logic + hydration gating in `useNightTheme` (shared by
+  `RasterStamp` and `JoggediballaScreenshot`); the three SVG stamps
+  (camera/schnee/tauchen) re-token via CSS and don't swap. Warm/
+  Turbulenz adds a layered paper `text-shadow` halo on main/header/
+  footer for glyph contrast over hard bands.
 - **Switcher UX**: pointer-selection blurs the radio + disarms
   group-hover until pointerleave (immediate collapse); keyboard keeps
   focus/expansion. On first appear the pill unfolds for 3.5s
