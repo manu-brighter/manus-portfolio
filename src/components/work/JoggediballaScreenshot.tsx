@@ -1,6 +1,6 @@
 "use client";
 
-import { useNightTheme } from "@/hooks/useNightTheme";
+import { useNightTheme } from "@/components/scene/useNightTheme";
 
 /**
  * JoggediballaScreenshot — the Work-card <picture> that follows the

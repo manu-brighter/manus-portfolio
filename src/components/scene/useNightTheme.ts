@@ -12,6 +12,12 @@ import { useSimPresetStore } from "@/lib/simPresetStore";
  * StaticFallback and reduced-motion paths stay on the canonical light
  * treatment even when a night preset persists in the store.
  *
+ * Lives in components/scene/ (not hooks/) on purpose: it consumes the
+ * shared `useScene` context so every caller reads the SAME resolved
+ * capability instead of re-probing the GPU — and hooks/ may not import
+ * from components/ (check-layering.mjs). Components composing this is
+ * exactly the intended direction.
+ *
  * `mounted` starts false so the first client render matches the
  * server's light-theme markup; the swap lands in the effect pass
  * (no hydration mismatch). Consumers that swap an <img src> re-fetch

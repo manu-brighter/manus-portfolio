@@ -1,6 +1,6 @@
 "use client";
 
-import { useNightTheme } from "@/hooks/useNightTheme";
+import { useNightTheme } from "@/components/scene/useNightTheme";
 
 /**
  * RasterStamp — shared night-aware <img> for the hand-designed PNG
