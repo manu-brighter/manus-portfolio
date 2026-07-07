@@ -2,7 +2,7 @@
   "legal": {
     "common": {
       "lastUpdatedLabel": "Last updated",
-      "lastUpdated": "6 May 2026",
+      "lastUpdated": "7 July 2026",
       "backLabel": "Back to home"
     },
     "impressum": {
@@ -72,7 +72,7 @@
           "heading": "What data is collected",
           "body": [
             "This site sets no cookies. There's no tracking, no analytics, no advertising networks, no social-media pixels. No data is shared with third parties for advertising purposes.",
-            "For purely technical reasons the browser's LocalStorage is used: one anonymous entry remembers your device's GPU performance class (so the WebGL animation starts at the right detail level on your next visit) and one entry remembers that the loading screen has already played (so it doesn't replay when you switch language). These values are not personal, are not transmitted to third parties, and can be cleared at any time via your browser settings."
+            "For purely technical reasons the browser's local storage is used: one anonymous LocalStorage entry remembers your device's GPU performance class (so the WebGL animation starts at the right detail level on your next visit), another LocalStorage entry remembers the ink character you picked for the simulation, and one SessionStorage entry remembers for the duration of the browser session that the loading screen has already played (so it doesn't replay when you switch language). These values are not personal, are not transmitted to third parties, and can be cleared at any time via your browser settings."
           ]
         },
         {
@@ -87,8 +87,8 @@
           "id": "form",
           "heading": "Contact form",
           "body": [
-            "When you use the contact form, your email client's mailto mechanism is currently triggered. The message goes via your email provider, not via a server under my control. Only the data you enter yourself in your mail client is processed.",
-            "Should a direct delivery via a server bridge (Resend.com, Resend, Inc., USA) be activated at a later point, your name, email address, and message would be transmitted to me through that technical intermediary. Resend would be covered via Standard Contractual Clauses (Art. 46 GDPR). This statement will be updated accordingly when activated.",
+            "When you use the contact form, your name, email address, and message are transmitted encrypted to a technical intermediary: the request is received at the Cloudflare edge (Cloudflare, Inc., USA) by a Cloudflare Worker and delivered to me as an email via the email service Resend (Resend, Inc., USA). Both providers are covered by Standard Contractual Clauses (Art. 46 GDPR) for data transfers to the USA. Only the data you enter into the form yourself is processed.",
+            "If the delivery fails, the form falls back to offering a mailto link — the message then goes via your own email client and email provider, not via a server under my control.",
             "Legal basis in both cases: your consent by submitting (Art. 6(1)(a) GDPR, Art. 31(1) revFADP). Incoming messages are deleted after they're answered, at the latest after six months. You can request access, correction, or deletion at any time. Just write to manuelheller@bluewin.ch."
           ]
         },
@@ -104,7 +104,7 @@
           "heading": "External links",
           "body": [
             "This site links to external platforms in several places, whose content I cannot influence or control. When you click an external link you leave this site, and the privacy policy of the respective provider applies from that point.",
-            "Currently linked external services: GitHub (github.com), LinkedIn (linkedin.com), Instagram (instagram.com), Adobe Portfolio (manuelheller.myportfolio.com), Twitch (twitch.tv), Jogge di Balla (joggediballa.ch). A list of the exact providers with their country of residence can be requested at any time via email."
+            "Currently linked external services: GitHub (github.com), LinkedIn (linkedin.com), Instagram (instagram.com), Adobe Portfolio (manuelheller.myportfolio.com), Jogge di Balla (joggediballa.ch). A list of the exact providers with their country of residence can be requested at any time via email."
           ]
         },
         {

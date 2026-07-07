@@ -2,7 +2,7 @@
   "legal": {
     "common": {
       "lastUpdatedLabel": "Stand",
-      "lastUpdated": "6. Mai 2026",
+      "lastUpdated": "7. Juli 2026",
       "backLabel": "Zurück zur Startseite"
     },
     "impressum": {
@@ -72,7 +72,7 @@
           "heading": "Welche Daten erhoben werden",
           "body": [
             "Diese Website setzt keine Cookies. Es gibt kein Tracking, kein Analytics, keine Werbenetzwerke und keine Social-Media-Pixel. Es werden keine Daten an Dritte zu Werbezwecken weitergegeben.",
-            "Aus rein technischen Gründen wird der LocalStorage des Browsers genutzt: ein anonymer Eintrag merkt sich die GPU-Leistungsklasse deines Geräts (damit die WebGL-Animation beim nächsten Besuch direkt im richtigen Detail-Level startet) und ein Eintrag merkt sich, dass der Lade-Bildschirm bereits gespielt wurde (damit er bei Wechsel der Sprache nicht erneut erscheint). Diese Werte sind nicht personenbezogen, werden nicht an Dritte übermittelt und können jederzeit über die Browser-Einstellungen gelöscht werden."
+            "Aus rein technischen Gründen wird der lokale Browser-Speicher genutzt: Ein anonymer LocalStorage-Eintrag merkt sich die GPU-Leistungsklasse deines Geräts (damit die WebGL-Animation beim nächsten Besuch direkt im richtigen Detail-Level startet), ein weiterer LocalStorage-Eintrag merkt sich den von dir gewählten Tinten-Charakter der Simulation, und ein SessionStorage-Eintrag merkt sich für die Dauer der Browser-Sitzung, dass der Lade-Bildschirm bereits gespielt wurde (damit er bei Wechsel der Sprache nicht erneut erscheint). Diese Werte sind nicht personenbezogen, werden nicht an Dritte übermittelt und können jederzeit über die Browser-Einstellungen gelöscht werden."
           ]
         },
         {
@@ -87,8 +87,8 @@
           "id": "form",
           "heading": "Kontaktformular",
           "body": [
-            "Bei Nutzung des Kontaktformulars wird aktuell der mailto-Mechanismus deines E-Mail-Clients aktiviert — die Nachricht läuft über deinen E-Mail-Provider, nicht über einen Server unter meiner Kontrolle. Dabei werden ausschliesslich die Daten verarbeitet, die du selbst in deinem Mail-Client eingibst.",
-            "Sollte zu einem späteren Zeitpunkt eine direkte Übermittlung über einen Server-Bridge (Resend.com, Resend, Inc., USA) aktiviert werden, würden Name, E-Mail-Adresse und Nachricht über diesen technischen Mittler an mich übermittelt. Resend wäre über Standard-Vertragsklauseln (Art. 46 DSGVO) abgesichert. Eine entsprechende Anpassung dieser Erklärung erfolgt mit Aktivierung.",
+            "Bei Nutzung des Kontaktformulars werden Name, E-Mail-Adresse und Nachricht verschlüsselt an einen technischen Mittler übermittelt: Die Anfrage wird an der Cloudflare-Edge (Cloudflare, Inc., USA) von einem Cloudflare Worker entgegengenommen und über den E-Mail-Dienst Resend (Resend, Inc., USA) als E-Mail an mich zugestellt. Beide Anbieter sind über Standard-Vertragsklauseln (Art. 46 DSGVO) für Datentransfers in die USA abgesichert. Verarbeitet werden ausschliesslich die Daten, die du selbst in das Formular eingibst.",
+            "Schlägt die Übermittlung fehl, bietet das Formular ersatzweise einen mailto-Link an — die Nachricht läuft dann über deinen eigenen E-Mail-Client und E-Mail-Provider, nicht über einen Server unter meiner Kontrolle.",
             "Rechtsgrundlage in beiden Fällen: deine Einwilligung durch das Absenden (Art. 6 Abs. 1 lit. a DSGVO, Art. 31 Abs. 1 DSG). Eingehende Nachrichten werden nach Beantwortung gelöscht, spätestens jedoch nach sechs Monaten. Du kannst jederzeit Auskunft, Berichtigung oder Löschung verlangen — schreib einfach an manuelheller@bluewin.ch."
           ]
         },
@@ -104,7 +104,7 @@
           "heading": "Externe Verlinkungen",
           "body": [
             "Diese Website verweist an mehreren Stellen auf externe Plattformen, deren Inhalte ich nicht beeinflussen oder kontrollieren kann. Beim Klick auf einen externen Link verlässt du diese Seite; ab dort gelten die Datenschutzbestimmungen des jeweiligen Anbieters.",
-            "Aktuell verlinkte externe Dienste: GitHub (github.com), LinkedIn (linkedin.com), Instagram (instagram.com), Adobe Portfolio (manuelheller.myportfolio.com), Twitch (twitch.tv), Jogge di Balla (joggediballa.ch). Eine Liste der genauen Anbieter mit Sitzland kann jederzeit per E-Mail bei mir angefragt werden."
+            "Aktuell verlinkte externe Dienste: GitHub (github.com), LinkedIn (linkedin.com), Instagram (instagram.com), Adobe Portfolio (manuelheller.myportfolio.com), Jogge di Balla (joggediballa.ch). Eine Liste der genauen Anbieter mit Sitzland kann jederzeit per E-Mail bei mir angefragt werden."
           ]
         },
         {
