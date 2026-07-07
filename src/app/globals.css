@@ -150,6 +150,22 @@
   --color-ink-cursor: #ff9fc8; /* neon rose — screen-blended, glows */
 }
 
+/* Per-theme spot repairs — a canonical spot only swaps where it would
+ * break the theme (screenshot audit; keep standards everywhere else).
+ * Wash: neon amber is the one spot outside the watercolor family ->
+ * yellow ochre, THE classic watercolor pigment. Wave: the blue plate
+ * print keeps its small rose misreg accents, but neon amber reads as
+ * a foreign plate -> sky-cyan from the wave ladder (distinct from
+ * mint). Cascades to every token consumer (SVG stamp accents via
+ * spotVar, pills, drop-caps, the riso-submit label); raster PNG
+ * accents can't follow, but at icon size the drift is invisible. */
+[data-sim-theme="wash"] {
+  --color-spot-amber: #d8a86b;
+}
+[data-sim-theme="wave"] {
+  --color-spot-amber: #7cc4e8;
+}
+
 /* Hand-made object-grid photos are dark line-art PNGs — CSS can't
  * re-token them like the SVG stamps. Night mode seats them on a
  * light paper sticker chip instead of inverting: invert(1)
@@ -181,11 +197,23 @@
 [data-sim-theme="warm"] main,
 [data-sim-theme="warm"] header,
 [data-sim-theme="warm"] footer {
+  /* Doubled tight layers build an opaque core so SMALL mono labels
+   * survive the dark contour band too (screenshot-verified — 3 layers
+   * were enough for the display serif but not for 12px badges). */
   text-shadow:
-    0 0 3px var(--color-paper),
-    0 0 3px var(--color-paper),
-    0 0 10px var(--color-paper),
-    0 0 18px var(--color-paper);
+    0 0 2px var(--color-paper),
+    0 0 2px var(--color-paper),
+    0 0 4px var(--color-paper),
+    0 0 8px var(--color-paper),
+    0 0 14px var(--color-paper),
+    0 0 22px var(--color-paper);
+}
+
+/* 11px stamp badges lose against a NEAR-BLACK contour pool even with
+ * the halo — give them a solid paper fill under this theme (they carry
+ * an ink border anyway, so the chip reads as a printed sticker). */
+[data-sim-theme="warm"] .type-label-stamp {
+  background: var(--color-paper);
 }
 
 /* Fehldruck easter egg — while <html data-print-jam> is set the
