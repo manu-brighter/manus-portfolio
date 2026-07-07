@@ -220,7 +220,35 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   not AA). InkCursor reads computed color per frame — live on switch.
 - **FluidSim re-applies the preset after every orchestrator init** (tier
   auto-tune re-creates the orchestrator) and fires a center splat-burst on
-  live switches only.
+  live switches only. `firePresetBurst` previews the preset's STEADY-STATE
+  character (radius × splatRadiusScale, swarm presets detonate a scattered
+  droplet cloud, ring splats seat off-centre) — "start must match idle"
+  was explicit user feedback; don't revert to a one-size celebration.
+- **Theme follows through to content**: the Work-card Joggediballa shot
+  swaps to the real darkmode screenshot under Nachtdruck
+  (`JoggediballaScreenshot`, gated like SimThemeSync so static tier keeps
+  light); the Portfolio card shows a **five-theme split composite**
+  (`homepage-themes-*`, five vertical hero slices in switcher order with
+  ink seams — composed via scratchpad Playwright + sharp, master in
+  content-input, pipeline task in `optimize-assets.mjs`). Night theme
+  seats the PNG object-grid stamps on a light paper sticker chip
+  (`.ink-lineart` night block) instead of inverting — invert corrupted
+  raster accents. Warm/Turbulenz adds a layered paper `text-shadow` halo
+  on main/header/footer for glyph contrast over hard bands.
+- **Switcher UX**: pointer-selection blurs the radio + disarms
+  group-hover until pointerleave (immediate collapse); keyboard keeps
+  focus/expansion. On first appear the pill unfolds for 3.5s
+  (`INTRO_PEEK_MS` discoverability peek; `expanded` drives mobile,
+  `introPeek` the md: pill).
+- **Console menu + easter egg**: `ConsoleMenu` (root layout) prints the
+  MANUS banner once (module flag vs StrictMode) and installs
+  `window.manus` = help/preset/burst/fehldruck — file-top
+  `biome-ignore-all lint/suspicious/noConsole` MUST precede "use client".
+  `PrintJamOverlay` runs the Fehldruck sequence (Konami via `e.code` +
+  printJamBus): `<html data-print-jam>` jitters headings (CSS in
+  globals.css), splat storm via fluidBus, reject-stamp then
+  NEU KALIBRIERT; reduced-motion = static stamp only. Stamp strings live
+  in the `easterEgg` common.json namespace (identical across locales).
 - **Playground/mini-sims inherit look only** via `syncPresetVisuals()` —
   their tuned physics stays authoritative.
 - **Ladder contrast rule**: light-theme ladder bands must never approach
@@ -319,8 +347,10 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   `delay={i * 0.08}` prop. `HeroSkillPulse` loops continuously without IO
   gate (cheap, avoids re-mount cycle restart).
 - **Work**: editorial DOM/SVG cards (no 3D toon planes — would compete with
-  hero sim). Cards dispatch splats via `fluidBus`. `PortfolioCardVisual` is
-  generative SVG (no real screenshot, no re-shoot per iteration).
+  hero sim). Cards dispatch splats via `fluidBus`. The generative-SVG
+  `PortfolioCardVisual` era is over: the Portfolio card shows the real
+  five-theme split screenshot behind `PortfolioCardReveal`'s hover stage,
+  Joggediballa shows real shots (`JoggediballaScreenshot`, night-aware).
 - **Case Study**: inline section, NOT a `/work/[slug]` route. Diorama design
   (one wide SVG illustration + absolute-positioned HTML cards in vh units,
   4200×1000 viewBox at 100vh tall = 420vh wide horizontal-pin track).
