@@ -165,7 +165,7 @@ export const SIM_PRESETS: readonly SimPreset[] = [
     // Wet watercolor (render-aquarell.frag.glsl): the dye field is
     // read through a wide blur with granulation and wet-edge rims —
     // by far the softest of the four styles. Single HUGE blooms
-    // (radius 2.6x tier baseline), velocity dies fast, dye lingers.
+    // (radius 6.5x tier baseline), velocity dies fast, dye lingers.
     id: "aquarell",
     i18nKey: "aquarell",
     swatch: ["mint", "violet"],
@@ -177,14 +177,16 @@ export const SIM_PRESETS: readonly SimPreset[] = [
       // dry out while the huge blooms spread.
       dyeDissipation: 0.978,
       confinement: 4,
-      splatRadiusScale: 4.5,
+      splatRadiusScale: 6.5,
     },
     visuals: {
       style: "aquarell",
       paper: WASH_PAPER,
       ladder: [MINT_TINT, SPOT_RGB.mint, SPOT_RGB.violet, ROSE_SOFT],
       velocityScale: 7,
-      dyeScale: 0.045,
+      // Deposit area grows ~radius^2 — dyeScale compensates the 4.5
+      // -> 6.5 radius bump so the wash doesn't flood into one pool.
+      dyeScale: 0.035,
       grainStrength: 0.04,
       // Wet-edge rim darkening (per-style meaning of edgeStrength).
       edgeStrength: 0.3,
@@ -280,6 +282,14 @@ export function applySimPreset(
  * warmup gate drops queued splats while the sim hasn't started, so a
  * switch during the loader can't leak into the hero reveal. Shared by
  * the Desktop FluidSim and the MobileBackgroundSim.
+ *
+ * The burst previews the preset's steady-state character instead of a
+ * one-size celebration (start must match idle — user feedback):
+ * radius carries splatRadiusScale (huge aquarell blooms, tiny
+ * turbulenz droplets), swarm presets detonate as a scattered droplet
+ * cloud, and runSplat's dye/velocityScale — already live via
+ * applySimPreset, which callers run before the burst — meter the ink
+ * per splat.
  */
 const BURST_COUNT = 8;
 export function firePresetBurst(
@@ -287,21 +297,30 @@ export function firePresetBurst(
   preset: SimPreset,
   baseRadius: number,
 ): void {
-  const ladder = preset.visuals.ladder ?? DEFAULT_FLUID_VISUALS.ladder;
-  for (let i = 0; i < BURST_COUNT; i++) {
-    const angle = (i / BURST_COUNT) * Math.PI * 2;
+  const visuals = { ...DEFAULT_FLUID_VISUALS, ...preset.visuals };
+  const { splatRadiusScale = 1 } = preset.physics;
+  const ladder = visuals.ladder;
+  const swarm = visuals.splatCount > 1;
+  const count = swarm ? visuals.splatCount * 2 : BURST_COUNT;
+  const radius = baseRadius * splatRadiusScale * (swarm ? 1 : 1.2);
+  for (let i = 0; i < count; i++) {
+    const angle = (i / count) * Math.PI * 2;
     // Safe: `i % ladder.length` is always 0..3 (ladder has 4 entries)
     const color = ladder[i % ladder.length] as readonly [number, number, number];
-    // Radius intentionally uses the tier baseline (not the preset's
-    // splatRadiusScale) — the burst should feel identical regardless
-    // of which preset is incoming.
+    // Seat each splat slightly off-centre along its own direction so
+    // the ring doesn't pile N splats of dye onto one spot; swarm
+    // presets scatter wider and add per-droplet jitter (a ring of a
+    // dozen droplets otherwise reads as one dotted circle).
+    const spread = swarm ? visuals.splatScatter * 6 : radius * 0.6;
+    const jx = swarm ? (Math.random() - 0.5) * visuals.splatScatter * 4 : 0;
+    const jy = swarm ? (Math.random() - 0.5) * visuals.splatScatter * 4 : 0;
     orchestrator.injectSplat(
-      0.5,
-      0.5,
+      0.5 + Math.cos(angle) * spread + jx,
+      0.5 + Math.sin(angle) * spread + jy,
       color,
       Math.cos(angle) * 1.2,
       Math.sin(angle) * 1.2,
-      baseRadius * 2,
+      radius,
     );
   }
 }
