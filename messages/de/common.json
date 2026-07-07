@@ -79,5 +79,9 @@
     "turbulenz": "Turbulenz",
     "aquarell": "Aquarell",
     "nachtdruck": "Nachtdruck"
+  },
+  "easterEgg": {
+    "jamStamp": "FEHLDRUCK · REGISTRATION ERROR",
+    "calibratedStamp": "NEU KALIBRIERT · RE-CALIBRATED"
   }
 }

@@ -8,10 +8,12 @@ import { AmbientRecorderDevGate } from "@/components/scene/AmbientRecorderDevGat
 import { InkWipeOverlay } from "@/components/scene/InkWipeOverlay";
 import { SceneProvider } from "@/components/scene/SceneProvider";
 import { ScrollInkCoupling } from "@/components/scene/ScrollInkCoupling";
+import { ConsoleMenu } from "@/components/ui/ConsoleMenu";
 import { Footer } from "@/components/ui/Footer";
 import { InkCursor } from "@/components/ui/InkCursor";
 import { Loader } from "@/components/ui/Loader";
 import { Nav } from "@/components/ui/Nav";
+import { PrintJamOverlay } from "@/components/ui/PrintJamOverlay";
 import { ScrollProgress } from "@/components/ui/ScrollProgress";
 import { SimPresetSwitcher } from "@/components/ui/SimPresetSwitcher";
 import { SimThemeSync } from "@/components/ui/SimThemeSync";
@@ -90,6 +92,8 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
               <ScrollInkCoupling />
               <Loader />
               <InkWipeOverlay />
+              <ConsoleMenu />
+              <PrintJamOverlay />
               <AmbientRecorderDevGate />
             </SceneProvider>
           </MotionProvider>
