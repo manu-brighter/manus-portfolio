@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { PlaygroundPresetBar } from "./PlaygroundPresetBar";
 
 type ExperimentChromeProps = {
   i18nKey: "inkDropStudio" | "typeAsFluid";
@@ -47,6 +48,15 @@ export function ExperimentChrome({ i18nKey, children }: ExperimentChromeProps) {
             </Link>
             <h1 className="type-h2 mt-3 italic text-ink">{t("title")}</h1>
             <p className="type-body-sm mt-3 max-w-[36ch] text-ink-soft md:hidden">{t("caption")}</p>
+            {/* Docked preset switcher — flows in the title column so it
+                sits below the caption on mobile and below the title on
+                desktop (caption is bottom-left there), adapting to
+                whatever the caption's height is. The site-wide floating
+                pill stands down on these routes (SimPresetSwitcher route
+                gate). */}
+            <div className="mt-4">
+              <PlaygroundPresetBar />
+            </div>
           </div>
         </div>
 

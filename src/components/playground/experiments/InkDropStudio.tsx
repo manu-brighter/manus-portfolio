@@ -93,6 +93,9 @@ function InkDropStudioCanvas() {
   // pointerup / pointerleave clear it. Lets the user "rain bombs"
   // for as long as they hold instead of getting one short blip.
   const bombIntervalRef = useRef<number | null>(null);
+  // Per-frame sustain timers for the bomb splats — tracked so unmount
+  // can clear any in-flight ones before the GL context is disposed.
+  const bombSustainTimersRef = useRef<Set<number>>(new Set<number>());
   const [paused, setPaused] = useState(false);
 
   // Tweakpane mutates this object directly. No React state — slider
@@ -175,7 +178,10 @@ function InkDropStudioCanvas() {
     const params = paramsRef.current;
     const pane = new Pane({
       container,
-      title: "INK DROP STUDIO",
+      // "SIM-PARAMETER", not a second "INK DROP STUDIO" — the card is a
+      // labeled control panel, not a duplicate of the page title (which
+      // read as thrown-in). Matches the caption's "Slider = Sim-Parameter".
+      title: "SIM-PARAMETER",
     });
     pane.addBinding(params, "velocityDissipation", {
       label: "Velocity Dissipation",
@@ -338,24 +344,57 @@ function InkDropStudioCanvas() {
    * 110ms cadence (see onBombStart/End). Two stacked splats per
    * position with crossed velocity vectors amplify the impact and
    * give vorticity something to tear apart.
+   *
+   * Each point is SUSTAINED over ~8 frames instead of a single-frame
+   * poke: the first frame lands the full velocity impulse (the
+   * shockwave), the following frames keep depositing dye with a gentle
+   * push at the same spot, so the splat visibly BUILDS UP into a solid
+   * ink pool rather than flashing once and vanishing (user feedback).
    */
   const fireBombWave = () => {
     const o = orchestratorRef.current;
     if (!o) return;
     const COUNT = 4 + Math.floor(Math.random() * 5);
-    for (let i = 0; i < COUNT; i++) {
-      const x = 0.1 + Math.random() * 0.8;
-      const y = 0.1 + Math.random() * 0.8;
-      const angle = Math.random() * Math.PI * 2;
-      const speed = 1.2 + Math.random() * 1.5;
-      o.injectSplat(x, y, randomSpot(), Math.cos(angle) * speed, Math.sin(angle) * speed);
-      o.injectSplat(
-        x,
-        y,
-        randomSpot(),
-        Math.cos(angle + Math.PI / 2) * speed * 0.6,
-        Math.sin(angle + Math.PI / 2) * speed * 0.6,
-      );
+    const points = Array.from({ length: COUNT }, () => ({
+      x: 0.1 + Math.random() * 0.8,
+      y: 0.1 + Math.random() * 0.8,
+      angle: Math.random() * Math.PI * 2,
+      speed: 1.2 + Math.random() * 1.5,
+      color: randomSpot(),
+      crossColor: randomSpot(),
+    }));
+    const injectFrame = (frame: number) => {
+      const orch = orchestratorRef.current;
+      if (!orch) return;
+      // Full impulse on frame 0; gentle push after so later frames add
+      // dye without re-exploding the velocity field.
+      const vScale = frame === 0 ? 1 : 0.2;
+      for (const p of points) {
+        orch.injectSplat(
+          p.x,
+          p.y,
+          p.color,
+          Math.cos(p.angle) * p.speed * vScale,
+          Math.sin(p.angle) * p.speed * vScale,
+        );
+        orch.injectSplat(
+          p.x,
+          p.y,
+          p.crossColor,
+          Math.cos(p.angle + Math.PI / 2) * p.speed * 0.6 * vScale,
+          Math.sin(p.angle + Math.PI / 2) * p.speed * 0.6 * vScale,
+        );
+      }
+    };
+    const SUSTAIN_FRAMES = 8;
+    injectFrame(0);
+    const timers = bombSustainTimersRef.current;
+    for (let f = 1; f < SUSTAIN_FRAMES; f++) {
+      const id = window.setTimeout(() => {
+        timers.delete(id);
+        injectFrame(f);
+      }, f * 16);
+      timers.add(id);
     }
   };
 
@@ -371,13 +410,17 @@ function InkDropStudioCanvas() {
     }
   };
 
-  // Safety: clear the interval if the component unmounts while held.
+  // Safety: clear the interval + any in-flight bomb-sustain timers if
+  // the component unmounts while held (they'd otherwise fire injectSplat
+  // against a disposed GL context ~130ms after route change).
   useEffect(() => {
     return () => {
       if (bombIntervalRef.current !== null) {
         window.clearInterval(bombIntervalRef.current);
         bombIntervalRef.current = null;
       }
+      for (const id of bombSustainTimersRef.current) window.clearTimeout(id);
+      bombSustainTimersRef.current.clear();
     };
   }, []);
   const onFreezeToggle = () => {
@@ -420,15 +463,16 @@ function InkDropStudioCanvas() {
           tucked it half-under the nav and read as broken), dressed as a
           Riso card (ink border + offset shadow) like the toolbar
           buttons so it belongs to the composition. */}
-      {/* Pane sits BELOW the (up to 4-line) title/caption block on
-          mobile (top-64) so the sliders don't cover "Ink Drop Studio /
-          Spielwiese..." — desktop keeps it up at top-24 where there's
-          room beside the left-aligned title. Narrower on mobile so it
-          doesn't span most of a phone. */}
+      {/* Pane docks to the BOTTOM on mobile (centered, above the button
+          row) — the sliders join the buttons in the thumb zone, leaving
+          the top clear for the title/caption/preset-bar column. Desktop
+          keeps it top-right below the nav, forming a control column with
+          the preset bar. Narrower on mobile so it doesn't span the
+          phone. */}
       <div
         ref={paneContainerRef}
         data-no-splat
-        className="riso-tweakpane pointer-events-auto absolute top-64 right-4 z-20 w-[min(300px,72vw)] border-[1.5px] border-ink bg-paper shadow-[3px_3px_0_var(--color-ink)] md:top-24 md:right-6 md:w-[300px]"
+        className="riso-tweakpane pointer-events-auto absolute bottom-28 left-1/2 z-20 w-[min(300px,72vw)] -translate-x-1/2 border-[1.5px] border-ink bg-paper shadow-[3px_3px_0_var(--color-ink)] md:top-24 md:right-6 md:bottom-auto md:left-auto md:w-[300px] md:translate-x-0"
       />
     </ExperimentChrome>
   );

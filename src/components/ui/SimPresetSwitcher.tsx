@@ -5,14 +5,16 @@ import { useEffect, useRef, useState } from "react";
 import { useScene } from "@/components/scene/SceneProvider";
 import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { usePathname } from "@/i18n/navigation";
 import { getSimPreset, SIM_PRESETS, type SimPreset } from "@/lib/content/simPresets";
 import { isLoaderComplete, subscribeToLoaderComplete } from "@/lib/loaderSession";
 import { SPOT_HEX } from "@/lib/palette";
 import { useSimPresetStore } from "@/lib/simPresetStore";
 
 /** Two-tone dot fill. `swatchHex` (Wave's blues) wins over the
- *  canonical spot pair — spot colors as fills only, decorative. */
-function swatchGradient(preset: SimPreset): string {
+ *  canonical spot pair — spot colors as fills only, decorative.
+ *  Exported for the playground's inline PlaygroundPresetBar. */
+export function swatchGradient(preset: SimPreset): string {
   const [c0, c1] = preset.swatchHex ?? [SPOT_HEX[preset.swatch[0]], SPOT_HEX[preset.swatch[1]]];
   return `linear-gradient(135deg, ${c0} 50%, ${c1} 50%)`;
 }
@@ -88,6 +90,14 @@ export function SimPresetSwitcher() {
   // trigger there — after one selection the pill would dead-end
   // until a stray tap elsewhere re-armed the emulated hover.
   const isCoarse = useCoarsePointer();
+  // Playground experiment routes render their own docked PresetBar in
+  // ExperimentChrome (all viewports), so the floating overlay pill
+  // stands down there — one switcher per screen, and the docked bar
+  // avoids the pill's mobile overlap with the experiments' bottom-edge
+  // controls. usePathname is locale-stripped ("/playground/type-as-
+  // fluid").
+  const pathname = usePathname();
+  const onExperimentRoute = pathname.startsWith("/playground/");
   const presetId = useSimPresetStore((s) => s.presetId);
   const setPreset = useSimPresetStore((s) => s.setPreset);
 
@@ -148,7 +158,7 @@ export function SimPresetSwitcher() {
     };
   }, []);
 
-  if (!mounted || !config || reducedMotion) return null;
+  if (!mounted || !config || reducedMotion || onExperimentRoute) return null;
 
   const activePreset = getSimPreset(presetId);
 
