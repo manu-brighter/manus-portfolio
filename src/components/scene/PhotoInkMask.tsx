@@ -29,10 +29,13 @@
 
 import { useEffect, useRef } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { getSimPreset } from "@/lib/content/simPresets";
 import { compileShader } from "@/lib/gl/compileShader";
+import { DEFAULT_FLUID_VISUALS, type RGB } from "@/lib/gl/fluidOrchestrator";
 import { capDPR, DPR_FULL } from "@/lib/gpu";
 import { PAPER_COLOR, SPOT_RGB, type SpotColor } from "@/lib/palette";
 import { MAX_DT_S, subscribe } from "@/lib/raf";
+import { useSimPresetStore } from "@/lib/simPresetStore";
 import quadVertSrc from "@/shaders/common/quad.vert.glsl";
 import advectFragSrc from "@/shaders/ink-mask/advect.frag.glsl";
 import maskFragSrc from "@/shaders/ink-mask/mask.frag.glsl";
@@ -43,6 +46,29 @@ import splatFragSrc from "@/shaders/ink-mask/splat.frag.glsl";
 // definition now lives in `@/lib/palette` but the prop-side import
 // stays component-local for readability.
 export type { SpotColor };
+
+// Theme-following mask colors. The per-photo spot prop maps onto the
+// active preset's 4-slot ladder (the slot order IS the legacy spot
+// order — same convention as the fluid render uniforms), and the mask
+// paper mirrors the preset's sim paper. Gate: only when the page
+// actually wears a sim theme (`data-sim-theme` set by SimThemeSync);
+// on the static tier the attribute never lands, so the mask stays
+// canonical and coherent with the untinted page.
+const SPOT_LADDER_SLOT: Record<SpotColor, 0 | 1 | 2 | 3> = {
+  mint: 0,
+  amber: 1,
+  rose: 2,
+  violet: 3,
+};
+
+function activeMaskColors(spot: SpotColor): { paper: RGB; ink: RGB } {
+  if (document.documentElement.dataset.simTheme === undefined) {
+    return { paper: PAPER_COLOR, ink: SPOT_RGB[spot] };
+  }
+  const preset = getSimPreset(useSimPresetStore.getState().presetId);
+  const visuals = { ...DEFAULT_FLUID_VISUALS, ...preset.visuals };
+  return { paper: visuals.paper, ink: visuals.ladder[SPOT_LADDER_SLOT[spot]] };
+}
 
 const DENSITY_RES = 256;
 // Total reveal duration. The wavefront covers ~0.5 texture units of
@@ -408,8 +434,11 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
       gl.useProgram(maskProg);
       gl.uniform1i(maskU.density, 0);
       gl.uniform2f(maskU.resolution, canvas.width, canvas.height);
-      gl.uniform3f(maskU.paper, ...PAPER_COLOR);
-      gl.uniform3f(maskU.spot, ...(SPOT_RGB[spotColorRef.current] as [number, number, number]));
+      // Read per frame so a preset switch re-tints the mask live —
+      // store read + object spread are trivial next to the GL work.
+      const { paper, ink } = activeMaskColors(spotColorRef.current);
+      gl.uniform3f(maskU.paper, ...(paper as [number, number, number]));
+      gl.uniform3f(maskU.spot, ...(ink as [number, number, number]));
       gl.uniform1f(maskU.time, time);
       gl.bindVertexArray(vao);
       gl.drawArrays(gl.TRIANGLES, 0, 3);

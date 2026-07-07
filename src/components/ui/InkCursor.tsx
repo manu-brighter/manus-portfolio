@@ -25,9 +25,11 @@ import { subscribe } from "@/lib/raf";
  * kills the offset users saw when the fixed canvas didn't sit exactly
  * at the viewport origin.
  *
- * Color comes from the canvas' computed `color` (text-ink class) so
- * it follows the sim theme; `.ink-cursor-layer` flips multiply ->
- * screen blending in night mode (light ink would multiply to black).
+ * Color comes from the canvas' computed `color`, driven by the
+ * `--color-ink-cursor` token (per-theme accent overrides in
+ * globals.css) so dot + trail re-tint live with the sim theme;
+ * `.ink-cursor-layer` flips multiply -> screen blending in night
+ * mode (a light color would multiply to black).
  *
  * Trail sampling rides the shared RAF (`subscribe`), the head dot
  * rides gsap.quickTo on gsap.ticker — same frame, one clock.
@@ -250,13 +252,18 @@ export function InkCursor() {
         ref={canvasRef}
         aria-hidden="true"
         tabIndex={-1}
-        className="ink-cursor-layer pointer-events-none fixed top-0 left-0 z-[10001] hidden text-ink mix-blend-multiply md:block"
+        className="ink-cursor-layer pointer-events-none fixed top-0 left-0 z-[10001] hidden mix-blend-multiply md:block"
+        style={{ color: "var(--color-ink-cursor)" }}
       />
       <div
         ref={dotRef}
         aria-hidden="true"
-        className="ink-cursor-layer pointer-events-none fixed top-0 left-0 z-[10001] hidden rounded-full bg-ink mix-blend-multiply md:block"
-        style={{ width: DOT_SIZE_PX, height: DOT_SIZE_PX }}
+        className="ink-cursor-layer pointer-events-none fixed top-0 left-0 z-[10001] hidden rounded-full mix-blend-multiply md:block"
+        style={{
+          width: DOT_SIZE_PX,
+          height: DOT_SIZE_PX,
+          background: "var(--color-ink-cursor)",
+        }}
       />
     </>
   );

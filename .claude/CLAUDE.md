@@ -166,19 +166,131 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 
 ## Sim presets & night theme
 
-- **4 user-switchable presets** (riso/turbulenz/aquarell/nachtdruck) defined in
-  `src/lib/content/simPresets.ts`; persisted selection in
+- **5 user-switchable presets** (riso/wave/turbulenz/aquarell/nachtdruck)
+  defined in `src/lib/content/simPresets.ts`; persisted selection in
   `src/lib/simPresetStore.ts` (zustand + localStorage `manus-sim-preset`).
+- **One render shader per preset** (theme-differentiation pass): riso =
+  the ORIGINAL soft-ladder + Sobel pooling (deliberately the quietest —
+  it's the default under the hero text; the louder overprint rework was
+  demoted from default after user feedback), wave = overprint ring-band
+  plates + misreg seams + ink bleed in a blue plate ladder, turbulenz =
+  screenprint comic (hard bands, halftone, ink contour lines), aquarell =
+  wet blur + granulation + wet-edge rims, nachtdruck = neon terraces +
+  additive glow + chroma fringes. All five compile at `init()`; selection
+  via `FluidVisuals.style` (exhaustive switch in `renderProgram()`).
+  `render-toon.frag.glsl` is retired (its look lives in render-riso).
+  Blur hierarchy is deliberate: aquarell >> riso > wave/turbulenz/
+  nachtdruck (crisp).
+- **Idle ambient swarm**: the ambient rig runs up to 10 wandering points
+  (3 hand-tuned A/B/C + 7 procedural golden-angle extras) —
+  `FluidVisuals.ambientPointCount` picks how many, `ambientChurn` (0..1)
+  cycles points beyond A/B in/out on staggered ~10-20s sines (visible
+  spawn/despawn; dye deposit fades with the life gate via runSplat's
+  dyeMul). Turbulenz 8/full churn so the swarm persists while IDLE too
+  (user feedback: pointer-only multi-splat "verschwindet gleich"),
+  nachtdruck 6/0.8, wave 6/0.7. Defaults 3/0 = original rig.
+- **Wave is a full page theme**: `theme: "wave"` re-inks paper AND ink
+  family (blue-black on blue-white, globals.css) — unlike warm/wash
+  which only tint paper. Switcher dot uses `swatchHex` (blue sits
+  outside the four canonical spots).
+- **PhotoInkMask follows the theme**: mask paper = preset sim paper,
+  per-photo spot maps onto the preset ladder slot (mint=0/amber=1/
+  rose=2/violet=3, the legacy uniform order), read per frame, gated on
+  `data-sim-theme` so the static tier stays canonical.
+- **Render shaders are `precision highp float`** — the shared noise include
+  overflows fp16 internally (`permute` ~3e6) and pixel-space halftone
+  coords exceed fp16 range; sim passes stay mediump. Halftone uses
+  `gl_FragCoord.xy` (spec-guaranteed highp), Sobel steps in SIM texels
+  (`uSimTexel`) so edge response is viewport-independent.
+- **Per-style knob reuse**: `FluidVisuals.edgeStrength` means contour-line
+  strength (turbulenz), wet-edge darkening (aquarell), glow gain
+  (nachtdruck); riso ignores it. A shader that doesn't declare a uniform
+  no-ops it (null location).
 - **Two-channel application**: physics subset via `setParams()` (reset to tier
   baseline first — never touches gridSize/halfRate/pressureIterations, so weak
-  GPUs can't regress), look via `setVisuals(FluidVisuals)` (posterize levels,
-  outline, grain, paper, 4-slot color ladder, splat scales, ambient
-  multipliers). `DEFAULT_FLUID_VISUALS` reproduces the pre-preset literals.
+  GPUs can't regress), look via `setVisuals(FluidVisuals)` (style,
+  outline, grain, paper, 4-slot color ladder, splat scales/count/scatter,
+  ambient multipliers).
+- **Multi-splat swarm**: `splatCount`/`splatScatter` in FluidVisuals —
+  turbulenz throws 7 tiny jittered droplets per pointer frame (position AND
+  direction jitter; N parallel copies of one stroke otherwise).
+  dye/velocityScale are per-droplet — retune them when changing count.
+- **Ink cursor follows the theme** via `--color-ink-cursor` (globals.css,
+  `:root` + per-`data-sim-theme` overrides; decorative, visibility-picked,
+  not AA). InkCursor reads computed color per frame — live on switch.
 - **FluidSim re-applies the preset after every orchestrator init** (tier
   auto-tune re-creates the orchestrator) and fires a center splat-burst on
-  live switches only.
+  live switches only. `firePresetBurst` previews the preset's STEADY-STATE
+  character (radius × splatRadiusScale, swarm presets detonate a scattered
+  droplet cloud, ring splats seat off-centre) — "start must match idle"
+  was explicit user feedback; don't revert to a one-size celebration.
+- **Theme follows through to content**: the Work-card Joggediballa shot
+  swaps to the real darkmode screenshot under Nachtdruck
+  (`JoggediballaScreenshot`, gated like SimThemeSync so static tier keeps
+  light); the Portfolio card shows a **five-theme split composite**
+  (`homepage-themes-*`, five vertical hero slices in switcher order with
+  ink seams — composed via scratchpad Playwright + sharp, master in
+  content-input, pipeline task in `optimize-assets.mjs`). Night theme
+  swaps the three raster object-grid stamps (car/joggediballa/pingpong)
+  to hand-recolored `-dark` PNG variants (generate-icons.mjs emits them;
+  masters in content-input/icons) — CSS filters can't re-ink raster
+  accents (invert turned the pingpong ball brown, joggediballa mint dark
+  green). Swap logic + hydration gating in `useNightTheme` (shared by
+  `RasterStamp` and `JoggediballaScreenshot`); the three SVG stamps
+  (camera/schnee/tauchen) re-token via CSS and don't swap. Warm/
+  Turbulenz adds a layered paper `text-shadow` halo on main/header/
+  footer for glyph contrast over hard bands.
+- **Switcher UX**: pointer-selection blurs the radio + disarms
+  group-hover until pointerleave (immediate collapse); keyboard keeps
+  focus/expansion. On first appear the pill unfolds for 3.5s
+  (`INTRO_PEEK_MS` discoverability peek; `expanded` drives mobile,
+  `introPeek` the md: pill).
+- **Console menu + easter egg**: `ConsoleMenu` (root layout) prints the
+  MANUS banner once (module flag vs StrictMode) and installs
+  `window.manus` = help/preset/burst/fehldruck — file-top
+  `biome-ignore-all lint/suspicious/noConsole` MUST precede "use client".
+  `PrintJamOverlay` runs the Fehldruck sequence (Konami via `e.code` +
+  printJamBus): `<html data-print-jam>` jitters headings (CSS in
+  globals.css), splat storm via fluidBus, reject-stamp then
+  NEU KALIBRIERT; reduced-motion = static stamp only. Stamp strings live
+  in the `easterEgg` common.json namespace (identical across locales).
 - **Playground/mini-sims inherit look only** via `syncPresetVisuals()` —
-  their tuned physics stays authoritative.
+  their tuned physics stays authoritative. Two option flags matter:
+  `lookOnly` applies ONLY the render subset (style/paper/ink/ladder/
+  grain/edges) and leaves the caller's splat-feel (count/scatter/
+  velocity/dye scale) alone — Type-as-Fluid needs this because the
+  preset swarm feel is tuned for the hero's fast dye fade and piles
+  into a solid dark mass under the experiment's slow-fade text physics
+  (turbulenz's density-to-dark shader makes it obvious). `cursor-
+  SplatRadiusBase` re-scales the hover cursor by the preset's
+  splatRadiusScale on each switch (turbulenz tiny, aquarell a bloom).
+  InkDropStudio instead applies full preset physics via its Tweakpane
+  sync, so it keeps the swarm.
+- **Type-as-Fluid auto-writes a fresh word every 6.5s** (continuous
+  self-rearming rotation) AND re-inks immediately on preset switch.
+  The catch: each stamped word blooms + spreads viewport-wide, so
+  repeated stamping piles the dye into a solid mass under turbulenz's
+  density-to-dark shader. The fix is `autoStamp()` = `orchestrator
+  .reset()` THEN stampWord, so the canvas is always one clean word at
+  a time on EVERY device — no reliance on the dye fading fast enough
+  between stamps (which throttles hard on weak GPUs / headless).
+  Rotation is gated on `lastTypedAtRef` (updated on typing AND
+  cursoring) so it never wipes ink mid-gesture. `pickWord()`
+  centralizes typed-vs-default selection.
+- **Playground preset switcher is a DOCKED bar, not the floating pill.**
+  `PlaygroundPresetBar` (a labeled riso card) flows in the
+  ExperimentChrome title column (below caption on mobile, below title
+  on desktop — adapts to caption height); the site-wide
+  `SimPresetSwitcher` returns null on `/playground/*` (usePathname,
+  locale-stripped) so there's one switcher per screen. `swatchGradient`
+  is exported from SimPresetSwitcher for reuse. InkDropStudio's
+  Tweakpane docks bottom-centre on mobile (thumb zone, above the button
+  row) / top-right on desktop (a control column with the preset bar);
+  its title is "SIM-PARAMETER" (not a second page title). The
+  ExperimentChrome back link is `self-start` (bordered stamp hugs
+  content). BOMB splats sustain over ~8 frames (full impulse frame 0,
+  gentle dye deposits after) so each splat builds into a pool instead
+  of a one-frame poke.
 - **Ladder contrast rule**: light-theme ladder bands must never approach
   text-ink luminance — DOM text sits on top of the sim; a near-black pool
   under near-black type is unreadable (screenshot-verified).
@@ -192,7 +304,10 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 - **Visual tuning workflow**: headless-Playwright screenshot scripts against
   the dev server (pin tier via localStorage `manus-gpu-tier`, set preset,
   synthesize pointer churn, screenshot) — used for the turbulenz/nachtdruck
-  retunes; far faster than eyeballing param changes blind.
+  retunes and the per-preset shader pass; far faster than eyeballing param
+  changes blind. Verify at BOTH high and low tier — blur radii and band
+  edges are constant in UV, so their ratio to a sim texel swings ~4x
+  between 512^2 and 128^2 grids.
 
 ## Mobile architecture (post mobile-wow-pass)
 
@@ -211,7 +326,9 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   persisted preset on init + live on store change (same wiring as FluidSim);
   SimThemeSync and SimPresetSwitcher gate only on `config && !reducedMotion`.
   Switcher renders as a horizontal bottom-left row with 44px touch targets
-  below `md`, vertical dot pill from `md` up.
+  below `md`; from `md` up a vertical pill that rests as the active dot
+  and expands on :hover OR :focus-within (focus keeps the native-radio
+  arrow-key pattern working — collapsed dots are h-0, not display:none).
 - **Tap-to-splat** reads touch at document level; taps on interactive UI
   (`a/button/input/label/[data-no-splat]`) are ignored; color is a random
   spot per tap.
@@ -270,8 +387,10 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   `delay={i * 0.08}` prop. `HeroSkillPulse` loops continuously without IO
   gate (cheap, avoids re-mount cycle restart).
 - **Work**: editorial DOM/SVG cards (no 3D toon planes — would compete with
-  hero sim). Cards dispatch splats via `fluidBus`. `PortfolioCardVisual` is
-  generative SVG (no real screenshot, no re-shoot per iteration).
+  hero sim). Cards dispatch splats via `fluidBus`. The generative-SVG
+  `PortfolioCardVisual` era is over: the Portfolio card shows the real
+  five-theme split screenshot behind `PortfolioCardReveal`'s hover stage,
+  Joggediballa shows real shots (`JoggediballaScreenshot`, night-aware).
 - **Case Study**: inline section, NOT a `/work/[slug]` route. Diorama design
   (one wide SVG illustration + absolute-positioned HTML cards in vh units,
   4200×1000 viewBox at 100vh tall = 420vh wide horizontal-pin track).

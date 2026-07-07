@@ -114,11 +114,11 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
   // real GPU frametime sample; outside that window the loop is
   // overhead-free.
   //
-  // step() is always called so render-toon paints paper-color + grain
+  // step() is always called so the render pass paints paper-color + grain
   // (the orchestrator short-circuits sim passes internally while the
   // warmup gate is closed — see `step()`). The measuring path however
   // is gated on `isStarted()` because frametime samples taken during
-  // the warmup window only capture render-toon (~1ms) and would
+  // the warmup window only capture the render pass (~1ms) and would
   // mis-tier first-time visitors as `high`.
   useEffect(() => {
     return subscribe((deltaMs, elapsedMs) => {

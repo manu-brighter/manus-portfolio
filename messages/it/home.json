@@ -328,7 +328,6 @@
       }
     },
     "objectGrid": {
-      "ariaCarouselLabel": "Galleria di oggetti",
       "sectionLabel": "Fuori dallo schermo",
       "headline": "Quando lo schermo è spento.",
       "currentlyBand": "Snapshot 2026 · Viaggio wildlife in pianificazione · Stagione invernale · Pagaia a portata di mano",
@@ -389,7 +388,7 @@
         "metaNote": "Stai surfando in questo momento su una simulazione di fluido GPU. Niente iframe, niente video in loop, niente file Lottie. Frame veri.",
         "ctaLabel": "Sei già qui",
         "screenshot": {
-          "alt": "Screenshot della sezione hero di manuelheller.dev",
+          "alt": "La sezione hero di manuelheller.dev in cinque strisce — una per carattere d'inchiostro",
           "caption": "manuelheller.dev · hero"
         },
         "reveal": {
@@ -566,7 +565,7 @@
     },
     "stations": {
       "hook": {
-        "datestamp": "2022.05",
+        "datestamp": "2022.08",
         "polaroidCaption": "Joggediballa · Mobile · Live"
       },
       "stack": {
@@ -602,14 +601,6 @@
     "headline": "Attraverso l'obiettivo.",
     "lede": "Wildlife e auto, i miei due mondi. Il primo lo inseguo in solitaria nelle giungle del Costa Rica o della Thailandia, il secondo di solito mi trova più vicino a casa. Ciò che li unisce: pazienza, luce, e quel singolo momento che giustifica tutta la giornata.",
     "techLabel": "SONY α7 IV · 24–600mm · dal 2023",
-    "prev": "Indietro",
-    "next": "Avanti",
-    "ariaCarouselLabel": "Carosello foto",
-    "ariaPrev": "Foto precedente",
-    "ariaNext": "Foto successiva",
-    "ariaDot": "Foto {index} di {total}",
-    "ariaSlideOf": "Foto {index} di {total}",
-    "ariaLive": "Foto {index} di {total}",
     "ctaLabel": "Portfolio completo su manuelheller.myportfolio.com",
     "ctaHref": "https://manuelheller.myportfolio.com/portfolio",
     "ctaCaption": "",

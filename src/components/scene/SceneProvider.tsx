@@ -90,10 +90,10 @@ export function SceneProvider({ children }: SceneProviderProps) {
 
   // Universal SceneCanvas defer: the WebGL2 context creation, 9 shader
   // program compilations, FBO allocation, and the first per-frame
-  // render-toon dispatch all compete with the loader animation + hero
+  // render-pass dispatch all compete with the loader animation + hero
   // reveal for GPU time on every device — mobile especially, but also
   // measurable on mid-range desktop GPUs. The body bg is already
-  // `--color-paper`, identical to what render-toon paints with empty
+  // `--color-paper`, identical to what the render pass paints with empty
   // dye, so deferring the mount has zero visual cost: no flash when
   // the canvas appears later.
   //

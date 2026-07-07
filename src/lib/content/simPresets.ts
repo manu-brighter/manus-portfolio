@@ -22,7 +22,7 @@ import { SPOT_RGB, type SpotColor } from "@/lib/palette";
  * `@/lib/content/playground.ts`.
  */
 
-export type SimPresetId = "riso" | "turbulenz" | "aquarell" | "nachtdruck";
+export type SimPresetId = "riso" | "wave" | "turbulenz" | "aquarell" | "nachtdruck";
 
 export type SimPresetPhysics = {
   velocityDissipation?: number;
@@ -44,14 +44,21 @@ export type SimPreset = {
   /** Two spot colors for the switcher's two-tone dot (fills only). */
   swatch: readonly [SpotColor, SpotColor];
   /**
+   * Custom dot colors for the switcher when the preset's character
+   * sits outside the four canonical spots (Wave is blue — no blue
+   * spot exists). Fills only, decorative. Overrides `swatch`.
+   */
+  swatchHex?: readonly [string, string];
+  /**
    * Page-level theme coupling — applied by SimThemeSync as
    * `<html data-sim-theme>`; token overrides live in globals.css.
    * "night" flips to the dark paper set (dark dye and dark text must
-   * never fight); "warm"/"wash" are light-theme paper tints so every
+   * never fight); "warm"/"wash" are light-theme paper tints; "wave"
+   * re-inks the whole page cool blue (paper AND ink family) so every
    * preset re-colors the page, not just the sim. Riso (undefined)
    * keeps the canonical palette.
    */
-  theme?: "night" | "warm" | "wash";
+  theme?: "night" | "warm" | "wash" | "wave";
   physics: SimPresetPhysics;
   visuals: Partial<FluidVisuals>;
 };
@@ -78,11 +85,18 @@ const NIGHT_PAPER: RGB = [0.08, 0.06, 0.1];
 const WARM_PAPER: RGB = [0.965, 0.89, 0.8];
 /** Wash paper (#e9efe8) — `[data-sim-theme="wash"]` (Aquarell). */
 const WASH_PAPER: RGB = [0.914, 0.937, 0.91];
+/** Wave paper (#e6edf4) — `[data-sim-theme="wave"]`. */
+const WAVE_PAPER: RGB = [0.902, 0.929, 0.957];
+// Wave plate inks (multiply-overprint transmittances, low -> high).
+const WAVE_SKY: RGB = [0.55, 0.83, 0.94]; // pale sky-cyan
+const WAVE_ULTRA: RGB = [0.3, 0.45, 0.9]; // ultramarine
 
 export const SIM_PRESETS: readonly SimPreset[] = [
   {
-    // Today's shipped look, verbatim — DEFAULT_FLUID_VISUALS + tier
-    // baseline physics. Empty overrides keep it byte-identical.
+    // The original shipped look (render-riso.frag.glsl): soft
+    // overlapping ladder + Sobel ink pooling. Deliberately the
+    // quietest of the five — it's the default under the hero text.
+    // The louder overprint rework moved to Wave.
     id: "riso",
     i18nKey: "riso",
     swatch: ["mint", "rose"],
@@ -90,12 +104,31 @@ export const SIM_PRESETS: readonly SimPreset[] = [
     visuals: {},
   },
   {
-    // High-energy, FINE-GRAINED: small hard splats + strong
-    // confinement + inky Sobel contours — deliberately far from
-    // Riso's broad soft blobs. The trap from the first cut was dye
-    // dying before the eddies could read (dyeDis 0.94); small splats
-    // stay legible as long as the dye lives (0.975) and deposits
-    // punchy (dyeScale 0.22).
+    // Overprint-plate print (render-wave.frag.glsl): four
+    // misregistered drum passes with ink bleed + needle speckle, in a
+    // cool blue plate ladder. Full page theme — cool blue-white paper
+    // AND blue-black ink family (globals.css "wave" block).
+    id: "wave",
+    i18nKey: "wave",
+    swatch: ["mint", "violet"],
+    swatchHex: ["#7cc4e8", "#3b5bd9"],
+    theme: "wave",
+    physics: {},
+    visuals: {
+      style: "wave",
+      paper: WAVE_PAPER,
+      ladder: [WAVE_SKY, SPOT_RGB.mint, WAVE_ULTRA, SPOT_RGB.violet],
+      ambientPointCount: 6,
+      ambientChurn: 0.7,
+    },
+  },
+  {
+    // Screenprint comic (render-turbulenz.frag.glsl): hard bands,
+    // halftone ramps, true ink contour lines. Feel-side it throws a
+    // SWARM — 7 tiny scattered droplets per pointer frame instead of
+    // one stroke (splatCount/splatScatter), radius well below every
+    // other preset. dye/velocityScale are per-droplet, hence far
+    // lower than the old single-splat 0.22/15.
     id: "turbulenz",
     i18nKey: "turbulenz",
     swatch: ["amber", "violet"],
@@ -104,53 +137,69 @@ export const SIM_PRESETS: readonly SimPreset[] = [
       velocityDissipation: 0.99,
       dyeDissipation: 0.975,
       confinement: 26,
-      splatRadiusScale: 0.55,
+      splatRadiusScale: 0.3,
     },
     visuals: {
+      style: "turbulenz",
       paper: WARM_PAPER,
       // Top band stays a readable deep violet — see contrast rule.
       ladder: [SPOT_RGB.amber, SPOT_RGB.rose, SPOT_RGB.violet, VIOLET_DEEP],
-      velocityScale: 15,
-      dyeScale: 0.22,
-      grainStrength: 0.06,
+      velocityScale: 8,
+      dyeScale: 0.08,
+      splatCount: 7,
+      splatScatter: 0.035,
+      grainStrength: 0.07,
+      // Ink contour-line strength (per-style meaning of edgeStrength).
       edgeStrength: 0.7,
+      // The swarm persists while idle: 8 ambient points with full
+      // spawn/despawn churn (~5-8 alive at any moment). Force scale
+      // dropped from the 3-point era's 1.6 — 8 sources at 1.6 over-
+      // energize the field.
+      ambientPointCount: 8,
+      ambientChurn: 1,
       ambientTimeScale: 1.6,
-      ambientForceScale: 1.6,
+      ambientForceScale: 1.3,
     },
   },
   {
-    // Calm watercolor: velocity dies quickly but dye lingers, broad
-    // soft blooms, barely-there grain, slow gentle ambient drift.
+    // Wet watercolor (render-aquarell.frag.glsl): the dye field is
+    // read through a wide blur with granulation and wet-edge rims —
+    // by far the softest of the four styles. Single HUGE blooms
+    // (radius 6.5x tier baseline), velocity dies fast, dye lingers.
     id: "aquarell",
     i18nKey: "aquarell",
     swatch: ["mint", "violet"],
     theme: "wash",
     physics: {
       velocityDissipation: 0.95,
-      dyeDissipation: 0.985,
+      // 0.985 saturated the whole viewport into one flat pool under
+      // sustained pointer input (screenshot-verified) — washes must
+      // dry out while the huge blooms spread.
+      dyeDissipation: 0.978,
       confinement: 4,
-      splatRadiusScale: 1.7,
+      splatRadiusScale: 6.5,
     },
     visuals: {
+      style: "aquarell",
       paper: WASH_PAPER,
       ladder: [MINT_TINT, SPOT_RGB.mint, SPOT_RGB.violet, ROSE_SOFT],
       velocityScale: 7,
-      dyeScale: 0.09,
+      // Deposit area grows ~radius^2 — dyeScale compensates the 4.5
+      // -> 6.5 radius bump so the wash doesn't flood into one pool.
+      dyeScale: 0.035,
       grainStrength: 0.04,
-      // Near-zero edge darkening + wide outline threshold: washes
-      // blend without contour lines — true watercolor softness.
-      edgeStrength: 0.1,
-      outlineThreshold: 0.3,
+      // Wet-edge rim darkening (per-style meaning of edgeStrength).
+      edgeStrength: 0.3,
       ambientTimeScale: 0.5,
       ambientForceScale: 0.7,
     },
   },
   {
-    // Night mode: the page flips to the dark token set (theme:
-    // "night" -> SimThemeSync), the sim paints near-black paper and
-    // a ladder that BRIGHTENS with density — posterized neon
-    // screen-print glowing out of the dark. Dark dye under dark text
-    // was unreadable (screenshot-verified), hence the full theme
+    // Neon print (render-nachtdruck.frag.glsl): the page flips to the
+    // dark token set (theme: "night" -> SimThemeSync), the sim paints
+    // near-black paper with hard ascending-brightness bands, additive
+    // glow halos and chromatic misreg fringes. Dark dye under dark
+    // text was unreadable (screenshot-verified), hence the full theme
     // flip instead of a dark-ink-on-light-paper compromise.
     id: "nachtdruck",
     i18nKey: "nachtdruck",
@@ -162,15 +211,19 @@ export const SIM_PRESETS: readonly SimPreset[] = [
       splatRadiusScale: 1.1,
     },
     visuals: {
+      style: "nachtdruck",
       paper: NIGHT_PAPER,
       // Ascending brightness — high density GLOWS out of the dark.
       // Top band slightly deeper than spot violet so the light hero
       // text keeps reading over saturated pools.
       ladder: [WINE, VIOLET_DEEP, ROSE_DEEP, [0.65, 0.5, 0.95]],
-      levels: 4,
       dyeScale: 0.16,
       grainStrength: 0.09,
-      edgeStrength: 0.5,
+      // Glow-halo gain (per-style meaning of edgeStrength).
+      edgeStrength: 0.85,
+      // Neon terraces breathe: 6 points, most cycling in and out.
+      ambientPointCount: 6,
+      ambientChurn: 0.8,
     },
   },
 ];
@@ -212,6 +265,16 @@ export function applySimPreset(
   ) {
     absolute.velocityDissipation = HALF_RATE_VEL_DISSIPATION_MAX;
   }
+  // Dye needs the same treatment or half-rate tiers keep ~sqrt the
+  // retention: aquarell's 0.978 at 30Hz behaves like 0.989 at 60Hz —
+  // past the 0.985 that screenshot-verified as viewport-flooding.
+  // Squaring is the exact 30Hz<->60Hz equivalence (30 applications of
+  // r^2 == 60 applications of r), so the preset keeps its tuned feel
+  // instead of hitting an arbitrary clamp. Tier BASELINES are already
+  // tuned per tier; only preset overrides are 60Hz-tuned values.
+  if (tierBaseline.halfRate && absolute.dyeDissipation !== undefined) {
+    absolute.dyeDissipation = absolute.dyeDissipation ** 2;
+  }
   orchestrator.setParams({
     velocityDissipation: tierBaseline.velocityDissipation,
     dyeDissipation: tierBaseline.dyeDissipation,
@@ -229,6 +292,14 @@ export function applySimPreset(
  * warmup gate drops queued splats while the sim hasn't started, so a
  * switch during the loader can't leak into the hero reveal. Shared by
  * the Desktop FluidSim and the MobileBackgroundSim.
+ *
+ * The burst previews the preset's steady-state character instead of a
+ * one-size celebration (start must match idle — user feedback):
+ * radius carries splatRadiusScale (huge aquarell blooms, tiny
+ * turbulenz droplets), swarm presets detonate as a scattered droplet
+ * cloud, and runSplat's dye/velocityScale — already live via
+ * applySimPreset, which callers run before the burst — meter the ink
+ * per splat.
  */
 const BURST_COUNT = 8;
 export function firePresetBurst(
@@ -236,21 +307,30 @@ export function firePresetBurst(
   preset: SimPreset,
   baseRadius: number,
 ): void {
-  const ladder = preset.visuals.ladder ?? DEFAULT_FLUID_VISUALS.ladder;
-  for (let i = 0; i < BURST_COUNT; i++) {
-    const angle = (i / BURST_COUNT) * Math.PI * 2;
+  const visuals = { ...DEFAULT_FLUID_VISUALS, ...preset.visuals };
+  const { splatRadiusScale = 1 } = preset.physics;
+  const ladder = visuals.ladder;
+  const swarm = visuals.splatCount > 1;
+  const count = swarm ? visuals.splatCount * 2 : BURST_COUNT;
+  const radius = baseRadius * splatRadiusScale * (swarm ? 1 : 1.2);
+  for (let i = 0; i < count; i++) {
+    const angle = (i / count) * Math.PI * 2;
     // Safe: `i % ladder.length` is always 0..3 (ladder has 4 entries)
     const color = ladder[i % ladder.length] as readonly [number, number, number];
-    // Radius intentionally uses the tier baseline (not the preset's
-    // splatRadiusScale) — the burst should feel identical regardless
-    // of which preset is incoming.
+    // Seat each splat slightly off-centre along its own direction so
+    // the ring doesn't pile N splats of dye onto one spot; swarm
+    // presets scatter wider and add per-droplet jitter (a ring of a
+    // dozen droplets otherwise reads as one dotted circle).
+    const spread = swarm ? visuals.splatScatter * 6 : radius * 0.6;
+    const jx = swarm ? (Math.random() - 0.5) * visuals.splatScatter * 4 : 0;
+    const jy = swarm ? (Math.random() - 0.5) * visuals.splatScatter * 4 : 0;
     orchestrator.injectSplat(
-      0.5,
-      0.5,
+      0.5 + Math.cos(angle) * spread + jx,
+      0.5 + Math.sin(angle) * spread + jy,
       color,
       Math.cos(angle) * 1.2,
       Math.sin(angle) * 1.2,
-      baseRadius * 2,
+      radius,
     );
   }
 }

@@ -2,7 +2,7 @@
   "legal": {
     "common": {
       "lastUpdatedLabel": "Aggiornato",
-      "lastUpdated": "6 maggio 2026",
+      "lastUpdated": "7 luglio 2026",
       "backLabel": "Torna alla home"
     },
     "impressum": {
@@ -72,7 +72,7 @@
           "heading": "Quali dati vengono raccolti",
           "body": [
             "Questo sito non imposta cookie. Non c'è tracking, non ci sono analytics, network pubblicitari né pixel social-media. Nessun dato viene condiviso con terzi a scopi pubblicitari.",
-            "Per ragioni puramente tecniche viene utilizzato il LocalStorage del browser: una voce anonima ricorda la classe di prestazioni GPU del tuo dispositivo (in modo che l'animazione WebGL parta direttamente al livello di dettaglio giusto alla prossima visita) e una voce ricorda che la schermata di caricamento è già stata mostrata (in modo che non si ripeta cambiando lingua). Questi valori non sono personali, non vengono trasmessi a terzi e possono essere cancellati in qualsiasi momento dalle impostazioni del browser."
+            "Per ragioni puramente tecniche viene utilizzata la memoria locale del browser: una voce LocalStorage anonima ricorda la classe di prestazioni GPU del tuo dispositivo (in modo che l'animazione WebGL parta direttamente al livello di dettaglio giusto alla prossima visita), un'altra voce LocalStorage ricorda il carattere d'inchiostro che hai scelto per la simulazione, e una voce SessionStorage ricorda, per la durata della sessione del browser, che la schermata di caricamento è già stata mostrata (in modo che non si ripeta cambiando lingua). Questi valori non sono personali, non vengono trasmessi a terzi e possono essere cancellati in qualsiasi momento dalle impostazioni del browser."
           ]
         },
         {
@@ -87,8 +87,8 @@
           "id": "form",
           "heading": "Modulo di contatto",
           "body": [
-            "Quando utilizzi il modulo di contatto viene attualmente attivato il meccanismo mailto del tuo client e-mail. Il messaggio passa dal tuo provider e-mail, non da un server sotto il mio controllo. Vengono trattati esclusivamente i dati che inserisci tu stesso nel tuo client mail.",
-            "Se in futuro venisse attivata una trasmissione diretta tramite un server bridge (Resend.com, Resend, Inc., USA), nome, indirizzo e-mail e messaggio mi verrebbero trasmessi tramite questo intermediario tecnico. Resend sarebbe coperto da Clausole Contrattuali Standard (art. 46 GDPR). Questa dichiarazione verrà aggiornata di conseguenza all'attivazione.",
+            "Quando utilizzi il modulo di contatto, nome, indirizzo e-mail e messaggio vengono trasmessi in forma cifrata a un intermediario tecnico: la richiesta viene ricevuta all'edge di Cloudflare (Cloudflare, Inc., USA) da un Cloudflare Worker e mi viene recapitata come e-mail tramite il servizio di posta Resend (Resend, Inc., USA). Entrambi i provider sono coperti da Clausole Contrattuali Standard (art. 46 GDPR) per i trasferimenti di dati verso gli USA. Vengono trattati esclusivamente i dati che inserisci tu stesso nel modulo.",
+            "Se la trasmissione fallisce, il modulo offre in alternativa un link mailto — il messaggio passa allora dal tuo client e-mail e dal tuo provider, non da un server sotto il mio controllo.",
             "Base legale in entrambi i casi: il tuo consenso con l'invio (art. 6(1)(a) GDPR, art. 31(1) nLPD). I messaggi in arrivo vengono cancellati dopo la risposta, al più tardi dopo sei mesi. Puoi richiedere accesso, rettifica o cancellazione in qualsiasi momento. Scrivi semplicemente a manuelheller@bluewin.ch."
           ]
         },
@@ -104,7 +104,7 @@
           "heading": "Link esterni",
           "body": [
             "Questo sito rimanda in più punti a piattaforme esterne i cui contenuti non posso influenzare né controllare. Cliccando un link esterno lasci questo sito, e da quel momento si applica l'informativa privacy del relativo provider.",
-            "Servizi esterni attualmente collegati: GitHub (github.com), LinkedIn (linkedin.com), Instagram (instagram.com), Adobe Portfolio (manuelheller.myportfolio.com), Twitch (twitch.tv), Jogge di Balla (joggediballa.ch). Una lista esatta dei provider con il loro paese di sede può essere richiesta in qualsiasi momento via e-mail."
+            "Servizi esterni attualmente collegati: GitHub (github.com), LinkedIn (linkedin.com), Instagram (instagram.com), Adobe Portfolio (manuelheller.myportfolio.com), Jogge di Balla (joggediballa.ch). Una lista esatta dei provider con il loro paese di sede può essere richiesta in qualsiasi momento via e-mail."
           ]
         },
         {

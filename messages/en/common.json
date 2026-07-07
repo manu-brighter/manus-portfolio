@@ -75,8 +75,13 @@
   "simPresets": {
     "label": "Ink character",
     "riso": "Riso",
+    "wave": "Wave",
     "turbulenz": "Turbulence",
     "aquarell": "Watercolor",
     "nachtdruck": "Night print"
+  },
+  "easterEgg": {
+    "jamStamp": "FEHLDRUCK · REGISTRATION ERROR",
+    "calibratedStamp": "NEU KALIBRIERT · RE-CALIBRATED"
   }
 }

@@ -5,7 +5,7 @@
  *
  * `DPR_FULL` — fullscreen canvases (Hero FluidSim, InkDropStudio,
  *   TypeAsFluid, InkWipeOverlay, PhotoInkMask). Caps Retina/4K at
- *   2x so the toon shader's posterize pass doesn't waste cycles
+ *   2x so the per-preset render shader doesn't waste cycles
  *   resolving pixels that compress back to the spot palette anyway.
  * `DPR_MINI` — small-card mini-sims (InkDropMiniSim,
  *   TypeAsFluidMiniSim). Cards measure <300px on screen so 1.5x is

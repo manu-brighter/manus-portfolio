@@ -21,6 +21,13 @@ const TASKS = [
   { source: "content-input/icons/car.png", slug: "car" },
   { source: "content-input/icons/jogge di balla.PNG", slug: "joggediballa" },
   { source: "content-input/icons/ping pong.png", slug: "pingpong" },
+  // Night-theme variants — hand-recolored in Photoshop by Manuel
+  // (paper-light line art, accent colors preserved). The object-grid
+  // stamps swap to these while Nachtdruck is active; CSS filters
+  // can't re-ink raster accents (invert corrupted them).
+  { source: "content-input/icons/car-darkmode.png", slug: "car-dark" },
+  { source: "content-input/icons/joggediballa-darkmode.png", slug: "joggediballa-dark" },
+  { source: "content-input/icons/pingpong-darkmode.png", slug: "pingpong-dark" },
 ];
 
 const WIDTHS = [120, 240];

@@ -99,7 +99,15 @@ jobs:
           path: out
 
       - name: Install Playwright browser (${{ matrix.browser }})
-        run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
+        # The runner image ships Microsoft apt repos (azure-cli, prod) that
+        # periodically serve invalid InRelease files ("NOSPLIT" / no longer
+        # signed), which fails the apt-get update that `--with-deps` runs. We
+        # don't need those repos for the browser system deps, so drop any
+        # packages.microsoft.com apt source first. --with-deps stays: webkit
+        # needs system libs the base image doesn't ship.
+        run: |
+          grep -rl packages.microsoft.com /etc/apt/sources.list.d/ | sudo xargs -r rm -f || true
+          pnpm exec playwright install --with-deps ${{ matrix.browser }}
 
       - name: Playwright ${{ matrix.project }} against ./out
         run: pnpm exec playwright test --grep-invert @visual --project=${{ matrix.project }}
@@ -147,7 +155,10 @@ jobs:
           path: out
 
       - name: Install Chromium for Lighthouse
-        run: pnpm exec playwright install --with-deps chromium
+        # Same broken-Microsoft-apt-repo workaround as the e2e job (see there).
+        run: |
+          grep -rl packages.microsoft.com /etc/apt/sources.list.d/ | sudo xargs -r rm -f || true
+          pnpm exec playwright install --with-deps chromium
 
       - name: Lighthouse CI (budget from plan §8)
         run: pnpm lighthouse

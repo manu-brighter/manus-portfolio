@@ -163,18 +163,37 @@ const TASKS = [
     jpgFallbackWidth: 800,
     resize: { width: 2400, height: 1350, fit: "cover" },
   },
-  // Joggediballa landscape screenshots — all 16:9
+  // Five-theme split (theme-differentiation pass): one hero, five
+  // vertical slices in switcher order (riso/wave/turbulenz/aquarell/
+  // nachtdruck) with ink seams. Master composed from per-preset
+  // Playwright hero shots; the Work-section portfolio card shows this
+  // instead of the single-theme shot. The single-theme "homepage"
+  // master above stays for the sitemap image entry.
+  {
+    group: "portfolio",
+    source: "content-input/projects/portfolio/source/homepage-five-themes.png",
+    outDir: "public/projects/portfolio",
+    outName: "homepage-themes",
+    widths: [480, 800, 1200],
+    codecs: ["avif", "webp"],
+    jpgFallbackWidth: 800,
+    resize: { width: 2400, height: 1350, fit: "cover" },
+  },
+  // Joggediballa landscape screenshots — all 16:9. The darkmode
+  // homepage shot feeds the Work-card's Nachtdruck swap
+  // (JoggediballaScreenshot) — outName "homepage-dark".
   ...[
     "admin-lightmode-landscape",
     "goennerverwaltung-lightmode-landscape",
     "homepage-lightmode-landscape",
+    "homepage-darkmode-landscape",
     "statistics-lightmode-landscape",
     "twitchoverlay-lightmode-landscape",
   ].map((slug) => ({
     group: "joggediballa",
     source: `content-input/projects/joggediballa/source/${slug}.png`,
     outDir: "public/projects/joggediballa",
-    outName: slug.replace("-lightmode-landscape", ""),
+    outName: slug.replace("-lightmode-landscape", "").replace("-darkmode-landscape", "-dark"),
     widths: [480, 800, 1200],
     codecs: ["avif", "webp"],
     jpgFallbackWidth: 800,

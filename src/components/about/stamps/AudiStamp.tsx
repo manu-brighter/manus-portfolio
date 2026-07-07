@@ -1,41 +1,18 @@
 /**
- * Audi S5 / car icon — replaced the inline SVG silhouette with the
- * hand-designed PNG icon under public/about/objects/. Source asset:
- * content-input/icons/car.png (902×657, transparent bg). 1x + 2x
- * retina variants generated via the optimize-assets pipeline.
+ * Audi S5 / car icon — hand-designed PNG under public/about/objects/.
+ * Source asset: content-input/icons/car.png (902×657, transparent bg);
+ * Nachtdruck-recolored variant car-dark.
  *
- * Width 140 x height 90 matches the other stamps in the grid so the
- * tile heights stay aligned. `object-contain` keeps the source aspect
- * ratio (~1.37:1) within the slot.
- *
- * The `spotVar` prop is preserved on the signature so the parent
- * dispatcher in ObjectGrid.tsx can pass it uniformly across all six
- * stamps; this PNG-based stamp doesn't tint dynamically (pure raster)
- * and the prop goes unused.
- *
- * Plain <img> with 1x + 2x srcSet — no <picture>/AVIF/WebP wrap yet.
- * Wave C perf-agent shipped a speculative <picture> skeleton pointing
- * at AVIF + WebP variants that don't exist; browsers don't reliably
- * fall through 404s on a matching <source>, so the icon disappeared.
- * Re-introduce <picture> only once the variants are actually generated
- * via `scripts/optimize-assets.mjs`.
+ * Width 140 x height ~102 (aspect ~1.37:1) matches the other stamps so
+ * the grid tile heights stay aligned. Rendering (night-swap, 1x/2x
+ * srcSet, unused-but-preserved spotVar prop for parent dispatcher
+ * uniformity) lives in RasterStamp.
  */
+
+import { RasterStamp } from "./RasterStamp";
 
 type Props = { spotVar: string };
 
 export function AudiStamp({ spotVar: _spotVar }: Props) {
-  return (
-    <img
-      src="/about/objects/car-120w.png"
-      srcSet="/about/objects/car-120w.png 1x, /about/objects/car-240w.png 2x"
-      alt=""
-      aria-hidden="true"
-      loading="lazy"
-      decoding="async"
-      width={140}
-      height={102}
-      className="ink-lineart block h-16 w-auto max-w-[140px] object-contain"
-      style={{ transform: "rotate(0.5deg)" }}
-    />
-  );
+  return <RasterStamp slug="car" width={140} height={102} rotate="0.5deg" />;
 }

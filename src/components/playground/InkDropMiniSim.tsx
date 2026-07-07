@@ -62,7 +62,7 @@ export function InkDropMiniSim({ paused }: Props) {
     }
 
     // DPR capped at 1.5 — these mini-frames are tiny on screen, no
-    // need to push 2x pixels through the toon shader's posterize pass.
+    // need to push 2x pixels through the render shader's band pass.
     const dpr = capDPR(DPR_MINI);
     canvas.width = Math.floor(canvas.clientWidth * dpr);
     canvas.height = Math.floor(canvas.clientHeight * dpr);

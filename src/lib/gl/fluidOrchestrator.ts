@@ -5,7 +5,6 @@ import { createProgram as linkProgram } from "@/lib/gl/createProgram";
 import type { TierConfig } from "@/lib/gpu";
 import { INK_COLOR, PAPER_COLOR, SPOT_RGB, type SpotColor } from "@/lib/palette";
 import noiseSrc from "@/shaders/common/noise.glsl";
-import posterizeSrc from "@/shaders/common/posterize.glsl";
 import quadVert from "@/shaders/common/quad.vert.glsl";
 import sobelSrc from "@/shaders/common/sobel.glsl";
 import advectFrag from "@/shaders/fluid/advect.frag.glsl";
@@ -14,7 +13,11 @@ import divergenceFrag from "@/shaders/fluid/divergence.frag.glsl";
 import gradientSubFrag from "@/shaders/fluid/gradient-subtract.frag.glsl";
 import injectDensityFrag from "@/shaders/fluid/inject-density.frag.glsl";
 import pressureFrag from "@/shaders/fluid/pressure.frag.glsl";
-import renderToonFrag from "@/shaders/fluid/render-toon.frag.glsl";
+import renderAquarellFrag from "@/shaders/fluid/render-aquarell.frag.glsl";
+import renderNachtdruckFrag from "@/shaders/fluid/render-nachtdruck.frag.glsl";
+import renderRisoFrag from "@/shaders/fluid/render-riso.frag.glsl";
+import renderTurbulenzFrag from "@/shaders/fluid/render-turbulenz.frag.glsl";
+import renderWaveFrag from "@/shaders/fluid/render-wave.frag.glsl";
 import splatFrag from "@/shaders/fluid/splat.frag.glsl";
 import vorticityFrag from "@/shaders/fluid/vorticity.frag.glsl";
 
@@ -52,7 +55,14 @@ type Programs = {
   divergence: WebGLProgram;
   pressure: WebGLProgram;
   gradientSub: WebGLProgram;
-  renderToon: WebGLProgram;
+  // One genuinely distinct render shader per preset style — not one
+  // parametrized shader. All four compile at init (cheap, one-time)
+  // so a live preset switch is just a program swap in runRender().
+  renderRiso: WebGLProgram;
+  renderWave: WebGLProgram;
+  renderTurbulenz: WebGLProgram;
+  renderAquarell: WebGLProgram;
+  renderNachtdruck: WebGLProgram;
   injectDensity: WebGLProgram;
 };
 
@@ -66,13 +76,64 @@ type Programs = {
 // explicit at import time.
 const SPOT_COLORS = SPOT_RGB;
 
-// Ambient motion: 3 wandering points that splat fluid when no pointer input.
-// Extracted for future dev-panel tuning. Time-scale governs the whole rig;
-// per-point freq/range/force multipliers are in AMBIENT_POINTS below.
-const AMBIENT_PARAMS = {
-  timeScale: 0.0003,
-  pointA: {
-    center: [0.55, 0.55] as [number, number],
+// Ambient motion: wandering points that splat fluid when no pointer
+// input. The first three are the original hand-tuned rig (A/B/C —
+// point C only appears at full ambient strength via gateThreshold);
+// the rest are generated procedurally so presets can raise the count
+// (Turbulenz runs a swarm of 8). Time-scale governs the whole rig.
+const AMBIENT_TIME_SCALE = 0.0003;
+
+type AmbientPoint = {
+  center: readonly [number, number];
+  range: number;
+  freqX: number;
+  freqY: number;
+  forceFreqX: number;
+  forceFreqY: number;
+  forceStrength: number;
+  phaseX: number;
+  phaseY: number;
+  phaseFX: number;
+  phaseFY: number;
+  /** Only splat when ambientStrength > this (legacy point-C gate). */
+  gateThreshold?: number;
+  /** Spawn/despawn cycle speed in rad/s — consumed when a preset sets
+   *  ambientChurn > 0 (see step()). */
+  lifeFreq: number;
+  lifePhase: number;
+};
+
+/** Deterministic pseudo-random extra point — golden-angle placement +
+ *  golden-ratio fractional spreads land the extras evenly without an
+ *  RNG, so the rig stays reproducible frame-to-frame and reload-to-
+ *  reload. */
+function makeExtraAmbientPoint(i: number): AmbientPoint {
+  const g = (k: number) => (i * k) % 1;
+  const angle = i * 2.39996;
+  const r = 0.16 + g(0.37) * 0.14;
+  return {
+    center: [0.5 + Math.cos(angle) * r, 0.5 + Math.sin(angle) * r],
+    range: 0.12 + g(0.61) * 0.1,
+    freqX: 0.6 + g(0.83) * 1.5,
+    freqY: 0.5 + g(0.29) * 1.5,
+    forceFreqX: 0.5 + g(0.47) * 1.2,
+    forceFreqY: 0.6 + g(0.71) * 1.2,
+    forceStrength: 0.13 + g(0.53) * 0.09,
+    phaseX: i * 1.7,
+    phaseY: i * 2.3,
+    phaseFX: i * 0.9,
+    phaseFY: i * 1.3,
+    lifeFreq: 0.28 + g(0.43) * 0.3,
+    lifePhase: i * 2.1,
+  };
+}
+
+const MAX_AMBIENT_POINTS = 10;
+
+const AMBIENT_POINTS: readonly AmbientPoint[] = [
+  // Point A: slow wide orbit (upper-right quadrant tendency)
+  {
+    center: [0.55, 0.55],
     range: 0.25,
     freqX: 1.3,
     freqY: 0.9,
@@ -83,9 +144,12 @@ const AMBIENT_PARAMS = {
     phaseY: 0,
     phaseFX: 0,
     phaseFY: 0,
+    lifeFreq: 0.31,
+    lifePhase: 0.5,
   },
-  pointB: {
-    center: [0.4, 0.4] as [number, number],
+  // Point B: faster small orbit (lower-left tendency) — offset phase
+  {
+    center: [0.4, 0.4],
     range: 0.2,
     freqX: 2.1,
     freqY: 1.7,
@@ -96,9 +160,12 @@ const AMBIENT_PARAMS = {
     phaseY: 1.0,
     phaseFX: 3.0,
     phaseFY: 2.0,
+    lifeFreq: 0.4,
+    lifePhase: 2.8,
   },
-  pointC: {
-    center: [0.5, 0.5] as [number, number],
+  // Point C: very slow drift (center) — appears only at full ambient
+  {
+    center: [0.5, 0.5],
     range: 0.15,
     freqX: 0.7,
     freqY: 0.5,
@@ -109,9 +176,12 @@ const AMBIENT_PARAMS = {
     phaseY: 3.0,
     phaseFX: 1.5,
     phaseFY: 2.5,
-    gateThreshold: 0.5, // only splat when ambientStrength > this
+    gateThreshold: 0.5,
+    lifeFreq: 0.35,
+    lifePhase: 4.2,
   },
-} as const;
+  ...Array.from({ length: MAX_AMBIENT_POINTS - 3 }, (_, k) => makeExtraAmbientPoint(k + 3)),
+];
 
 // ---------------------------------------------------------------------------
 // Visual look parameters
@@ -120,27 +190,38 @@ const AMBIENT_PARAMS = {
 export type RGB = readonly [number, number, number];
 
 /**
+ * The five style-specific render shaders. Each is a genuinely
+ * different fragment shader, not a parameter set on one shader:
+ * riso = the original soft-ladder + Sobel ink pooling (quiet default),
+ * wave = overprint plates with misregistration + ink bleed,
+ * turbulenz = screenprint comic (hard bands, halftone, ink contours),
+ * aquarell = wet watercolor (wide blur, granulation, wet-edge rims),
+ * nachtdruck = neon print (hard bands, additive glow, chroma fringes).
+ * Ids mirror `SimPresetId` today but stay a separate type — a future
+ * preset may reuse an existing style.
+ */
+export type FluidRenderStyle = "riso" | "wave" | "turbulenz" | "aquarell" | "nachtdruck";
+
+/**
  * Look-side knobs of the sim — everything that shapes how the dye field
  * is *rendered* plus how strongly splats inject, as opposed to the
  * physics params in `TierConfig` (which stay tier-owned, see gpu.ts).
- * Pure JS state read every frame by runSplat()/runRenderToon()/the
+ * Pure JS state read every frame by runSplat()/runRender()/the
  * ambient rig — no GL resources involved, so overrides are live and
  * safe at any time via setVisuals().
  *
- * `DEFAULT_FLUID_VISUALS` reproduces the pre-preset hard-coded literals
- * exactly: an orchestrator that never calls setVisuals() renders
- * byte-identical to before the preset system existed. (`levels` was
- * historically fed as 4.0 but the uniform was dead in the shader; the
- * live default is 0 = soft ladder, matching the shipped look.)
+ * Some knobs are interpreted per style (documented on the field);
+ * a shader that doesn't declare a uniform simply ignores it (null
+ * location = no-op).
  */
 export type FluidVisuals = {
-  /** Density pre-quantization bands in render-toon. 0 = soft ladder
-   *  (default look); >0 = hard screen-printed separations. */
-  levels: number;
+  /** Which of the four render shaders draws the dye field. */
+  style: FluidRenderStyle;
   outlineThreshold: number;
   grainStrength: number;
-  /** Sobel ink-pooling intensity: ~0.1 soft washes, 0.35 default
-   *  Riso settle, ~0.7 inky drawn contours. */
+  /** Per-style intensity knob: riso ignores it, turbulenz = ink
+   *  contour-line strength, aquarell = wet-edge rim darkening,
+   *  nachtdruck = glow-halo gain. */
   edgeStrength: number;
   paper: RGB;
   ink: RGB;
@@ -151,9 +232,25 @@ export type FluidVisuals = {
   /** Multiplier on pointer/splat velocity injection. */
   velocityScale: number;
   /** How much dye a splat deposits (kept well below 1 so dye stays in
-   *  range and the toon shader's Sobel pass isn't overwhelmed). */
+   *  range and the render shaders' edge passes aren't overwhelmed). */
   dyeScale: number;
-  /** Multiplier on AMBIENT_PARAMS.timeScale (rig wander speed). */
+  /** Splats emitted per pointer-move frame (>= 1). Above 1 the splats
+   *  scatter around the pointer (see splatScatter) — Turbulenz throws
+   *  a swarm of small droplets instead of one stroke. */
+  splatCount: number;
+  /** UV jitter radius for the multi-splat scatter (0 = all stack). */
+  splatScatter: number;
+  /** How many ambient wandering points the idle rig runs (clamped to
+   *  MAX_AMBIENT_POINTS). 3 = the original A/B/C rig; swarm presets
+   *  raise this so the multi-splat character persists while idle,
+   *  not just under the pointer. */
+  ambientPointCount: number;
+  /** 0..1 spawn/despawn cycling of ambient points beyond A/B. At 0
+   *  every point is permanently alive (default rig behavior); at 1
+   *  each extra point fades in and out on its own slow cycle, so the
+   *  number of live ink sources visibly fluctuates over time. */
+  ambientChurn: number;
+  /** Multiplier on AMBIENT_TIME_SCALE (rig wander speed). */
   ambientTimeScale: number;
   /** Multiplier on each ambient point's forceStrength. */
   ambientForceScale: number;
@@ -163,7 +260,7 @@ export type FluidVisuals = {
 // setVisuals() — an accidental in-place mutation would poison every
 // orchestrator plus the default itself.
 export const DEFAULT_FLUID_VISUALS: FluidVisuals = Object.freeze<FluidVisuals>({
-  levels: 0,
+  style: "riso",
   outlineThreshold: 0.15,
   grainStrength: 0.07,
   edgeStrength: 0.35,
@@ -172,6 +269,10 @@ export const DEFAULT_FLUID_VISUALS: FluidVisuals = Object.freeze<FluidVisuals>({
   ladder: [SPOT_RGB.mint, SPOT_RGB.amber, SPOT_RGB.rose, SPOT_RGB.violet],
   velocityScale: 10.0,
   dyeScale: 0.15,
+  splatCount: 1,
+  splatScatter: 0,
+  ambientPointCount: 3,
+  ambientChurn: 0,
   ambientTimeScale: 1,
   ambientForceScale: 1,
 });
@@ -389,12 +490,6 @@ export class FluidOrchestrator {
     }
 
     // Compile all programs
-    const toonFrag = injectIncludes(renderToonFrag, {
-      noise: noiseSrc,
-      posterize: posterizeSrc,
-      sobel: sobelSrc,
-    });
-
     const programs: Programs = {
       splat: createProgram(gl, quadVert, splatFrag, "fluid.splat"),
       curl: createProgram(gl, quadVert, curlFrag, "fluid.curl"),
@@ -403,7 +498,36 @@ export class FluidOrchestrator {
       divergence: createProgram(gl, quadVert, divergenceFrag, "fluid.divergence"),
       pressure: createProgram(gl, quadVert, pressureFrag, "fluid.pressure"),
       gradientSub: createProgram(gl, quadVert, gradientSubFrag, "fluid.gradient-sub"),
-      renderToon: createProgram(gl, quadVert, toonFrag, "fluid.render-toon"),
+      renderRiso: createProgram(
+        gl,
+        quadVert,
+        injectIncludes(renderRisoFrag, { noise: noiseSrc, sobel: sobelSrc }),
+        "fluid.render-riso",
+      ),
+      renderWave: createProgram(
+        gl,
+        quadVert,
+        injectIncludes(renderWaveFrag, { noise: noiseSrc }),
+        "fluid.render-wave",
+      ),
+      renderTurbulenz: createProgram(
+        gl,
+        quadVert,
+        injectIncludes(renderTurbulenzFrag, { noise: noiseSrc, sobel: sobelSrc }),
+        "fluid.render-turbulenz",
+      ),
+      renderAquarell: createProgram(
+        gl,
+        quadVert,
+        injectIncludes(renderAquarellFrag, { noise: noiseSrc }),
+        "fluid.render-aquarell",
+      ),
+      renderNachtdruck: createProgram(
+        gl,
+        quadVert,
+        injectIncludes(renderNachtdruckFrag, { noise: noiseSrc }),
+        "fluid.render-nachtdruck",
+      ),
       injectDensity: createProgram(gl, quadVert, injectDensityFrag, "fluid.inject-density"),
     };
 
@@ -541,7 +665,7 @@ export class FluidOrchestrator {
 
   /**
    * Live-tunable look overrides — the preset-facing sibling of
-   * setParams(). Pure JS state read by runSplat()/runRenderToon()/the
+   * setParams(). Pure JS state read by runSplat()/runRender()/the
    * ambient rig on the next frame; no GL resources touched, so unlike
    * setParams() this is safe to call before init().
    */
@@ -795,6 +919,7 @@ export class FluidOrchestrator {
     dy: number,
     color: readonly [number, number, number],
     radiusOverride?: number,
+    dyeMul = 1,
   ): void {
     const state = this.requireState();
     const p = state.programs.splat;
@@ -812,9 +937,12 @@ export class FluidOrchestrator {
     state.velocity.swap();
 
     // Dye splat — dyeScale keeps dye in [0,1] range so it doesn't
-    // overwhelm the toon shader's Sobel edge detection.
+    // overwhelm the render shaders' edge passes. dyeMul lets the
+    // ambient churn fade a point's ink deposit in/out with its life
+    // cycle instead of popping.
+    const d = dyeScale * dyeMul;
     this.bindTexture(p, "uTarget", state.dye.read.texture, 0);
-    this.setVec3(p, "uColor", color[0] * dyeScale, color[1] * dyeScale, color[2] * dyeScale);
+    this.setVec3(p, "uColor", color[0] * d, color[1] * d, color[2] * d);
     this.renderToFBO(state.dye.write);
     this.drawQuad();
     state.dye.swap();
@@ -895,14 +1023,37 @@ export class FluidOrchestrator {
     state.velocity.swap();
   }
 
-  private runRenderToon(elapsed: number): void {
+  /** The render program for the active visual style. Exhaustive switch
+   *  keeps TS honest when a fifth style is added. */
+  private renderProgram(state: GLState): WebGLProgram {
+    switch (this.visuals.style) {
+      case "wave":
+        return state.programs.renderWave;
+      case "turbulenz":
+        return state.programs.renderTurbulenz;
+      case "aquarell":
+        return state.programs.renderAquarell;
+      case "nachtdruck":
+        return state.programs.renderNachtdruck;
+      case "riso":
+        return state.programs.renderRiso;
+    }
+  }
+
+  private runRender(elapsed: number): void {
     const state = this.requireState();
-    const p = state.programs.renderToon;
+    const p = this.renderProgram(state);
     this.activateProgram(p);
     this.bindTexture(p, "uDye", state.dye.read.texture, 0);
     this.setVec2(p, "uTexelSize", 1.0 / this.canvasWidth, 1.0 / this.canvasHeight);
+    // Sim-grid texel for passes that step the dye texture (Sobel in
+    // render-turbulenz) — canvas-texel steps starve at high viewport
+    // resolutions because the dye FBO is sim-resolution.
+    this.setVec2(p, "uSimTexel", 1.0 / this.simWidth, 1.0 / this.simHeight);
+    // Uniforms a style's shader doesn't declare resolve to a null
+    // location — setting them is a spec-defined no-op, so one uniform
+    // pass serves all four programs.
     const v = this.visuals;
-    this.setFloat(p, "uLevels", v.levels);
     this.setFloat(p, "uOutlineThreshold", v.outlineThreshold);
     this.setFloat(p, "uGrainStrength", v.grainStrength);
     this.setFloat(p, "uEdgeStrength", v.edgeStrength);
@@ -977,16 +1128,16 @@ export class FluidOrchestrator {
 
     // Pre-warmup gate: while !started, skip all expensive sim passes
     // (curl + vorticity + 2 advects + divergence + N-iter pressure +
-    // gradient-subtract) and only paint render-toon so the canvas shows
-    // paper + grain instead of WebGL's opaque-black default-clear (the
-    // R3F Canvas is `alpha: false`). Splat queue drains on the first
-    // started step so any buffered Work-card clicks during the loader
-    // don't dump as a glitch when ambient kicks in.
+    // gradient-subtract) and only paint the render pass so the canvas
+    // shows paper + grain instead of WebGL's opaque-black default-clear
+    // (the R3F Canvas is `alpha: false`). Splat queue drains on the
+    // first started step so any buffered Work-card clicks during the
+    // loader don't dump as a glitch when ambient kicks in.
     if (!this.started) {
       this.pendingSplats.length = 0;
       gl.bindVertexArray(state.emptyVAO);
       gl.disable(gl.BLEND);
-      this.runRenderToon(elapsed);
+      this.runRender(elapsed);
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
       gl.bindVertexArray(null);
       return;
@@ -1030,10 +1181,19 @@ export class FluidOrchestrator {
     if (runSim) {
       // Splat from pointer (hero default; studio mode disables this and
       // drives splats manually via injectSplat() so click-burst and
-      // drag-trail can have distinct behaviour).
+      // drag-trail can have distinct behaviour). splatCount > 1 throws
+      // a scattered swarm per frame: position AND direction jitter,
+      // otherwise N splats read as N parallel copies of one stroke.
       if (this.pointerSplatEnabled && (pointer.moved || pointer.down)) {
-        const color = this.splatColorOverride ?? this.nextSplatColor();
-        this.runSplat(pointer.x, pointer.y, pointer.dx, pointer.dy, color);
+        const { splatCount, splatScatter } = this.visuals;
+        for (let i = 0; i < splatCount; i++) {
+          const color = this.splatColorOverride ?? this.nextSplatColor();
+          const jx = (Math.random() - 0.5) * 2 * splatScatter;
+          const jy = (Math.random() - 0.5) * 2 * splatScatter;
+          const jdx = pointer.dx + (Math.random() - 0.5) * splatScatter * 0.8;
+          const jdy = pointer.dy + (Math.random() - 0.5) * splatScatter * 0.8;
+          this.runSplat(pointer.x + jx, pointer.y + jy, jdx, jdy, color);
+        }
       }
 
       // Drain external splats queued via injectSplat() — Work-card click
@@ -1045,47 +1205,56 @@ export class FluidOrchestrator {
         this.pendingSplats.length = 0;
       }
 
-      // Ambient motion when idle — multiple wandering points
-      // for an organic, breathing feel like layered Riso ink settling.
-      // Studio mode disables this entirely (flag is false).
+      // Ambient motion when idle — wandering points for an organic,
+      // breathing feel like layered Riso ink settling. Presets control
+      // how many points run (ambientPointCount) and whether the extras
+      // cycle in and out of existence (ambientChurn) — the swarm
+      // presets keep their many-sources character while idle, not just
+      // under the pointer. Studio mode disables this entirely.
       if (this.ambientEnabled && this.ambientStrength > 0.01) {
         // Preset multipliers: time scales the whole rig's wander speed,
         // force scales injection strength — but NOT `s` itself, so the
         // point-C gate below keeps its ambient-strength semantics.
-        const t = elapsed * AMBIENT_PARAMS.timeScale * this.visuals.ambientTimeScale;
+        const t = elapsed * AMBIENT_TIME_SCALE * this.visuals.ambientTimeScale;
         const s = this.ambientStrength;
         const fs = this.visuals.ambientForceScale;
+        const churn = this.visuals.ambientChurn;
+        const count = Math.min(this.visuals.ambientPointCount, AMBIENT_POINTS.length);
 
-        const { pointA, pointB, pointC } = AMBIENT_PARAMS;
+        for (let i = 0; i < count; i++) {
+          // Safe: i < count <= AMBIENT_POINTS.length
+          const pt = AMBIENT_POINTS[i] as AmbientPoint;
 
-        // Point A: slow wide orbit (upper-right quadrant tendency)
-        const ax = pointA.center[0] + pointA.range * Math.sin(t * pointA.freqX + pointA.phaseX);
-        const ay = pointA.center[1] + pointA.range * Math.cos(t * pointA.freqY + pointA.phaseY);
-        const adx =
-          Math.cos(t * pointA.forceFreqX + pointA.phaseFX) * s * fs * pointA.forceStrength;
-        const ady =
-          Math.sin(t * pointA.forceFreqY + pointA.phaseFY) * s * fs * pointA.forceStrength;
-        this.runSplat(ax, ay, adx, ady, this.nextSplatColor());
+          // Legacy point-C gate: appears only at full ambient strength
+          // (i.e. vanishes while the pointer is active).
+          let pointS = s;
+          if (pt.gateThreshold !== undefined) {
+            if (s <= pt.gateThreshold) continue;
+            pointS = s - pt.gateThreshold;
+          }
 
-        // Point B: faster small orbit (lower-left tendency) — offset phase
-        const bx = pointB.center[0] + pointB.range * Math.sin(t * pointB.freqX + pointB.phaseX);
-        const by = pointB.center[1] + pointB.range * Math.cos(t * pointB.freqY + pointB.phaseY);
-        const bdx =
-          Math.cos(t * pointB.forceFreqX + pointB.phaseFX) * s * fs * pointB.forceStrength;
-        const bdy =
-          Math.sin(t * pointB.forceFreqY + pointB.phaseFY) * s * fs * pointB.forceStrength;
-        this.runSplat(bx, by, bdx, bdy, this.nextSplatColor());
+          // Churn life cycle: points beyond A/B fade in and out on a
+          // slow personal sine (period ~10-20s, staggered phases), so
+          // sources visibly despawn and respawn instead of running a
+          // constant roster. A/B stay alive as the rig's base pulse.
+          let life = 1;
+          if (churn > 0 && i >= 2) {
+            const cyc = Math.sin(elapsed * 0.001 * pt.lifeFreq + pt.lifePhase);
+            // Duty cycle ~2/3 on: fades span ~0.5 of a sine unit.
+            const edge0 = -0.4;
+            const edge1 = 0.1;
+            const gate = Math.min(1, Math.max(0, (cyc - edge0) / (edge1 - edge0)));
+            life = 1 - churn + churn * gate * gate * (3 - 2 * gate);
+            if (life < 0.04) continue;
+          }
 
-        // Point C: very slow drift (center) — appears only at full ambient
-        if (s > pointC.gateThreshold) {
-          const cs = s - pointC.gateThreshold;
-          const cx = pointC.center[0] + pointC.range * Math.sin(t * pointC.freqX + pointC.phaseX);
-          const cy = pointC.center[1] + pointC.range * Math.cos(t * pointC.freqY + pointC.phaseY);
-          const cdx =
-            Math.cos(t * pointC.forceFreqX + pointC.phaseFX) * cs * fs * pointC.forceStrength;
-          const cdy =
-            Math.sin(t * pointC.forceFreqY + pointC.phaseFY) * cs * fs * pointC.forceStrength;
-          this.runSplat(cx, cy, cdx, cdy, this.nextSplatColor());
+          const x = pt.center[0] + pt.range * Math.sin(t * pt.freqX + pt.phaseX);
+          const y = pt.center[1] + pt.range * Math.cos(t * pt.freqY + pt.phaseY);
+          const dx =
+            Math.cos(t * pt.forceFreqX + pt.phaseFX) * pointS * fs * pt.forceStrength * life;
+          const dy =
+            Math.sin(t * pt.forceFreqY + pt.phaseFY) * pointS * fs * pt.forceStrength * life;
+          this.runSplat(x, y, dx, dy, this.nextSplatColor(), undefined, life);
         }
       }
 
@@ -1106,8 +1275,8 @@ export class FluidOrchestrator {
       this.runAdvect(state.dye, state.config.dyeDissipation, dt);
     }
 
-    // Render-toon always runs (even at half-rate)
-    this.runRenderToon(elapsed);
+    // The render pass always runs (even at half-rate)
+    this.runRender(elapsed);
 
     // Restore GL state for R3F
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);

@@ -111,11 +111,61 @@
   --color-paper-line: #c3d4c2;
 }
 
-/* Hand-made object-grid photos are dark line-art PNGs — CSS can't
- * re-token them like the SVG stamps, so night mode inverts them
- * (hue-rotate keeps the spot accents roughly in family). */
-[data-sim-theme="night"] .ink-lineart {
-  filter: invert(1) hue-rotate(180deg);
+/* "wave" — Overprint-plate print: unlike warm/wash this re-inks the
+ * whole page, not just the paper — cool print-shop blue-white stock
+ * with a blue-black ink family, so switching reads as a full theme.
+ * Contrast: ink #101a2e on paper #e6edf4 ≈ 14:1; muted at 0.72
+ * alpha ≈ 6.4:1 — both AA, but don't lean on muted for small text
+ * beyond body-copy sizes.
+ * TRAP: no `color-scheme` here (LightningCSS drops the whole rule —
+ * see the night block). */
+[data-sim-theme="wave"] {
+  --color-paper: #e6edf4;
+  --color-paper-tint: #f0f5fa;
+  --color-paper-shade: #d8e2ec;
+  --color-paper-line: #b7c8da;
+
+  --color-ink: #101a2e;
+  --color-ink-soft: #1c2a44;
+  --color-ink-muted: rgba(16, 26, 46, 0.72);
+  --color-ink-faint: rgba(16, 26, 46, 0.28);
+}
+
+/* Ink-cursor accent — dot + trail follow the active sim theme with a
+ * high-contrast accent instead of plain ink. Riso (no data-sim-theme)
+ * stays canonical ink. Decorative, not text: picked for visibility on
+ * each theme's paper, not for AA. InkCursor reads the resolved color
+ * per frame via getComputedStyle, so switches are live. */
+:root {
+  --color-ink-cursor: var(--color-ink);
+}
+[data-sim-theme="warm"] {
+  --color-ink-cursor: #9c3a0d; /* burnt sienna on apricot paper */
+}
+[data-sim-theme="wash"] {
+  --color-ink-cursor: #0e5c49; /* deep pine teal on mint-grey paper */
+}
+[data-sim-theme="wave"] {
+  --color-ink-cursor: #1f4fd0; /* ultramarine on blue-white paper */
+}
+[data-sim-theme="night"] {
+  --color-ink-cursor: #ff9fc8; /* neon rose — screen-blended, glows */
+}
+
+/* Per-theme spot repairs — a canonical spot only swaps where it would
+ * break the theme (screenshot audit; keep standards everywhere else).
+ * Wash: neon amber is the one spot outside the watercolor family ->
+ * yellow ochre, THE classic watercolor pigment. Wave: the blue plate
+ * print keeps its small rose misreg accents, but neon amber reads as
+ * a foreign plate -> sky-cyan from the wave ladder (distinct from
+ * mint). Cascades to every token consumer (SVG stamp accents via
+ * spotVar, pills, drop-caps, the riso-submit label); raster PNG
+ * accents can't follow, but at icon size the drift is invisible. */
+[data-sim-theme="wash"] {
+  --color-spot-amber: #d8a86b;
+}
+[data-sim-theme="wave"] {
+  --color-spot-amber: #7cc4e8;
 }
 
 /* The ink cursor multiplies over light papers; on the night theme a
@@ -123,6 +173,103 @@
  * glows instead. */
 [data-sim-theme="night"] .ink-cursor-layer {
   mix-blend-mode: screen;
+}
+
+/* Turbulenz (warm) paints hard mid-tone bands directly under the
+ * copy — all DOM text sits on top of the fullscreen sim. A layered
+ * paper-colored halo restores local edge contrast without recoloring
+ * the theme; text-shadow inherits, so the landmark containers cover
+ * everything. Over solid paper-family surfaces the halo is invisible
+ * (paper on paper), so no opt-outs are needed. */
+[data-sim-theme="warm"] main,
+[data-sim-theme="warm"] header,
+[data-sim-theme="warm"] footer {
+  /* Doubled tight layers build an opaque core so SMALL mono labels
+   * survive the dark contour band too (screenshot-verified — 3 layers
+   * were enough for the display serif but not for 12px badges). */
+  text-shadow:
+    0 0 2px var(--color-paper),
+    0 0 2px var(--color-paper),
+    0 0 4px var(--color-paper),
+    0 0 8px var(--color-paper),
+    0 0 14px var(--color-paper),
+    0 0 22px var(--color-paper);
+}
+
+/* 11px stamp badges lose against a NEAR-BLACK contour pool even with
+ * the halo — give them a solid paper fill under this theme (they carry
+ * an ink border anyway, so the chip reads as a printed sticker). */
+[data-sim-theme="warm"] .type-label-stamp {
+  background: var(--color-paper);
+}
+
+/* Fehldruck easter egg — while <html data-print-jam> is set the
+ * registration "slips": display text gets channel-split plate shadows
+ * plus a stepped jitter (a drum losing its registration, not a smooth
+ * wobble). Scoped to headings/labels so body copy stays legible for
+ * the ~4s the jam lasts. PrintJamOverlay only sets the attribute on
+ * the no-preference path; the media query is belt-and-suspenders. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-print-jam] :is(h1, h2, h3, h4, .type-label, .type-label-stamp) {
+    animation: print-jam-jitter 160ms steps(2, jump-none) infinite;
+    text-shadow:
+      2px 0 0 var(--color-spot-rose),
+      -2px 0 0 var(--color-spot-mint);
+  }
+
+  .print-jam-stamp-jam {
+    animation: print-jam-stamp-slam 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .print-jam-stamp-ok {
+    animation: print-jam-stamp-ok-in 420ms ease-out both;
+  }
+}
+
+@keyframes print-jam-jitter {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-2px, 1px) skewX(-0.5deg);
+  }
+  50% {
+    transform: translate(2px, -1px);
+  }
+  75% {
+    transform: translate(-1px, -2px) skewX(0.4deg);
+  }
+  100% {
+    transform: translate(1px, 2px);
+  }
+}
+
+/* The stamp div carries a Tailwind rotate — animations replace the
+ * whole transform, so every keyframe restates rotate(-7deg). */
+@keyframes print-jam-stamp-slam {
+  0% {
+    transform: rotate(-7deg) scale(2.2);
+    opacity: 0;
+  }
+  60% {
+    transform: rotate(-7deg) scale(0.94);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(-7deg) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes print-jam-stamp-ok-in {
+  0% {
+    transform: rotate(-7deg) scale(1.15);
+    opacity: 0;
+  }
+  100% {
+    transform: rotate(-7deg) scale(1);
+    opacity: 1;
+  }
 }
 
 @media (min-width: 768px) {

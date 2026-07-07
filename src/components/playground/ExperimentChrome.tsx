@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { PlaygroundPresetBar } from "./PlaygroundPresetBar";
 
 type ExperimentChromeProps = {
   i18nKey: "inkDropStudio" | "typeAsFluid";
@@ -37,16 +38,25 @@ export function ExperimentChrome({ i18nKey, children }: ExperimentChromeProps) {
             the bottom edge for experiment-specific controls (Ink Drop's
             ButtonRow, Type-as-Fluid's input bar). */}
         <div className="container-page absolute top-20 left-0 right-0 md:top-6">
-          <div className="pointer-events-auto flex flex-col gap-1">
+          <div className="pointer-events-auto flex flex-col items-start gap-1">
             <Link
               href="/#playground"
-              className="type-label-stamp inline-flex items-baseline gap-2 text-ink hover:translate-x-[-2px] transition-transform"
+              className="type-label-stamp inline-flex items-baseline gap-2 self-start text-ink hover:translate-x-[-2px] transition-transform"
             >
               <span aria-hidden="true">←</span>
               <span>{tCommon("back")}</span>
             </Link>
             <h1 className="type-h2 mt-3 italic text-ink">{t("title")}</h1>
             <p className="type-body-sm mt-3 max-w-[36ch] text-ink-soft md:hidden">{t("caption")}</p>
+            {/* Docked preset switcher — flows in the title column so it
+                sits below the caption on mobile and below the title on
+                desktop (caption is bottom-left there), adapting to
+                whatever the caption's height is. The site-wide floating
+                pill stands down on these routes (SimPresetSwitcher route
+                gate). */}
+            <div className="mt-4">
+              <PlaygroundPresetBar />
+            </div>
           </div>
         </div>
 
