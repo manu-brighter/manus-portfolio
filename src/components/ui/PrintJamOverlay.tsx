@@ -79,7 +79,7 @@ export function PrintJamOverlay() {
       if (phaseRef.current !== "idle") return;
       // Flip the guard SYNCHRONOUSLY — setPhase only reaches phaseRef
       // on the next render, so two triggers in one task (e.g.
-      // `manus.fehldruck(); manus.fehldruck()` pasted as one console
+      // `manu.fehldruck(); manu.fehldruck()` pasted as one console
       // statement) would otherwise both pass the guard and the second
       // interval would orphan the first: a permanent splat storm.
       phaseRef.current = "jam";

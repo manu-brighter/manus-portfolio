@@ -16,7 +16,9 @@ import { SITE } from "@/lib/site";
  * command object for the technical audience: preset switching, splat
  * storms, and the Fehldruck easter-egg trigger. English on purpose —
  * the console reaches developers, not the four site locales.
- * "manu" (Manuel's actual name), NOT "manus" — that's the repo name.
+ * Named `manu` after Manuel directly. (The project is "manus portfolio"
+ * — the German genitive, "Manu's portfolio" — but the command surface
+ * addresses him by name, not the possessive.)
  *
  * Module-level `installed` flag keeps StrictMode's double-effect (and
  * client-side route changes under the persistent layout) from
