@@ -17,7 +17,7 @@ export function SceneCanvas({ children }: SceneCanvasProps) {
         // momentum scroll (its tile compositor drops position:fixed
         // layers under GPU pressure), the body's `--color-paper`
         // background shows through. The body bg matches the
-        // render-toon shader's `uPaperColor` exactly (#f0e8dc), so the
+        // render shader's `uPaperColor` exactly (#f0e8dc), so the
         // cull → un-cull transition only affects the ink + grain
         // overlay rather than the entire canvas. The blink is still
         // there but visually goes from "everything disappears" to

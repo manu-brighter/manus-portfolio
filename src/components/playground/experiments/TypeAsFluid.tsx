@@ -143,7 +143,7 @@ function TypeAsFluidCanvas() {
     orchestrator.setAmbientEnabled(false);
     // Open the warmup gate so step() runs the full sim pipeline
     // (advect, vorticity, pressure-solve, etc.). Without this the
-    // gate stays closed and step() short-circuits to render-toon
+    // gate stays closed and step() short-circuits to the render pass
     // only — text gets stamped directly into the dye FBO via
     // injectDensityTexture but never advects or dissipates.
     // InkDropStudio + TypeAsFluidMiniSim already call start() at

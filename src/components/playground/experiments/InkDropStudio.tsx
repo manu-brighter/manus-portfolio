@@ -35,7 +35,7 @@ import { ExperimentChrome } from "../ExperimentChrome";
 // number scale-readable while leaving the tier baseline intact.
 const BASE_SPLAT_RADIUS = 0.015;
 
-// The toon render shader (render-toon.frag.glsl) maps dye *magnitude*
+// The preset render shaders (render-*.frag.glsl) map dye *magnitude*
 // to a fixed mint→amber→rose→violet ladder rather than reading the
 // dye RGB itself — so a single-colour override can't show through the
 // layered Riso look. Studio embraces that: every splat picks a random

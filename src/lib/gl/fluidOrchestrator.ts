@@ -128,7 +128,7 @@ function makeExtraAmbientPoint(i: number): AmbientPoint {
   };
 }
 
-export const MAX_AMBIENT_POINTS = 10;
+const MAX_AMBIENT_POINTS = 10;
 
 const AMBIENT_POINTS: readonly AmbientPoint[] = [
   // Point A: slow wide orbit (upper-right quadrant tendency)
