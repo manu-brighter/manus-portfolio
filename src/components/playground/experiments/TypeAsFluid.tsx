@@ -25,9 +25,11 @@ import { ExperimentChrome } from "../ExperimentChrome";
  *     triggers a ~250ms-debounced re-stamp so live typing reads as a
  *     continuously-printing-and-dissolving inscription rather than a
  *     stutter on every character.
- *   - When idle (no typing or cursoring for 4s), a continuous rotation
- *     kicks in: every 6.5s it clears the dye and stamps a fresh word
- *     (the typed word if any, else the next default). The clear-between
+ *   - When idle (no typing or cursoring for 3s), a continuous rotation
+ *     kicks in: every ~5s it clears the dye and stamps a fresh word
+ *     (the typed word if any, else the next default). The idle condition
+ *     is polled frequently (not on the rotation period) so a word lands
+ *     promptly once the user stops. The clear-between
  *     keeps it to one clean word at a time — repeated stamping without
  *     it piles the viewport-spreading dye into a solid mass under
  *     turbulenz's density-to-dark shader. A preset switch re-inks
@@ -93,6 +95,10 @@ function TypeAsFluidCanvas() {
   // The continuous idle-rotation reschedule handle — kept OUT of
   // stampTimersRef so it doesn't count toward the in-flight race guard.
   const rotationTimerRef = useRef<number | null>(null);
+  // Timestamp of the last auto-stamped word — enforces a minimum
+  // spacing between idle-rotation words, independent of the (frequent)
+  // idle-poll cadence.
+  const lastAutoStampAtRef = useRef(0);
   const disposedRef = useRef(false);
 
   // ---- Mount: build orchestrator + stamper ----
@@ -179,6 +185,10 @@ function TypeAsFluidCanvas() {
     // Stamp an initial default word so the canvas isn't empty on first
     // paint. Picks a random one each mount so the experience varies.
     stampWord(stamperRef.current, orchestrator, pickWord(""), stampTimersRef.current, disposedRef);
+    // Seed the rotation spacing clock so the first idle word waits the
+    // full ROTATE_MS after this initial stamp rather than firing on the
+    // next poll.
+    lastAutoStampAtRef.current = performance.now();
 
     const onResize = () => {
       const ratio = capDPR(DPR_FULL);
@@ -279,25 +289,39 @@ function TypeAsFluidCanvas() {
       stampTimersRef.current,
       disposedRef,
     );
+    lastAutoStampAtRef.current = performance.now();
   }, []);
 
-  // ---- Continuous idle rotation: a fresh word every ROTATE_MS ----
+  // ---- Continuous idle rotation: a fresh word every ~ROTATE_MS ----
   // Self-rearming timer (mounted once) so words keep printing when the
   // user is idle — the whole point the user flagged ("das Wort wird
-  // nicht alle paar Sekunden geschrieben"). Skips while the user is
-  // actively interacting (typed OR cursored within IDLE_MS — see
-  // lastTypedAtRef) and while a stamp-reveal is already in flight, so
-  // it never wipes ink mid-gesture or double-stamps.
+  // nicht alle paar Sekunden geschrieben").
+  //
+  // The idle condition is POLLED on POLL_MS (short), NOT on the rotation
+  // period. The old code rescheduled on ROTATE_MS, so it only re-checked
+  // idleness every ~6.5s: a stray cursor move just before a check pushed
+  // the next word a full cycle away, which is exactly the "dauert sehr
+  // lange" the user hit. Polling frequently means a word appears within
+  // POLL_MS of the user going idle, while ROTATE_MS still caps the
+  // between-word cadence (via lastAutoStampAtRef). Skips while the user
+  // is actively interacting (typed OR cursored within IDLE_MS — see
+  // lastTypedAtRef) and while a stamp-reveal is already in flight, so it
+  // never wipes ink mid-gesture or double-stamps.
   useEffect(() => {
-    const ROTATE_MS = 6500;
-    const IDLE_MS = 4000;
+    const POLL_MS = 1500;
+    const IDLE_MS = 3000;
+    const ROTATE_MS = 5000;
     const tick = () => {
       if (disposedRef.current) return;
-      const idleFor = performance.now() - lastTypedAtRef.current;
-      if (idleFor >= IDLE_MS && stampTimersRef.current.size === 0) autoStamp();
-      rotationTimerRef.current = window.setTimeout(tick, ROTATE_MS);
+      const now = performance.now();
+      const idleFor = now - lastTypedAtRef.current;
+      const sinceStamp = now - lastAutoStampAtRef.current;
+      if (idleFor >= IDLE_MS && sinceStamp >= ROTATE_MS && stampTimersRef.current.size === 0) {
+        autoStamp();
+      }
+      rotationTimerRef.current = window.setTimeout(tick, POLL_MS);
     };
-    rotationTimerRef.current = window.setTimeout(tick, ROTATE_MS);
+    rotationTimerRef.current = window.setTimeout(tick, POLL_MS);
     return () => {
       if (rotationTimerRef.current !== null) window.clearTimeout(rotationTimerRef.current);
       rotationTimerRef.current = null;

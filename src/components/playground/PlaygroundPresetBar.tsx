@@ -35,7 +35,6 @@ export function PlaygroundPresetBar() {
       data-no-splat
       className="pointer-events-auto flex items-center gap-3 border-[1.5px] border-ink bg-paper px-3 py-2 shadow-[3px_3px_0_var(--color-ink)]"
     >
-      <span className="type-label-stamp border-none px-0 py-0 text-ink">{t(active.i18nKey)}</span>
       <div role="radiogroup" aria-label={t("label")} className="flex items-center gap-1.5">
         {SIM_PRESETS.map((preset) => {
           const isActive = preset.id === presetId;
@@ -73,6 +72,10 @@ export function PlaygroundPresetBar() {
           );
         })}
       </div>
+      {/* Name AFTER the dots so the dot row stays put and only the card's
+          right edge grows/shrinks as the label length changes (the card
+          is left-anchored in ExperimentChrome's title column). */}
+      <span className="type-label-stamp border-none px-0 py-0 text-ink">{t(active.i18nKey)}</span>
     </div>
   );
 }

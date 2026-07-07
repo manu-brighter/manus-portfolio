@@ -472,7 +472,7 @@ function InkDropStudioCanvas() {
       <div
         ref={paneContainerRef}
         data-no-splat
-        className="riso-tweakpane pointer-events-auto absolute bottom-28 left-1/2 z-20 w-[min(300px,72vw)] -translate-x-1/2 border-[1.5px] border-ink bg-paper shadow-[3px_3px_0_var(--color-ink)] md:top-24 md:right-6 md:bottom-auto md:left-auto md:w-[300px] md:translate-x-0"
+        className="riso-tweakpane pointer-events-auto absolute bottom-28 left-1/2 z-20 w-[min(300px,72vw)] -translate-x-1/2 border-[1.5px] border-ink bg-paper shadow-[3px_3px_0_var(--color-ink)] md:top-32 md:right-6 md:bottom-auto md:left-auto md:w-[300px] md:translate-x-0"
       />
     </ExperimentChrome>
   );
