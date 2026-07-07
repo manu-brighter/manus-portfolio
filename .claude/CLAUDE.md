@@ -255,7 +255,32 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   NEU KALIBRIERT; reduced-motion = static stamp only. Stamp strings live
   in the `easterEgg` common.json namespace (identical across locales).
 - **Playground/mini-sims inherit look only** via `syncPresetVisuals()` —
-  their tuned physics stays authoritative.
+  their tuned physics stays authoritative. Two option flags matter:
+  `lookOnly` applies ONLY the render subset (style/paper/ink/ladder/
+  grain/edges) and leaves the caller's splat-feel (count/scatter/
+  velocity/dye scale) alone — Type-as-Fluid needs this because the
+  preset swarm feel is tuned for the hero's fast dye fade and piles
+  into a solid dark mass under the experiment's slow-fade text physics
+  (turbulenz's density-to-dark shader makes it obvious). `cursor-
+  SplatRadiusBase` re-scales the hover cursor by the preset's
+  splatRadiusScale on each switch (turbulenz tiny, aquarell a bloom).
+  InkDropStudio instead applies full preset physics via its Tweakpane
+  sync, so it keeps the swarm.
+- **Type-as-Fluid re-stamps on preset switch** (a switch is not a
+  keystroke, so the 5s idle re-stamp never re-armed after one — the
+  canvas went static). The idle re-stamp is deliberately ONE word per
+  idle window, not a continuous every-5s rotation: each stamped word
+  blooms + spreads viewport-wide and repeated stamping accumulates
+  into a dark fill under turbulenz (one word is clean, three fill the
+  screen — screenshot-verified). `pickWord()` centralizes typed-vs-
+  default selection across the initial/idle/switch/button stamps.
+- **Playground preset switcher opens UPWARD on mobile** (vertical
+  column, toggle is the bottom child, dots stack above) — the leftward
+  horizontal row covered the experiments' bottom-edge controls
+  (InkDropStudio button row, Type-as-Fluid input). InkDropStudio's
+  Tweakpane sits at `top-64` on mobile to clear the 4-line
+  title/caption block; the ExperimentChrome back link is `self-start`
+  so its bordered stamp hugs content instead of stretching full-width.
 - **Ladder contrast rule**: light-theme ladder bands must never approach
   text-ink luminance — DOM text sits on top of the sim; a near-black pool
   under near-black type is unreadable (screenshot-verified).

@@ -38,9 +38,12 @@ function swatchGradient(preset: SimPreset): string {
  * Layout is breakpoint-adaptive and collapsible on BOTH sides of md:
  * below md a tap-to-expand pill in the bottom-RIGHT corner — at rest
  * a single active-swatch toggle button (the dot row eats real phone
- * estate), tap to expand leftwards, selection re-collapses; >=44px
- * touch targets throughout (the name flag is hover/focus-only, so it
- * stays Desktop-only). From md up a vertical pill bottom-left that
+ * estate), tap to expand UPWARD (the toggle is the column's bottom
+ * child; dots stack above it), selection re-collapses; >=44px touch
+ * targets throughout (the name flag is hover/focus-only, so it stays
+ * Desktop-only). Upward, not sideways, because the playground routes
+ * put their controls along the bottom edge — a leftward row covered
+ * them (user-reported). From md up a vertical pill bottom-left that
  * rests as the active dot alone and expands upward on :hover OR
  * :focus-within — the focus trigger is what keeps the native-radio
  * arrow-key pattern working: the collapsed dots are h-0 (NOT
@@ -163,7 +166,7 @@ export function SimPresetSwitcher() {
     <div
       data-no-splat
       onPointerLeave={() => setHoverArmed(true)}
-      className={`group/pill fixed right-4 bottom-4 z-40 flex flex-row items-center gap-1 rounded-full border-2 border-paper-line bg-paper/90 px-1 py-1 backdrop-blur-sm transition-opacity duration-700 md:right-auto md:bottom-5 md:left-5 md:flex-col md:gap-0 md:px-2 md:py-2 ${
+      className={`group/pill fixed right-4 bottom-4 z-40 flex flex-col items-center gap-1 rounded-full border-2 border-paper-line bg-paper/90 px-1 py-1 backdrop-blur-sm transition-opacity duration-700 md:right-auto md:bottom-5 md:left-5 md:flex-col md:gap-0 md:px-2 md:py-2 ${
         // `invisible` keeps the not-yet-appeared pill out of the tab
         // order too (visibility transitions cleanly alongside opacity).
         visible ? "visible opacity-100" : "pointer-events-none invisible opacity-0"
@@ -179,7 +182,7 @@ export function SimPresetSwitcher() {
         onKeyDown={() => {
           pointerSelectRef.current = false;
         }}
-        className={`${expanded ? "flex" : "hidden"} flex-row items-center gap-1 md:flex md:flex-col md:gap-0`}
+        className={`${expanded ? "flex" : "hidden"} flex-col items-center gap-1 md:flex md:flex-col md:gap-0`}
       >
         {SIM_PRESETS.map((preset) => {
           const active = preset.id === presetId;
@@ -268,7 +271,7 @@ export function SimPresetSwitcher() {
               {/* Hover/focus name flag — ink on paper, decorative only
                 (the sr-only text above carries the accessible name).
                 Desktop-only: touch has no hover, and in the mobile
-                horizontal row `left-full` would cover the next dot. */}
+                vertical column `left-full` would jut off the edge. */}
               <span
                 aria-hidden="true"
                 className="pointer-events-none absolute left-full ml-3 hidden whitespace-nowrap rounded-sm bg-ink px-2 py-1 font-mono text-paper text-xs opacity-0 transition-opacity duration-200 group-hover:opacity-100 peer-focus-visible:opacity-100 md:block"

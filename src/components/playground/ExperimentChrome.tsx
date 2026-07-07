@@ -37,10 +37,10 @@ export function ExperimentChrome({ i18nKey, children }: ExperimentChromeProps) {
             the bottom edge for experiment-specific controls (Ink Drop's
             ButtonRow, Type-as-Fluid's input bar). */}
         <div className="container-page absolute top-20 left-0 right-0 md:top-6">
-          <div className="pointer-events-auto flex flex-col gap-1">
+          <div className="pointer-events-auto flex flex-col items-start gap-1">
             <Link
               href="/#playground"
-              className="type-label-stamp inline-flex items-baseline gap-2 text-ink hover:translate-x-[-2px] transition-transform"
+              className="type-label-stamp inline-flex items-baseline gap-2 self-start text-ink hover:translate-x-[-2px] transition-transform"
             >
               <span aria-hidden="true">←</span>
               <span>{tCommon("back")}</span>

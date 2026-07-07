@@ -420,10 +420,15 @@ function InkDropStudioCanvas() {
           tucked it half-under the nav and read as broken), dressed as a
           Riso card (ink border + offset shadow) like the toolbar
           buttons so it belongs to the composition. */}
+      {/* Pane sits BELOW the (up to 4-line) title/caption block on
+          mobile (top-64) so the sliders don't cover "Ink Drop Studio /
+          Spielwiese..." — desktop keeps it up at top-24 where there's
+          room beside the left-aligned title. Narrower on mobile so it
+          doesn't span most of a phone. */}
       <div
         ref={paneContainerRef}
         data-no-splat
-        className="riso-tweakpane pointer-events-auto absolute top-24 right-4 z-20 w-[300px] border-[1.5px] border-ink bg-paper shadow-[3px_3px_0_var(--color-ink)] md:right-6"
+        className="riso-tweakpane pointer-events-auto absolute top-64 right-4 z-20 w-[min(300px,72vw)] border-[1.5px] border-ink bg-paper shadow-[3px_3px_0_var(--color-ink)] md:top-24 md:right-6 md:w-[300px]"
       />
     </ExperimentChrome>
   );
