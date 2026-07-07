@@ -10,16 +10,17 @@ import { useSimPresetStore } from "@/lib/simPresetStore";
 import { SITE } from "@/lib/site";
 
 /**
- * ConsoleMenu — the devtools greeting + `window.manus` command surface.
+ * ConsoleMenu — the devtools greeting + `window.manu` command surface.
  *
  * Prints a styled ASCII banner once per page load and exposes a small
  * command object for the technical audience: preset switching, splat
  * storms, and the Fehldruck easter-egg trigger. English on purpose —
  * the console reaches developers, not the four site locales.
+ * "manu" (Manuel's actual name), NOT "manus" — that's the repo name.
  *
  * Module-level `installed` flag keeps StrictMode's double-effect (and
  * client-side route changes under the persistent layout) from
- * printing the banner twice. `window.manus` deliberately survives
+ * printing the banner twice. `window.manu` deliberately survives
  * unmount — a torn-down console API mid-session is more confusing
  * than a stale one on a dead page.
  */
@@ -27,18 +28,18 @@ import { SITE } from "@/lib/site";
 const SPOTS: readonly SpotColor[] = ["rose", "amber", "mint", "violet"];
 
 const BANNER = String.raw`
- __  __    _    _   _  _   _  ____
-|  \/  |  / \  | \ | || | | |/ ___|
-| |\/| | / _ \ |  \| || | | |\___ \
-| |  | |/ ___ \| |\  || |_| | ___) |
-|_|  |_/_/   \_\_| \_| \___/ |____/
+ __  __    _    _   _  _   _
+|  \/  |  / \  | \ | || | | |
+| |\/| | / _ \ |  \| || | | |
+| |  | |/ ___ \| |\  || |_| |
+|_|  |_/_/   \_\_| \_| \___/
 `;
 
 const PRESET_IDS = SIM_PRESETS.map((p) => p.id).join(" | ");
 
 declare global {
   interface Window {
-    manus?: {
+    manu?: {
       help: () => void;
       preset: (id?: string) => void;
       burst: (count?: number) => void;
@@ -54,23 +55,23 @@ function install(): void {
   installed = true;
 
   console.log(
-    `%c${BANNER}%c\n  ${SITE.shortName} — ${SITE.tagline}\n  ${SITE.url}\n\n%c  The ink under your cursor is a real-time GPU Navier-Stokes sim,\n  cel-shaded into a Risograph print. Five inkings, one paper.\n\n%c  > manus.help()  — take the print controls\n`,
+    `%c${BANNER}%c\n  ${SITE.shortName} — ${SITE.tagline}\n  ${SITE.url}\n\n%c  The ink under your cursor is a real-time GPU Navier-Stokes sim,\n  cel-shaded into a Risograph print. Five inkings, one paper.\n\n%c  > manu.help()  — take the print controls\n`,
     `color: ${SPOT_HEX.rose}; font-family: monospace;`,
     "color: inherit; font-weight: bold;",
     "color: inherit; font-weight: normal;",
     `color: ${SPOT_HEX.violet}; font-weight: bold;`,
   );
 
-  window.manus = {
+  window.manu = {
     help: () => {
       console.log(
         [
-          "manus — print controls",
+          "manu — print controls",
           "",
-          `  manus.preset(id)   switch the ink character (${PRESET_IDS})`,
-          "  manus.preset()     show the active preset",
-          "  manus.burst(n)     throw n ink splats at the page (default 14)",
-          "  manus.fehldruck()  ...slip the registration. Briefly.",
+          `  manu.preset(id)   switch the ink character (${PRESET_IDS})`,
+          "  manu.preset()     show the active preset",
+          "  manu.burst(n)     throw n ink splats at the page (default 14)",
+          "  manu.fehldruck()  ...slip the registration. Briefly.",
           "",
           "  (there may be an older way in, if you know the code)",
         ].join("\n"),
