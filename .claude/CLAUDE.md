@@ -166,17 +166,37 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 
 ## Sim presets & night theme
 
-- **4 user-switchable presets** (riso/turbulenz/aquarell/nachtdruck) defined in
-  `src/lib/content/simPresets.ts`; persisted selection in
+- **5 user-switchable presets** (riso/wave/turbulenz/aquarell/nachtdruck)
+  defined in `src/lib/content/simPresets.ts`; persisted selection in
   `src/lib/simPresetStore.ts` (zustand + localStorage `manus-sim-preset`).
 - **One render shader per preset** (theme-differentiation pass): riso =
-  overprint ring-band plates + misreg seams + ink bleed, turbulenz =
+  the ORIGINAL soft-ladder + Sobel pooling (deliberately the quietest —
+  it's the default under the hero text; the louder overprint rework was
+  demoted from default after user feedback), wave = overprint ring-band
+  plates + misreg seams + ink bleed in a blue plate ladder, turbulenz =
   screenprint comic (hard bands, halftone, ink contour lines), aquarell =
   wet blur + granulation + wet-edge rims, nachtdruck = neon terraces +
-  additive glow + chroma fringes. All four compile at `init()`; selection
+  additive glow + chroma fringes. All five compile at `init()`; selection
   via `FluidVisuals.style` (exhaustive switch in `renderProgram()`).
-  `render-toon.frag.glsl` is retired. Blur hierarchy is deliberate:
-  aquarell >> riso > turbulenz/nachtdruck (crisp).
+  `render-toon.frag.glsl` is retired (its look lives in render-riso).
+  Blur hierarchy is deliberate: aquarell >> riso > wave/turbulenz/
+  nachtdruck (crisp).
+- **Idle ambient swarm**: the ambient rig runs up to 10 wandering points
+  (3 hand-tuned A/B/C + 7 procedural golden-angle extras) —
+  `FluidVisuals.ambientPointCount` picks how many, `ambientChurn` (0..1)
+  cycles points beyond A/B in/out on staggered ~10-20s sines (visible
+  spawn/despawn; dye deposit fades with the life gate via runSplat's
+  dyeMul). Turbulenz 8/full churn so the swarm persists while IDLE too
+  (user feedback: pointer-only multi-splat "verschwindet gleich"),
+  nachtdruck 6/0.8, wave 6/0.7. Defaults 3/0 = original rig.
+- **Wave is a full page theme**: `theme: "wave"` re-inks paper AND ink
+  family (blue-black on blue-white, globals.css) — unlike warm/wash
+  which only tint paper. Switcher dot uses `swatchHex` (blue sits
+  outside the four canonical spots).
+- **PhotoInkMask follows the theme**: mask paper = preset sim paper,
+  per-photo spot maps onto the preset ladder slot (mint=0/amber=1/
+  rose=2/violet=3, the legacy uniform order), read per frame, gated on
+  `data-sim-theme` so the static tier stays canonical.
 - **Render shaders are `precision highp float`** — the shared noise include
   overflows fp16 internally (`permute` ~3e6) and pixel-space halftone
   coords exceed fp16 range; sim passes stay mediump. Halftone uses
@@ -238,7 +258,9 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   persisted preset on init + live on store change (same wiring as FluidSim);
   SimThemeSync and SimPresetSwitcher gate only on `config && !reducedMotion`.
   Switcher renders as a horizontal bottom-left row with 44px touch targets
-  below `md`, vertical dot pill from `md` up.
+  below `md`; from `md` up a vertical pill that rests as the active dot
+  and expands on :hover OR :focus-within (focus keeps the native-radio
+  arrow-key pattern working — collapsed dots are h-0, not display:none).
 - **Tap-to-splat** reads touch at document level; taps on interactive UI
   (`a/button/input/label/[data-no-splat]`) are ignored; color is a random
   spot per tap.
