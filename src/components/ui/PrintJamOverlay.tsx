@@ -11,7 +11,10 @@ import { subscribeToPrintJam } from "@/lib/printJamBus";
  * PrintJamOverlay — the "Fehldruck" easter egg.
  *
  * Triggers: the Konami code (via document keydown, `e.code` so QWERTZ
- * works) or `manus.fehldruck()` from the console menu (printJamBus).
+ * works), simply TYPING "fehldruck" anywhere outside a form field
+ * (rolling letter buffer — the word is printed on the stamp itself,
+ * so it doubles as the discoverable trigger), or `manu.fehldruck()`
+ * from the console menu (printJamBus).
  *
  * Sequence (~6s): `<html data-print-jam>` slips the registration on
  * all display text (channel-split shadows + jitter, CSS in
@@ -114,11 +117,24 @@ export function PrintJamOverlay() {
     };
 
     let progress = 0;
+    // Rolling buffer for the typed-word trigger. e.key (not e.code)
+    // so the layout's actual letters count.
+    const WORD = "fehldruck";
+    let typed = "";
     const onKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
       if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) {
         progress = 0;
+        typed = "";
         return;
+      }
+      if (e.key.length === 1) {
+        typed = (typed + e.key.toLowerCase()).slice(-WORD.length);
+        if (typed === WORD) {
+          typed = "";
+          run();
+          return;
+        }
       }
       if (e.code === KONAMI[progress]) {
         progress++;
