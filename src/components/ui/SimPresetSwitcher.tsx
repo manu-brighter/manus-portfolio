@@ -46,6 +46,17 @@ function swatchGradient(preset: SimPreset): string {
  * display:none), so their sr-only inputs stay focusable, and focus
  * expands the pill before the user can notice.
  *
+ * Pointer-selection collapses the pill immediately: the clicked radio
+ * is blurred (releases :focus-within) and hover-expansion is disarmed
+ * until the pointer leaves the pill — without the disarm the still-
+ * hovering cursor holds it open (user feedback: "collapse right after
+ * selecting"). Keyboard selection keeps focus and stays expanded.
+ *
+ * Discoverability peek: when the pill first appears it unfolds the
+ * full dot row for INTRO_PEEK_MS, then rests — first-time users
+ * otherwise never learn the lone dot is a 5-way switcher. Any
+ * selection or manual toggle ends the peek early.
+ *
  * A11y: radiogroup pattern with roving tabindex + arrow keys.
  * Accessible names come from sr-only children (never `aria-label` on
  * a generic span — documented axe trap). Spot colors appear as fills
@@ -60,6 +71,8 @@ function swatchGradient(preset: SimPreset): string {
 // and land at orchestrator init.
 const FRESH_APPEAR_MS = 2800;
 const RETURNING_APPEAR_MS = 600;
+// How long the appear-time discoverability peek holds the row open.
+const INTRO_PEEK_MS = 3500;
 
 export function SimPresetSwitcher() {
   const t = useTranslations("simPresets");
@@ -74,6 +87,14 @@ export function SimPresetSwitcher() {
   // expands leftwards on tap. From `md` up the group is always shown
   // and the toggle is display:none — `expanded` simply has no effect.
   const [expanded, setExpanded] = useState(false);
+  // Appear-time discoverability peek (desktop expansion is otherwise
+  // pure CSS hover/focus, so the forced unfold needs its own state).
+  const [introPeek, setIntroPeek] = useState(false);
+  const peekTimerRef = useRef<number | null>(null);
+  // False right after a pointer-selection, re-armed on pointerleave:
+  // gates the md: group-hover expansion classes so the pill can
+  // collapse under a still-hovering cursor.
+  const [hoverArmed, setHoverArmed] = useState(true);
   const toggleRef = useRef<HTMLButtonElement>(null);
   // Set on pointerdown, consumed in onChange: distinguishes tap/click
   // selection from keyboard (arrow-key) selection. Only keyboard
@@ -94,11 +115,22 @@ export function SimPresetSwitcher() {
     const wasComplete = isLoaderComplete();
     const unsub = subscribeToLoaderComplete(() => {
       const delay = wasComplete ? RETURNING_APPEAR_MS : FRESH_APPEAR_MS;
-      timer = window.setTimeout(() => setVisible(true), delay);
+      timer = window.setTimeout(() => {
+        setVisible(true);
+        // Discoverability peek — unfold the whole row for a beat
+        // (`expanded` drives the mobile row, `introPeek` the md: pill).
+        setExpanded(true);
+        setIntroPeek(true);
+        peekTimerRef.current = window.setTimeout(() => {
+          setExpanded(false);
+          setIntroPeek(false);
+        }, INTRO_PEEK_MS);
+      }, delay);
     });
     return () => {
       unsub();
       if (timer !== null) window.clearTimeout(timer);
+      if (peekTimerRef.current !== null) window.clearTimeout(peekTimerRef.current);
     };
   }, []);
 
@@ -106,9 +138,20 @@ export function SimPresetSwitcher() {
 
   const activePreset = getSimPreset(presetId);
 
+  // User interaction (selection or manual toggle) ends the peek early
+  // — their intent wins over the timed rest.
+  const endIntroPeek = () => {
+    if (peekTimerRef.current !== null) {
+      window.clearTimeout(peekTimerRef.current);
+      peekTimerRef.current = null;
+    }
+    setIntroPeek(false);
+  };
+
   return (
     <div
       data-no-splat
+      onPointerLeave={() => setHoverArmed(true)}
       className={`group/pill fixed right-4 bottom-4 z-40 flex flex-row items-center gap-1 rounded-full border-2 border-paper-line bg-paper/90 px-1 py-1 backdrop-blur-sm transition-opacity duration-700 md:right-auto md:bottom-5 md:left-5 md:flex-col md:gap-0 md:px-2 md:py-2 ${
         // `invisible` keeps the not-yet-appeared pill out of the tab
         // order too (visibility transitions cleanly alongside opacity).
@@ -141,12 +184,18 @@ export function SimPresetSwitcher() {
                 pointerSelectRef.current = true;
               }}
               // Desktop collapse: non-active dots rest at h-0 and fade
-              // in when the pill is hovered or holds focus. Heights are
-              // explicit (h-0 <-> h-10) so the transition animates.
+              // in when the pill is hovered or holds focus (hover only
+              // while armed — see hoverArmed), or during the intro
+              // peek. Heights are explicit (h-0 <-> h-10) so the
+              // transition animates.
               className={`group relative flex size-11 cursor-pointer items-center justify-center transition-[height,opacity] duration-300 [-webkit-tap-highlight-color:transparent] md:w-7 ${
-                active
+                active || introPeek
                   ? "md:h-10"
-                  : "md:h-0 md:overflow-hidden md:opacity-0 md:group-focus-within/pill:h-10 md:group-focus-within/pill:overflow-visible md:group-focus-within/pill:opacity-100 md:group-hover/pill:h-10 md:group-hover/pill:overflow-visible md:group-hover/pill:opacity-100"
+                  : `md:h-0 md:overflow-hidden md:opacity-0 md:group-focus-within/pill:h-10 md:group-focus-within/pill:overflow-visible md:group-focus-within/pill:opacity-100${
+                      hoverArmed
+                        ? " md:group-hover/pill:h-10 md:group-hover/pill:overflow-visible md:group-hover/pill:opacity-100"
+                        : ""
+                    }`
               }`}
             >
               <input
@@ -154,7 +203,7 @@ export function SimPresetSwitcher() {
                 name="sim-preset"
                 value={preset.id}
                 checked={active}
-                onChange={() => {
+                onChange={(e) => {
                   setPreset(preset.id);
                   // Mobile: selection collapses the row again. KEYBOARD
                   // selection restores focus to the toggle so users
@@ -165,10 +214,18 @@ export function SimPresetSwitcher() {
                   // up (toggle is display:none there and the group
                   // ignores `expanded`).
                   setExpanded(false);
+                  endIntroPeek();
                   const viaPointer = pointerSelectRef.current;
                   pointerSelectRef.current = false;
-                  if (
-                    !viaPointer &&
+                  if (viaPointer) {
+                    // Desktop pointer path: release :focus-within and
+                    // disarm hover so the pill collapses immediately
+                    // instead of waiting for an outside click /
+                    // pointer exit. Keyboard keeps focus (staying
+                    // expanded is correct mid-arrow-key browsing).
+                    e.currentTarget.blur();
+                    setHoverArmed(false);
+                  } else if (
                     toggleRef.current &&
                     getComputedStyle(toggleRef.current).display !== "none"
                   ) {
@@ -220,7 +277,10 @@ export function SimPresetSwitcher() {
         ref={toggleRef}
         type="button"
         aria-expanded={expanded}
-        onClick={() => setExpanded((v) => !v)}
+        onClick={() => {
+          endIntroPeek();
+          setExpanded((v) => !v);
+        }}
         className="relative flex size-11 cursor-pointer items-center justify-center rounded-full [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring) md:hidden"
       >
         <span className="sr-only">{t("label")}</span>
