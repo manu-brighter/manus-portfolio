@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useOrchestratorRAF } from "@/hooks/useOrchestratorRAF";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { TYPE_AS_FLUID_DEFAULTS } from "@/lib/content/playground";
@@ -25,9 +25,13 @@ import { ExperimentChrome } from "../ExperimentChrome";
  *     triggers a ~250ms-debounced re-stamp so live typing reads as a
  *     continuously-printing-and-dissolving inscription rather than a
  *     stutter on every character.
- *   - When idle (no typing for 4s), a default-word rotation kicks in —
- *     pulls the next word from TYPE_AS_FLUID_DEFAULTS and stamps it
- *     every 5s. Typing resumes overrides the rotation.
+ *   - When idle (no typing or cursoring for 4s), a continuous rotation
+ *     kicks in: every 6.5s it clears the dye and stamps a fresh word
+ *     (the typed word if any, else the next default). The clear-between
+ *     keeps it to one clean word at a time — repeated stamping without
+ *     it piles the viewport-spreading dye into a solid mass under
+ *     turbulenz's density-to-dark shader. A preset switch re-inks
+ *     immediately in the incoming theme.
  *
  * Reduced motion: instant-fade replacement (no sim, no stamp pipeline).
  */
@@ -86,6 +90,9 @@ function TypeAsFluidCanvas() {
   // GL context. Also doubles as an in-flight count for the idle-
   // rotation race-prevention check below.
   const stampTimersRef = useRef<Set<number>>(new Set<number>());
+  // The continuous idle-rotation reschedule handle — kept OUT of
+  // stampTimersRef so it doesn't count toward the in-flight race guard.
+  const rotationTimerRef = useRef<number | null>(null);
   const disposedRef = useRef(false);
 
   // ---- Mount: build orchestrator + stamper ----
@@ -230,6 +237,10 @@ function TypeAsFluidCanvas() {
       p.x = x;
       p.y = y;
       p.moved = true;
+      // Count active cursoring as interaction so the idle rotation
+      // (which resets the dye) can't wipe ink the user is making right
+      // now — lastTypedAtRef doubles as a last-interaction clock.
+      lastTypedAtRef.current = performance.now();
     };
     document.addEventListener("pointermove", onMove);
     return () => document.removeEventListener("pointermove", onMove);
@@ -248,65 +259,62 @@ function TypeAsFluidCanvas() {
     return () => window.clearTimeout(handle);
   }, [text]);
 
-  // ---- Idle re-stamp: 5s after the last keystroke ----
-  // One re-stamp per idle window: `text` change re-runs the effect,
-  // the cleanup clears the prior timer, and a fresh 5s window starts
-  // from the current keystroke. Refreshes whatever word is most
-  // relevant — the typed word (fresh random Riso ink) if present, else
-  // a default from TYPE_AS_FLUID_DEFAULTS.
-  //
-  // Deliberately NOT a continuous every-5s rotation: each stamped word
-  // blooms + spreads across the viewport, and repeated stamping piles
-  // the dye into a solid mass under turbulenz's density-to-dark shader
-  // (screenshot-verified — a single word is clean, three fill the
-  // screen). One word per idle window keeps every theme readable. The
-  // switch-refresh effect below covers the "keep working after a theme
-  // switch" case the user reported without the pile-up.
-  //
-  // Race protection: skip if a stamp-reveal is already in flight
-  // (stampTimersRef non-empty) so two 23-timer reveals can't overlap
-  // with cross-colour bleed.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: `text` is the reset trigger — each keystroke re-runs the effect, the cleanup clears the prior timer, and a fresh 5s window starts. The body reads textRef so it always sees the latest input even if it fires mid-typing.
+  // Clear the dye then stamp one fresh word. The reset is what makes a
+  // continuous rotation safe: each stamped word blooms + spreads across
+  // the viewport, so without a clear-between they pile into a solid
+  // mass under turbulenz's density-to-dark shader (screenshot-verified).
+  // Resetting per word means the canvas is ALWAYS one clean word at a
+  // time, on every device — no dependence on the dye fading fast enough
+  // between stamps (which throttles hard on weak GPUs). Only refs are
+  // read, so the callback is stable (empty deps).
+  const autoStamp = useCallback(() => {
+    const stamper = stamperRef.current;
+    const orchestrator = orchestratorRef.current;
+    if (!stamper || !orchestrator || disposedRef.current) return;
+    orchestrator.reset();
+    stampWord(
+      stamper,
+      orchestrator,
+      pickWord(textRef.current),
+      stampTimersRef.current,
+      disposedRef,
+    );
+  }, []);
+
+  // ---- Continuous idle rotation: a fresh word every ROTATE_MS ----
+  // Self-rearming timer (mounted once) so words keep printing when the
+  // user is idle — the whole point the user flagged ("das Wort wird
+  // nicht alle paar Sekunden geschrieben"). Skips while the user is
+  // actively interacting (typed OR cursored within IDLE_MS — see
+  // lastTypedAtRef) and while a stamp-reveal is already in flight, so
+  // it never wipes ink mid-gesture or double-stamps.
   useEffect(() => {
-    const timers = stampTimersRef.current;
-    const id = window.setTimeout(() => {
-      timers.delete(id);
-      if (timers.size > 0) return;
-      const stamper = stamperRef.current;
-      const orchestrator = orchestratorRef.current;
-      if (!stamper || !orchestrator) return;
-      stampWord(stamper, orchestrator, pickWord(textRef.current), timers, disposedRef);
-    }, 5000);
-    timers.add(id);
-    return () => {
-      window.clearTimeout(id);
-      timers.delete(id);
+    const ROTATE_MS = 6500;
+    const IDLE_MS = 4000;
+    const tick = () => {
+      if (disposedRef.current) return;
+      const idleFor = performance.now() - lastTypedAtRef.current;
+      if (idleFor >= IDLE_MS && stampTimersRef.current.size === 0) autoStamp();
+      rotationTimerRef.current = window.setTimeout(tick, ROTATE_MS);
     };
-  }, [text]);
+    rotationTimerRef.current = window.setTimeout(tick, ROTATE_MS);
+    return () => {
+      if (rotationTimerRef.current !== null) window.clearTimeout(rotationTimerRef.current);
+      rotationTimerRef.current = null;
+    };
+  }, [autoStamp]);
 
   // ---- Re-stamp on preset switch ----
-  // A theme switch is not a keystroke, so the idle re-stamp above never
-  // re-armed after one — the canvas went static once the user switched
-  // presets (user-reported "auto-writing stops after switching"). This
-  // stamps a fresh word in the incoming theme so the switch itself
-  // re-inks the canvas. Subscribes AFTER the mount effect's
-  // syncPresetVisuals subscriber (registration order), so the new look
-  // is applied before the word lands.
+  // A switch re-inks the canvas immediately (rather than waiting up to
+  // ROTATE_MS) with a fresh word in the incoming theme — a clean slate
+  // to show off the new look. Subscribes AFTER the mount effect's
+  // syncPresetVisuals subscriber (registration order), so the new
+  // visuals are applied before the word lands.
   useEffect(() => {
     return useSimPresetStore.subscribe((current, previous) => {
-      if (current.presetId === previous.presetId || disposedRef.current) return;
-      const stamper = stamperRef.current;
-      const orchestrator = orchestratorRef.current;
-      if (!stamper || !orchestrator) return;
-      stampWord(
-        stamper,
-        orchestrator,
-        pickWord(textRef.current),
-        stampTimersRef.current,
-        disposedRef,
-      );
+      if (current.presetId !== previous.presetId) autoStamp();
     });
-  }, []);
+  }, [autoStamp]);
 
   return (
     <ExperimentChrome i18nKey="typeAsFluid">
@@ -334,7 +342,7 @@ function TypeAsFluidCanvas() {
             autoComplete="off"
             spellCheck={false}
             maxLength={24}
-            className="type-h2 flex-1 border-[1.5px] border-ink bg-paper px-4 py-3 text-center text-ink italic placeholder:text-ink-muted focus-visible:outline-none focus-visible:shadow-[3px_3px_0_var(--color-ink)] focus-visible:-translate-x-[1px] focus-visible:-translate-y-[1px] transition-[transform,box-shadow]"
+            className="type-h2 flex-1 border-[1.5px] border-ink bg-paper px-4 py-3 text-center text-ink italic placeholder:text-ink/35 focus-visible:outline-none focus-visible:shadow-[3px_3px_0_var(--color-ink)] focus-visible:-translate-x-[1px] focus-visible:-translate-y-[1px] transition-[transform,box-shadow]"
             style={{ letterSpacing: "0.05em" }}
           />
           <button

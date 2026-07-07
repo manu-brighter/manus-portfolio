@@ -266,21 +266,31 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   splatRadiusScale on each switch (turbulenz tiny, aquarell a bloom).
   InkDropStudio instead applies full preset physics via its Tweakpane
   sync, so it keeps the swarm.
-- **Type-as-Fluid re-stamps on preset switch** (a switch is not a
-  keystroke, so the 5s idle re-stamp never re-armed after one — the
-  canvas went static). The idle re-stamp is deliberately ONE word per
-  idle window, not a continuous every-5s rotation: each stamped word
-  blooms + spreads viewport-wide and repeated stamping accumulates
-  into a dark fill under turbulenz (one word is clean, three fill the
-  screen — screenshot-verified). `pickWord()` centralizes typed-vs-
-  default selection across the initial/idle/switch/button stamps.
-- **Playground preset switcher opens UPWARD on mobile** (vertical
-  column, toggle is the bottom child, dots stack above) — the leftward
-  horizontal row covered the experiments' bottom-edge controls
-  (InkDropStudio button row, Type-as-Fluid input). InkDropStudio's
-  Tweakpane sits at `top-64` on mobile to clear the 4-line
-  title/caption block; the ExperimentChrome back link is `self-start`
-  so its bordered stamp hugs content instead of stretching full-width.
+- **Type-as-Fluid auto-writes a fresh word every 6.5s** (continuous
+  self-rearming rotation) AND re-inks immediately on preset switch.
+  The catch: each stamped word blooms + spreads viewport-wide, so
+  repeated stamping piles the dye into a solid mass under turbulenz's
+  density-to-dark shader. The fix is `autoStamp()` = `orchestrator
+  .reset()` THEN stampWord, so the canvas is always one clean word at
+  a time on EVERY device — no reliance on the dye fading fast enough
+  between stamps (which throttles hard on weak GPUs / headless).
+  Rotation is gated on `lastTypedAtRef` (updated on typing AND
+  cursoring) so it never wipes ink mid-gesture. `pickWord()`
+  centralizes typed-vs-default selection.
+- **Playground preset switcher is a DOCKED bar, not the floating pill.**
+  `PlaygroundPresetBar` (a labeled riso card) flows in the
+  ExperimentChrome title column (below caption on mobile, below title
+  on desktop — adapts to caption height); the site-wide
+  `SimPresetSwitcher` returns null on `/playground/*` (usePathname,
+  locale-stripped) so there's one switcher per screen. `swatchGradient`
+  is exported from SimPresetSwitcher for reuse. InkDropStudio's
+  Tweakpane docks bottom-centre on mobile (thumb zone, above the button
+  row) / top-right on desktop (a control column with the preset bar);
+  its title is "SIM-PARAMETER" (not a second page title). The
+  ExperimentChrome back link is `self-start` (bordered stamp hugs
+  content). BOMB splats sustain over ~8 frames (full impulse frame 0,
+  gentle dye deposits after) so each splat builds into a pool instead
+  of a one-frame poke.
 - **Ladder contrast rule**: light-theme ladder bands must never approach
   text-ink luminance — DOM text sits on top of the sim; a near-black pool
   under near-black type is unreadable (screenshot-verified).
