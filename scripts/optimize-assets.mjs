@@ -163,18 +163,21 @@ const TASKS = [
     jpgFallbackWidth: 800,
     resize: { width: 2400, height: 1350, fit: "cover" },
   },
-  // Joggediballa landscape screenshots — all 16:9
+  // Joggediballa landscape screenshots — all 16:9. The darkmode
+  // homepage shot feeds the Work-card's Nachtdruck swap
+  // (JoggediballaScreenshot) — outName "homepage-dark".
   ...[
     "admin-lightmode-landscape",
     "goennerverwaltung-lightmode-landscape",
     "homepage-lightmode-landscape",
+    "homepage-darkmode-landscape",
     "statistics-lightmode-landscape",
     "twitchoverlay-lightmode-landscape",
   ].map((slug) => ({
     group: "joggediballa",
     source: `content-input/projects/joggediballa/source/${slug}.png`,
     outDir: "public/projects/joggediballa",
-    outName: slug.replace("-lightmode-landscape", ""),
+    outName: slug.replace("-lightmode-landscape", "").replace("-darkmode-landscape", "-dark"),
     widths: [480, 800, 1200],
     codecs: ["avif", "webp"],
     jpgFallbackWidth: 800,

@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { WorkCard } from "@/components/ui/WorkCard";
+import { JoggediballaScreenshot } from "@/components/work/JoggediballaScreenshot";
 import { PortfolioCardReveal } from "@/components/work/PortfolioCardReveal";
 import type { WorkProjects } from "@/types/i18n-shapes";
 
@@ -116,26 +117,9 @@ export function Work() {
               vibecodedLabel={vibecodedLabel}
               click={{ kind: "anchor", target: "#case-study" }}
               media={
-                <picture className="block h-full w-full">
-                  <source
-                    type="image/avif"
-                    srcSet="/projects/joggediballa/homepage-480w.avif 480w, /projects/joggediballa/homepage-800w.avif 800w, /projects/joggediballa/homepage-1200w.avif 1200w"
-                    sizes="(min-width: 1024px) 40rem, (min-width: 640px) 60vw, 100vw"
-                  />
-                  <source
-                    type="image/webp"
-                    srcSet="/projects/joggediballa/homepage-480w.webp 480w, /projects/joggediballa/homepage-800w.webp 800w, /projects/joggediballa/homepage-1200w.webp 1200w"
-                  />
-                  <img
-                    src="/projects/joggediballa/homepage-800w.jpg"
-                    alt={joggediballa.screenshot?.alt ?? joggediballa.title}
-                    width={800}
-                    height={450}
-                    loading="lazy"
-                    decoding="async"
-                    className="block h-full w-full object-cover object-top"
-                  />
-                </picture>
+                // Theme-aware: swaps to the real darkmode homepage
+                // shot while the Nachtdruck preset is active.
+                <JoggediballaScreenshot alt={joggediballa.screenshot?.alt ?? joggediballa.title} />
               }
               mediaAlt={joggediballa.screenshot?.alt}
               mediaCaption={joggediballa.screenshot?.caption}
