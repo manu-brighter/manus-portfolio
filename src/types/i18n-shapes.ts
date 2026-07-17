@@ -41,6 +41,7 @@ export type SkillsTiers = (typeof deHome)["skills"]["tiers"];
 // --- work -----------------------------------------------------------
 
 export type WorkProjects = (typeof deHome)["work"]["projects"];
+export type WorkSideProjects = (typeof deHome)["work"]["sideProjects"]["items"];
 
 // --- caseStudy ------------------------------------------------------
 

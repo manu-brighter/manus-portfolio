@@ -3,6 +3,7 @@ import { FadeIn } from "@/components/motion/FadeIn";
 import { OverprintReveal } from "@/components/motion/OverprintReveal";
 import { VibecodedStamp } from "@/components/skills/VibecodedStamp";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { SITE } from "@/lib/site";
 import type { SkillsTiers } from "@/types/i18n-shapes";
 
 /**
@@ -74,6 +75,24 @@ export function Skills() {
             {t("heroSkill.description")}
           </FadeIn>
         </p>
+        {/* Proof row — the claim above, backed by a public repo. One
+            stamp link, ink-on-paper (spot colors stay fills-only). */}
+        <p className="mt-6 max-w-2xl type-body-sm text-ink-muted">
+          <FadeIn delay={0.5} y={10}>
+            {t("heroSkill.proof.lede")}
+          </FadeIn>
+        </p>
+        <FadeIn as="div" delay={0.6} y={10} className="mt-4">
+          <a
+            href={SITE.repos.fullProjectRework}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="type-label-stamp inline-flex items-center gap-2 transition-colors hover:bg-ink hover:text-paper-tint"
+          >
+            {t("heroSkill.proof.ctaLabel")}
+            <span aria-hidden="true">↗</span>
+          </a>
+        </FadeIn>
       </article>
 
       {/* Secondary tiers — flow as a stack, each with its own mono label. */}

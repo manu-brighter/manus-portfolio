@@ -28,11 +28,15 @@
         "value": "React 19 · R3F 9 · shaders WebGPU"
       },
       {
-        "verb": "lis",
+        "verb": "publie",
+        "value": "des skills Claude Code · une app Electron"
+      },
+      {
+        "verb": "shoote",
         "value": "wildlife au Costa Rica & en Thaïlande"
       },
       {
-        "verb": "écoute",
+        "verb": "roule en",
         "value": "Audi S5 B8.5 (projet tuning)"
       },
       {
@@ -48,7 +52,11 @@
     "heroSkill": {
       "eyebrow": "Hero Skill",
       "name": "AI Workflow & Vibecoding",
-      "description": "Custom agents, hooks, skills, prompts multi-étapes. L'IA n'est pas l'outil que j'utilise — c'est l'outil avec lequel je crée des outils."
+      "description": "Custom agents, hooks, skills, prompts multi-étapes. L'IA n'est pas l'outil que j'utilise — c'est l'outil avec lequel je crée des outils.",
+      "proof": {
+        "lede": "Pas une promesse en l'air — mon skill de rework multi-agents pour Claude Code est public : analyzers parallèles, triage par reviewers, commits atomiques.",
+        "ctaLabel": "GitHub · full-project-rework"
+      }
     },
     "vibecodedMarker": "vibecoded",
     "tiers": [
@@ -115,6 +123,10 @@
           },
           {
             "name": "Next.js",
+            "vibecoded": true
+          },
+          {
+            "name": "Electron",
             "vibecoded": true
           },
           {
@@ -420,7 +432,29 @@
         },
         "ctaLabel": "Case Study"
       }
-    ]
+    ],
+    "sideProjects": {
+      "label": "Faces B · Public sur GitHub",
+      "lede": "Plus petits que les deux projets principaux, mais réels et en service.",
+      "items": [
+        {
+          "id": "shotCounter",
+          "title": "Shot-Counter",
+          "tagline": "Scoreboard de soirée · App desktop",
+          "description": "Scoreboard live pour un nombre illimité d'équipes : on rejoint par QR code sur le LAN, chaque tap arrive instantanément sur tous les appareils via server-sent events, et un compteur SQLite atomique ne perd aucun shot. Construit comme app Electron pour Windows & Linux.",
+          "stack": ["Vue 3", "Express 5", "SQLite", "SSE", "Electron"],
+          "ctaLabel": "Repo & téléchargement"
+        },
+        {
+          "id": "fullProjectRework",
+          "title": "full-project-rework",
+          "tagline": "Skill Claude Code · Multi-agents",
+          "description": "Une commande, un overhaul complet du codebase : analyzers parallèles sur 20 catégories, triage par des reviewers seniors, implementers avec commits atomiques et rapport final. Mon workflow AI, distillé en un skill installable.",
+          "stack": ["Claude Code", "Subagents", "Skill", "MIT"],
+          "ctaLabel": "Repo & docs"
+        }
+      ]
+    }
   },
   "caseStudy": {
     "carousel": {

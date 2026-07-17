@@ -28,6 +28,10 @@
         "value": "React 19 · R3F 9 · WebGPU-Shader"
       },
       {
+        "verb": "shippe",
+        "value": "Claude-Code-Skills · eine Electron-App"
+      },
+      {
         "verb": "schieße",
         "value": "Wildlife in Costa Rica & Thailand"
       },
@@ -48,7 +52,11 @@
     "heroSkill": {
       "eyebrow": "Hero-Skill",
       "name": "AI-Workflow & Vibecoding",
-      "description": "Custom Agents, Hooks, Skills, mehrstufige Prompts. AI ist nicht das Tool, das ich nutze, sondern das Werkzeug, mit dem ich Tools baue."
+      "description": "Custom Agents, Hooks, Skills, mehrstufige Prompts. AI ist nicht das Tool, das ich nutze, sondern das Werkzeug, mit dem ich Tools baue.",
+      "proof": {
+        "lede": "Kein leeres Versprechen — mein Multi-Agent-Rework-Skill für Claude Code ist public: parallele Analyzer, Reviewer-Triage, atomare Implementer-Commits.",
+        "ctaLabel": "GitHub · full-project-rework"
+      }
     },
     "vibecodedMarker": "vibecoded",
     "tiers": [
@@ -115,6 +123,10 @@
           },
           {
             "name": "Next.js",
+            "vibecoded": true
+          },
+          {
+            "name": "Electron",
             "vibecoded": true
           },
           {
@@ -420,7 +432,29 @@
         },
         "ctaLabel": "Case Study"
       }
-    ]
+    ],
+    "sideProjects": {
+      "label": "B-Seiten · Public auf GitHub",
+      "lede": "Kleiner als die zwei Hauptprojekte, aber echt und im Einsatz.",
+      "items": [
+        {
+          "id": "shotCounter",
+          "title": "Shot-Counter",
+          "tagline": "Party-Scoreboard · Desktop-App",
+          "description": "Live-Scoreboard für beliebig viele Teams: QR-Code-Join übers LAN, jeder Tap landet per Server-Sent Events sofort auf allen Geräten, ein atomarer SQLite-Zähler verliert keinen Shot. Gebaut als Electron-App für Windows & Linux.",
+          "stack": ["Vue 3", "Express 5", "SQLite", "SSE", "Electron"],
+          "ctaLabel": "Repo & Download"
+        },
+        {
+          "id": "fullProjectRework",
+          "title": "full-project-rework",
+          "tagline": "Claude-Code-Skill · Multi-Agent",
+          "description": "Ein Befehl, kompletter Codebase-Overhaul: parallele Analyzer über 20 Kategorien, Senior-Reviewer-Triage, Implementer mit atomaren Commits und Abschluss-Report. Mein AI-Workflow, destilliert in ein installierbares Skill.",
+          "stack": ["Claude Code", "Subagents", "Skill", "MIT"],
+          "ctaLabel": "Repo & Doku"
+        }
+      ]
+    }
   },
   "caseStudy": {
     "carousel": {

@@ -28,6 +28,10 @@
         "value": "React 19 · R3F 9 · WebGPU shaders"
       },
       {
+        "verb": "shipping",
+        "value": "Claude Code skills · an Electron app"
+      },
+      {
         "verb": "shooting",
         "value": "wildlife in Costa Rica & Thailand"
       },
@@ -48,7 +52,11 @@
     "heroSkill": {
       "eyebrow": "Hero Skill",
       "name": "AI Workflow & Vibecoding",
-      "description": "Custom agents, hooks, skills, multi-stage prompts. AI isn't the tool I use — it's the thing I use to create tools."
+      "description": "Custom agents, hooks, skills, multi-stage prompts. AI isn't the tool I use — it's the thing I use to create tools.",
+      "proof": {
+        "lede": "Not an empty claim — my multi-agent rework skill for Claude Code is public: parallel analyzers, reviewer triage, atomic implementer commits.",
+        "ctaLabel": "GitHub · full-project-rework"
+      }
     },
     "vibecodedMarker": "vibecoded",
     "tiers": [
@@ -115,6 +123,10 @@
           },
           {
             "name": "Next.js",
+            "vibecoded": true
+          },
+          {
+            "name": "Electron",
             "vibecoded": true
           },
           {
@@ -420,7 +432,29 @@
         },
         "ctaLabel": "Case Study"
       }
-    ]
+    ],
+    "sideProjects": {
+      "label": "B-sides · Public on GitHub",
+      "lede": "Smaller than the two main projects, but real and in use.",
+      "items": [
+        {
+          "id": "shotCounter",
+          "title": "Shot-Counter",
+          "tagline": "Party scoreboard · Desktop app",
+          "description": "Live scoreboard for any number of teams: QR-code join over LAN, every tap lands on all devices instantly via server-sent events, and an atomic SQLite counter never loses a shot. Built as an Electron app for Windows & Linux.",
+          "stack": ["Vue 3", "Express 5", "SQLite", "SSE", "Electron"],
+          "ctaLabel": "Repo & download"
+        },
+        {
+          "id": "fullProjectRework",
+          "title": "full-project-rework",
+          "tagline": "Claude Code skill · Multi-agent",
+          "description": "One command, a full codebase overhaul: parallel analyzers across 20 categories, senior-reviewer triage, implementers with atomic commits and a final report. My AI workflow, distilled into an installable skill.",
+          "stack": ["Claude Code", "Subagents", "Skill", "MIT"],
+          "ctaLabel": "Repo & docs"
+        }
+      ]
+    }
   },
   "caseStudy": {
     "carousel": {

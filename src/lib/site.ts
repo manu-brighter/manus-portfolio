@@ -27,4 +27,11 @@ export const SITE = {
       instagram: "https://instagram.com/joggediballa",
     },
   },
+  /** Public repos referenced from Skills (proof link) and the Work
+   *  B-sides strip. URLs live here, not in the i18n catalogs — one
+   *  file beats four JSONs in sync (same rationale as the socials). */
+  repos: {
+    fullProjectRework: "https://github.com/manu-brighter/full-project-rework",
+    shotCounter: "https://github.com/manu-brighter/shot-counter",
+  },
 } as const;

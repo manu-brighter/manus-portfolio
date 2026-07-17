@@ -28,11 +28,15 @@
         "value": "React 19 · R3F 9 · shader WebGPU"
       },
       {
-        "verb": "leggo",
+        "verb": "pubblico",
+        "value": "skill per Claude Code · un'app Electron"
+      },
+      {
+        "verb": "fotografo",
         "value": "wildlife in Costa Rica & Thailandia"
       },
       {
-        "verb": "ascolto",
+        "verb": "guido",
         "value": "Audi S5 B8.5 (progetto tuning)"
       },
       {
@@ -48,7 +52,11 @@
     "heroSkill": {
       "eyebrow": "Hero Skill",
       "name": "AI Workflow & Vibecoding",
-      "description": "Custom agents, hooks, skills, prompt a più stadi. L'IA non è lo strumento che uso — è lo strumento con cui creo strumenti."
+      "description": "Custom agents, hooks, skills, prompt a più stadi. L'IA non è lo strumento che uso — è lo strumento con cui creo strumenti.",
+      "proof": {
+        "lede": "Nessuna promessa vuota — il mio skill di rework multi-agente per Claude Code è pubblico: analyzer paralleli, triage dei reviewer, commit atomici degli implementer.",
+        "ctaLabel": "GitHub · full-project-rework"
+      }
     },
     "vibecodedMarker": "vibecoded",
     "tiers": [
@@ -115,6 +123,10 @@
           },
           {
             "name": "Next.js",
+            "vibecoded": true
+          },
+          {
+            "name": "Electron",
             "vibecoded": true
           },
           {
@@ -420,7 +432,29 @@
         },
         "ctaLabel": "Case Study"
       }
-    ]
+    ],
+    "sideProjects": {
+      "label": "Lati B · Pubblico su GitHub",
+      "lede": "Più piccoli dei due progetti principali, ma reali e in uso.",
+      "items": [
+        {
+          "id": "shotCounter",
+          "title": "Shot-Counter",
+          "tagline": "Scoreboard da festa · App desktop",
+          "description": "Scoreboard live per un numero qualsiasi di team: si entra via QR code sulla LAN, ogni tap arriva subito su tutti i dispositivi via server-sent events, e un contatore SQLite atomico non perde nessuno shot. Costruito come app Electron per Windows & Linux.",
+          "stack": ["Vue 3", "Express 5", "SQLite", "SSE", "Electron"],
+          "ctaLabel": "Repo & download"
+        },
+        {
+          "id": "fullProjectRework",
+          "title": "full-project-rework",
+          "tagline": "Skill Claude Code · Multi-agente",
+          "description": "Un comando, overhaul completo del codebase: analyzer paralleli su 20 categorie, triage di reviewer senior, implementer con commit atomici e report finale. Il mio workflow AI, distillato in uno skill installabile.",
+          "stack": ["Claude Code", "Subagents", "Skill", "MIT"],
+          "ctaLabel": "Repo & docs"
+        }
+      ]
+    }
   },
   "caseStudy": {
     "carousel": {

@@ -1,9 +1,13 @@
 import { useTranslations } from "next-intl";
+import { FadeIn } from "@/components/motion/FadeIn";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { WorkCard } from "@/components/ui/WorkCard";
 import { JoggediballaScreenshot } from "@/components/work/JoggediballaScreenshot";
 import { PortfolioCardReveal } from "@/components/work/PortfolioCardReveal";
-import type { WorkProjects } from "@/types/i18n-shapes";
+import { SideProjectCard } from "@/components/work/SideProjectCard";
+import type { SpotColor } from "@/lib/palette";
+import { SITE } from "@/lib/site";
+import type { WorkProjects, WorkSideProjects } from "@/types/i18n-shapes";
 
 /**
  * Work — Section 03.
@@ -22,9 +26,17 @@ import type { WorkProjects } from "@/types/i18n-shapes";
  * later pass.
  */
 
+// Repo URL + spot color per B-side id — URLs live in site.ts (single
+// source), spots use the pair the two hero cards don't (rose/amber).
+const SIDE_PROJECT_META: Record<string, { href: string; spot: SpotColor }> = {
+  shotCounter: { href: SITE.repos.shotCounter, spot: "mint" },
+  fullProjectRework: { href: SITE.repos.fullProjectRework, spot: "violet" },
+};
+
 export function Work() {
   const t = useTranslations("work");
   const projects = t.raw("projects") as WorkProjects;
+  const sideProjects = t.raw("sideProjects.items") as WorkSideProjects;
   const vibecodedLabel = t("vibecodedStamp");
 
   // Hard-coded order matches briefing §4: Portfolio first (meta-card),
@@ -127,6 +139,34 @@ export function Work() {
           </div>
         ) : null}
       </div>
+
+      {/* B-sides strip — the smaller public repos. Compact catalog
+          cards, not a third hero (the section stays "two intentional
+          projects" + a quiet open-source shelf below). */}
+      <FadeIn as="div" y={14} className="mt-20 md:mt-28">
+        <div className="mb-8 flex flex-col gap-2 md:flex-row md:items-baseline md:gap-6">
+          <h3 className="type-label-stamp">{t("sideProjects.label")}</h3>
+          <p className="type-label text-ink-muted">{t("sideProjects.lede")}</p>
+        </div>
+        <div className="grid gap-6 md:grid-cols-2 md:gap-8 lg:max-w-4xl">
+          {sideProjects.map((project) => {
+            const meta = SIDE_PROJECT_META[project.id];
+            if (!meta) return null;
+            return (
+              <SideProjectCard
+                key={project.id}
+                title={project.title}
+                tagline={project.tagline}
+                description={project.description}
+                stack={project.stack}
+                ctaLabel={project.ctaLabel}
+                href={meta.href}
+                spot={meta.spot}
+              />
+            );
+          })}
+        </div>
+      </FadeIn>
     </section>
   );
 }
