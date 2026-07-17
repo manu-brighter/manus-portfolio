@@ -344,26 +344,48 @@
       "headline": "Wenn der Bildschirm aus ist.",
       "currentlyBand": "Snapshot 2026 · Wildlife-Reise in Planung · Wintersaison · Paddle griffbereit",
       "currentlyBandShort": "Snapshot 2026",
+      "revealCta": "Bild ansehen",
+      "revealClose": "Schliessen",
       "tiles": {
         "camera": {
           "name": "Kamera",
-          "caption": "shooting · Sony α7 IV · Wildlife"
+          "caption": "shooting · Sony α7 IV · Wildlife",
+          "reveal": {
+            "alt": "Zwei junge Füchse zwischen Buchenzweigen im Wald — Wildlife-Aufnahme mit der Sony α7 IV",
+            "caption": "JUNGFÜCHSE · WILDLIFE · α7 IV"
+          }
         },
         "audi": {
           "name": "Audi S5",
-          "caption": "driving · B8.5 · Tuning-Projekt"
+          "caption": "driving · B8.5 · Tuning-Projekt",
+          "reveal": {
+            "alt": "Schwarzer Audi S5 B8.5 mit silbernen Felgen vor einer Holzscheune in der Abenddämmerung",
+            "caption": "AUDI S5 · B8.5 · BLAUE STUNDE"
+          }
         },
         "joggediballa": {
           "name": "Jogge di Balla",
-          "caption": "co-running · Verein · Vize-Präsident"
+          "caption": "co-running · Verein · Vize-Präsident",
+          "reveal": {
+            "alt": "Das Jogge-di-Balla-Team posiert vor vollem Saal an einem Vereinsevent",
+            "caption": "JOGGE DI BALLA · VOLLES HAUS"
+          }
         },
         "schnee": {
           "name": "Schnee",
-          "caption": "carving · Ski/Snowboard · Wintersaison"
+          "caption": "carving · Ski/Snowboard · Wintersaison",
+          "reveal": {
+            "alt": "Verschneite Alpengipfel unter blauem Himmel, vom Grat aus gesehen",
+            "caption": "ALPEN · WINTERSAISON"
+          }
         },
         "tauchen": {
           "name": "Tiefe",
-          "caption": "diving · certified"
+          "caption": "diving · certified",
+          "reveal": {
+            "alt": "Manuel beim Tauchgang am Riff, Daumen hoch in die Kamera",
+            "caption": "TAUCHGANG · DAUMEN HOCH"
+          }
         },
         "pingpong": {
           "name": "Ping-Pong",

@@ -344,26 +344,48 @@
       "headline": "Quando lo schermo è spento.",
       "currentlyBand": "Snapshot 2026 · Viaggio wildlife in pianificazione · Stagione invernale · Pagaia a portata di mano",
       "currentlyBandShort": "Snapshot 2026",
+      "revealCta": "Guarda l'immagine",
+      "revealClose": "Chiudi",
       "tiles": {
         "camera": {
           "name": "Macchina",
-          "caption": "shooting · Sony α7 IV · wildlife"
+          "caption": "shooting · Sony α7 IV · wildlife",
+          "reveal": {
+            "alt": "Due giovani volpi tra i rami di faggio nel bosco — scatto wildlife con la Sony α7 IV",
+            "caption": "VOLPACCHIOTTI · WILDLIFE · α7 IV"
+          }
         },
         "audi": {
           "name": "Audi S5",
-          "caption": "driving · B8.5 · progetto tuning"
+          "caption": "driving · B8.5 · progetto tuning",
+          "reveal": {
+            "alt": "Audi S5 B8.5 nera con cerchi argento davanti a un fienile in legno al crepuscolo",
+            "caption": "AUDI S5 · B8.5 · ORA BLU"
+          }
         },
         "joggediballa": {
           "name": "Jogge di Balla",
-          "caption": "co-running · associazione · vicepresidente"
+          "caption": "co-running · associazione · vicepresidente",
+          "reveal": {
+            "alt": "Il team Jogge di Balla in posa davanti a una sala piena a un evento del club",
+            "caption": "JOGGE DI BALLA · SALA PIENA"
+          }
         },
         "schnee": {
           "name": "Neve",
-          "caption": "carving · sci/snowboard · stagione invernale"
+          "caption": "carving · sci/snowboard · stagione invernale",
+          "reveal": {
+            "alt": "Cime alpine innevate sotto un cielo blu, viste dalla cresta",
+            "caption": "ALPI · STAGIONE INVERNALE"
+          }
         },
         "tauchen": {
           "name": "Profondità",
-          "caption": "diving · certificato"
+          "caption": "diving · certificato",
+          "reveal": {
+            "alt": "Manuel in immersione sulla barriera, pollice in su verso la camera",
+            "caption": "IMMERSIONE · POLLICE IN SU"
+          }
         },
         "pingpong": {
           "name": "Ping-pong",

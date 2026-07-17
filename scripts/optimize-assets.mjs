@@ -60,7 +60,7 @@ const COPYRIGHT_EXIF = {
  *   widths: number[],
  *   codecs?: ("avif" | "webp" | "jpg")[],
  *   jpgFallbackWidth?: number | number[],
- *   resize?: { width?: number, height?: number, fit?: "cover" | "inside" },
+ *   resize?: { width?: number, height?: number, fit?: "cover" | "inside", position?: string },
  *   quality?: { avif?: number, webp?: number, jpg?: number },
  *   copyright?: boolean,
  * }} Task */
@@ -211,6 +211,42 @@ const TASKS = [
     resize: { width: 1440, height: 2560, fit: "cover" },
     quality: { avif: 55, webp: 78 },
   })),
+  // — Creative pass · Off-the-screen tile reveals —
+  // Manuel provides BOTH crops per tile at
+  // content-input/about/tiles/{key}-{landscape|portrait}.jpg — the
+  // pipeline only scales, it never re-crops (the author's framing IS
+  // the framing; aspect ratios vary per tile and that's fine, the
+  // overlay renders object-contain). TileRevealOverlay picks the
+  // orientation via <source media>. Missing masters skip with a
+  // warning, so tiles go live one at a time as photos land; mirror
+  // the live set in src/components/about/tileReveals.ts
+  // (TILE_REVEAL_KEYS). pingpong has no master yet. The tauchen
+  // portrait master is a 648px video still — widths capped so the
+  // srcset never advertises upscales.
+  ...["camera", "audi", "joggediballa", "schnee", "tauchen", "pingpong"].flatMap((key) => [
+    {
+      group: "about-tiles",
+      source: `content-input/about/tiles/${key}-landscape.jpg`,
+      outDir: "public/about/tiles",
+      outName: `${key}-landscape`,
+      widths: [800, 1200, 1600],
+      codecs: ["avif", "webp"],
+      jpgFallbackWidth: 1200,
+      quality: { avif: 46, webp: 72 },
+      copyright: true,
+    },
+    {
+      group: "about-tiles",
+      source: `content-input/about/tiles/${key}-portrait.jpg`,
+      outDir: "public/about/tiles",
+      outName: `${key}-portrait`,
+      widths: key === "tauchen" ? [540] : [540, 810, 1080],
+      codecs: ["avif", "webp"],
+      jpgFallbackWidth: 540,
+      quality: { avif: 46, webp: 72 },
+      copyright: true,
+    },
+  ]),
 ];
 
 const groupFilter = process.argv[2];
@@ -245,10 +281,23 @@ for (const task of tasks) {
 
   for (const w of task.widths) {
     let base = sharp(src);
-    if (task.resize) {
-      base = base.resize(task.resize);
+    if (task.resize?.width && task.resize?.height) {
+      // Aspect-crop and width-scale in ONE resize call — sharp only
+      // honours the last resize() in a pipeline, so the previous
+      // two-step (crop, then scale) silently dropped the crop and
+      // outputs kept the source aspect. Unnoticed until the
+      // about-tiles portrait crops because every earlier master was
+      // already pre-cropped to the task's target aspect.
+      const h = Math.round((w * task.resize.height) / task.resize.width);
+      base = base.resize({
+        width: w,
+        height: h,
+        fit: task.resize.fit ?? "cover",
+        position: task.resize.position,
+      });
+    } else {
+      base = base.resize({ width: w, withoutEnlargement: true });
     }
-    base = base.resize({ width: w, withoutEnlargement: true });
     if (task.copyright) {
       base = base.withMetadata(COPYRIGHT_EXIF);
     }
@@ -263,14 +312,22 @@ for (const task of tasks) {
 
   for (const fallbackW of fallbackWidths) {
     let jpgBase = sharp(src);
-    if (task.resize) {
-      jpgBase = jpgBase.resize(task.resize);
+    if (task.resize?.width && task.resize?.height) {
+      // Same single-resize rule as the AVIF/WebP loop above.
+      const h = Math.round((fallbackW * task.resize.height) / task.resize.width);
+      jpgBase = jpgBase.resize({
+        width: fallbackW,
+        height: h,
+        fit: task.resize.fit ?? "cover",
+        position: task.resize.position,
+      });
+    } else {
+      jpgBase = jpgBase.resize({ width: fallbackW, withoutEnlargement: true });
     }
     if (task.copyright) {
       jpgBase = jpgBase.withMetadata(COPYRIGHT_EXIF);
     }
     await jpgBase
-      .resize({ width: fallbackW, withoutEnlargement: true })
       .jpeg({ quality: q.jpg, mozjpeg: true })
       .toFile(`${outDir}/${task.outName}-${fallbackW}w.jpg`);
   }

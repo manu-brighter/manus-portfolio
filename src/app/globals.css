@@ -344,6 +344,31 @@
   }
 }
 
+/* Off-the-screen tile reveal — the plate settles in while (on the
+ * motion path) the ink wipe still covers the viewport, so the retract
+ * unveils a finished composition. Reduced-motion opens the overlay
+ * directly, hence the hard disable. */
+.tile-reveal-figure {
+  animation: tile-reveal-in 340ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile-reveal-figure {
+    animation: none;
+  }
+}
+
+@keyframes tile-reveal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @media (min-width: 768px) {
   :root {
     --container-gutter: 2rem;

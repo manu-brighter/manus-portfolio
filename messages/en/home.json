@@ -344,26 +344,48 @@
       "headline": "When the screen is off.",
       "currentlyBand": "Snapshot 2026 · Wildlife trip in planning · Winter season · Paddle within reach",
       "currentlyBandShort": "Snapshot 2026",
+      "revealCta": "View the picture",
+      "revealClose": "Close",
       "tiles": {
         "camera": {
           "name": "Camera",
-          "caption": "shooting · Sony α7 IV · wildlife"
+          "caption": "shooting · Sony α7 IV · wildlife",
+          "reveal": {
+            "alt": "Two young foxes between beech branches in the forest — wildlife shot on the Sony α7 IV",
+            "caption": "FOX CUBS · WILDLIFE · α7 IV"
+          }
         },
         "audi": {
           "name": "Audi S5",
-          "caption": "driving · B8.5 · tuning project"
+          "caption": "driving · B8.5 · tuning project",
+          "reveal": {
+            "alt": "Black Audi S5 B8.5 with silver wheels in front of a wooden barn at dusk",
+            "caption": "AUDI S5 · B8.5 · BLUE HOUR"
+          }
         },
         "joggediballa": {
           "name": "Jogge di Balla",
-          "caption": "co-running · club · vice-president"
+          "caption": "co-running · club · vice-president",
+          "reveal": {
+            "alt": "The Jogge di Balla team posing in front of a packed hall at a club event",
+            "caption": "JOGGE DI BALLA · FULL HOUSE"
+          }
         },
         "schnee": {
           "name": "Snow",
-          "caption": "carving · ski/snowboard · winter season"
+          "caption": "carving · ski/snowboard · winter season",
+          "reveal": {
+            "alt": "Snow-covered alpine peaks under a blue sky, seen from the ridge",
+            "caption": "ALPS · WINTER SEASON"
+          }
         },
         "tauchen": {
           "name": "Depth",
-          "caption": "diving · certified"
+          "caption": "diving · certified",
+          "reveal": {
+            "alt": "Manuel scuba diving at the reef, thumbs up to the camera",
+            "caption": "DIVE · THUMBS UP"
+          }
         },
         "pingpong": {
           "name": "Ping-pong",

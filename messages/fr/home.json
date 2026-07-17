@@ -344,26 +344,48 @@
       "headline": "Quand l'écran est éteint.",
       "currentlyBand": "Snapshot 2026 · Voyage wildlife en préparation · Saison d'hiver · Pagaie à portée de main",
       "currentlyBandShort": "Snapshot 2026",
+      "revealCta": "Voir l'image",
+      "revealClose": "Fermer",
       "tiles": {
         "camera": {
           "name": "Appareil",
-          "caption": "shooting · Sony α7 IV · wildlife"
+          "caption": "shooting · Sony α7 IV · wildlife",
+          "reveal": {
+            "alt": "Deux jeunes renards entre les branches de hêtre en forêt — photo wildlife au Sony α7 IV",
+            "caption": "RENARDEAUX · WILDLIFE · α7 IV"
+          }
         },
         "audi": {
           "name": "Audi S5",
-          "caption": "driving · B8.5 · projet tuning"
+          "caption": "driving · B8.5 · projet tuning",
+          "reveal": {
+            "alt": "Audi S5 B8.5 noire aux jantes argentées devant une grange en bois au crépuscule",
+            "caption": "AUDI S5 · B8.5 · HEURE BLEUE"
+          }
         },
         "joggediballa": {
           "name": "Jogge di Balla",
-          "caption": "co-running · association · vice-président"
+          "caption": "co-running · association · vice-président",
+          "reveal": {
+            "alt": "L'équipe Jogge di Balla pose devant une salle comble lors d'un événement du club",
+            "caption": "JOGGE DI BALLA · SALLE COMBLE"
+          }
         },
         "schnee": {
           "name": "Neige",
-          "caption": "carving · ski/snowboard · saison d'hiver"
+          "caption": "carving · ski/snowboard · saison d'hiver",
+          "reveal": {
+            "alt": "Sommets alpins enneigés sous un ciel bleu, vus depuis la crête",
+            "caption": "ALPES · SAISON D'HIVER"
+          }
         },
         "tauchen": {
           "name": "Profondeur",
-          "caption": "diving · certifié"
+          "caption": "diving · certifié",
+          "reveal": {
+            "alt": "Manuel en plongée au récif, pouce levé vers la caméra",
+            "caption": "PLONGÉE · POUCE LEVÉ"
+          }
         },
         "pingpong": {
           "name": "Ping-pong",
