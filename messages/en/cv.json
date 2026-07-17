@@ -1,0 +1,163 @@
+{
+  "cv": {
+    "metaTitle": "CV — Manuel Heller",
+    "metaDescription": "Curriculum vitae of Manuel Heller — full-stack developer from the Basel region. Saveable as PDF, printed in the active ink character.",
+    "sectionLabel": "Curriculum Vitae",
+    "editionStamp": "Edition MMXXVI",
+    "name": "Manuel Heller",
+    "role": "Full-Stack Developer",
+    "region": "Basel region, Switzerland",
+    "profile": "Full-stack developer with five years of production experience in PHP and Vue, a background as a certified IT systems engineer (EFZ), and a trained eye for web design honed through photography and graphic design. Deeply invested in AI-assisted workflows (custom agents, hooks, skills, multi-step prompting) — convinced that continuous learning is not optional in the current tech climate. Team player with a quick grasp and the patience to turn a problem over until the solution is clean.",
+    "contactLabel": "Contact",
+    "download": {
+      "label": "Save as PDF",
+      "hint": "Prints in the active ink character — switching themes re-inks the sheet."
+    },
+    "backLabel": "Back to home",
+    "experience": {
+      "label": "Experience",
+      "items": [
+        {
+          "period": "11/2021 — today",
+          "role": "Full-Stack Developer",
+          "org": "zvoove Switzerland AG",
+          "bullets": [
+            "Development on zvoove Core — enterprise SaaS in the staffing sector: grown PHP codebase, modern Vue frontend, BFF API in between",
+            "API and interface tooling (PHP, OpenAPI, Yii)",
+            "E2E test coverage with Cypress",
+            "Code reviews and architecture discussions in a ~14-person dev team",
+            "GitLab workflows, internal release management, Docker/Traefik dev environment"
+          ]
+        },
+        {
+          "period": "2020 — 2021",
+          "role": "Civilian service",
+          "org": "Primarschule Grellingen · Altersheim Rosengarten",
+          "bullets": [
+            "Teaching assistance in daily school life; activation program and care in a nursing home"
+          ]
+        },
+        {
+          "period": "2016 — 2020",
+          "role": "Apprenticeship, IT systems engineer EFZ",
+          "org": "Novartis Pharma AG · GIBM Muttenz",
+          "bullets": [
+            "Server and network administration, device management, IT service management per ITIL",
+            "Independently built an integrated display and info system with Scala Digital Designer",
+            "Degree: Swiss Federal Certificate of Competence"
+          ]
+        }
+      ]
+    },
+    "projects": {
+      "label": "Own projects",
+      "items": [
+        {
+          "title": "joggediballa.ch",
+          "meta": "React 19 · tRPC · Drizzle · MySQL",
+          "description": "All-in-one club platform: dynamic permission system, member and sponsor management (68+ sponsors), live Twitch overlay. Vibecoded, self-hosted."
+        },
+        {
+          "title": "manuelheller.dev",
+          "meta": "Next.js 16 · R3F · WebGL",
+          "description": "This site: GPU fluid simulation as the hero, Risograph aesthetic, four languages, statically exported to my own server."
+        },
+        {
+          "title": "Shot-Counter",
+          "meta": "Vue 3 · Express · SQLite · Electron",
+          "description": "Party scoreboard as a desktop app: QR join over LAN, realtime via server-sent events, atomic counter."
+        },
+        {
+          "title": "full-project-rework",
+          "meta": "Claude Code skill",
+          "description": "Autonomous multi-agent codebase overhaul — analyzers, reviewers, implementers. Public on GitHub."
+        }
+      ]
+    },
+    "skills": {
+      "label": "Core technologies",
+      "groups": [
+        {
+          "label": "AI workflow · core competence",
+          "items": "Claude Code · Cursor · custom agents, hooks, skills · MCP · multi-step prompting"
+        },
+        {
+          "label": "Daily driver",
+          "items": "PHP · Yii · Vue · MariaDB/MySQL · OpenAPI/Swagger · Cypress · HTML/CSS/JS"
+        },
+        {
+          "label": "Ops & tooling",
+          "items": "Docker · Git/GitLab · nginx · Linux servers · Bash · PowerShell"
+        },
+        {
+          "label": "Vibecoded",
+          "items": "TypeScript · React · Next.js · tRPC · Drizzle · Electron · GSAP · Three.js/R3F · WebGL shaders"
+        },
+        {
+          "label": "Creative",
+          "items": "Lightroom · Photoshop · DaVinci Resolve · photo and video production at a semi-professional level"
+        }
+      ]
+    },
+    "education": {
+      "label": "Education",
+      "items": [
+        {
+          "period": "2016 — 2020",
+          "title": "IT systems engineer EFZ",
+          "org": "Novartis Pharma AG · GIBM Muttenz"
+        },
+        {
+          "period": "2014 — 2016",
+          "title": "Secondary school, level E",
+          "org": "Sekundarschule Zwingen"
+        },
+        {
+          "period": "2012 — 2014",
+          "title": "Gymnasium, years 1–2",
+          "org": "Gymnasium Laufen"
+        }
+      ]
+    },
+    "languages": {
+      "label": "Languages",
+      "items": [
+        {
+          "name": "German",
+          "level": "native"
+        },
+        {
+          "name": "English",
+          "level": "fluent, incl. technical"
+        },
+        {
+          "name": "French",
+          "level": "school level"
+        }
+      ]
+    },
+    "engagement": {
+      "label": "Engagement",
+      "items": [
+        {
+          "period": "since 2022",
+          "title": "Vice president · Verein Jogge di Balla",
+          "description": "Co-founder of the 9-person event club: web platform, social media lead (~100k views / 30 days), club photographer and videographer."
+        }
+      ]
+    },
+    "strengths": {
+      "label": "Strengths",
+      "items": [
+        "Outgoing, extroverted, team player",
+        "Quick grasp, eager to learn",
+        "Perfectionist with a tendency to productively overdo it",
+        "Creative eye from photography and graphic design"
+      ]
+    },
+    "footer": {
+      "printedNote": "Printed from manuelheller.dev/cv — the sheet follows the chosen ink character.",
+      "publicNote": "Public version — full contact details on request."
+    }
+  }
+}

@@ -29,7 +29,10 @@ import { Link, usePathname, useRouter } from "@/i18n/navigation";
  * Component must be "use client" because of the click handler.
  */
 
+// Document routes in the footer row — the CV sheet leads, legal
+// follows. All three share the pin-killing click handler below.
 const LEGAL_LINKS = [
+  { href: "/cv", key: "cv" },
   { href: "/impressum", key: "impressum" },
   { href: "/datenschutz", key: "datenschutz" },
 ] as const;

@@ -369,6 +369,35 @@
   }
 }
 
+/* Print — `window.print()` on /cv IS the PDF export. Chrome off
+ * (nav/footer element roots plus every fixed overlay: loader, ink
+ * cursor, switcher pill + hint, scroll rail, wipe canvas), colors
+ * forced so the paper/ink/spot tokens survive into the PDF — which is
+ * what makes the sheet print in the ACTIVE ink character, Nachtdruck
+ * included. Rules are chrome-generic, so printing any other route
+ * degrades gracefully too. */
+@media print {
+  @page {
+    size: A4;
+    margin: 11mm;
+  }
+
+  html {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  nav,
+  footer,
+  .skip-link,
+  .fixed {
+    /* biome-ignore lint/complexity/noImportantStyles: must beat inline
+       display styles that GSAP / the scene-visibility store leave on
+       fixed overlays. */
+    display: none !important;
+  }
+}
+
 @media (min-width: 768px) {
   :root {
     --container-gutter: 2rem;

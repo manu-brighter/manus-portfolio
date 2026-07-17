@@ -700,7 +700,8 @@
       "email": "E-Mail",
       "github": "GitHub",
       "linkedin": "LinkedIn",
-      "photos": "Fotos"
+      "photos": "Fotos",
+      "cv": "CV"
     },
     "form": {
       "name": {

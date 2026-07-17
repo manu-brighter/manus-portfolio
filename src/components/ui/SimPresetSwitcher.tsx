@@ -161,6 +161,25 @@ export function SimPresetSwitcher() {
     };
   }, []);
 
+  // A real scroll means the user has moved on — keeping the peek (and
+  // its hint) pinned over mid-page content reads as clutter, not
+  // teaching. Threshold beats a bare listener so Lenis' sub-pixel
+  // settle can't cancel the peek on load.
+  useEffect(() => {
+    if (!introPeek) return;
+    const onScroll = () => {
+      if (window.scrollY < 160) return;
+      if (peekTimerRef.current !== null) {
+        window.clearTimeout(peekTimerRef.current);
+        peekTimerRef.current = null;
+      }
+      setExpanded(false);
+      setIntroPeek(false);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [introPeek]);
+
   if (!mounted || !config || reducedMotion || onExperimentRoute) return null;
 
   const activePreset = getSimPreset(presetId);

@@ -1,0 +1,163 @@
+{
+  "cv": {
+    "metaTitle": "CV — Manuel Heller",
+    "metaDescription": "Curriculum Vitae von Manuel Heller — Full-Stack Developer aus der Basel-Region. Als PDF speicherbar, gedruckt im aktiven Tinten-Charakter.",
+    "sectionLabel": "Curriculum Vitae",
+    "editionStamp": "Edition MMXXVI",
+    "name": "Manuel Heller",
+    "role": "Full-Stack Developer",
+    "region": "Basel-Region, Schweiz",
+    "profile": "Full-Stack Developer mit fünf Jahren Production-Erfahrung in PHP und Vue, einem Hintergrund als Betriebsinformatiker EFZ und einem ausgeprägten Auge für Webdesign aus Fotografie und Grafikdesign. Tief eingearbeitet in AI-gestützte Workflows (Custom Agents, Hooks, Skills, Multi-Step-Prompting) — überzeugt, dass kontinuierliches Lernen im aktuellen Tech-Klima nicht optional ist. Teamplayer mit guter Auffassungsgabe und der Geduld, ein Problem so lange zu drehen, bis die Lösung sauber ist.",
+    "contactLabel": "Kontakt",
+    "download": {
+      "label": "Als PDF speichern",
+      "hint": "Druckt im aktiven Tinten-Charakter — Theme wechseln färbt den Bogen um."
+    },
+    "backLabel": "Zur Startseite",
+    "experience": {
+      "label": "Berufserfahrung",
+      "items": [
+        {
+          "period": "11/2021 — heute",
+          "role": "Full-Stack Developer",
+          "org": "zvoove Switzerland AG",
+          "bullets": [
+            "Entwicklung an zvoove Core — Enterprise-SaaS im Personaldienstleistungs-Sektor: gewachsene PHP-Codebase, modernes Vue-Frontend, BFF-API als Bindeglied",
+            "Schnittstellen- und API-Tools (PHP, OpenAPI, Yii)",
+            "E2E-Test-Coverage mit Cypress",
+            "Code-Reviews und Architektur-Diskussionen im ~14-köpfigen Dev-Team",
+            "GitLab-Workflows, internes Release-Management, Docker/Traefik-Entwicklungsumgebung"
+          ]
+        },
+        {
+          "period": "2020 — 2021",
+          "role": "Zivildienst",
+          "org": "Primarschule Grellingen · Altersheim Rosengarten",
+          "bullets": [
+            "Lehrassistenz im Schulalltag; Aktivierungsprogramm und Betreuung im Pflegeheim"
+          ]
+        },
+        {
+          "period": "2016 — 2020",
+          "role": "Lehre Betriebsinformatiker EFZ",
+          "org": "Novartis Pharma AG · GIBM Muttenz",
+          "bullets": [
+            "Server- und Netzwerk-Administration, Endgeräte-Management, IT-Service-Management nach ITIL",
+            "Eigenständige Entwicklung eines integrierten Anzeige- und Infosystems mit Scala Digital Designer",
+            "Abschluss: Eidgenössisches Fähigkeitszeugnis"
+          ]
+        }
+      ]
+    },
+    "projects": {
+      "label": "Eigene Projekte",
+      "items": [
+        {
+          "title": "joggediballa.ch",
+          "meta": "React 19 · tRPC · Drizzle · MySQL",
+          "description": "All-in-One-Vereinsplattform: dynamisches Berechtigungssystem, Mitglieder- und Gönner-Verwaltung (68+ Sponsoren), Live-Twitch-Overlay. Vibecoded, selbst gehostet."
+        },
+        {
+          "title": "manuelheller.dev",
+          "meta": "Next.js 16 · R3F · WebGL",
+          "description": "Diese Seite: GPU-Fluid-Simulation als Hero, Risograph-Ästhetik, vier Sprachen, statisch exportiert auf den eigenen Server."
+        },
+        {
+          "title": "Shot-Counter",
+          "meta": "Vue 3 · Express · SQLite · Electron",
+          "description": "Party-Scoreboard als Desktop-App: QR-Join übers LAN, Echtzeit via Server-Sent Events, atomarer Zähler."
+        },
+        {
+          "title": "full-project-rework",
+          "meta": "Claude-Code-Skill",
+          "description": "Autonomer Multi-Agent-Codebase-Overhaul — Analyzer, Reviewer, Implementer. Public auf GitHub."
+        }
+      ]
+    },
+    "skills": {
+      "label": "Kerntechnologien",
+      "groups": [
+        {
+          "label": "AI-Workflow · zentrale Kompetenz",
+          "items": "Claude Code · Cursor · Custom Agents, Hooks, Skills · MCP · Multi-Step-Prompting"
+        },
+        {
+          "label": "Daily Driver",
+          "items": "PHP · Yii · Vue · MariaDB/MySQL · OpenAPI/Swagger · Cypress · HTML/CSS/JS"
+        },
+        {
+          "label": "Ops & Tooling",
+          "items": "Docker · Git/GitLab · nginx · Linux-Server · Bash · PowerShell"
+        },
+        {
+          "label": "Vibecoded",
+          "items": "TypeScript · React · Next.js · tRPC · Drizzle · Electron · GSAP · Three.js/R3F · WebGL-Shader"
+        },
+        {
+          "label": "Kreativ",
+          "items": "Lightroom · Photoshop · DaVinci Resolve · Foto- und Videoproduktion auf semi-professionellem Niveau"
+        }
+      ]
+    },
+    "education": {
+      "label": "Ausbildung",
+      "items": [
+        {
+          "period": "2016 — 2020",
+          "title": "Betriebsinformatiker EFZ",
+          "org": "Novartis Pharma AG · GIBM Muttenz"
+        },
+        {
+          "period": "2014 — 2016",
+          "title": "Sekundarschule Niveau E",
+          "org": "Sekundarschule Zwingen"
+        },
+        {
+          "period": "2012 — 2014",
+          "title": "Gymnasium, 1.–2. Klasse",
+          "org": "Gymnasium Laufen"
+        }
+      ]
+    },
+    "languages": {
+      "label": "Sprachen",
+      "items": [
+        {
+          "name": "Deutsch",
+          "level": "Muttersprache"
+        },
+        {
+          "name": "Englisch",
+          "level": "fliessend, auch technisch"
+        },
+        {
+          "name": "Französisch",
+          "level": "Schulkenntnisse"
+        }
+      ]
+    },
+    "engagement": {
+      "label": "Engagement",
+      "items": [
+        {
+          "period": "seit 2022",
+          "title": "Vize-Präsident · Verein Jogge di Balla",
+          "description": "Mitgründer des 9-köpfigen Eventvereins: Web-Plattform, Social-Media-Lead (~100k Views / 30 Tage), Vereinsfotograf und Videograf."
+        }
+      ]
+    },
+    "strengths": {
+      "label": "Stärken",
+      "items": [
+        "Kontaktfreudig, extrovertiert, Teamplayer",
+        "Schnelle Auffassungsgabe, lernfreudig",
+        "Perfektionist mit Tendenz zum produktiven Übertreiben",
+        "Kreatives Auge aus Foto und Grafikdesign"
+      ]
+    },
+    "footer": {
+      "printedNote": "Gedruckt ab manuelheller.dev/cv — der Bogen folgt dem gewählten Tinten-Charakter.",
+      "publicNote": "Öffentliche Version — vollständige Kontaktdaten auf Anfrage."
+    }
+  }
+}

@@ -95,7 +95,7 @@ export function SimPresetSwitcherHint({ active }: { active: boolean }) {
   return (
     <div
       aria-hidden="true"
-      className={`pointer-events-none fixed right-20 bottom-36 z-40 flex flex-col items-end gap-1 transition-opacity duration-500 md:right-auto md:bottom-24 md:left-24 md:items-start ${
+      className={`pointer-events-none fixed right-20 bottom-36 z-40 flex flex-col items-end gap-1 transition-opacity duration-500 md:right-auto md:bottom-10 md:left-24 md:items-start ${
         phase === "leaving" ? "opacity-0" : "opacity-100"
       }`}
     >
