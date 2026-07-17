@@ -641,7 +641,6 @@
     },
     "channels": {
       "label": "Direct channels",
-      "note": "GitHub is only semi-active, not a 100-repo polished-facade account.",
       "email": "Email",
       "github": "GitHub",
       "linkedin": "LinkedIn",

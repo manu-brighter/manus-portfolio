@@ -641,7 +641,6 @@
     },
     "channels": {
       "label": "Canali diretti",
-      "note": "GitHub è solo semi-attivo, non è un account vetrina da 100 repo.",
       "email": "E-mail",
       "github": "GitHub",
       "linkedin": "LinkedIn",

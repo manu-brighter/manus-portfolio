@@ -104,7 +104,6 @@ export function Contact() {
                 </div>
               ))}
             </dl>
-            <p className="mt-4 type-body-sm text-ink-muted">{t("channels.note")}</p>
           </FadeIn>
         </div>
 

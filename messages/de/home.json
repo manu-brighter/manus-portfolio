@@ -641,7 +641,6 @@
     },
     "channels": {
       "label": "Direkt-Kanäle",
-      "note": "GitHub ist nur semi-aktiv — kein 100-Repo-Glanzfassaden-Account.",
       "email": "E-Mail",
       "github": "GitHub",
       "linkedin": "LinkedIn",
