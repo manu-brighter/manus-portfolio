@@ -74,6 +74,7 @@
   },
   "simPresets": {
     "label": "Tinten-Charakter",
+    "hint": "Psst — hier wechselst du die Tinte!",
     "riso": "Riso",
     "wave": "Wave",
     "turbulenz": "Turbulenz",

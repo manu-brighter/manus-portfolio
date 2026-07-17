@@ -74,6 +74,7 @@
   },
   "simPresets": {
     "label": "Ink character",
+    "hint": "Psst — switch the ink flavour here!",
     "riso": "Riso",
     "wave": "Wave",
     "turbulenz": "Turbulence",
