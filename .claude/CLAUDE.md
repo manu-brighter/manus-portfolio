@@ -242,9 +242,16 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   footer for glyph contrast over hard bands.
 - **Switcher UX**: pointer-selection blurs the radio + disarms
   group-hover until pointerleave (immediate collapse); keyboard keeps
-  focus/expansion. On first appear the pill unfolds for 3.5s
+  focus/expansion. On first appear the pill unfolds for 6.5s
   (`INTRO_PEEK_MS` discoverability peek; `expanded` drives mobile,
-  `introPeek` the md: pill).
+  `introPeek` the md: pill). During the peek `SimPresetSwitcherHint`
+  renders the onboarding note: hand-drawn SVG arrow (pathLength dash
+  draw + rose misreg ghost) + typewriter paper chip, fully decorative
+  (aria-hidden, pointer-events-none), breakpoint-mirrored to the pill's
+  corner. Peek (and hint) end early on selection, manual toggle, OR
+  real scroll (>160px — a scrolled user has moved on; without this the
+  fixed hint floats over mid-page content). Desktop chip sits at
+  md:bottom-10 to clear the hero bio stamps (screenshot-verified).
 - **Console menu + easter egg**: `ConsoleMenu` (root layout) prints the
   MANUS banner once (module flag vs StrictMode) and installs
   `window.manus` = help/preset/burst/fehldruck — file-top
@@ -383,6 +390,25 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   variable cascading to drop-cap (CSS `:first-letter`) and `.pull-highlight`.
   `<StampDivider>` is a sibling of `<AboutBlock>` (not nested) so cascade
   doesn't reach it — takes a `spot` prop instead.
+- **Object-Grid tile reveals** (creative pass): tiles listed in
+  `src/components/about/tileReveals.ts` (`TILE_REVEAL_KEYS`) carry a
+  stretched button + corner "+" chip; click fires the site ink-wipe
+  (inkWipeStore reuse, no route change), mounts `TileRevealOverlay` at
+  GROW_MS−60 under cover, retract unveils the photo. The overlay is a
+  **fixed div, NOT `dialog.showModal()`** — the native dialog top layer
+  paints above the wipe canvas (z-[10000]) and would kill the reveal
+  choreography; focus pin/restore is manual (single close control).
+  Manuel authors BOTH crops per tile (`content-input/about/tiles/
+  {key}-{landscape|portrait}.jpg`); pipeline group `about-tiles` only
+  scales — never re-crop his framing. Orientation picked at view time
+  via `<source media="(orientation: portrait)">`. pingpong tile has no
+  master yet → stays decorative until one lands (drop-in path
+  documented in tileReveals.ts). Reduced-motion opens directly, no wipe.
+- **optimize-assets.mjs single-resize rule**: sharp honours only the
+  LAST `resize()` in a pipeline — aspect-crop + width-scale MUST happen
+  in one call (fixed in the creative pass; the old two-step silently
+  dropped the crop and nobody noticed because every earlier master was
+  pre-cropped to the task aspect).
 - **Skills**: `VibecodedStamp` IO `threshold: 0.4`; stagger via parent
   `delay={i * 0.08}` prop. `HeroSkillPulse` loops continuously without IO
   gate (cheap, avoids re-mount cycle restart).
@@ -391,6 +417,12 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   `PortfolioCardVisual` era is over: the Portfolio card shows the real
   five-theme split screenshot behind `PortfolioCardReveal`'s hover stage,
   Joggediballa shows real shots (`JoggediballaScreenshot`, night-aware).
+  Below the two hero cards sits the **B-sides strip** (`SideProjectCard`,
+  server-rendered, CSS-only hover): Shot-Counter + full-project-rework
+  as compact catalog cards linking to GitHub. Repo URLs live in
+  `SITE.repos` (site.ts), spots mint/violet (the pair the hero cards
+  don't use). The section stays "two intentional projects" — a third
+  hero card needs a reason, not just a new repo.
 - **Case Study**: inline section, NOT a `/work/[slug]` route. Diorama design
   (one wide SVG illustration + absolute-positioned HTML cards in vh units,
   4200×1000 viewBox at 100vh tall = 420vh wide horizontal-pin track).
@@ -431,6 +463,17 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   routes through shared `<LegalDocument namespace>` server component.
   CH-conform DSG/revDSG + EU DSGVO informational. No cookie banner (site
   sets no cookies; documented in datenschutz).
+- **CV**: `/[locale]/cv` press sheet (`CvDocument`, server component; own
+  `cv` i18n namespace — DE authored, EN translated, FR/IT DE-mirrored).
+  **`window.print()` IS the PDF export**: the `@media print` block in
+  globals.css strips chrome (`nav, footer, .skip-link, .fixed`) and
+  forces `print-color-adjust: exact`, so the PDF prints in the ACTIVE
+  ink character (Nachtdruck included) — don't add a build-time PDF
+  generator. Content is the PUBLIC redaction of `docs/cv.md`: never add
+  street address, phone number, or birth date (privacy section of that
+  doc). Route is noindex+follow with self-canonical (legal-pages
+  pattern), excluded from sitemap, linked from footer document row and
+  a Contact direct channel. Axe scans it (tests/a11y PAGES list).
 - **404**: `src/app/not-found.tsx` owns its own `<html>`/`<body>` shell
   (root layout is pass-through). Strings come from `notFound` namespace at
   `routing.defaultLocale`. `<html lang="de">` hardcoded; `noindex`. Footer
