@@ -49,6 +49,15 @@ export function SimPresetSwitcherHint({ active }: { active: boolean }) {
     const timers = timersRef.current;
     if (active && !prevActiveRef.current) {
       prevActiveRef.current = true;
+      // Cancel any pending leave timer from a previous cycle — without
+      // this, `active` re-triggering within LEAVE_MS would let the old
+      // timer hide the freshly shown hint (latent while introPeek is
+      // one-shot, live the moment the trigger becomes re-armable).
+      for (const id of timers) {
+        window.clearTimeout(id);
+        window.clearInterval(id);
+      }
+      timers.clear();
       setPhase("shown");
       setTypedCount(0);
       const startId = window.setTimeout(() => {

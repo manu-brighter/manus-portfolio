@@ -25,14 +25,6 @@ const DEFAULT_WIDTHS: Record<TileOrientation, readonly number[]> = {
   portrait: [540, 810, 1080],
 };
 
-/** tauchen's portrait master is a 648px video still — the pipeline
- *  caps its widths so the srcset never advertises upscales. */
-const WIDTH_OVERRIDES: Partial<
-  Record<RevealTileKey, Partial<Record<TileOrientation, readonly number[]>>>
-> = {
-  tauchen: { portrait: [540] },
-};
-
 const JPG_FALLBACK: Record<TileOrientation, number> = { landscape: 1200, portrait: 540 };
 
 export function hasTileReveal(key: StampKey): key is RevealTileKey {
@@ -40,7 +32,11 @@ export function hasTileReveal(key: StampKey): key is RevealTileKey {
 }
 
 function widthsFor(key: RevealTileKey, orientation: TileOrientation): readonly number[] {
-  return WIDTH_OVERRIDES[key]?.[orientation] ?? DEFAULT_WIDTHS[orientation];
+  // Mirrors the pipeline's ternary 1:1 (optimize-assets.mjs,
+  // about-tiles group): tauchen's portrait master is a 648px video
+  // still — widths capped so the srcset never advertises upscales.
+  if (key === "tauchen" && orientation === "portrait") return [540];
+  return DEFAULT_WIDTHS[orientation];
 }
 
 export function tileRevealSrcSet(

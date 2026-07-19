@@ -30,6 +30,11 @@ type DirectChannel = {
   internal?: boolean;
 };
 
+// Shared by both branches of the internal/external link split below —
+// one string, so a styling tweak can't land on only one tag.
+const CHANNEL_LINK_CLASS =
+  "text-ink underline decoration-spot-rose decoration-2 underline-offset-4 transition-colors hover:text-ink-soft";
+
 export function Contact() {
   const t = useTranslations("contact");
 
@@ -102,10 +107,7 @@ export function Contact() {
                   </dt>
                   <dd>
                     {channel.internal ? (
-                      <Link
-                        href={channel.href}
-                        className="text-ink underline decoration-spot-rose decoration-2 underline-offset-4 transition-colors hover:text-ink-soft"
-                      >
+                      <Link href={channel.href} className={CHANNEL_LINK_CLASS}>
                         {channel.value}
                       </Link>
                     ) : (
@@ -114,7 +116,7 @@ export function Contact() {
                         {...(channel.href.startsWith("http")
                           ? { target: "_blank", rel: "noopener noreferrer" }
                           : {})}
-                        className="text-ink underline decoration-spot-rose decoration-2 underline-offset-4 transition-colors hover:text-ink-soft"
+                        className={CHANNEL_LINK_CLASS}
                       >
                         {channel.value}
                       </a>

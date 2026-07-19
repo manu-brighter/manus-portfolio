@@ -70,7 +70,10 @@ export function Footer() {
     };
 
   return (
-    <footer className="relative z-10 border-paper-line border-t-2 bg-paper-shade">
+    // data-site-chrome: the print stylesheet hides site chrome via this
+    // attribute (a bare `footer` selector would also swallow the CV
+    // sheet's own footer — see the @media print block in globals.css).
+    <footer data-site-chrome className="relative z-10 border-paper-line border-t-2 bg-paper-shade">
       <div className="container-page flex flex-col items-start justify-between gap-6 py-12 md:flex-row md:items-center">
         <p className="type-label text-ink-muted">
           <FadeIn y={8}>

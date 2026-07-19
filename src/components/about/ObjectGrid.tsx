@@ -160,7 +160,10 @@ export function ObjectGrid() {
       <ul className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6">
         {TILES.map((tile) => {
           const cssVars = { "--tile-spot": SPOT_VAR[tile.spot] } as CSSProperties;
-          const interactive = hasTileReveal(tile.key);
+          // Narrow once — the guard result IS the key, so the button
+          // path below stays cast-free (a loosened gate would surface
+          // as a type error, not a broken image at runtime).
+          const revealKey = hasTileReveal(tile.key) ? tile.key : null;
           return (
             <li key={tile.key} className="list-none">
               <TileFigure
@@ -184,14 +187,14 @@ export function ObjectGrid() {
                     {t(`tiles.${tile.i18nKey}.caption`)}
                   </p>
                 </figcaption>
-                {interactive ? (
+                {revealKey ? (
                   <>
                     {/* Stretched action — the whole tile opens the
                         plate pull. Sits above the decorative layers;
                         the sr-only text names the action + subject. */}
                     <button
                       type="button"
-                      onClick={(e) => openReveal(tile, tile.key as RevealTileKey, e)}
+                      onClick={(e) => openReveal(tile, revealKey, e)}
                       className="absolute inset-0 z-10 cursor-pointer [-webkit-tap-highlight-color:transparent] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
                     >
                       <span className="sr-only">

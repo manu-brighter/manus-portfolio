@@ -28,10 +28,20 @@ import type { WorkProjects, WorkSideProjects } from "@/types/i18n-shapes";
 
 // Repo URL + spot color per B-side id — URLs live in site.ts (single
 // source), spots use the pair the two hero cards don't (rose/amber).
-const SIDE_PROJECT_META: Record<string, { href: string; spot: SpotColor }> = {
+// The id union is explicit (JSON imports widen literals to string), so
+// adding a meta entry is exhaustiveness-checked; catalog ids without a
+// meta entry are dropped through the NAMED guard below, not silently.
+const SIDE_PROJECT_IDS = ["shotCounter", "fullProjectRework"] as const;
+type SideProjectId = (typeof SIDE_PROJECT_IDS)[number];
+
+const SIDE_PROJECT_META: Record<SideProjectId, { href: string; spot: SpotColor }> = {
   shotCounter: { href: SITE.repos.shotCounter, spot: "mint" },
   fullProjectRework: { href: SITE.repos.fullProjectRework, spot: "violet" },
 };
+
+function isSideProjectId(id: string): id is SideProjectId {
+  return (SIDE_PROJECT_IDS as readonly string[]).includes(id);
+}
 
 export function Work() {
   const t = useTranslations("work");
@@ -150,8 +160,8 @@ export function Work() {
         </div>
         <div className="grid gap-6 md:grid-cols-2 md:gap-8 lg:max-w-4xl">
           {sideProjects.map((project) => {
+            if (!isSideProjectId(project.id)) return null;
             const meta = SIDE_PROJECT_META[project.id];
-            if (!meta) return null;
             return (
               <SideProjectCard
                 key={project.id}

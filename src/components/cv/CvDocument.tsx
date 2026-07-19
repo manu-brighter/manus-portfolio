@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { CvActions } from "@/components/cv/CvActions";
 import { PlateCornerMarks } from "@/components/ui/PlateCornerMarks";
 import { Link } from "@/i18n/navigation";
+import { SPOT_CSS_VAR, type SpotColor } from "@/lib/palette";
 import { SITE } from "@/lib/site";
 import type {
   CvEducationItems,
@@ -34,15 +35,15 @@ import type {
  * button receives its two strings as props.
  */
 
-const SPOT_SEQUENCE = ["rose", "amber", "mint", "violet"] as const;
+const SPOT_SEQUENCE: readonly SpotColor[] = ["rose", "amber", "mint", "violet"];
 
 function SpotDot({ index }: { index: number }) {
-  const spot = SPOT_SEQUENCE[index % SPOT_SEQUENCE.length];
+  const spot = SPOT_SEQUENCE[index % SPOT_SEQUENCE.length] as SpotColor;
   return (
     <span
       aria-hidden="true"
       className="size-2 shrink-0 rounded-full border border-ink/40"
-      style={{ background: `var(--color-spot-${spot})` }}
+      style={{ background: SPOT_CSS_VAR[spot] }}
     />
   );
 }
@@ -165,10 +166,7 @@ export function CvDocument() {
                     </p>
                     <ul className="mt-3 flex list-none flex-col gap-1.5 print:mt-2 print:gap-1">
                       {item.bullets.map((bullet) => (
-                        <li
-                          key={bullet}
-                          className="flex gap-2 type-body-sm text-ink print:text-[0.72rem]"
-                        >
+                        <li key={bullet} className="flex gap-2 type-body-sm text-ink">
                           <span
                             aria-hidden="true"
                             className="mt-[0.55em] size-1 shrink-0 rounded-full bg-ink"
@@ -195,9 +193,7 @@ export function CvDocument() {
                     <p className="mt-1 font-mono text-[0.65rem] text-ink-muted uppercase tracking-[0.14em]">
                       {project.meta}
                     </p>
-                    <p className="mt-2 type-body-sm text-ink-soft print:text-[0.7rem]">
-                      {project.description}
-                    </p>
+                    <p className="mt-2 type-body-sm text-ink-soft">{project.description}</p>
                   </div>
                 ))}
               </div>
@@ -213,9 +209,7 @@ export function CvDocument() {
                     <dt className="font-mono text-[0.65rem] text-ink-muted uppercase tracking-[0.16em]">
                       {group.label}
                     </dt>
-                    <dd className="mt-1 type-body-sm text-ink print:text-[0.72rem]">
-                      {group.items}
-                    </dd>
+                    <dd className="mt-1 type-body-sm text-ink">{group.items}</dd>
                   </div>
                 ))}
               </dl>
@@ -225,7 +219,7 @@ export function CvDocument() {
               <dl className="flex flex-col gap-1.5">
                 {languages.map((language) => (
                   <div key={language.name} className="flex items-baseline justify-between gap-4">
-                    <dt className="type-body-sm text-ink print:text-[0.72rem]">{language.name}</dt>
+                    <dt className="type-body-sm text-ink">{language.name}</dt>
                     <dd className="font-mono text-[0.65rem] text-ink-muted uppercase tracking-[0.12em]">
                       {language.level}
                     </dd>
@@ -242,9 +236,7 @@ export function CvDocument() {
                       {item.period}
                     </p>
                     <h3 className="mt-1 font-display text-base text-ink italic">{item.title}</h3>
-                    <p className="mt-1.5 type-body-sm text-ink-soft print:text-[0.7rem]">
-                      {item.description}
-                    </p>
+                    <p className="mt-1.5 type-body-sm text-ink-soft">{item.description}</p>
                   </div>
                 ))}
               </div>
@@ -253,10 +245,7 @@ export function CvDocument() {
             <CvSection index={1} label={t("strengths.label")}>
               <ul className="flex list-none flex-col gap-1.5">
                 {strengths.map((strength) => (
-                  <li
-                    key={strength}
-                    className="flex gap-2 type-body-sm text-ink print:text-[0.72rem]"
-                  >
+                  <li key={strength} className="flex gap-2 type-body-sm text-ink">
                     <span
                       aria-hidden="true"
                       className="mt-[0.55em] size-1 shrink-0 rounded-full bg-ink"
@@ -274,7 +263,7 @@ export function CvDocument() {
                     <dt className="font-mono text-[0.65rem] text-ink-muted uppercase tracking-[0.16em]">
                       {item.period}
                     </dt>
-                    <dd className="mt-0.5 type-body-sm text-ink print:text-[0.72rem]">
+                    <dd className="mt-0.5 type-body-sm text-ink">
                       {item.title}
                       <span className="text-ink-muted"> · {item.org}</span>
                     </dd>

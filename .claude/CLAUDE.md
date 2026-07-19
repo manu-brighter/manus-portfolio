@@ -466,10 +466,13 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 - **CV**: `/[locale]/cv` press sheet (`CvDocument`, server component; own
   `cv` i18n namespace — DE authored, EN translated, FR/IT DE-mirrored).
   **`window.print()` IS the PDF export**: the `@media print` block in
-  globals.css strips chrome (`nav, footer, .skip-link, .fixed`) and
-  forces `print-color-adjust: exact`, so the PDF prints in the ACTIVE
+  globals.css strips chrome (`nav, [data-site-chrome], .skip-link,
+  .fixed` — the site Footer carries `data-site-chrome`; a bare `footer`
+  selector would also swallow the CV sheet's own footer) and forces
+  `print-color-adjust: exact`, so the PDF prints in the ACTIVE
   ink character (Nachtdruck included) — don't add a build-time PDF
-  generator. Content is the PUBLIC redaction of `docs/cv.md`: never add
+  generator. Print body sizing for the sheet lives in ONE rule
+  (`[data-page="cv"] .type-body-sm`), not per-node utilities. Content is the PUBLIC redaction of `docs/cv.md`: never add
   street address, phone number, or birth date (privacy section of that
   doc). Route is noindex+follow with self-canonical (legal-pages
   pattern), excluded from sitemap, linked from footer document row and

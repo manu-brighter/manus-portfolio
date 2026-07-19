@@ -387,14 +387,23 @@
     print-color-adjust: exact;
   }
 
+  /* Site footer is matched via [data-site-chrome], NOT a bare `footer`
+     selector — the CV sheet has its own <footer> (provenance + privacy
+     notes) that MUST survive into the printed PDF. */
   nav,
-  footer,
+  [data-site-chrome],
   .skip-link,
   .fixed {
     /* biome-ignore lint/complexity/noImportantStyles: must beat inline
        display styles that GSAP / the scene-visibility store leave on
        fixed overlays. */
     display: none !important;
+  }
+
+  /* CV sheet body copy compacts to one print size — retune HERE, not
+     per-node (scattered arbitrary values drifted 0.7 vs 0.72 before). */
+  [data-page="cv"] .type-body-sm {
+    font-size: 0.72rem;
   }
 }
 
