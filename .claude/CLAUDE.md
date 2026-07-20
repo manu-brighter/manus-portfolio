@@ -33,8 +33,11 @@ invoke the tools directly: `node node_modules/typescript/bin/tsc --noEmit`,
 - `src/shaders/` — GLSL split into `common/`, `fluid/`, `ink-mask/`, `ink-wipe/`, `text-fluid/`. The retired `toon/` and `photo-duotone/` subdirs no longer exist — duotone treatment was reversed (see "Visual / image policy" below).
 - `src/lib/` — `raf.ts`, `gpu.ts`, `motion/tokens.ts`, `i18n/`, `content/`, `site.ts` (central identity: URL/email/socials), `gl/compileShader.ts` (shared, with `#version`-strip)
 - `src/hooks/` — `useLenis`, `useReducedMotion`, `useGPUCapability`, `useMousePosition`
-- `content/` — MDX (project-scoped, 4 locales per file)
 - `messages/` — next-intl UI strings (de/en/fr/it)
+- **No `content/` directory and no MDX anywhere.** Plan §3 specifies a
+  project-scoped MDX content layer with 4 locales per file; it was never
+  built. All copy lives in `messages/**` (next-intl) and in
+  `src/lib/content/*.ts`. Don't go looking for `.mdx`.
 
 ## Design tokens
 
@@ -94,7 +97,6 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   title separators use "·"; date ranges use en dash ("2016–2020",
   "seit 11/2021"). Purged site-wide 2026-07-20 (messages/** + component
   strings) — don't reintroduce.
-- Content MDX has 4 per-locale variants (e.g. `project.de.mdx`)
 - Routes always include the `[locale]` segment
 - **Pull-quote keyword marker is `[[keyword]]`, not `{keyword}`** — next-intl
   treats curly braces as ICU placeholders (FORMATTING_ERROR).
@@ -260,7 +262,8 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   md:bottom-10 to clear the hero bio stamps (screenshot-verified).
 - **Console menu + easter egg**: `ConsoleMenu` (root layout) prints the
   MANUS banner once (module flag vs StrictMode) and installs
-  `window.manus` = help/preset/burst/fehldruck — file-top
+  `window.manu` = help/preset/burst/fehldruck (named after Manuel, NOT
+  after the "manus" project name — see the comment in ConsoleMenu) — file-top
   `biome-ignore-all lint/suspicious/noConsole` MUST precede "use client".
   `PrintJamOverlay` runs the Fehldruck sequence (Konami via `e.code` +
   printJamBus): `<html data-print-jam>` jitters headings (CSS in
@@ -487,8 +490,8 @@ Source of truth: `src/app/globals.css` (`@theme` block).
     `src/components/ui/Portrait.tsx` (different component, no token cross-talk).
 - **Photography**: editorial-asymmetric flow (full-bleed + side-text-paired
   layouts), no sticky pins, no ScrollTrigger. Each `PhotoInkMask` owns an
-  isolated WebGL2 context with simplified two-program sim (advect + splat +
-  mask, no pressure solve). Trigger IO: `rootMargin: "-20% 0px -20% 0px"`,
+  isolated WebGL2 context with a simplified three-program sim (advect +
+  splat + mask, no pressure solve). Trigger IO: `rootMargin: "-20% 0px -20% 0px"`,
   `threshold: 0` — fires when photo enters central 60% band. Document
   pointermove listener detached + ambient queue cleared at reveal lock.
 - **Playground**: Tweakpane ships in prod (the demo IS runtime parameter
@@ -659,19 +662,25 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 - **JSON-LD inlined as first child of `<body>`** (Next 16 App Router has no
   clean head-injection for arbitrary scripts). Documented Next.js workaround.
 - **`export const dynamic = "force-static"` on every metadata route** —
-  required by `output: "export"` for `icon.tsx`, `apple-icon.tsx`,
-  `manifest.ts`, `sitemap.ts`, `robots.ts`, `opengraph-image.tsx`,
-  `twitter-image.tsx`.
+  required by `output: "export"` for `manifest.ts`, `sitemap.ts`,
+  `robots.ts`, `opengraph-image.tsx`, `twitter-image.tsx`. The icons are
+  static files, not routes, so they need nothing.
 - **Favicon pipeline**: master at `public/brand/icon-source.svg`. Run
-  `node scripts/generate-favicons.mjs` after editing the source SVG to
-  regenerate `public/icon-{192,512}.png` + `icon-maskable-{192,512}.png`
-  (sharp pipeline, 80% safe-area for maskable). Tab favicon
-  (`src/app/icon.tsx`) ships transparent bg; iOS apple-icon
-  (`src/app/apple-icon.tsx`) ships `--color-paper` bg (iOS no transparency).
-  - **The 4 .tsx icon routes have inline ellipse coords for the misreg
-    ghosts** that don't auto-update from the source SVG. Hand-update
-    `icon.tsx`, `apple-icon.tsx`, `[locale]/opengraph-image.tsx`,
-    `[locale]/twitter-image.tsx` when the source SVG geometry changes.
+  `node scripts/generate-favicons.mjs` after editing the source SVG. It
+  emits BOTH the PWA sizes (`public/icon-{192,512}.png` +
+  `icon-maskable-{192,512}.png`, 80% safe-area for maskable) AND the
+  app-dir icons that Next 16 file-based metadata picks up automatically:
+  `src/app/icon.png` (32px, transparent, browser tab),
+  `src/app/favicon.ico` (byte-copy of icon.png), and
+  `src/app/apple-icon.png` (180px on `--color-paper` — iOS gives no
+  transparency). These are **generated PNGs, not `.tsx` routes** — an
+  earlier cut rendered them through `next/og` and that is gone. Never
+  hand-edit them; edit the source SVG and re-run the script.
+  - **Only `opengraph-image.tsx` and `twitter-image.tsx` are still
+    hand-written `.tsx`**, and they carry inline ellipse coords for the
+    misreg ghosts that do NOT auto-update from the source SVG. Hand-update
+    `[locale]/opengraph-image.tsx` and `[locale]/twitter-image.tsx`
+    whenever the source SVG geometry changes.
 - **The Nav wordmark is the site-wide return-to-home control.** On any
   sub-route it is a plain `<Link href="/">`; ON HOME it preventDefaults
   and Lenis-scrolls to the top, because the router treats a same-route
