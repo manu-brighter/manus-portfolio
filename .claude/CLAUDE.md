@@ -554,17 +554,44 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   - **Theme character on the sheet** (`CvSimFrame` + `.cv-theme-
     texture`, per-theme blocks in globals.css). The sheet is opaque
     paper sitting ON TOP of the sim, so none of the sim's look reaches
-    it and the site-wide warm halo (paper-on-paper) is invisible there
-    — switching presets only re-tinted the background, which read as
-    "the theme barely changes" and "the Turbulenz glow is missing".
-    Fix: `CvSimFrame` prints the render pass's ladder terraces as a
-    still frame in spot tokens (top + flipped at the foot), and each
-    theme adds its shader's signature — Wave overprint bands +
-    channel-split headings, Turbulenz halftone screen + amber glow,
-    Aquarell wet blur + pooled corners, Nachtdruck additive screen
-    blend + neon bloom. Riso stays quiet on purpose (same hierarchy as
-    the sim). All of it is colour/text-shadow/filter, so
-    `print-color-adjust: exact` carries it into the PDF.
+    it on its own. `CvSimFrame` prints the render pass's posterized
+    ladder as a still frame (top + flipped at the foot) and each theme
+    adds its shader's signature: Wave overprint bands + channel-split
+    headings, Turbulenz halftone screen, Aquarell wet blur + pooled
+    corners, Nachtdruck additive screen blend + neon bloom. Riso stays
+    quiet on purpose (same hierarchy as the sim). All of it is colour /
+    text-shadow / filter, so `print-color-adjust: exact` carries it
+    into the PDF. Three rules this went through user feedback to reach:
+    - **Colour comes from the ACTIVE preset's dye ladder**, published
+      as `--cv-dye-1..4` by `CvDyeSync` reading `simPresets.ts`
+      directly. Painted in canonical Riso spots the sheet looked the
+      same in every theme, because the spots barely move between
+      presets while the sim runs blue-green under Wave and
+      violet/pink/wine under Nachtdruck. Never restate the ladder as a
+      hex table here — it would drift when a preset is retuned.
+    - **Bands tile edge to edge.** Each band is drawn as "everything
+      below my boundary" and painted top-down, with every boundary
+      running past both viewBox edges. Per-band ribbons ended at
+      different x positions and read as an accident. Opacity sits on
+      the group, never per band (overlapping bands accumulate alpha).
+    - **Don't invent a Turbulenz glow.** The sheet inherits the
+      site-wide `[data-sim-theme="warm"] main` paper halo verbatim; an
+      amber bloom substituted for it read as a different effect
+      ("mach das richtig oder gar nicht"). It works on the sheet
+      because the still frame puts dye under the headings for the halo
+      to cut through.
+    - `.cv-sheet` carries `isolation: isolate`, or Nachtdruck's screen
+      blend composites past the opaque paper against the live sim.
+  - **The saved PDF's filename is `document.title`.** The route sets
+    `title: { absolute: ... }` (the locale layout's template would
+    append the name a second time), and `CvActions` swaps in a title
+    carrying the active theme for the duration of the print, restoring
+    it on `afterprint` — otherwise five differently inked exports all
+    land in Downloads under one name.
+  - **The experience timeline spine is segmented per entry**, not one
+    border on the container: a container border runs through the
+    inter-entry gaps as well, so the page boundary sliced it mid-air
+    and the cut read as a printing error instead of a page turn.
   - Contact chips: email, manuelheller.dev, GitHub only — visible text
     must equal the destination; LinkedIn was cut (shortened label lied
     about the URL, useless on paper).
@@ -614,6 +641,11 @@ Source of truth: `src/app/globals.css` (`@theme` block).
     ghosts** that don't auto-update from the source SVG. Hand-update
     `icon.tsx`, `apple-icon.tsx`, `[locale]/opengraph-image.tsx`,
     `[locale]/twitter-image.tsx` when the source SVG geometry changes.
+- **The Nav wordmark is the site-wide return-to-home control.** On any
+  sub-route it is a plain `<Link href="/">`; ON HOME it preventDefaults
+  and Lenis-scrolls to the top, because the router treats a same-route
+  push as a no-op and the click otherwise did nothing at all for a
+  scrolled reader. Regression spec: `tests/e2e/home-return.spec.ts`.
 - **Mobile hamburger menu**: `useState` + custom toggle (not `<details>`) —
   needs JS for mq-resize-close behaviour anyway, and animation needs the
   open state to drive className transitions. Esc-to-close explicit.
