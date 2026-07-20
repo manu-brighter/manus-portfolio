@@ -469,42 +469,58 @@
   }
 }
 
-/* Off-the-screen tile reveal — "Stempelpress". No full-page ink wipe
- * anymore (the ~1s grow/hold/retract read as lag — user feedback):
- * the overlay owns a ~350ms press choreography instead. The plate
- * slams onto the paper with an overshoot scale, the spot-color
- * shadow starts out of register and seats into the resting 8px
- * offset, an ink blob squishes out from under the plate, and the
- * caption row stamps in a beat later. Reduced-motion opens the
- * overlay statically (hard disable below). */
+/* Off-the-screen tile reveal — "Andruck", the registration snap.
+ *
+ * History: v1 was a full-page ink wipe (~1s grow/hold/retract) and
+ * read as lag. v2 replaced it with a press choreography that animated
+ * `box-shadow` from out-of-register plus a big blobby ink rim; that
+ * one looked "holprig" and cropped at the bottom (user feedback), for
+ * two concrete reasons. box-shadow is not compositor-animatable, so
+ * 420ms of it repainted a full-screen photo every frame; and scaling
+ * the whole <figure> from 1.14 dragged the caption around and pushed
+ * the oversized rim past the viewport.
+ *
+ * v3 is what a riso press actually does: two plates land slightly out
+ * of register and snap into it. The spot plate is a real element
+ * behind the photo (a rough-edged rectangle) that slides from a big
+ * offset into its resting 8px; the photo plate fades in over a small
+ * scale. Both are pure transform/opacity, so the whole thing runs on
+ * the compositor. Nothing extends past the frame, so nothing crops.
+ * Total ~290ms. Reduced-motion opens statically (hard disable below). */
 .tile-reveal-backdrop {
-  animation: tile-backdrop-in 140ms ease-out;
+  animation: tile-backdrop-in 110ms ease-out;
 }
 
-.tile-reveal-figure {
-  animation: tile-press-in 340ms cubic-bezier(0.3, 1.4, 0.4, 1);
+/* The spot plate: lands first, from down-right and slightly rotated,
+ * overshoots past its rest offset, settles. Ends ON the resting
+ * translate so no fill-mode is needed. */
+/* The timing function must NOT overshoot on its own: a back-ease here
+ * applies to EACH keyframe segment, so it consumed ~85% of the travel
+ * in the first 60ms and the registration move became invisible
+ * (frame-by-frame verified). The overshoot lives in the keyframes;
+ * the curve just decelerates. */
+.tile-reveal-plate {
+  transform: translate(8px, 8px);
+  animation: tile-plate-in 320ms cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
-/* Ends at the picture's static Tailwind shadow (8px 8px spot), so no
- * fill-mode is needed — the animation hands off seamlessly. */
-.tile-reveal-shadow {
-  animation: tile-shadow-seat 420ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.tile-reveal-splat {
+/* No delay and no fade from zero: with either, the first ~2 frames
+ * showed the bare spot plate as a solid full-size colour flash. The
+ * photo is present from frame 0 and the drama comes from the plate
+ * travelling into register underneath it. */
+.tile-reveal-photo {
   transform-origin: 50% 50%;
-  animation: tile-splat-in 380ms cubic-bezier(0.34, 1.56, 0.64, 1) 40ms backwards;
+  animation: tile-photo-in 260ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .tile-reveal-meta {
-  animation: tile-meta-in 220ms ease-out 120ms backwards;
+  animation: tile-meta-in 200ms ease-out 150ms backwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .tile-reveal-backdrop,
-  .tile-reveal-figure,
-  .tile-reveal-shadow,
-  .tile-reveal-splat,
+  .tile-reveal-plate,
+  .tile-reveal-photo,
   .tile-reveal-meta {
     animation: none;
   }
@@ -519,54 +535,33 @@
   }
 }
 
-@keyframes tile-press-in {
+@keyframes tile-plate-in {
   0% {
-    opacity: 0;
-    transform: scale(1.14) rotate(1.4deg);
+    transform: translate(38px, 42px) rotate(1.4deg);
   }
-  55% {
-    opacity: 1;
-    transform: scale(0.982) rotate(-0.5deg);
+  68% {
+    transform: translate(2px, 3px) rotate(-0.3deg);
   }
   100% {
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
+    transform: translate(8px, 8px) rotate(0deg);
   }
 }
 
-@keyframes tile-shadow-seat {
-  0% {
-    box-shadow:
-      22px 26px 0 var(--tile-spot),
-      -12px -10px 0 color-mix(in srgb, var(--color-ink) 30%, transparent);
-  }
-  60% {
-    box-shadow:
-      5px 6px 0 var(--tile-spot),
-      0 0 0 transparent;
-  }
-  100% {
-    box-shadow:
-      8px 8px 0 var(--tile-spot),
-      0 0 0 transparent;
-  }
-}
-
-@keyframes tile-splat-in {
+@keyframes tile-photo-in {
   from {
-    opacity: 0;
-    transform: scale(0.4) rotate(-14deg);
+    opacity: 0.55;
+    transform: scale(1.04);
   }
   to {
     opacity: 1;
-    transform: scale(1) rotate(0deg);
+    transform: scale(1);
   }
 }
 
 @keyframes tile-meta-in {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(5px);
   }
   to {
     opacity: 1;
