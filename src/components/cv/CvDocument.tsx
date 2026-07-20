@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { CvActions } from "@/components/cv/CvActions";
+import { CvInkStamp } from "@/components/cv/CvInkStamp";
 import { PlateCornerMarks } from "@/components/ui/PlateCornerMarks";
 import { Link } from "@/i18n/navigation";
 import { SPOT_CSS_VAR, type SpotColor } from "@/lib/palette";
@@ -16,39 +17,136 @@ import type {
 } from "@/types/i18n-shapes";
 
 /**
- * CvDocument — the /cv "Druckbogen" (press sheet).
+ * CvDocument — the /cv press proof.
  *
- * One editorial sheet in the site's riso language: display-serif name
- * with a static rose misregistration ghost, mono stamp labels with
- * rotating spot dots, two-column body (experience + projects as the
- * main flow, skills/languages/engagement/strengths/education as the
- * side rail). Because every color rides the theme tokens, the sheet
- * re-inks with the active sim preset — and since `window.print()` is
- * the PDF export (see CvActions + the @media print block in
- * globals.css), the downloaded PDF does too.
+ * PRINT PARITY IS THE DESIGN RULE HERE. The sheet is a fixed-width
+ * `max-w-[184mm]` block whose typography uses only fixed rem sizes
+ * (no vw/clamp — viewport units resolve differently against the A4
+ * page box and would reflow the PDF). `@page` margin is 11mm, so the
+ * 184mm sheet fits the printable area 1:1: what you see on screen IS
+ * the PDF, minus the desk backdrop, topbar, and drop shadow (all
+ * `print:`-stripped without touching geometry). Never add `print:`
+ * overrides that change sizes, gaps, or columns — that reintroduces
+ * the "PDF layout is shifted" bug this layout replaced.
  *
- * Content policy (docs/cv.md "Privacy"): this is the PUBLIC version —
- * no street address, no phone number, no birth date. Email + region
- * only; the footer notes that full details come on request.
+ * Pressroom conceit (all of it theme-aware because everything rides
+ * the paper/ink/spot tokens): crop marks on the sheet, a Druckprobe
+ * calibration bar in the header, ink splats + registration dots in
+ * the margins, hand-drawn wobble rules under the section stamps, a
+ * misregistered double ghost on the name, and a live `CvInkStamp`
+ * in the sheet footer that names the ACTIVE ink character (reads
+ * `data-sim-theme`) — switching presets re-inks the sheet AND
+ * re-labels the proof, on screen and in the saved PDF.
  *
- * Server component — `cv` strings never ship to the client; the print
- * button receives its two strings as props.
+ * Content policy (docs/cv.md "Privacy"): PUBLIC version — no street
+ * address, no phone number, no birth date. Email + region only; the
+ * footer notes that full details come on request. Contact chips are
+ * limited to targets whose visible text equals the destination
+ * (email, manuelheller.dev, GitHub) — no LinkedIn: its shortened
+ * label lied about the URL and shortened URLs are useless on paper.
+ *
+ * Server component — `cv` strings never ship to the client; the two
+ * client islands (print button, ink stamp) get strings as props.
  */
 
 const SPOT_SEQUENCE: readonly SpotColor[] = ["rose", "amber", "mint", "violet"];
 
-function SpotDot({ index }: { index: number }) {
-  const spot = SPOT_SEQUENCE[index % SPOT_SEQUENCE.length] as SpotColor;
+function spotAt(index: number): string {
+  return SPOT_CSS_VAR[SPOT_SEQUENCE[index % SPOT_SEQUENCE.length] as SpotColor];
+}
+
+/** Hand-drawn horizontal rule — same visual family as the switcher
+ *  hint arrow. Optional spot ghost line prints slightly offset, like
+ *  a second plate out of register. */
+function WobbleRule({ spot, className }: { spot?: string; className?: string }) {
   return (
-    <span
+    <svg
       aria-hidden="true"
-      className="size-2 shrink-0 rounded-full border border-ink/40"
-      style={{ background: SPOT_CSS_VAR[spot] }}
-    />
+      viewBox="0 0 400 8"
+      preserveAspectRatio="none"
+      className={`h-[7px] w-full ${className ?? ""}`}
+    >
+      {spot ? (
+        <path
+          d="M 2 5.4 C 32 3.8, 64 6.8, 102 5.3 C 142 3.7, 172 7, 212 5.5 C 252 3.9, 287 6.7, 332 5.2 C 357 4.3, 382 5.8, 400 5"
+          fill="none"
+          stroke={spot}
+          strokeWidth="2.2"
+          opacity="0.55"
+        />
+      ) : null}
+      <path
+        d="M 0 3.7 C 30 2.1, 62 5.1, 100 3.6 C 140 2, 170 5.3, 210 3.8 C 250 2.2, 285 5, 330 3.5 C 355 2.6, 380 4.1, 400 3.3"
+        fill="none"
+        stroke="var(--color-ink)"
+        strokeWidth="1.5"
+      />
+    </svg>
   );
 }
 
-/** Mono stamp section label with a rotating spot dot. */
+/** Irregular ink splat, colored by the given spot token. */
+function InkBlob({
+  spot,
+  className,
+  variant = 0,
+}: {
+  spot: string;
+  className?: string;
+  variant?: 0 | 1;
+}) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 100 80"
+      preserveAspectRatio="none"
+      className={`pointer-events-none ${className ?? ""}`}
+      style={{ fill: spot }}
+    >
+      {variant === 0 ? (
+        <>
+          <path d="M50 4 C70 1 90 12 95 30 C99 45 92 62 74 70 C56 78 30 77 16 66 C4 56 1 38 8 24 C15 10 32 7 50 4 Z" />
+          <circle cx="95" cy="12" r="3.4" />
+          <circle cx="6" cy="72" r="2.6" />
+        </>
+      ) : (
+        <>
+          <path d="M42 8 C60 2 84 8 92 24 C99 39 96 58 80 68 C63 78 38 76 22 68 C7 60 2 44 8 30 C13 17 26 13 42 8 Z" />
+          <circle cx="10" cy="14" r="2.8" />
+          <circle cx="93" cy="66" r="3" />
+        </>
+      )}
+    </svg>
+  );
+}
+
+/** Header calibration bar — ink + the four spots, like a pressroom
+ *  Druckprobe strip. The loudest theme tell besides the paper itself:
+ *  the ink swatch flips with the token set. */
+function CalibrationBar({ label }: { label: string }) {
+  return (
+    <div className="flex items-center gap-1.5 pt-1">
+      <span
+        aria-hidden="true"
+        className="size-4 border border-ink/60"
+        style={{ background: "var(--color-ink)" }}
+      />
+      {SPOT_SEQUENCE.map((spot) => (
+        <span
+          key={spot}
+          aria-hidden="true"
+          className="size-4 border border-ink/60"
+          style={{ background: SPOT_CSS_VAR[spot] }}
+        />
+      ))}
+      <span className="ml-2 font-mono text-[0.55rem] text-ink-muted uppercase tracking-[0.24em]">
+        {label}
+      </span>
+    </div>
+  );
+}
+
+/** Section header: mono stamp label, rotated spot square, wobble rule. */
 function CvSection({
   index,
   label,
@@ -61,11 +159,21 @@ function CvSection({
   className?: string;
 }) {
   return (
-    <section className={`break-inside-avoid ${className ?? ""}`}>
-      <h2 className="mb-4 flex items-center gap-2 border-ink border-b pb-2 font-mono text-ink text-xs uppercase tracking-[0.22em]">
-        <SpotDot index={index} />
+    // NO break-inside-avoid on the section itself: a whole section is
+    // page-sized, and avoiding breaks inside it shoves the entire
+    // block to the next PDF page (the 3-pages-with-a-straggler bug).
+    // Items/cards carry their own avoid; the header binds to the
+    // first line of content via break-after-avoid.
+    <section className={className}>
+      <h2 className="break-after-avoid flex items-center gap-2.5 font-mono text-[0.7rem] text-ink uppercase tracking-[0.24em]">
+        <span
+          aria-hidden="true"
+          className="size-2.5 shrink-0 rotate-45 border border-ink"
+          style={{ background: spotAt(index) }}
+        />
         {label}
       </h2>
+      <WobbleRule spot={spotAt(index)} className="mt-2 mb-4 break-after-avoid" />
       {children}
     </section>
   );
@@ -82,56 +190,97 @@ export function CvDocument() {
   const engagement = t.raw("engagement.items") as CvEngagementItems;
   const strengths = t.raw("strengths.items") as CvStrengthItems;
 
+  // Paper targets only: visible text === destination. No LinkedIn —
+  // a shortened label that differs from the real URL is worthless in
+  // a printed document.
   const contacts = [
     { label: SITE.author.email, href: `mailto:${SITE.author.email}` },
     { label: "manuelheller.dev", href: SITE.url },
     { label: "github.com/manu-brighter", href: SITE.author.socials.github },
-    { label: "linkedin.com/in/manuel-heller", href: SITE.author.socials.linkedin },
   ];
 
   return (
-    <article
-      aria-labelledby="cv-heading"
-      className="container-page py-16 print:py-0 md:py-24"
+    <div
       data-page="cv"
+      className="bg-paper-shade/60 py-10 print:bg-transparent print:py-0 md:py-16"
     >
-      <div className="plate-corners relative border-[1.5px] border-ink bg-paper-tint p-6 print:border-0 print:bg-transparent print:p-0 md:p-12">
+      {/* Topbar — screen chrome, never printed. Lives OUTSIDE the sheet
+          so the printable geometry stays untouched. */}
+      <div className="mx-auto mb-8 flex w-full max-w-[184mm] flex-wrap items-start justify-between gap-4 px-4 print:hidden sm:px-0">
+        <Link
+          href="/"
+          className="type-label-stamp bg-paper transition-colors hover:bg-ink hover:text-paper-tint"
+        >
+          <span aria-hidden="true">← </span>
+          {t("backLabel")}
+        </Link>
+        <CvActions label={t("download.label")} hint={t("download.hint")} />
+      </div>
+
+      {/* The sheet. Fixed 184mm width, fixed type sizes — identical on
+          screen and in the printed PDF. */}
+      <article
+        aria-labelledby="cv-heading"
+        className="plate-corners relative mx-auto w-full max-w-[184mm] bg-paper-tint px-5 py-8 shadow-[10px_10px_0_color-mix(in_srgb,var(--color-ink)_18%,transparent)] print:shadow-none sm:px-[11mm] sm:py-[12mm]"
+      >
         <PlateCornerMarks />
 
-        {/* Header — stamps row, monumental name, profile + contact. */}
-        <header className="mb-10 print:mb-6 md:mb-14">
-          <div className="flex flex-col justify-between gap-6 md:flex-row md:items-start">
-            <p className="type-label-stamp">
+        {/* Margin ink — registration droplets in the sheet's gutter,
+            outside every text block. */}
+        <InkBlob
+          spot={SPOT_CSS_VAR.amber}
+          variant={1}
+          className="absolute top-[36%] right-1.5 h-4 w-5 rotate-[24deg] opacity-80"
+        />
+        <span
+          aria-hidden="true"
+          className="absolute top-[38.5%] right-4 size-1.5 rounded-full opacity-70"
+          style={{ background: SPOT_CSS_VAR.violet }}
+        />
+        <InkBlob
+          spot={SPOT_CSS_VAR.mint}
+          variant={0}
+          className="absolute bottom-[22%] left-2 h-3.5 w-4 rotate-[-12deg] opacity-80"
+        />
+
+        {/* ---- Header ---- */}
+        <header>
+          <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+            <p className="type-label-stamp rotate-[-1deg] bg-paper">
               {t("sectionLabel")}
               <span aria-hidden="true"> · </span>
               {t("editionStamp")}
             </p>
-            <CvActions label={t("download.label")} hint={t("download.hint")} />
+            <CalibrationBar label={t("calibrationLabel")} />
           </div>
 
-          <h1
-            id="cv-heading"
-            className="mt-8 font-display text-[clamp(2.75rem,7vw,5.5rem)] text-ink italic leading-[0.95] tracking-[-0.03em] print:mt-4 print:text-[2.6rem]"
-            style={{
-              textShadow: "3px 2px 0 color-mix(in srgb, var(--color-spot-rose) 45%, transparent)",
-            }}
-          >
-            {t("name")}
-          </h1>
-          <p className="mt-3 font-mono text-ink-soft text-sm uppercase tracking-[0.2em]">
+          <div className="relative mt-9">
+            <InkBlob
+              spot={SPOT_CSS_VAR.rose}
+              className="absolute top-[-1.1rem] left-[-1.2rem] h-[4.6rem] w-[6.4rem] rotate-[-9deg] opacity-90"
+            />
+            <h1
+              id="cv-heading"
+              className="relative font-display text-[2.5rem] text-ink italic leading-[0.98] tracking-[-0.02em] sm:text-[3.3rem]"
+              style={{
+                textShadow:
+                  "4px 3px 0 color-mix(in srgb, var(--color-spot-rose) 50%, transparent), -3px -2px 0 color-mix(in srgb, var(--color-spot-mint) 40%, transparent)",
+              }}
+            >
+              {t("name")}
+            </h1>
+          </div>
+          <p className="mt-3 font-mono text-[0.75rem] text-ink-soft uppercase tracking-[0.2em]">
             {t("role")}
             <span aria-hidden="true"> · </span>
             {t("region")}
           </p>
 
-          <p className="mt-6 max-w-[70ch] type-body text-ink print:mt-4 print:text-[0.8rem]">
-            {t("profile")}
-          </p>
+          <WobbleRule className="mt-5" />
 
-          <ul
-            className="mt-6 flex flex-wrap gap-x-3 gap-y-2 print:mt-4"
-            aria-label={t("contactLabel")}
-          >
+          <p className="mt-5 max-w-[66ch] type-body-sm text-ink leading-relaxed">{t("profile")}</p>
+
+          <ul className="mt-5 flex flex-wrap gap-x-2.5 gap-y-2" aria-label={t("contactLabel")}>
             {contacts.map((contact) => (
               <li key={contact.label}>
                 <a
@@ -139,7 +288,7 @@ export function CvDocument() {
                   {...(contact.href.startsWith("http")
                     ? { target: "_blank", rel: "noopener noreferrer" }
                     : {})}
-                  className="inline-block rounded-[2px] border border-ink px-2.5 py-1 font-mono text-ink text-xs tracking-[0.08em] transition-colors hover:bg-ink hover:text-paper-tint print:px-1.5"
+                  className="inline-block rounded-[2px] border border-ink bg-paper px-2.5 py-1 font-mono text-[0.7rem] text-ink tracking-[0.08em] transition-colors hover:bg-ink hover:text-paper-tint"
                 >
                   {contact.label}
                 </a>
@@ -148,28 +297,34 @@ export function CvDocument() {
           </ul>
         </header>
 
-        <div className="grid-12 gap-y-12 print:gap-y-6">
-          {/* Main flow — experience + projects. */}
-          <div className="col-span-12 flex flex-col gap-12 print:gap-6 md:col-span-7">
+        {/* ---- Body: main flow + side rail ---- */}
+        <div className="mt-10 grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-[1.45fr_1fr]">
+          <div className="flex flex-col gap-10">
             <CvSection index={0} label={t("experience.label")}>
-              <div className="flex flex-col gap-8 print:gap-4">
-                {experience.map((item) => (
-                  <div key={`${item.period}-${item.org}`} className="break-inside-avoid">
-                    <p className="font-mono text-ink-muted text-xs uppercase tracking-[0.18em]">
+              {/* Timeline spine — the left rule + registration dots
+                  encode real chronology, newest at the top. */}
+              <div className="flex flex-col gap-7 border-ink/70 border-l-2 pl-5">
+                {experience.map((item, i) => (
+                  <div key={`${item.period}-${item.org}`} className="relative break-inside-avoid">
+                    <span
+                      aria-hidden="true"
+                      className="absolute top-[0.2rem] left-[-27px] size-3 rounded-full border-2 border-ink"
+                      style={{ background: spotAt(i) }}
+                    />
+                    <p className="font-mono text-[0.65rem] text-ink-muted uppercase tracking-[0.16em]">
                       {item.period}
-                    </p>
-                    <h3 className="mt-1 font-display text-ink text-xl italic print:text-lg">
-                      {item.role}
-                    </h3>
-                    <p className="font-mono text-ink-soft text-xs uppercase tracking-[0.14em]">
+                      <span aria-hidden="true"> · </span>
                       {item.org}
                     </p>
-                    <ul className="mt-3 flex list-none flex-col gap-1.5 print:mt-2 print:gap-1">
+                    <h3 className="mt-1 font-display text-[1.35rem] text-ink italic leading-snug">
+                      {item.role}
+                    </h3>
+                    <ul className="mt-2 flex list-none flex-col gap-1.5">
                       {item.bullets.map((bullet) => (
                         <li key={bullet} className="flex gap-2 type-body-sm text-ink">
                           <span
                             aria-hidden="true"
-                            className="mt-[0.55em] size-1 shrink-0 rounded-full bg-ink"
+                            className="mt-[0.5em] size-1.5 shrink-0 bg-ink/80"
                           />
                           {bullet}
                         </li>
@@ -181,35 +336,42 @@ export function CvDocument() {
             </CvSection>
 
             <CvSection index={1} label={t("projects.label")}>
-              <div className="grid gap-5 print:gap-3 sm:grid-cols-2">
-                {projects.map((project) => (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {projects.map((project, i) => (
                   <div
                     key={project.title}
-                    className="break-inside-avoid border border-ink/30 p-4 print:p-2.5"
+                    className="relative break-inside-avoid border border-ink/40 bg-paper/60 p-3"
+                    style={{ "--card-spot": spotAt(i) } as CSSProperties}
                   >
-                    <h3 className="font-display text-ink text-lg italic print:text-base">
-                      {project.title}
-                    </h3>
-                    <p className="mt-1 font-mono text-[0.65rem] text-ink-muted uppercase tracking-[0.14em]">
+                    <span
+                      aria-hidden="true"
+                      className="absolute top-0 right-0 size-2"
+                      style={{ background: "var(--card-spot)" }}
+                    />
+                    <h3 className="font-display text-[1rem] text-ink italic">{project.title}</h3>
+                    <p className="mt-0.5 font-mono text-[0.58rem] text-ink-muted uppercase tracking-[0.12em]">
                       {project.meta}
                     </p>
-                    <p className="mt-2 type-body-sm text-ink-soft">{project.description}</p>
+                    <p className="mt-1.5 text-[0.72rem] text-ink-soft leading-relaxed">
+                      {project.description}
+                    </p>
                   </div>
                 ))}
               </div>
             </CvSection>
           </div>
 
-          {/* Side rail — skills, languages, engagement, strengths, education. */}
-          <div className="col-span-12 flex flex-col gap-10 print:gap-5 md:col-span-4 md:col-start-9">
+          <div className="flex flex-col gap-8">
             <CvSection index={2} label={t("skills.label")}>
-              <dl className="flex flex-col gap-4 print:gap-2.5">
+              <dl className="flex flex-col gap-3">
                 {skillGroups.map((group) => (
                   <div key={group.label} className="break-inside-avoid">
-                    <dt className="font-mono text-[0.65rem] text-ink-muted uppercase tracking-[0.16em]">
+                    <dt className="font-mono text-[0.62rem] text-ink-muted uppercase tracking-[0.14em]">
                       {group.label}
                     </dt>
-                    <dd className="mt-1 type-body-sm text-ink">{group.items}</dd>
+                    <dd className="mt-0.5 text-[0.74rem] text-ink leading-relaxed">
+                      {group.items}
+                    </dd>
                   </div>
                 ))}
               </dl>
@@ -219,8 +381,8 @@ export function CvDocument() {
               <dl className="flex flex-col gap-1.5">
                 {languages.map((language) => (
                   <div key={language.name} className="flex items-baseline justify-between gap-4">
-                    <dt className="type-body-sm text-ink">{language.name}</dt>
-                    <dd className="font-mono text-[0.65rem] text-ink-muted uppercase tracking-[0.12em]">
+                    <dt className="text-[0.74rem] text-ink">{language.name}</dt>
+                    <dd className="font-mono text-[0.62rem] text-ink-muted uppercase tracking-[0.12em]">
                       {language.level}
                     </dd>
                   </div>
@@ -229,14 +391,18 @@ export function CvDocument() {
             </CvSection>
 
             <CvSection index={0} label={t("engagement.label")}>
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-3">
                 {engagement.map((item) => (
                   <div key={item.title} className="break-inside-avoid">
-                    <p className="font-mono text-[0.65rem] text-ink-muted uppercase tracking-[0.16em]">
+                    <p className="font-mono text-[0.62rem] text-ink-muted uppercase tracking-[0.14em]">
                       {item.period}
                     </p>
-                    <h3 className="mt-1 font-display text-base text-ink italic">{item.title}</h3>
-                    <p className="mt-1.5 type-body-sm text-ink-soft">{item.description}</p>
+                    <h3 className="mt-0.5 font-display text-[0.95rem] text-ink italic">
+                      {item.title}
+                    </h3>
+                    <p className="mt-1 text-[0.72rem] text-ink-soft leading-relaxed">
+                      {item.description}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -245,11 +411,8 @@ export function CvDocument() {
             <CvSection index={1} label={t("strengths.label")}>
               <ul className="flex list-none flex-col gap-1.5">
                 {strengths.map((strength) => (
-                  <li key={strength} className="flex gap-2 type-body-sm text-ink">
-                    <span
-                      aria-hidden="true"
-                      className="mt-[0.55em] size-1 shrink-0 rounded-full bg-ink"
-                    />
+                  <li key={strength} className="flex gap-2 text-[0.74rem] text-ink">
+                    <span aria-hidden="true" className="mt-[0.5em] size-1.5 shrink-0 bg-ink/80" />
                     {strength}
                   </li>
                 ))}
@@ -257,13 +420,13 @@ export function CvDocument() {
             </CvSection>
 
             <CvSection index={2} label={t("education.label")}>
-              <dl className="flex flex-col gap-3 print:gap-2">
+              <dl className="flex flex-col gap-2.5">
                 {education.map((item) => (
                   <div key={item.title} className="break-inside-avoid">
-                    <dt className="font-mono text-[0.65rem] text-ink-muted uppercase tracking-[0.16em]">
+                    <dt className="font-mono text-[0.62rem] text-ink-muted uppercase tracking-[0.14em]">
                       {item.period}
                     </dt>
-                    <dd className="mt-0.5 type-body-sm text-ink">
+                    <dd className="mt-0.5 text-[0.74rem] text-ink">
                       {item.title}
                       <span className="text-ink-muted"> · {item.org}</span>
                     </dd>
@@ -274,25 +437,22 @@ export function CvDocument() {
           </div>
         </div>
 
-        {/* Sheet footer — provenance stamp + privacy note; back link is
-            screen-only. */}
-        <footer className="mt-12 flex flex-col gap-4 border-paper-line border-t pt-6 print:mt-6 print:pt-3 md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-col gap-1">
-            <p className="type-label text-ink-muted print:text-[0.6rem]">
-              {t("footer.printedNote")}
-            </p>
-            <p className="type-label text-ink-muted print:text-[0.6rem]">
-              {t("footer.publicNote")}
-            </p>
+        {/* ---- Sheet footer: provenance + the live ink stamp ---- */}
+        <footer className="mt-10">
+          <WobbleRule className="mb-4" />
+          <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+            <div className="flex flex-col gap-1">
+              <p className="font-mono text-[0.62rem] text-ink-muted uppercase tracking-[0.14em]">
+                {t("footer.printedNote")}
+              </p>
+              <p className="font-mono text-[0.62rem] text-ink-muted uppercase tracking-[0.14em]">
+                {t("footer.publicNote")}
+              </p>
+            </div>
+            <CvInkStamp label={t("footer.inkLabel")} />
           </div>
-          <Link
-            href="/"
-            className="type-label-stamp transition-colors hover:bg-ink hover:text-paper-tint print:hidden"
-          >
-            ← {t("backLabel")}
-          </Link>
         </footer>
-      </div>
-    </article>
+      </article>
+    </div>
   );
 }

@@ -1,28 +1,29 @@
 {
   "cv": {
-    "metaTitle": "CV — Manuel Heller",
-    "metaDescription": "Curriculum Vitae von Manuel Heller — Full-Stack Developer aus der Basel-Region. Als PDF speicherbar, gedruckt im aktiven Tinten-Charakter.",
+    "metaTitle": "CV · Manuel Heller",
+    "metaDescription": "Curriculum Vitae von Manuel Heller, Full-Stack Developer aus der Basel-Region. Als PDF speicherbar, gedruckt im aktiven Tinten-Charakter.",
     "sectionLabel": "Curriculum Vitae",
     "editionStamp": "Edition MMXXVI",
+    "calibrationLabel": "Druckprobe",
     "name": "Manuel Heller",
     "role": "Full-Stack Developer",
     "region": "Basel-Region, Schweiz",
-    "profile": "Full-Stack Developer mit fünf Jahren Production-Erfahrung in PHP und Vue, einem Hintergrund als Betriebsinformatiker EFZ und einem ausgeprägten Auge für Webdesign aus Fotografie und Grafikdesign. Tief eingearbeitet in AI-gestützte Workflows (Custom Agents, Hooks, Skills, Multi-Step-Prompting) — überzeugt, dass kontinuierliches Lernen im aktuellen Tech-Klima nicht optional ist. Teamplayer mit guter Auffassungsgabe und der Geduld, ein Problem so lange zu drehen, bis die Lösung sauber ist.",
+    "profile": "Full-Stack Developer mit fünf Jahren Production-Erfahrung in PHP und Vue, einem Hintergrund als Betriebsinformatiker EFZ und einem ausgeprägten Auge für Webdesign aus Fotografie und Grafikdesign. Tief eingearbeitet in AI-gestützte Workflows (Custom Agents, Hooks, Skills, Multi-Step-Prompting) und überzeugt, dass kontinuierliches Lernen im aktuellen Tech-Klima nicht optional ist. Teamplayer mit guter Auffassungsgabe und der Geduld, ein Problem so lange zu drehen, bis die Lösung sauber ist.",
     "contactLabel": "Kontakt",
     "download": {
       "label": "Als PDF speichern",
-      "hint": "Druckt im aktiven Tinten-Charakter — Theme wechseln färbt den Bogen um."
+      "hint": "Druckt im aktiven Tinten-Charakter. Theme wechseln färbt den Bogen um."
     },
     "backLabel": "Zur Startseite",
     "experience": {
       "label": "Berufserfahrung",
       "items": [
         {
-          "period": "11/2021 — heute",
+          "period": "seit 11/2021",
           "role": "Full-Stack Developer",
           "org": "zvoove Switzerland AG",
           "bullets": [
-            "Entwicklung an zvoove Core — Enterprise-SaaS im Personaldienstleistungs-Sektor: gewachsene PHP-Codebase, modernes Vue-Frontend, BFF-API als Bindeglied",
+            "Entwicklung an zvoove Core, einem Enterprise-SaaS im Personaldienstleistungs-Sektor: gewachsene PHP-Codebase, modernes Vue-Frontend, BFF-API als Bindeglied",
             "Schnittstellen- und API-Tools (PHP, OpenAPI, Yii)",
             "E2E-Test-Coverage mit Cypress",
             "Code-Reviews und Architektur-Diskussionen im ~14-köpfigen Dev-Team",
@@ -30,7 +31,7 @@
           ]
         },
         {
-          "period": "2020 — 2021",
+          "period": "2020–2021",
           "role": "Zivildienst",
           "org": "Primarschule Grellingen · Altersheim Rosengarten",
           "bullets": [
@@ -38,7 +39,7 @@
           ]
         },
         {
-          "period": "2016 — 2020",
+          "period": "2016–2020",
           "role": "Lehre Betriebsinformatiker EFZ",
           "org": "Novartis Pharma AG · GIBM Muttenz",
           "bullets": [
@@ -70,7 +71,7 @@
         {
           "title": "full-project-rework",
           "meta": "Claude-Code-Skill",
-          "description": "Autonomer Multi-Agent-Codebase-Overhaul — Analyzer, Reviewer, Implementer. Public auf GitHub."
+          "description": "Autonomer Multi-Agent-Codebase-Overhaul mit Analyzern, Reviewern und Implementern. Public auf GitHub."
         }
       ]
     },
@@ -103,17 +104,17 @@
       "label": "Ausbildung",
       "items": [
         {
-          "period": "2016 — 2020",
+          "period": "2016–2020",
           "title": "Betriebsinformatiker EFZ",
           "org": "Novartis Pharma AG · GIBM Muttenz"
         },
         {
-          "period": "2014 — 2016",
+          "period": "2014–2016",
           "title": "Sekundarschule Niveau E",
           "org": "Sekundarschule Zwingen"
         },
         {
-          "period": "2012 — 2014",
+          "period": "2012–2014",
           "title": "Gymnasium, 1.–2. Klasse",
           "org": "Gymnasium Laufen"
         }
@@ -156,8 +157,9 @@
       ]
     },
     "footer": {
-      "printedNote": "Gedruckt ab manuelheller.dev/cv — der Bogen folgt dem gewählten Tinten-Charakter.",
-      "publicNote": "Öffentliche Version — vollständige Kontaktdaten auf Anfrage."
+      "inkLabel": "Tinte",
+      "printedNote": "Gedruckt ab manuelheller.dev/cv. Der Bogen folgt dem gewählten Tinten-Charakter.",
+      "publicNote": "Öffentliche Version, vollständige Kontaktdaten auf Anfrage."
     }
   }
 }

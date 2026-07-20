@@ -480,11 +480,11 @@
     display: none !important;
   }
 
-  /* CV sheet body copy compacts to one print size — retune HERE, not
-     per-node (scattered arbitrary values drifted 0.7 vs 0.72 before). */
-  [data-page="cv"] .type-body-sm {
-    font-size: 0.72rem;
-  }
+  /* NO print-only size/gap/column overrides for the CV sheet — the
+     sheet is a fixed 184mm block with fixed rem type, so screen and
+     PDF share one geometry (print parity). Only chrome (topbar, desk
+     backdrop, drop shadow) is stripped, via inline print: utilities
+     in CvDocument. */
 }
 
 @media (min-width: 768px) {

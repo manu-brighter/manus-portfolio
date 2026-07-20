@@ -1,28 +1,29 @@
 {
   "cv": {
-    "metaTitle": "CV — Manuel Heller",
-    "metaDescription": "Curriculum vitae of Manuel Heller — full-stack developer from the Basel region. Saveable as PDF, printed in the active ink character.",
+    "metaTitle": "CV · Manuel Heller",
+    "metaDescription": "Curriculum vitae of Manuel Heller, full-stack developer from the Basel region. Saveable as PDF, printed in the active ink character.",
     "sectionLabel": "Curriculum Vitae",
     "editionStamp": "Edition MMXXVI",
+    "calibrationLabel": "Ink proof",
     "name": "Manuel Heller",
     "role": "Full-Stack Developer",
     "region": "Basel region, Switzerland",
-    "profile": "Full-stack developer with five years of production experience in PHP and Vue, a background as a certified IT systems engineer (EFZ), and a trained eye for web design honed through photography and graphic design. Deeply invested in AI-assisted workflows (custom agents, hooks, skills, multi-step prompting) — convinced that continuous learning is not optional in the current tech climate. Team player with a quick grasp and the patience to turn a problem over until the solution is clean.",
+    "profile": "Full-stack developer with five years of production experience in PHP and Vue, a background as a certified IT systems engineer (EFZ), and a trained eye for web design honed through photography and graphic design. Deeply invested in AI-assisted workflows (custom agents, hooks, skills, multi-step prompting) and convinced that continuous learning is not optional in the current tech climate. Team player with a quick grasp and the patience to turn a problem over until the solution is clean.",
     "contactLabel": "Contact",
     "download": {
       "label": "Save as PDF",
-      "hint": "Prints in the active ink character — switching themes re-inks the sheet."
+      "hint": "Prints in the active ink character. Switching themes re-inks the sheet."
     },
     "backLabel": "Back to home",
     "experience": {
       "label": "Experience",
       "items": [
         {
-          "period": "11/2021 — today",
+          "period": "since 11/2021",
           "role": "Full-Stack Developer",
           "org": "zvoove Switzerland AG",
           "bullets": [
-            "Development on zvoove Core — enterprise SaaS in the staffing sector: grown PHP codebase, modern Vue frontend, BFF API in between",
+            "Development on zvoove Core, an enterprise SaaS in the staffing sector: grown PHP codebase, modern Vue frontend, BFF API in between",
             "API and interface tooling (PHP, OpenAPI, Yii)",
             "E2E test coverage with Cypress",
             "Code reviews and architecture discussions in a ~14-person dev team",
@@ -30,7 +31,7 @@
           ]
         },
         {
-          "period": "2020 — 2021",
+          "period": "2020–2021",
           "role": "Civilian service",
           "org": "Primarschule Grellingen · Altersheim Rosengarten",
           "bullets": [
@@ -38,7 +39,7 @@
           ]
         },
         {
-          "period": "2016 — 2020",
+          "period": "2016–2020",
           "role": "Apprenticeship, IT systems engineer EFZ",
           "org": "Novartis Pharma AG · GIBM Muttenz",
           "bullets": [
@@ -70,7 +71,7 @@
         {
           "title": "full-project-rework",
           "meta": "Claude Code skill",
-          "description": "Autonomous multi-agent codebase overhaul — analyzers, reviewers, implementers. Public on GitHub."
+          "description": "Autonomous multi-agent codebase overhaul with analyzers, reviewers and implementers. Public on GitHub."
         }
       ]
     },
@@ -103,17 +104,17 @@
       "label": "Education",
       "items": [
         {
-          "period": "2016 — 2020",
+          "period": "2016–2020",
           "title": "IT systems engineer EFZ",
           "org": "Novartis Pharma AG · GIBM Muttenz"
         },
         {
-          "period": "2014 — 2016",
+          "period": "2014–2016",
           "title": "Secondary school, level E",
           "org": "Sekundarschule Zwingen"
         },
         {
-          "period": "2012 — 2014",
+          "period": "2012–2014",
           "title": "Gymnasium, years 1–2",
           "org": "Gymnasium Laufen"
         }
@@ -156,8 +157,9 @@
       ]
     },
     "footer": {
-      "printedNote": "Printed from manuelheller.dev/cv — the sheet follows the chosen ink character.",
-      "publicNote": "Public version — full contact details on request."
+      "inkLabel": "Ink",
+      "printedNote": "Printed from manuelheller.dev/cv. The sheet follows the chosen ink character.",
+      "publicNote": "Public version, full contact details on request."
     }
   }
 }
