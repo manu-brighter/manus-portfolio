@@ -14,9 +14,9 @@
 | Build / scripts (`.mjs`)              |     8 |   1 007 |
 | **Code subtotal**                     | **213** | **25 943** |
 | i18n / content (`.json`, 4 locales)   |    24 |   4 636 |
-| Docs / specs / plans (`.md`)          |    35 |  22 249 |
+| Docs / specs / plans (`.md`)          |    35 |  22 364 |
 | Configs (`.yml`, `.gitignore`, hooks) |     6 |     316 |
-| **Total tracked, self-written**       | **278** | **53 144** |
+| **Total tracked, self-written**       | **278** | **53 259** |
 
 ## What changed since the previous snapshot (2026-05-14)
 
@@ -24,7 +24,7 @@ Two months of feature work, roughly doubling the codebase. The through-line
 is that the fluid sim stopped being one look on one device and became a
 switchable system that reaches everywhere:
 
-- **+8 550 LOC in `.tsx`/`.ts`.** The Wow-Pass and theme-differentiation
+- **+8 552 LOC in `.tsx`/`.ts`.** The Wow-Pass and theme-differentiation
   branches added the five user-switchable sim presets
   (`src/lib/content/simPresets.ts`, `src/lib/simPresetStore.ts`,
   `SimPresetSwitcher`, `SimThemeSync`, `InkCursor`), the mobile rework

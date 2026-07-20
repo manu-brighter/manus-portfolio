@@ -22,12 +22,12 @@ content-input/
 │       ├─ camera-landscape.jpg         Crops: 16:9 landscape + 2:3 portrait
 │       ├─ camera-portrait.jpg          (Keys: camera, audi, joggediballa,
 │       └─ ...                          schnee, tauchen, pingpong)
-├─ projects/
-│   ├─ portfolio/source/              ← Screenshots der eigenen Homepage
-│   │   ├─ homepage-landscape.png
-│   │   └─ homepage-five-themes.png     (Fünf-Themen-Split für die Work-Card)
-│   └─ joggediballa/source/           ← Joggediballa-Screenshots, light + dark
-│       ├─ homepage-lightmode-landscape.png
+├─ projects/                          ← FEHLT LOKAL. Nur die public/-Outputs
+│   ├─ portfolio/source/                sind noch da; die Pipeline liest hier
+│   │   ├─ homepage-landscape.png        und meldet ⊘ skipped, solange die
+│   │   └─ homepage-five-themes.png      Masters nicht wieder drin liegen.
+│   └─ joggediballa/source/             (Fünf-Themen-Split für die Work-Card,
+│       ├─ homepage-lightmode-landscape.png   Joggediballa light + dark)
 │       ├─ homepage-darkmode-landscape.png
 │       └─ ...
 └─ joggediballa/                      ← Alt-Ablage aus Phase 8, nicht in der Pipeline
@@ -52,7 +52,7 @@ content-input/
 - [x] `photography/source/*.jpg` — kopiere alle JPEGs aus `Downloads\portfolio input\Example Bilder\`
 - [x] `joggediballa/joggediballa-story.mdx` — kopiere von `Downloads\portfolio input\joggediballa-story.mdx`
 - [x] `joggediballa/screenshots/*.jpg` — neu erstellen, sobald Joggediballa-Plattform gescreenshotet ist (Liste siehe `docs/content-briefing.md` §5.4)
-- [x] `projects/portfolio/source/*.png` + `projects/joggediballa/source/*.png`: die Screenshots, die die Pipeline tatsächlich liest
+- [ ] `projects/portfolio/source/*.png` + `projects/joggediballa/source/*.png`: die Screenshots, die die Pipeline tatsächlich liest. **Der ganze `projects/`-Baum fehlt aktuell lokal** — die fertigen Bilder liegen in `public/projects/`, die Masters nicht mehr hier. `node scripts/optimize-assets.mjs portfolio` bzw. `joggediballa` läuft bis dahin nur durch `⊘ skipped`.
 - [ ] `about/tiles/{key}-landscape.jpg` + `{key}-portrait.jpg`: beide Crops pro Tile, von Manu selbst gerahmt. Aktuell live: camera, audi, joggediballa, schnee, tauchen (als PNG-Videostills). `pingpong` fehlt noch, die Kachel bleibt bis dahin dekorativ (Drop-in-Pfad steht in `src/components/about/tileReveals.ts`).
 
 ### Claude (automatisch, beim Implementieren)

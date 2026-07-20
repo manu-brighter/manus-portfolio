@@ -113,7 +113,7 @@ DE (default) / EN / FR / IT via next-intl. Routes always include the `[locale]` 
 | `/[locale]/cv` | Press-proof CV sheet · `window.print()` **is** the PDF export, so the PDF comes out in whichever ink character is active |
 | `/[locale]/playground/[slug]` | Experiment routes · InkDropStudio, TypeAsFluid |
 | `/[locale]/impressum` · `/[locale]/datenschutz` | CH DSG/revDSG + EU DSGVO legal pages · noindex, follow |
-| `/[locale]/styleguide` | Internal token + component reference · noindex |
+| `/[locale]/styleguide` | Internal token + component reference · noindex, nofollow |
 | `not-found` | Riso 404 with its own `<html>` shell and a locale-switch row |
 
 <br>
