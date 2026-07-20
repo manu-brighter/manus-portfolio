@@ -158,18 +158,40 @@ export function Work() {
           <h3 className="type-label-stamp">{t("sideProjects.label")}</h3>
           <p className="type-label text-ink-muted">{t("sideProjects.lede")}</p>
         </div>
-        {/* Side-scroll rail on phones, two-column grid from `md`. The
-            per-card wrapper is what `.side-rail` sizes and snaps, so
-            SideProjectCard itself stays layout-agnostic. Carousels are
-            used sparingly here (see CLAUDE.md); this one earns it by
-            keeping a quiet open-source shelf from eating a full screen
-            of vertical scroll on the way to Contact. */}
-        <div className="side-rail lg:max-w-4xl">
+        {/* Side-scroll rail on phones, two-column grid from `md`.
+            Carousels are used sparingly here (see CLAUDE.md); this one
+            earns it by keeping a quiet open-source shelf from eating a
+            full screen of vertical scroll on the way to Contact.
+
+            The layout is Tailwind UTILITIES, not a hand-written class.
+            A first cut put all of it in a `.side-rail` component rule,
+            which meant the desktop grid depended on that one rule
+            shipping — when it did not, desktop regressed from a working
+            two-column grid to a plain stack. Utilities are emitted from
+            a source scan and the grid classes here predate the rail, so
+            desktop can no longer be collateral damage of a mobile-only
+            feature. The only custom class left is `.no-scrollbar`,
+            which is cosmetic.
+
+            The negative margin cancels the section gutter so cards
+            bleed to the viewport edge and the next one peeks in; that
+            peek plus the snap points is the whole affordance. `py-2` is
+            not decoration: `overflow-x: auto` forces `overflow-y` to
+            compute to `auto` too, so without the room a card's hover
+            translate and focus ring spawn a nested vertical scrollbar.
+
+            No `tabIndex`: axe's scrollable-region-focusable only fires
+            when a scrollable region has no focusable descendants, and
+            every card is a link. */}
+        <div
+          data-testid="side-rail"
+          className="-mx-[var(--container-gutter)] no-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto overscroll-x-contain px-[var(--container-gutter)] py-2 md:mx-0 md:grid md:grid-cols-2 md:gap-8 md:overflow-x-visible md:px-0 md:py-0 lg:max-w-4xl"
+        >
           {sideProjects.map((project) => {
             if (!isSideProjectId(project.id)) return null;
             const meta = SIDE_PROJECT_META[project.id];
             return (
-              <div key={project.id}>
+              <div key={project.id} className="w-[84%] shrink-0 snap-center md:w-auto">
                 <SideProjectCard
                   title={project.title}
                   tagline={project.tagline}

@@ -5,7 +5,7 @@ import { expect, test } from "@playwright/test";
  * The Work side-projects strip is a side-scroll rail on phones and a
  * two-column grid from `md` up.
  *
- * It is CSS-only (`.side-rail` in globals.css) so Work and
+ * It is CSS-only (Tailwind utilities on the container) so Work and
  * SideProjectCard stay server components — there is no JS carousel to
  * assert against, which makes the computed layout the contract.
  *
@@ -18,7 +18,7 @@ test.describe("Work side-projects rail", () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/de/");
 
-    const rail = page.locator(".side-rail");
+    const rail = page.getByTestId("side-rail");
     await rail.scrollIntoViewIfNeeded();
 
     const geo = await rail.evaluate((el) => {
@@ -52,7 +52,7 @@ test.describe("Work side-projects rail", () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/de/");
 
-    const rail = page.locator(".side-rail");
+    const rail = page.getByTestId("side-rail");
     await rail.scrollIntoViewIfNeeded();
 
     const geo = await rail.evaluate((el) => {
@@ -76,7 +76,7 @@ test.describe("Work side-projects rail", () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/de/");
 
-    const links = page.locator(".side-rail a[href]");
+    const links = page.getByTestId("side-rail").locator("a[href]");
     await expect(links).toHaveCount(2);
     for (const href of await links.evaluateAll((els) => els.map((el) => el.getAttribute("href")))) {
       expect(href).toMatch(/^https:\/\/github\.com\//);
