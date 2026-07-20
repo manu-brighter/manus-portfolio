@@ -57,30 +57,151 @@ function spotAt(index: number): string {
 
 /** Hand-drawn horizontal rule — same visual family as the switcher
  *  hint arrow. Optional spot ghost line prints slightly offset, like
- *  a second plate out of register. */
-function WobbleRule({ spot, className }: { spot?: string; className?: string }) {
+ *  a second plate out of register.
+ *
+ *  `drips` hangs wet ink off the rule: the section's plate ran before
+ *  it dried.
+ *
+ *  Two constraints shape the implementation. (1) Positions are a fixed
+ *  table indexed by section, NEVER Math.random — this is a server
+ *  component and a per-render value would hydrate-mismatch and re-roll
+ *  on every navigation. (2) The drips are ABSOLUTELY positioned and
+ *  cost zero layout height. Their first version added ~19px per rule,
+ *  which across eight sections grew the sheet by 152px and tipped the
+ *  PDF from two pages to three — the sheet runs at ~92% of two A4
+ *  pages, so decorative height is not free here. */
+// Lengths stay under ~14px: the rule sits 12px above its content, and
+// a longer run reaches into the first line of text (screenshot-checked
+// against the Sprachen and Stärken blocks, where it collided).
+const DRIP_SETS: readonly (readonly { x: number; len: number; w: number }[])[] = [
+  [
+    { x: 11, len: 11, w: 3 },
+    { x: 36, len: 6, w: 2.2 },
+    { x: 75, len: 14, w: 3.4 },
+  ],
+  [
+    { x: 22, len: 13, w: 3.2 },
+    { x: 54, len: 7, w: 2.2 },
+    { x: 88, len: 10, w: 2.8 },
+  ],
+  [
+    { x: 8, len: 8, w: 2.4 },
+    { x: 47, len: 14, w: 3.4 },
+    { x: 82, len: 6, w: 2.2 },
+  ],
+  [
+    { x: 18, len: 14, w: 3.2 },
+    { x: 43, len: 9, w: 2.6 },
+    { x: 69, len: 12, w: 2.8 },
+  ],
+];
+
+function WobbleRule({
+  spot,
+  className,
+  drips,
+}: {
+  spot?: string;
+  className?: string;
+  drips?: number;
+}) {
+  const dripSet = drips === undefined ? null : DRIP_SETS[drips % DRIP_SETS.length];
+  return (
+    <div className={`relative ${className ?? ""}`}>
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 400 8"
+        preserveAspectRatio="none"
+        className="block h-[7px] w-full"
+      >
+        {spot ? (
+          <path
+            d="M 2 5.4 C 32 3.8, 64 6.8, 102 5.3 C 142 3.7, 172 7, 212 5.5 C 252 3.9, 287 6.7, 332 5.2 C 357 4.3, 382 5.8, 400 5"
+            fill="none"
+            stroke={spot}
+            strokeWidth="2.2"
+            opacity="0.55"
+          />
+        ) : null}
+        <path
+          d="M 0 3.7 C 30 2.1, 62 5.1, 100 3.6 C 140 2, 170 5.3, 210 3.8 C 250 2.2, 285 5, 330 3.5 C 355 2.6, 380 4.1, 400 3.3"
+          fill="none"
+          stroke="var(--color-ink)"
+          strokeWidth="1.5"
+        />
+      </svg>
+      {dripSet?.map((drip) => (
+        // Run + the bead that gathered at its tip. Plain boxes rather
+        // than SVG: the rule stretches with preserveAspectRatio="none",
+        // and drips inside it would stretch with it into fat stubs.
+        <span
+          key={drip.x}
+          aria-hidden="true"
+          className="pointer-events-none absolute top-[4px] rounded-b-full opacity-60"
+          style={{
+            left: `${drip.x}%`,
+            width: `${drip.w}px`,
+            height: `${drip.len}px`,
+            background: spot ?? "var(--color-ink)",
+          }}
+        >
+          <span
+            className="-translate-x-1/2 absolute bottom-0 left-1/2 block translate-y-1/4 rounded-full"
+            style={{
+              width: `${drip.w * 1.7}px`,
+              height: `${drip.w * 1.7}px`,
+              background: spot ?? "var(--color-ink)",
+            }}
+          />
+        </span>
+      ))}
+    </div>
+  );
+}
+
+/** Frozen frame of the fluid sim, printed onto the sheet.
+ *
+ *  Four wavy terraces in the ladder order (mint / amber / rose /
+ *  violet — the legacy uniform order the render shaders use), stacked
+ *  and bleeding off both edges: the posterized band structure the riso
+ *  render pass actually outputs, held still. Every band rides a spot
+ *  token, so a preset switch re-inks the still frame exactly like it
+ *  re-inks the sim, and `print-color-adjust: exact` carries it into
+ *  the PDF. Per-theme character (halftone under Turbulenz, wet blur
+ *  under Aquarell, additive glow under Nachtdruck) is layered on in
+ *  globals.css via the `cv-sim-frame` hook. */
+function CvSimFrame({ className }: { className?: string }) {
   return (
     <svg
       aria-hidden="true"
-      viewBox="0 0 400 8"
+      viewBox="0 0 400 150"
       preserveAspectRatio="none"
-      className={`h-[7px] w-full ${className ?? ""}`}
+      className={`cv-sim-frame pointer-events-none ${className ?? ""}`}
     >
-      {spot ? (
-        <path
-          d="M 2 5.4 C 32 3.8, 64 6.8, 102 5.3 C 142 3.7, 172 7, 212 5.5 C 252 3.9, 287 6.7, 332 5.2 C 357 4.3, 382 5.8, 400 5"
-          fill="none"
-          stroke={spot}
-          strokeWidth="2.2"
-          opacity="0.55"
-        />
-      ) : null}
       <path
-        d="M 0 3.7 C 30 2.1, 62 5.1, 100 3.6 C 140 2, 170 5.3, 210 3.8 C 250 2.2, 285 5, 330 3.5 C 355 2.6, 380 4.1, 400 3.3"
-        fill="none"
-        stroke="var(--color-ink)"
-        strokeWidth="1.5"
+        d="M-10 0 C 60 6, 120 30, 190 24 C 258 18, 300 40, 360 34 C 385 31, 400 26, 410 28 L 410 -10 L -10 -10 Z"
+        fill="var(--color-spot-mint)"
+        opacity="0.16"
       />
+      <path
+        d="M-10 26 C 52 42, 128 20, 196 40 C 262 59, 312 34, 366 48 C 388 54, 400 52, 410 50 L 410 20 C 380 26, 340 12, 288 20 C 226 30, 172 8, 108 14 C 60 18, 24 12, -10 4 Z"
+        fill="var(--color-spot-amber)"
+        opacity="0.2"
+      />
+      <path
+        d="M-10 62 C 48 80, 118 54, 184 74 C 250 94, 306 66, 362 82 C 386 89, 400 88, 410 86 L 410 54 C 372 60, 330 40, 274 48 C 214 57, 158 32, 96 40 C 52 46, 20 40, -10 34 Z"
+        fill="var(--color-spot-rose)"
+        opacity="0.17"
+      />
+      <path
+        d="M-10 104 C 54 124, 124 96, 190 116 C 254 135, 310 108, 366 124 C 388 130, 400 130, 410 128 L 410 96 C 374 102, 332 82, 276 90 C 216 99, 160 74, 98 82 C 54 88, 20 82, -10 76 Z"
+        fill="var(--color-spot-violet)"
+        opacity="0.14"
+      />
+      {/* Loose dye that broke off the bands. */}
+      <ellipse cx="318" cy="16" rx="9" ry="5" fill="var(--color-spot-rose)" opacity="0.3" />
+      <ellipse cx="64" cy="96" rx="7" ry="4" fill="var(--color-spot-mint)" opacity="0.28" />
+      <ellipse cx="238" cy="132" rx="11" ry="5" fill="var(--color-spot-amber)" opacity="0.24" />
     </svg>
   );
 }
@@ -152,19 +273,25 @@ function CvSection({
   label,
   children,
   className,
+  keepTogether = false,
 }: {
   index: number;
   label: string;
   children: ReactNode;
   className?: string;
+  /**
+   * Never split this section across a PDF page. ONLY for sections
+   * comfortably shorter than a page (the sidebar blocks, all <250px
+   * against a 1039px page). A page-sized section with an avoid gets
+   * shoved wholesale to the next page and strands a third page — the
+   * original 3-page bug. Berufserfahrung and Eigene Projekte
+   * deliberately stay breakable and rely on item-level avoids so the
+   * cut always lands between entries.
+   */
+  keepTogether?: boolean;
 }) {
   return (
-    // NO break-inside-avoid on the section itself: a whole section is
-    // page-sized, and avoiding breaks inside it shoves the entire
-    // block to the next PDF page (the 3-pages-with-a-straggler bug).
-    // Items/cards carry their own avoid; the header binds to the
-    // first line of content via break-after-avoid.
-    <section className={className}>
+    <section className={`${keepTogether ? "break-inside-avoid " : ""}${className ?? ""}`}>
       <h2 className="break-after-avoid flex items-center gap-2.5 font-mono text-[0.7rem] text-ink uppercase tracking-[0.24em]">
         <span
           aria-hidden="true"
@@ -173,7 +300,7 @@ function CvSection({
         />
         {label}
       </h2>
-      <WobbleRule spot={spotAt(index)} className="mt-2 mb-4 break-after-avoid" />
+      <WobbleRule spot={spotAt(index)} drips={index} className="mt-2 mb-3 break-after-avoid" />
       {children}
     </section>
   );
@@ -225,6 +352,10 @@ export function CvDocument() {
       >
         <PlateCornerMarks />
 
+        {/* Per-theme wash (halftone / bands / wet pools / neon bloom).
+            Empty under Riso — see globals.css. */}
+        <div aria-hidden="true" className="cv-theme-texture" />
+
         {/* Margin ink — registration droplets in the sheet's gutter,
             outside every text block. */}
         <InkBlob
@@ -243,8 +374,14 @@ export function CvDocument() {
           className="absolute bottom-[22%] left-2 h-3.5 w-4 rotate-[-12deg] opacity-80"
         />
 
+        {/* Sim still frame — the ladder terraces bled onto the sheet,
+            edge to edge (negative insets cancel the sheet padding).
+            Positioned, so the also-positioned <header> after it in DOM
+            order paints on top. */}
+        <CvSimFrame className="absolute top-0 right-0 left-0 z-0 h-[42%] opacity-75" />
+
         {/* ---- Header ---- */}
-        <header>
+        <header className="relative z-10">
           <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
             <p className="type-label-stamp rotate-[-1deg] bg-paper">
               {t("sectionLabel")}
@@ -254,18 +391,18 @@ export function CvDocument() {
             <CalibrationBar label={t("calibrationLabel")} />
           </div>
 
-          <div className="relative mt-9">
+          <div className="relative mt-7">
             <InkBlob
               spot={SPOT_CSS_VAR.rose}
               className="absolute top-[-1.1rem] left-[-1.2rem] h-[4.6rem] w-[6.4rem] rotate-[-9deg] opacity-90"
             />
+            {/* Misregistration lives in `.cv-name` (globals.css), not
+                in an inline style: the per-theme blocks need to be
+                able to replace it, and an inline text-shadow beats
+                every stylesheet rule. */}
             <h1
               id="cv-heading"
-              className="relative font-display text-[2.5rem] text-ink italic leading-[0.98] tracking-[-0.02em] sm:text-[3.3rem]"
-              style={{
-                textShadow:
-                  "4px 3px 0 color-mix(in srgb, var(--color-spot-rose) 50%, transparent), -3px -2px 0 color-mix(in srgb, var(--color-spot-mint) 40%, transparent)",
-              }}
+              className="cv-name relative font-display text-[2.5rem] text-ink italic leading-[0.98] tracking-[-0.02em] sm:text-[3.3rem]"
             >
               {t("name")}
             </h1>
@@ -276,11 +413,11 @@ export function CvDocument() {
             {t("region")}
           </p>
 
-          <WobbleRule className="mt-5" />
+          <WobbleRule className="mt-4" />
 
-          <p className="mt-5 max-w-[66ch] type-body-sm text-ink leading-relaxed">{t("profile")}</p>
+          <p className="mt-4 max-w-[66ch] type-body-sm text-ink leading-relaxed">{t("profile")}</p>
 
-          <ul className="mt-5 flex flex-wrap gap-x-2.5 gap-y-2" aria-label={t("contactLabel")}>
+          <ul className="mt-4 flex flex-wrap gap-x-2.5 gap-y-2" aria-label={t("contactLabel")}>
             {contacts.map((contact) => (
               <li key={contact.label}>
                 <a
@@ -298,12 +435,12 @@ export function CvDocument() {
         </header>
 
         {/* ---- Body: main flow + side rail ---- */}
-        <div className="mt-10 grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-[1.45fr_1fr]">
+        <div className="relative z-10 mt-8 grid grid-cols-1 gap-x-8 gap-y-9 sm:grid-cols-[1.45fr_1fr]">
           <div className="flex flex-col gap-10">
             <CvSection index={0} label={t("experience.label")}>
               {/* Timeline spine — the left rule + registration dots
                   encode real chronology, newest at the top. */}
-              <div className="flex flex-col gap-7 border-ink/70 border-l-2 pl-5">
+              <div className="flex flex-col gap-6 border-ink/70 border-l-2 pl-5">
                 {experience.map((item, i) => (
                   <div key={`${item.period}-${item.org}`} className="relative break-inside-avoid">
                     <span
@@ -362,7 +499,7 @@ export function CvDocument() {
           </div>
 
           <div className="flex flex-col gap-8">
-            <CvSection index={2} label={t("skills.label")}>
+            <CvSection index={2} keepTogether label={t("skills.label")}>
               <dl className="flex flex-col gap-3">
                 {skillGroups.map((group) => (
                   <div key={group.label} className="break-inside-avoid">
@@ -377,7 +514,7 @@ export function CvDocument() {
               </dl>
             </CvSection>
 
-            <CvSection index={3} label={t("languages.label")}>
+            <CvSection index={3} keepTogether label={t("languages.label")}>
               <dl className="flex flex-col gap-1.5">
                 {languages.map((language) => (
                   <div key={language.name} className="flex items-baseline justify-between gap-4">
@@ -390,7 +527,7 @@ export function CvDocument() {
               </dl>
             </CvSection>
 
-            <CvSection index={0} label={t("engagement.label")}>
+            <CvSection index={0} keepTogether label={t("engagement.label")}>
               <div className="flex flex-col gap-3">
                 {engagement.map((item) => (
                   <div key={item.title} className="break-inside-avoid">
@@ -408,7 +545,7 @@ export function CvDocument() {
               </div>
             </CvSection>
 
-            <CvSection index={1} label={t("strengths.label")}>
+            <CvSection index={1} keepTogether label={t("strengths.label")}>
               <ul className="flex list-none flex-col gap-1.5">
                 {strengths.map((strength) => (
                   <li key={strength} className="flex gap-2 text-[0.74rem] text-ink">
@@ -419,7 +556,7 @@ export function CvDocument() {
               </ul>
             </CvSection>
 
-            <CvSection index={2} label={t("education.label")}>
+            <CvSection index={2} keepTogether label={t("education.label")}>
               <dl className="flex flex-col gap-2.5">
                 {education.map((item) => (
                   <div key={item.title} className="break-inside-avoid">
@@ -437,8 +574,12 @@ export function CvDocument() {
           </div>
         </div>
 
+        {/* Second still frame, flipped: the sheet's foot ran through the
+            press the other way round. */}
+        <CvSimFrame className="absolute right-0 bottom-0 left-0 z-0 h-[22%] rotate-180 opacity-70" />
+
         {/* ---- Sheet footer: provenance + the live ink stamp ---- */}
-        <footer className="mt-10">
+        <footer className="relative z-10 mt-8">
           <WobbleRule className="mb-4" />
           <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
             <div className="flex flex-col gap-1">

@@ -203,6 +203,131 @@
   background: var(--color-paper);
 }
 
+/* ---------------------------------------------------------------
+ * /cv theme character.
+ *
+ * The sheet is opaque paper, so it sits ON TOP of the sim instead of
+ * in front of it — none of the sim's look reaches it, and the halo
+ * above (paper-on-paper over a solid surface) is invisible there.
+ * Result was that switching presets only re-tinted the CV background
+ * (user feedback: "man merkt fast nicht ausser an der Hintergrundfarbe
+ * dass man das Theme switched", plus "der Text-Glow von Turbulenz
+ * fehlt im CV").
+ *
+ * So each theme prints its render shader's signature trait onto the
+ * sheet: Wave the overprint misregistration, Turbulenz the halftone
+ * plus its glow, Aquarell the wet blur, Nachtdruck the additive neon
+ * bloom. Riso stays deliberately quiet — same hierarchy as the sim.
+ * Everything here is color / text-shadow / filter, all of which
+ * `print-color-adjust: exact` carries into the saved PDF, so the
+ * printed proof matches the screen exactly.
+ * -------------------------------------------------------------- */
+
+/* Per-theme wash over the sheet; base is deliberately empty (riso). */
+.cv-theme-texture {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Name plate: two spot plates slightly out of register. Theme blocks
+ * below replace this wholesale where they have a louder idea. */
+.cv-name {
+  text-shadow:
+    4px 3px 0 color-mix(in srgb, var(--color-spot-rose) 50%, transparent),
+    -3px -2px 0 color-mix(in srgb, var(--color-spot-mint) 40%, transparent);
+}
+
+/* Wave — overprint plates: horizontal band ladder + channel-split
+ * headings, the same seam the wave shader draws. */
+[data-sim-theme="wave"] .cv-theme-texture {
+  background-image: repeating-linear-gradient(
+    0deg,
+    color-mix(in srgb, var(--color-spot-amber) 13%, transparent) 0 3px,
+    transparent 3px 10px
+  );
+}
+[data-sim-theme="wave"] [data-page="cv"] :is(h2, h3) {
+  text-shadow:
+    1.5px 0 0 color-mix(in srgb, var(--color-spot-rose) 42%, transparent),
+    -1.5px 0 0 color-mix(in srgb, var(--color-spot-amber) 42%, transparent);
+}
+
+/* Turbulenz — screenprint: halftone dot screen over the sheet, and
+ * the glow the rest of the site gets, here as an amber bloom (the
+ * paper-colored variant is invisible on opaque paper). Specificity
+ * has to clear `[data-sim-theme="warm"] main` above, hence the
+ * two-attribute selector. */
+[data-sim-theme="warm"] .cv-theme-texture {
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--color-spot-amber) 52%, transparent) 1.05px,
+    transparent 1.15px
+  );
+  background-size: 7px 7px;
+  opacity: 0.55;
+}
+[data-sim-theme="warm"] [data-page="cv"] :is(h1, h2, h3) {
+  text-shadow:
+    0 0 3px var(--color-paper),
+    0 0 8px color-mix(in srgb, var(--color-spot-amber) 90%, transparent),
+    0 0 18px color-mix(in srgb, var(--color-spot-amber) 65%, transparent),
+    0 0 30px color-mix(in srgb, var(--color-spot-rose) 40%, transparent);
+}
+[data-sim-theme="warm"] [data-page="cv"] h1.cv-name {
+  /* Keep the misregistered plates AND take the glow. */
+  text-shadow:
+    4px 3px 0 color-mix(in srgb, var(--color-spot-rose) 50%, transparent),
+    -3px -2px 0 color-mix(in srgb, var(--color-spot-mint) 40%, transparent),
+    0 0 10px color-mix(in srgb, var(--color-spot-amber) 65%, transparent),
+    0 0 22px color-mix(in srgb, var(--color-spot-amber) 40%, transparent);
+}
+
+/* Aquarell — wet: the still frame bleeds, corners pool. */
+[data-sim-theme="wash"] .cv-sim-frame {
+  filter: blur(4px);
+}
+[data-sim-theme="wash"] .cv-theme-texture {
+  background-image:
+    radial-gradient(
+      110% 55% at 12% 0%,
+      color-mix(in srgb, var(--color-spot-mint) 24%, transparent),
+      transparent 62%
+    ),
+    radial-gradient(
+      90% 45% at 88% 100%,
+      color-mix(in srgb, var(--color-spot-violet) 20%, transparent),
+      transparent 62%
+    );
+}
+
+/* Nachtdruck — neon: the still frame goes additive over dark paper
+ * (multiplying a light ladder onto near-black would just vanish),
+ * headings bloom. */
+[data-sim-theme="night"] .cv-sim-frame {
+  mix-blend-mode: screen;
+  opacity: 1;
+}
+[data-sim-theme="night"] .cv-theme-texture {
+  background-image: radial-gradient(
+    85% 45% at 50% 0%,
+    color-mix(in srgb, var(--color-spot-violet) 28%, transparent),
+    transparent 66%
+  );
+}
+[data-sim-theme="night"] [data-page="cv"] :is(h2, h3) {
+  text-shadow:
+    0 0 7px color-mix(in srgb, var(--color-spot-violet) 55%, transparent),
+    0 0 16px color-mix(in srgb, var(--color-spot-rose) 32%, transparent);
+}
+[data-sim-theme="night"] [data-page="cv"] h1.cv-name {
+  text-shadow:
+    4px 3px 0 color-mix(in srgb, var(--color-spot-rose) 55%, transparent),
+    -3px -2px 0 color-mix(in srgb, var(--color-spot-mint) 45%, transparent),
+    0 0 16px color-mix(in srgb, var(--color-spot-violet) 60%, transparent),
+    0 0 34px color-mix(in srgb, var(--color-spot-rose) 35%, transparent);
+}
+
 /* Fehldruck easter egg — while <html data-print-jam> is set the
  * registration "slips": display text gets channel-split plate shadows
  * plus a stepped jitter (a drum losing its registration, not a smooth

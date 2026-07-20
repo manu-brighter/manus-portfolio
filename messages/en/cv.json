@@ -12,7 +12,7 @@
     "contactLabel": "Contact",
     "download": {
       "label": "Save as PDF",
-      "hint": "Prints in the active ink character. Switching themes re-inks the sheet."
+      "hint": "Prints in the active theme"
     },
     "backLabel": "Back to home",
     "experience": {

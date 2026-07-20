@@ -12,7 +12,7 @@
     "contactLabel": "Kontakt",
     "download": {
       "label": "Als PDF speichern",
-      "hint": "Druckt im aktiven Tinten-Charakter. Theme wechseln färbt den Bogen um."
+      "hint": "Druckt im aktiven Theme"
     },
     "backLabel": "Zur Startseite",
     "experience": {
