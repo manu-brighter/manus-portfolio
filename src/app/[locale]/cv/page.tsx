@@ -17,7 +17,12 @@ export async function generateMetadata({ params }: CvPageProps): Promise<Metadat
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "cv" });
   return {
-    title: t("metaTitle"),
+    // `absolute` bypasses the locale layout's title template. The
+    // template appends " · Manuel Heller", and metaTitle already ends
+    // in the name — Chrome derives the saved PDF's filename from
+    // document.title, so the download came out as
+    // "CV · Manuel Heller · Manuel Heller.pdf".
+    title: { absolute: t("metaTitle") },
     description: t("metaDescription"),
     // Self-canonical override — same rationale as the legal pages: the
     // locale layout's canonical points at `/${locale}/`, which would
