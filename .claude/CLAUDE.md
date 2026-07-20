@@ -88,6 +88,12 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 
 - 4 locales: `de` (default), `en`, `fr`, `it`
 - No hard-coded strings in components — always through next-intl
+- **No em dashes ("—") in any user-visible copy** — Manuel reads them
+  as an AI tell ("schreit extrem nach AI"), same for ad-speak negation
+  phrases ("Kein leeres Versprechen"). Rewrite with period/comma/colon;
+  title separators use "·"; date ranges use en dash ("2016–2020",
+  "seit 11/2021"). Purged site-wide 2026-07-20 (messages/** + component
+  strings) — don't reintroduce.
 - Content MDX has 4 per-locale variants (e.g. `project.de.mdx`)
 - Routes always include the `[locale]` segment
 - **Pull-quote keyword marker is `[[keyword]]`, not `{keyword}`** — next-intl
@@ -392,23 +398,43 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   doesn't reach it — takes a `spot` prop instead.
 - **Object-Grid tile reveals** (creative pass): tiles listed in
   `src/components/about/tileReveals.ts` (`TILE_REVEAL_KEYS`) carry a
-  stretched button + corner "+" chip; click fires the site ink-wipe
-  (inkWipeStore reuse, no route change), mounts `TileRevealOverlay` at
-  GROW_MS−60 under cover, retract unveils the photo. The overlay is a
-  **fixed div, NOT `dialog.showModal()`** — the native dialog top layer
-  paints above the wipe canvas (z-[10000]) and would kill the reveal
-  choreography; focus pin/restore is manual (single close control).
-  Manuel authors BOTH crops per tile (`content-input/about/tiles/
-  {key}-{landscape|portrait}.jpg`); pipeline group `about-tiles` only
-  scales — never re-crop his framing. Orientation picked at view time
-  via `<source media="(orientation: portrait)">`. pingpong tile has no
-  master yet → stays decorative until one lands (drop-in path
-  documented in tileReveals.ts). Reduced-motion opens directly, no wipe.
+  stretched button + corner "+" chip; click opens `TileRevealOverlay`
+  IMMEDIATELY with a ~350ms "Stempelpress" choreography (backdrop fade,
+  overshoot plate press, box-shadow seats from out-of-register, spot
+  ink rim + spray squishes out behind the frame, caption stamps in a
+  beat later — keyframes `tile-press-in` & friends in globals.css).
+  The original full-page ink-wipe reuse (~1s grow/hold/retract) was
+  cut after user feedback: too slow. Open drops one fluidBus splat at
+  the pointer, close leaves a two-splat burst at the tile (desktop
+  only — no mobile subscriber). The ink rim must stay a RIM
+  (-inset ~2.5%): sized bigger it reads as a balloon, not pressed ink.
+  The overlay is a **fixed div, NOT `dialog.showModal()`** with manual
+  focus pin/restore (single close control). Heads-up for tests: the
+  mobile hamburger nav keeps a permanent `role="dialog"` node in the
+  DOM — select the overlay via `[aria-labelledby="tile-reveal-caption"]`,
+  never by bare dialog role. Manuel authors BOTH crops per tile
+  (`content-input/about/tiles/{key}-{landscape|portrait}.{jpg|png}`,
+  uniformly 16:9 / 2:3 since the second image drop); pipeline group
+  `about-tiles` only scales — never re-crop his framing. Orientation
+  picked at view time via `<source media="(orientation: portrait)">`.
+  pingpong tile has no master yet → stays decorative until one lands
+  (drop-in path documented in tileReveals.ts). Reduced-motion opens
+  statically, no splats.
 - **optimize-assets.mjs single-resize rule**: sharp honours only the
   LAST `resize()` in a pipeline — aspect-crop + width-scale MUST happen
   in one call (fixed in the creative pass; the old two-step silently
   dropped the crop and nobody noticed because every earlier master was
-  pre-cropped to the task aspect).
+  pre-cropped to the task aspect). The runner falls back to a `.png`
+  sibling when a task's `.jpg` source is missing (tauchen video stills).
+- **Image quality floor for pro photos: avif q60 / webp q82.** The
+  earlier q38–50 range showed visible compression at display size —
+  explicit user feedback ("da will ich meine Photography-Skills
+  zeigen"). Full-bleed photography slides (sizes=100vw) also need a
+  ~2560w srcset rung or large/high-DPR screens upscale 1600w. KNOWN
+  GAP: the 01-pelican master (DSC05426-Verbessert-RR.jpg) is missing
+  from content-input/photography/source — that slide still ships the
+  old low-quality 800/1200/1600 set; drop the master back in, re-run
+  the pipeline, and add the 2560w rung in Photography.tsx.
 - **Skills**: `VibecodedStamp` IO `threshold: 0.4`; stagger via parent
   `delay={i * 0.08}` prop. `HeroSkillPulse` loops continuously without IO
   gate (cheap, avoids re-mount cycle restart).
@@ -417,12 +443,14 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   `PortfolioCardVisual` era is over: the Portfolio card shows the real
   five-theme split screenshot behind `PortfolioCardReveal`'s hover stage,
   Joggediballa shows real shots (`JoggediballaScreenshot`, night-aware).
-  Below the two hero cards sits the **B-sides strip** (`SideProjectCard`,
-  server-rendered, CSS-only hover): Shot-Counter + full-project-rework
-  as compact catalog cards linking to GitHub. Repo URLs live in
-  `SITE.repos` (site.ts), spots mint/violet (the pair the hero cards
-  don't use). The section stays "two intentional projects" — a third
-  hero card needs a reason, not just a new repo.
+  Below the two hero cards sits the **side-projects strip**
+  (`SideProjectCard`, server-rendered, CSS-only hover): Shot-Counter +
+  full-project-rework as compact catalog cards linking to GitHub.
+  Label is "Weitere Projekte" — the earlier "B-Seiten" wording was cut
+  (user: they're projects, not sides). Repo URLs live in `SITE.repos`
+  (site.ts), spots mint/violet (the pair the hero cards don't use).
+  The section stays "two intentional projects" — a third hero card
+  needs a reason, not just a new repo.
 - **Case Study**: inline section, NOT a `/work/[slug]` route. Diorama design
   (one wide SVG illustration + absolute-positioned HTML cards in vh units,
   4200×1000 viewBox at 100vh tall = 420vh wide horizontal-pin track).
@@ -431,6 +459,15 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   - `bg-paper` on `<DioramaTrack>` isolates from root FluidSim ink bleed.
   - `<DioramaTrack>` ScrollTrigger uses `kill(true)` on cleanup to revert
     pin spacers when reduced-motion / resize toggles desktop branch off.
+  - **Pin an INNER wrapper, never the `section#case-study` itself.**
+    The section is a direct child of `<main>`; ScrollTrigger's
+    pin-spacer re-parents the pinned element, and on client-side
+    navigation React's deletion pass calls `main.removeChild(section)`
+    → NotFoundError ("Failed to execute 'removeChild'"). Passive
+    effect cleanup (and the sceneHidden kill) runs AFTER that DOM
+    mutation on layout-mount routes (/cv, legal), so no store dance
+    can save it — only keeping the spacer INSIDE the section does.
+    Regression spec: tests/e2e/route-transitions.spec.ts.
   - `Polaroid` is case-study-exclusive; About-Portrait uses
     `src/components/ui/Portrait.tsx` (different component, no token cross-talk).
 - **Photography**: editorial-asymmetric flow (full-bleed + side-text-paired
@@ -463,7 +500,7 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   routes through shared `<LegalDocument namespace>` server component.
   CH-conform DSG/revDSG + EU DSGVO informational. No cookie banner (site
   sets no cookies; documented in datenschutz).
-- **CV**: `/[locale]/cv` press sheet (`CvDocument`, server component; own
+- **CV**: `/[locale]/cv` press proof (`CvDocument`, server component; own
   `cv` i18n namespace — DE authored, EN translated, FR/IT DE-mirrored).
   **`window.print()` IS the PDF export**: the `@media print` block in
   globals.css strips chrome (`nav, [data-site-chrome], .skip-link,
@@ -471,12 +508,30 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   selector would also swallow the CV sheet's own footer) and forces
   `print-color-adjust: exact`, so the PDF prints in the ACTIVE
   ink character (Nachtdruck included) — don't add a build-time PDF
-  generator. Print body sizing for the sheet lives in ONE rule
-  (`[data-page="cv"] .type-body-sm`), not per-node utilities. Content is the PUBLIC redaction of `docs/cv.md`: never add
-  street address, phone number, or birth date (privacy section of that
-  doc). Route is noindex+follow with self-canonical (legal-pages
-  pattern), excluded from sitemap, linked from footer document row and
-  a Contact direct channel. Axe scans it (tests/a11y PAGES list).
+  generator.
+  - **Print parity is the design rule**: the sheet is a fixed
+    `max-w-[184mm]` block, fixed rem type only (NO vw/clamp — viewport
+    units resolve differently against the A4 page box), `@page` margin
+    11mm. Screen and PDF share ONE geometry; only desk backdrop,
+    topbar, and shadow are `print:`-stripped. Never add `print:` size/
+    gap/column overrides — that reintroduces the shifted-PDF bug.
+  - **`break-inside-avoid` on ITEMS/cards only, never whole sections**
+    — a section-level avoid shoves page-sized blocks and produced a
+    3-page PDF with a straggler; item-level breaks give a clean 2 pages.
+  - Pressroom ornaments all ride tokens (theme-aware): Druckprobe
+    calibration bar, ink blobs/droplets, wobble rules (`WobbleRule`),
+    misreg double ghost on the name, and `CvInkStamp` — a client
+    island that names the active ink character by reading
+    `<html data-sim-theme>` (NOT the preset store: on reduced-motion/
+    static tier the store may hold a preset the sheet never applies).
+  - Contact chips: email, manuelheller.dev, GitHub only — visible text
+    must equal the destination; LinkedIn was cut (shortened label lied
+    about the URL, useless on paper).
+  - Content is the PUBLIC redaction of `docs/cv.md`: never add street
+    address, phone number, or birth date (privacy section of that doc).
+    Route is noindex+follow with self-canonical (legal-pages pattern),
+    excluded from sitemap, linked from footer document row and a
+    Contact direct channel. Axe scans it (tests/a11y PAGES list).
 - **404**: `src/app/not-found.tsx` owns its own `<html>`/`<body>` shell
   (root layout is pass-through). Strings come from `notFound` namespace at
   `routing.defaultLocale`. `<html lang="de">` hardcoded; `noindex`. Footer
@@ -543,6 +598,10 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 ## Never do
 
 - Hard-code strings (always via next-intl)
+- Write em dashes ("—") or ad-speak phrasing into user-visible copy
+- Pin a direct child of `<main>` with ScrollTrigger (removeChild crash
+  on route change — pin an inner wrapper)
+- Add `print:` overrides that change the CV sheet's sizes/gaps/columns
 - Center or left-align the hero — asymmetric right-align is the signature
 - Mount a second `<Canvas>` — share the one at root layout
 - Skip the reduced-motion branch — not optional
