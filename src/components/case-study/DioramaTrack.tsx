@@ -42,7 +42,17 @@ type Props = {
 
 export function DioramaTrack({ children, mobileFallback, sectionLabel }: Props) {
   const reducedMotion = useReducedMotion();
-  const sectionRef = useRef<HTMLDivElement>(null);
+  // The PIN TARGET is an inner wrapper, never the <section> itself.
+  // ScrollTrigger's pin wraps the pinned element in a `div.pin-spacer`
+  // — a DOM move React doesn't know about. The section is a direct
+  // child of <main>, so pinning IT means React's deletion pass on
+  // client-side navigation calls `main.removeChild(section)` while
+  // the section actually sits inside the spacer → NotFoundError
+  // ("Failed to execute 'removeChild'"). Passive-effect cleanup runs
+  // AFTER that mutation, so kill(true)-on-unmount can't save it. With
+  // the spacer inside the section, React only ever detaches the
+  // unmoved section and the whole subtree goes with it — timing-proof.
+  const pinRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<ScrollTrigger | null>(null);
   const [useFallback, setUseFallback] = useState(false);
@@ -60,21 +70,21 @@ export function DioramaTrack({ children, mobileFallback, sectionLabel }: Props) 
 
   useEffect(() => {
     if (reducedMotion || useFallback) return;
-    const section = sectionRef.current;
+    const pinEl = pinRef.current;
     const track = trackRef.current;
-    if (!section || !track) return;
+    if (!pinEl || !track) return;
 
     let raf2 = 0;
 
     const raf1 = requestAnimationFrame(() => {
       raf2 = requestAnimationFrame(() => {
         const trackWidth = track.scrollWidth;
-        const viewportWidth = section.clientWidth;
+        const viewportWidth = pinEl.clientWidth;
         let distance = trackWidth - viewportWidth;
         if (distance <= 0) return;
 
         triggerRef.current = ScrollTrigger.create({
-          trigger: section,
+          trigger: pinEl,
           start: "top top",
           end: () => `+=${distance}`,
           pin: true,
@@ -82,7 +92,7 @@ export function DioramaTrack({ children, mobileFallback, sectionLabel }: Props) 
           anticipatePin: 1,
           invalidateOnRefresh: true,
           onRefresh: () => {
-            distance = track.scrollWidth - section.clientWidth;
+            distance = track.scrollWidth - pinEl.clientWidth;
           },
           onUpdate: (self) => {
             gsap.set(track, { x: -distance * self.progress });
@@ -102,12 +112,14 @@ export function DioramaTrack({ children, mobileFallback, sectionLabel }: Props) 
     };
   }, [reducedMotion, useFallback]);
 
-  // Pre-unmount cleanup: when the user clicks a playground card,
-  // SceneVisibilityGate flips `sceneHidden=true` (one frame later via
-  // rAF, per the previous fix). Kill the ScrollTrigger here BEFORE
-  // React starts unmounting the page tree — otherwise the pin-spacer
-  // (a ScrollTrigger-injected sibling outside React's reconciliation
-  // tree) confuses React's removeChild and throws NotFoundError.
+  // Early cleanup on the playground path: PlaygroundCard flips
+  // `sceneHidden=true` before its route push, so killing here reverts
+  // the pin while the wipe still covers the viewport (no layout jump
+  // mid-transition). NOT load-bearing for correctness anymore — the
+  // inner-wrapper pin above keeps React's deletion pass safe on every
+  // navigation path, including /cv + legal routes where the
+  // destination layout's SceneVisibilityGate effect runs only after
+  // the old tree is already gone.
   useEffect(() => {
     if (!sceneHidden) return;
     triggerRef.current?.kill(true);
@@ -127,18 +139,21 @@ export function DioramaTrack({ children, mobileFallback, sectionLabel }: Props) 
   }
 
   return (
-    <section
-      ref={sectionRef}
-      id="case-study"
-      aria-labelledby="case-study-heading"
-      className="relative h-screen overflow-hidden bg-paper"
-    >
-      {/* Floating section identity stamp — visible on desktop diorama only. */}
-      <p aria-hidden="true" className="absolute top-6 left-6 z-10 type-label-stamp text-ink-muted">
-        {sectionLabel}
-      </p>
-      <div ref={trackRef} className="relative h-full" style={{ width: `${TRACK_WIDTH_VH}vh` }}>
-        {children}
+    // The section is deliberately unstyled height-wise: the pin-spacer
+    // that ScrollTrigger injects around the inner wrapper dictates the
+    // section's height during and after the pin.
+    <section id="case-study" aria-labelledby="case-study-heading" className="relative bg-paper">
+      <div ref={pinRef} className="relative h-screen overflow-hidden bg-paper">
+        {/* Floating section identity stamp — visible on desktop diorama only. */}
+        <p
+          aria-hidden="true"
+          className="absolute top-6 left-6 z-10 type-label-stamp text-ink-muted"
+        >
+          {sectionLabel}
+        </p>
+        <div ref={trackRef} className="relative h-full" style={{ width: `${TRACK_WIDTH_VH}vh` }}>
+          {children}
+        </div>
       </div>
     </section>
   );
