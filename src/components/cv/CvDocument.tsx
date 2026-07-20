@@ -348,7 +348,7 @@ export function CvDocument() {
           screen and in the printed PDF. */}
       <article
         aria-labelledby="cv-heading"
-        className="plate-corners relative mx-auto w-full max-w-[184mm] bg-paper-tint px-5 py-8 shadow-[10px_10px_0_color-mix(in_srgb,var(--color-ink)_18%,transparent)] print:shadow-none sm:px-[11mm] sm:py-[12mm]"
+        className="cv-sheet plate-corners relative mx-auto w-full max-w-[184mm] bg-paper-tint px-5 py-8 shadow-[10px_10px_0_color-mix(in_srgb,var(--color-ink)_18%,transparent)] print:shadow-none sm:px-[11mm] sm:py-[12mm]"
       >
         <PlateCornerMarks />
 

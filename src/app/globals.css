@@ -223,6 +223,15 @@
  * printed proof matches the screen exactly.
  * -------------------------------------------------------------- */
 
+/* The sheet is its own blend group. Without this, Nachtdruck's
+ * `mix-blend-mode: screen` on the still frame blends past the opaque
+ * paper and against the live sim behind the page, washing the whole
+ * header out on screen (it looked fine in print only because the sim
+ * is not there). `isolation` costs nothing on the other themes. */
+.cv-sheet {
+  isolation: isolate;
+}
+
 /* Per-theme wash over the sheet; base is deliberately empty (riso). */
 .cv-theme-texture {
   position: absolute;
@@ -304,14 +313,18 @@
 /* Nachtdruck — neon: the still frame goes additive over dark paper
  * (multiplying a light ladder onto near-black would just vanish),
  * headings bloom. */
+/* Opacity stays LOW under screen: the four bands screened onto a
+ * near-black sheet at full strength lifted the whole header to a flat
+ * magenta and cost the body copy its contrast (A/B screenshot against
+ * a frame-less render). Additive here means a tint, not a wash. */
 [data-sim-theme="night"] .cv-sim-frame {
   mix-blend-mode: screen;
-  opacity: 1;
+  opacity: 0.4;
 }
 [data-sim-theme="night"] .cv-theme-texture {
   background-image: radial-gradient(
     85% 45% at 50% 0%,
-    color-mix(in srgb, var(--color-spot-violet) 28%, transparent),
+    color-mix(in srgb, var(--color-spot-violet) 15%, transparent),
     transparent 66%
   );
 }
