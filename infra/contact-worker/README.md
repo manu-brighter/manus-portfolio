@@ -8,7 +8,9 @@ no nginx edit, no new service on the box.
 
 `src/components/ui/ContactForm.tsx` POSTs `{name, email, message}` as JSON and
 treats only a `2xx` with `{ "ok": true }` as sent; anything else degrades to a
-pre-filled `mailto:` link, so messages are never lost while this is being wired.
+pre-filled `mailto:` link, so messages are never lost. The client also aborts
+the request after 8s, so a hung endpoint drops to that same fallback rather
+than hanging the form.
 
 ## Files
 
@@ -52,8 +54,9 @@ Workers & Pages -> **Create Worker** (name e.g. `manuelheller-contact`):
    `manuelheller.dev/api/contact` (zone `manuelheller.dev`).
 
 Defaults baked into `worker.js`:
-`from kontakt@manuelheller.dev` / `to manuelheller@bluewin.ch` /
-subject `Neue Nachricht über manuelheller.dev` / rate limit `5 / 3600s` per IP.
+`from kontakt@manuelheller.dev` / from-name `manuelheller.dev Kontakt` /
+`to manuelheller@bluewin.ch` / subject `Neue Nachricht über manuelheller.dev` /
+rate limit `5 / 3600s` per IP.
 
 ### 4. Test
 ```bash
@@ -68,6 +71,8 @@ mailto — inspect the Worker logs (dashboard -> the Worker -> Logs / `wrangler 
 ## Behaviour / parity with the old PHP endpoint
 
 - Method != POST -> `405 method_not_allowed`
+- `RESEND_API_KEY` secret missing -> `500 server_misconfigured` (logged; the
+  Worker refuses before parsing the body)
 - Bad JSON -> `400 bad_request`
 - Honeypot field (`bot-trap`) non-empty -> `200 {ok:true}`, sends nothing
 - Validation (name 1–200, valid email ≤320, message 10–5000) -> `422 validation` + `fields[]`
@@ -81,5 +86,8 @@ mailto — inspect the Worker logs (dashboard -> the Worker -> Logs / `wrangler 
   bypass the client checks.
 - The Resend API key lives only as an encrypted Worker secret — never in code,
   the repo, or `wrangler.toml`.
+- Rate limiting fails **open**: with no `CONTACT_RL` KV binding the Worker still
+  sends and only logs a warning. Re-check the binding after any redeploy that
+  recreates the Worker.
 - Reply-To is the visitor, so "Reply" reaches them; From != To avoids Bluewin
   self-spam heuristics.

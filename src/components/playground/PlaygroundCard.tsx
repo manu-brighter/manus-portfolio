@@ -167,7 +167,7 @@ export function PlaygroundCard({ slug, i18nKey, cardSpot, visual, LiveSim }: Pla
       href={`/playground/${slug}`}
       className="group block focus:outline-none focus-visible:outline-none"
       style={cssVars}
-      aria-label={`${t("cardTitle")} — ${tCommon("openLabel")}`}
+      aria-label={`${t("cardTitle")}: ${tCommon("openLabel")}`}
       onMouseEnter={onEnter}
       onMouseLeave={onLeave}
       onFocus={onEnter}

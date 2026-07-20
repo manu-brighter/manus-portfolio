@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { ContactForm } from "@/components/ui/ContactForm";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { Link } from "@/i18n/navigation";
 import { SITE } from "@/lib/site";
 
 /**
@@ -21,11 +22,18 @@ import { SITE } from "@/lib/site";
  */
 
 type DirectChannel = {
-  key: "email" | "github" | "linkedin" | "photos";
+  key: "email" | "github" | "linkedin" | "photos" | "cv";
   label: string;
   value: string;
   href: string;
+  /** Locale-internal route — rendered through the i18n <Link>. */
+  internal?: boolean;
 };
+
+// Shared by both branches of the internal/external link split below —
+// one string, so a styling tweak can't land on only one tag.
+const CHANNEL_LINK_CLASS =
+  "text-ink underline decoration-spot-rose decoration-2 underline-offset-4 transition-colors hover:text-ink-soft";
 
 export function Contact() {
   const t = useTranslations("contact");
@@ -54,6 +62,13 @@ export function Contact() {
       label: t("channels.photos"),
       value: "manuelheller.myportfolio.com",
       href: SITE.author.socials.photos,
+    },
+    {
+      key: "cv",
+      label: t("channels.cv"),
+      value: "manuelheller.dev/cv",
+      href: "/cv",
+      internal: true,
     },
   ];
 
@@ -91,20 +106,25 @@ export function Contact() {
                     {channel.label}
                   </dt>
                   <dd>
-                    <a
-                      href={channel.href}
-                      {...(channel.href.startsWith("http")
-                        ? { target: "_blank", rel: "noopener noreferrer" }
-                        : {})}
-                      className="text-ink underline decoration-spot-rose decoration-2 underline-offset-4 transition-colors hover:text-ink-soft"
-                    >
-                      {channel.value}
-                    </a>
+                    {channel.internal ? (
+                      <Link href={channel.href} className={CHANNEL_LINK_CLASS}>
+                        {channel.value}
+                      </Link>
+                    ) : (
+                      <a
+                        href={channel.href}
+                        {...(channel.href.startsWith("http")
+                          ? { target: "_blank", rel: "noopener noreferrer" }
+                          : {})}
+                        className={CHANNEL_LINK_CLASS}
+                      >
+                        {channel.value}
+                      </a>
+                    )}
                   </dd>
                 </div>
               ))}
             </dl>
-            <p className="mt-4 type-body-sm text-ink-muted">{t("channels.note")}</p>
           </FadeIn>
         </div>
 

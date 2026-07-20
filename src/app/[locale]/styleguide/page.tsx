@@ -16,7 +16,7 @@ import { dur, ease } from "@/lib/motion/tokens";
  */
 
 export const metadata: Metadata = {
-  title: "Styleguide — Manuel Heller",
+  title: "Styleguide · Manuel Heller",
   robots: { index: false, follow: false },
 };
 

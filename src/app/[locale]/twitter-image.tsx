@@ -14,7 +14,7 @@ import { renderSocialCard } from "@/lib/seo/socialCard";
 // Required for `output: "export"` static-export mode — Next 16 won't
 // pre-render dynamic Twitter card routes without an explicit force-static.
 export const dynamic = "force-static";
-export const alt = "Manuel Heller — Craft Portfolio";
+export const alt = "Manuel Heller · Craft Portfolio";
 export const size = { width: 1200, height: 600 };
 export const contentType = "image/png";
 

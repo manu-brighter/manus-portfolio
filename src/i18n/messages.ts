@@ -1,6 +1,7 @@
 import type { AbstractIntlMessages } from "next-intl";
 
 import deCommon from "../../messages/de/common.json";
+import deCv from "../../messages/de/cv.json";
 import deHome from "../../messages/de/home.json";
 import deLegal from "../../messages/de/legal.json";
 import deNotFound from "../../messages/de/notFound.json";
@@ -22,13 +23,23 @@ import dePlayground from "../../messages/de/playground.json";
  *                    `/playground/[slug]`.
  *   - `legal`     — Impressum + Datenschutz. Loaded only by /impressum
  *                    and /datenschutz.
+ *   - `cv`        — Curriculum Vitae. Loaded only by /cv (server-only:
+ *                    CvDocument renders server-side, the print button
+ *                    gets its strings as props).
  *   - `notFound`  — 404 page. Loaded only by the root `not-found.tsx`.
  *
  * Server-side `getTranslations()` reads from the merged tree
  * assembled by `i18n/request.ts`, so every namespace is always
  * server-accessible regardless of route.
  */
-export const NAMESPACE_GROUPS = ["common", "home", "playground", "legal", "notFound"] as const;
+export const NAMESPACE_GROUPS = [
+  "common",
+  "home",
+  "playground",
+  "legal",
+  "cv",
+  "notFound",
+] as const;
 
 export type NamespaceGroup = (typeof NAMESPACE_GROUPS)[number];
 
@@ -41,6 +52,7 @@ const TYPE_INFERENCE_ROOT = {
   ...deHome,
   ...dePlayground,
   ...deLegal,
+  ...deCv,
   ...deNotFound,
 };
 
@@ -50,6 +62,7 @@ export type HomeMessages = typeof deHome;
 export type LegalMessages = typeof deLegal;
 export type PlaygroundMessages = typeof dePlayground;
 export type CommonMessages = typeof deCommon;
+export type CvMessages = typeof deCv;
 export type NotFoundMessages = typeof deNotFound;
 
 /**

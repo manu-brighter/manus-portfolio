@@ -18,7 +18,8 @@ const LOCALES = ["de", "en", "fr", "it"] as const;
 // F-testing-coverage-5: expanded to include legal pages.
 // Previously only "" and "styleguide" were scanned — legal routes and
 // playground experiments were invisible to CI axe checks.
-const PAGES = ["", "styleguide", "impressum", "datenschutz"] as const;
+// Creative pass: /cv joins the scan (press-sheet document route).
+const PAGES = ["", "styleguide", "impressum", "datenschutz", "cv"] as const;
 
 const ROUTES = LOCALES.flatMap((locale) =>
   PAGES.map((page) => (page ? `/${locale}/${page}` : `/${locale}`)),

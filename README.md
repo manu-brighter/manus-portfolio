@@ -3,7 +3,7 @@
 <div align="center">
 
 [![Live](https://img.shields.io/badge/live-manuelheller.dev-ff6ba0?style=for-the-badge&logo=vercel&logoColor=f0e8dc&labelColor=0a0608)](https://manuelheller.dev)&nbsp;
-![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white&labelColor=0a0608)&nbsp;
+![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?style=for-the-badge&logo=typescript&logoColor=white&labelColor=0a0608)&nbsp;
 ![Next.js](https://img.shields.io/badge/Next.js-16-f0e8dc?style=for-the-badge&logo=nextdotjs&logoColor=0a0608&labelColor=0a0608)&nbsp;
 ![License](https://img.shields.io/badge/code-MIT-7ce8c4?style=for-the-badge&labelColor=0a0608)
 
@@ -36,6 +36,9 @@ Four spot colors — Rose `#ff6ba0`, Amber `#ffc474`, Mint `#7ce8c4`, Violet `#b
 **OverprintReveal**
 The hero H1 uses a custom primitive that stacks three per-character layers (ink + rose ghost + mint ghost), drives them with GSAP, and lands with ±2px resting misregistration. Screen readers get a single `sr-only` sibling — the animated DOM is `aria-hidden`.
 
+**Five Sim Presets**
+Riso · Wave · Turbulenz · Aquarell · Nachtdruck. Each ships its own render shader (soft ladder, overprint plates, screenprint halftone, wet granulation, neon terraces) and its own idle ambient swarm. The selection persists in `localStorage` and carries through to the page tokens: Nachtdruck flips the whole site into night mode, Wave re-inks paper and ink blue.
+
 </td>
 <td width="50%" valign="top">
 
@@ -47,6 +50,9 @@ Each photography section image has its own isolated WebGL2 fluid context — a s
 
 **Single RAF Ticker**
 GSAP, Lenis smooth-scroll, and React Three Fiber share one `requestAnimationFrame` loop via `src/lib/raf.ts`. No tick duplication, no jitter from competing schedulers.
+
+**Live Sim on Mobile Too**
+Coarse-pointer devices get `MobileBackgroundSim`, a fixed full-viewport WebGL2 canvas with its own orchestrator. Taps inject splats, scroll velocity injects an invisible force so ink drifts with the page. Presets and themes are pointer-agnostic.
 
 **4 Locales**
 DE (default) / EN / FR / IT via next-intl. Routes always include the `[locale]` segment. Zero hard-coded strings in components.
@@ -70,7 +76,7 @@ DE (default) / EN / FR / IT via next-intl. Routes always include the `[locale]` 
 | **WebGL / 3D** | React Three Fiber · Three.js · custom GLSL shaders |
 | **Motion** | GSAP · ScrollTrigger · Lenis · single shared RAF ticker |
 | **i18n** | next-intl — DE / EN / FR / IT |
-| **State** | Zustand — scene visibility, ink-wipe overlay, fluid bus |
+| **State** | Zustand · scene visibility, ink-wipe overlay, sim preset, lightbox |
 | **Testing** | Playwright E2E + axe-core accessibility |
 | **Quality** | Biome (lint + format) · TypeScript strict |
 | **Deploy** | Static export → Nginx + Cloudflare CDN |
@@ -87,13 +93,28 @@ DE (default) / EN / FR / IT via next-intl. Routes always include the `[locale]` 
 | Section | Description |
 |---|---|
 | **Hero** | Fullscreen fluid sim · OverprintReveal H1 · right-aligned Instrument Serif |
-| **About** | 8-spine editorial flow · Riso PullQuote blocks · object-grid stamps |
+| **About** | 8-spine editorial flow · Riso PullQuote blocks · object-grid stamps · click-to-open tile reveals |
 | **Skills** | Tech stack · VibecodedStamp · pulsing GSAP loop |
-| **Work** | Editorial DOM/SVG cards · each dispatches fluid splats on hover |
+| **Work** | Editorial DOM/SVG cards · each dispatches fluid splats on hover · side-projects strip |
 | **Case Study** | Diorama horizontal pin · 420vh scroll track · GSAP ScrollTrigger |
 | **Photography** | Per-image WebGL ink reveal · asymmetric editorial layout |
 | **Playground** | InkDropStudio · TypeAsFluid · runtime Tweakpane controls |
 | **Contact** | Form → Cloudflare Worker → Resend · honeypot · mailto fallback |
+
+<br>
+
+---
+
+## ✦ Routes
+
+| Route | Description |
+|---|---|
+| `/[locale]` | Home · the full section flow above |
+| `/[locale]/cv` | Press-proof CV sheet · `window.print()` **is** the PDF export, so the PDF comes out in whichever ink character is active |
+| `/[locale]/playground/[slug]` | Experiment routes · InkDropStudio, TypeAsFluid |
+| `/[locale]/impressum` · `/[locale]/datenschutz` | CH DSG/revDSG + EU DSGVO legal pages · noindex, follow |
+| `/[locale]/styleguide` | Internal token + component reference · noindex, nofollow |
+| `not-found` | Riso 404 with its own `<html>` shell and a locale-switch row |
 
 <br>
 
@@ -118,15 +139,20 @@ Tier selection runs at startup via renderer name match + frametime probe, cached
 ## ✦ Notable source files
 
 ```
-src/components/scene/FluidSim.tsx          GPU Navier-Stokes sim — 8-pass pipeline
-src/components/scene/PhotoInkMask.tsx      Per-photo dedicated WebGL2 fluid reveal
-src/components/motion/OverprintReveal.tsx  Riso misregistration reveal primitive
-src/components/case-study/DioramaTrack.tsx Sticky-pin horizontal diorama track
-src/lib/raf.ts                             Single shared RAF ticker (GSAP+Lenis+R3F)
-src/lib/gpu.ts                             GPU capability detection + tier selection
-src/lib/fluidBus.ts                        Pub/sub for cross-component splat injection
-src/shaders/fluid/                         GLSL — advect, diverge, pressure, splat, render
-public/maintenance.html                    Self-contained Riso-styled 503 page
+src/components/scene/FluidSim.tsx             GPU Navier-Stokes sim, 8-pass pipeline
+src/components/scene/MobileBackgroundSim.tsx  Coarse-pointer background sim (own orchestrator)
+src/components/scene/PhotoInkMask.tsx         Per-photo dedicated WebGL2 fluid reveal
+src/components/motion/OverprintReveal.tsx     Riso misregistration reveal primitive
+src/components/case-study/DioramaTrack.tsx    Sticky-pin horizontal diorama track
+src/components/about/TileRevealOverlay.tsx    Stempelpress tile-reveal overlay
+src/components/cv/CvDocument.tsx              Press-proof CV sheet, print parity with screen
+src/lib/gl/fluidOrchestrator.ts               Sim pipeline, physics params + visual knobs
+src/lib/content/simPresets.ts                 The five presets as pure data (physics + look)
+src/lib/raf.ts                                Single shared RAF ticker (GSAP+Lenis+R3F)
+src/lib/gpu.ts                                GPU capability detection + tier selection
+src/lib/fluidBus.ts                           Pub/sub for cross-component splat injection
+src/shaders/fluid/                            GLSL sim passes + one render shader per preset
+public/maintenance.html                       Self-contained Riso-styled 503 page
 ```
 
 <br>
@@ -141,9 +167,14 @@ pnpm dev          # localhost:3000  (Windows: use dev.cmd instead)
 
 pnpm build        # static export → ./out
 pnpm ci:local     # lint + typecheck + build + e2e (mirrors CI)
-pnpm test:a11y    # axe across all 4 locales
+pnpm test:a11y    # axe across all 4 locales × every user-facing page
+pnpm test:visual  # Playwright screenshot baselines
 pnpm lighthouse   # Lighthouse against ./out (Linux/CI; broken on Windows)
+
+node scripts/optimize-assets.mjs [group]   # AVIF/WebP/JPG pipeline, see content-input/README.md
 ```
+
+Open the browser console and run `manu.help()` for the print controls: preset switching, splat bursts, and the Fehldruck sequence (also reachable via the Konami code).
 
 <br>
 

@@ -88,7 +88,7 @@
           "heading": "Contact form",
           "body": [
             "When you use the contact form, your name, email address, and message are transmitted encrypted to a technical intermediary: the request is received at the Cloudflare edge (Cloudflare, Inc., USA) by a Cloudflare Worker and delivered to me as an email via the email service Resend (Resend, Inc., USA). Both providers are covered by Standard Contractual Clauses (Art. 46 GDPR) for data transfers to the USA. Only the data you enter into the form yourself is processed.",
-            "If the delivery fails, the form falls back to offering a mailto link — the message then goes via your own email client and email provider, not via a server under my control.",
+            "If the delivery fails, the form falls back to offering a mailto link. The message then goes via your own email client and email provider, not via a server under my control.",
             "Legal basis in both cases: your consent by submitting (Art. 6(1)(a) GDPR, Art. 31(1) revFADP). Incoming messages are deleted after they're answered, at the latest after six months. You can request access, correction, or deletion at any time. Just write to manuelheller@bluewin.ch."
           ]
         },

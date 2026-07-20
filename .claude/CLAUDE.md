@@ -33,8 +33,11 @@ invoke the tools directly: `node node_modules/typescript/bin/tsc --noEmit`,
 - `src/shaders/` — GLSL split into `common/`, `fluid/`, `ink-mask/`, `ink-wipe/`, `text-fluid/`. The retired `toon/` and `photo-duotone/` subdirs no longer exist — duotone treatment was reversed (see "Visual / image policy" below).
 - `src/lib/` — `raf.ts`, `gpu.ts`, `motion/tokens.ts`, `i18n/`, `content/`, `site.ts` (central identity: URL/email/socials), `gl/compileShader.ts` (shared, with `#version`-strip)
 - `src/hooks/` — `useLenis`, `useReducedMotion`, `useGPUCapability`, `useMousePosition`
-- `content/` — MDX (project-scoped, 4 locales per file)
 - `messages/` — next-intl UI strings (de/en/fr/it)
+- **No `content/` directory and no MDX anywhere.** Plan §3 specifies a
+  project-scoped MDX content layer with 4 locales per file; it was never
+  built. All copy lives in `messages/**` (next-intl) and in
+  `src/lib/content/*.ts`. Don't go looking for `.mdx`.
 
 ## Design tokens
 
@@ -88,7 +91,12 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 
 - 4 locales: `de` (default), `en`, `fr`, `it`
 - No hard-coded strings in components — always through next-intl
-- Content MDX has 4 per-locale variants (e.g. `project.de.mdx`)
+- **No em dashes ("—") in any user-visible copy** — Manuel reads them
+  as an AI tell ("schreit extrem nach AI"), same for ad-speak negation
+  phrases ("Kein leeres Versprechen"). Rewrite with period/comma/colon;
+  title separators use "·"; date ranges use en dash ("2016–2020",
+  "seit 11/2021"). Purged site-wide 2026-07-20 (messages/** + component
+  strings) — don't reintroduce.
 - Routes always include the `[locale]` segment
 - **Pull-quote keyword marker is `[[keyword]]`, not `{keyword}`** — next-intl
   treats curly braces as ICU placeholders (FORMATTING_ERROR).
@@ -242,12 +250,20 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   footer for glyph contrast over hard bands.
 - **Switcher UX**: pointer-selection blurs the radio + disarms
   group-hover until pointerleave (immediate collapse); keyboard keeps
-  focus/expansion. On first appear the pill unfolds for 3.5s
+  focus/expansion. On first appear the pill unfolds for 6.5s
   (`INTRO_PEEK_MS` discoverability peek; `expanded` drives mobile,
-  `introPeek` the md: pill).
+  `introPeek` the md: pill). During the peek `SimPresetSwitcherHint`
+  renders the onboarding note: hand-drawn SVG arrow (pathLength dash
+  draw + rose misreg ghost) + typewriter paper chip, fully decorative
+  (aria-hidden, pointer-events-none), breakpoint-mirrored to the pill's
+  corner. Peek (and hint) end early on selection, manual toggle, OR
+  real scroll (>160px — a scrolled user has moved on; without this the
+  fixed hint floats over mid-page content). Desktop chip sits at
+  md:bottom-10 to clear the hero bio stamps (screenshot-verified).
 - **Console menu + easter egg**: `ConsoleMenu` (root layout) prints the
   MANUS banner once (module flag vs StrictMode) and installs
-  `window.manus` = help/preset/burst/fehldruck — file-top
+  `window.manu` = help/preset/burst/fehldruck (named after Manuel, NOT
+  after the "manus" project name — see the comment in ConsoleMenu) — file-top
   `biome-ignore-all lint/suspicious/noConsole` MUST precede "use client".
   `PrintJamOverlay` runs the Fehldruck sequence (Konami via `e.code` +
   printJamBus): `<html data-print-jam>` jitters headings (CSS in
@@ -341,6 +357,43 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   (desk slides, mirroring the Desktop horizontal-pin track) — Manuel
   explicitly asked for it back after a first cut removed it. A new
   carousel needs a reason like that, not just "content overflows".
+  The Work side-projects strip got one too (Manuel asked directly):
+  it is a quiet open-source shelf, and stacking two cards vertically
+  cost a full phone screen of scroll on the way to Contact.
+- **The side-projects strip is the LIGHT carousel pattern** — a
+  side-scroll rail below `md`, a two-column grid from `md` up, no JS.
+  Reach for this before `CaseStudyMobileCarousel`'s machinery (arrows,
+  dots, aria-live, keyboard handler): that one drags its consumers
+  across the client boundary, and Work/SideProjectCard are server
+  components. Snap points plus a peeking neighbour carry the
+  affordance on their own. Four things it encodes:
+  - **Build it from Tailwind UTILITIES, not a hand-written component
+    class.** The first cut used a `.side-rail` rule, which made the
+    DESKTOP grid depend on that single rule shipping — when it didn't,
+    desktop regressed from a working grid to a plain stack, i.e. a
+    mobile-only feature took desktop down with it. Utilities are
+    emitted from a source scan and the grid classes predate the
+    feature, so desktop can't become collateral damage. Custom CSS is
+    fine for cosmetics (`.no-scrollbar`), never for layout.
+  - `overflow-x: auto` makes `overflow-y` compute to `auto` as well,
+    so the rail needs `py-2` or a card's hover translate and
+    `ring-offset-4` focus ring spawn a nested vertical scrollbar.
+  - It deliberately has **no `tabIndex`**. Axe's
+    `scrollable-region-focusable` only fires when a scrollable region
+    has no focusable descendants, and every card is a link — tabbing
+    to one scrolls it into view, so a tab stop on the rail would be
+    keyboard noise (verified: a11y suite passes without it).
+  - The bleed is `-mx-[var(--container-gutter)] px-[var(--container-gutter)]`,
+    reset with `md:mx-0 md:px-0`.
+  Regression spec: `tests/e2e/side-projects-rail.spec.ts` (targets
+  `data-testid="side-rail"`).
+- **A long-running `next dev` can serve stale `globals.css` for hours.**
+  Editing the file HMRs the page but the CSS chunk kept the previous
+  content: newly added rules were simply absent while older ones were
+  present. This cost real debugging time twice — once chasing a CSS
+  rule that was correct all along. When a style "doesn't apply",
+  confirm against a fresh `next dev` or `next build` BEFORE touching
+  the CSS, and grep the served chunk for the selector.
 - **FadeIn on potentially-viewport-tall blocks needs a low `threshold`**
   (~0.15): IO `intersectionRatio` can never reach the default 0.35 when the
   element is taller than the viewport → entrance never fires.
@@ -383,6 +436,60 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   variable cascading to drop-cap (CSS `:first-letter`) and `.pull-highlight`.
   `<StampDivider>` is a sibling of `<AboutBlock>` (not nested) so cascade
   doesn't reach it — takes a `spot` prop instead.
+- **Object-Grid tile reveals** (creative pass): tiles listed in
+  `src/components/about/tileReveals.ts` (`TILE_REVEAL_KEYS`) carry a
+  stretched button + corner "+" chip; click opens `TileRevealOverlay`
+  IMMEDIATELY with a ~320ms "Andruck" registration snap: the spot
+  plate (a rough-edged SVG rect behind the photo) travels in from
+  translate(38,42)+1.4deg, overshoots past its resting 8px offset and
+  seats; the photo fades 0.55→1 over scale 1.04→1; the caption stamps
+  a beat later (`tile-plate-in` & friends in globals.css). Three
+  iterations got here, so don't undo any of them:
+  - The original full-page ink-wipe reuse (~1s) was cut as too slow.
+  - v2 animated **`box-shadow`** from out-of-register and scaled the
+    whole `<figure>` from 1.14 behind a blobby ink rim. box-shadow is
+    not compositor-animatable (it repainted a fullscreen photo every
+    frame → "holprig"), the figure scale dragged the caption, and the
+    rim pushed past the viewport ("unten abgeschnitten"). Everything
+    animated is now transform/opacity only.
+  - The plate's timing function must **not** overshoot on its own: a
+    back-ease applies per keyframe segment and consumed ~85% of the
+    travel in the first 60ms, making the move invisible. Overshoot
+    belongs in the keyframes, the curve only decelerates.
+  - The plate's `inset-0` must resolve against the PHOTO (own
+    `relative` wrapper), not the `<figure>` — anchored to the figure
+    it painted a solid spot block behind the caption text.
+  - The photo may not start at opacity 0: that flashed the bare
+    full-size spot plate for ~2 frames.
+  Open drops one fluidBus splat at
+  the pointer, close leaves a two-splat burst at the tile (desktop
+  only — no mobile subscriber).
+  The overlay is a **fixed div, NOT `dialog.showModal()`** with manual
+  focus pin/restore (single close control). Heads-up for tests: the
+  mobile hamburger nav keeps a permanent `role="dialog"` node in the
+  DOM — select the overlay via `[aria-labelledby="tile-reveal-caption"]`,
+  never by bare dialog role. Manuel authors BOTH crops per tile
+  (`content-input/about/tiles/{key}-{landscape|portrait}.{jpg|png}`,
+  uniformly 16:9 / 2:3 since the second image drop); pipeline group
+  `about-tiles` only scales — never re-crop his framing. Orientation
+  picked at view time via `<source media="(orientation: portrait)">`.
+  pingpong tile has no master yet → stays decorative until one lands
+  (drop-in path documented in tileReveals.ts). Reduced-motion opens
+  statically, no splats.
+- **optimize-assets.mjs single-resize rule**: sharp honours only the
+  LAST `resize()` in a pipeline — aspect-crop + width-scale MUST happen
+  in one call (fixed in the creative pass; the old two-step silently
+  dropped the crop and nobody noticed because every earlier master was
+  pre-cropped to the task aspect). The runner falls back to a `.png`
+  sibling when a task's `.jpg` source is missing (tauchen video stills).
+- **Image quality floor for pro photos: avif q60 / webp q82.** The
+  earlier q38–50 range showed visible compression at display size —
+  explicit user feedback ("da will ich meine Photography-Skills
+  zeigen"). Full-bleed photography slides (sizes=100vw) also need a
+  ~2560w srcset rung or large/high-DPR screens upscale 1600w. All five
+  slides now ship the full set; 01-pelican's master is
+  `DSC05422-Verbessert-RR.jpg` (4524×3016, native 3:2 — an earlier
+  note pointed at DSC05426, which does not exist).
 - **Skills**: `VibecodedStamp` IO `threshold: 0.4`; stagger via parent
   `delay={i * 0.08}` prop. `HeroSkillPulse` loops continuously without IO
   gate (cheap, avoids re-mount cycle restart).
@@ -391,6 +498,14 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   `PortfolioCardVisual` era is over: the Portfolio card shows the real
   five-theme split screenshot behind `PortfolioCardReveal`'s hover stage,
   Joggediballa shows real shots (`JoggediballaScreenshot`, night-aware).
+  Below the two hero cards sits the **side-projects strip**
+  (`SideProjectCard`, server-rendered, CSS-only hover): Shot-Counter +
+  full-project-rework as compact catalog cards linking to GitHub.
+  Label is "Weitere Projekte" — the earlier "B-Seiten" wording was cut
+  (user: they're projects, not sides). Repo URLs live in `SITE.repos`
+  (site.ts), spots mint/violet (the pair the hero cards don't use).
+  The section stays "two intentional projects" — a third hero card
+  needs a reason, not just a new repo.
 - **Case Study**: inline section, NOT a `/work/[slug]` route. Diorama design
   (one wide SVG illustration + absolute-positioned HTML cards in vh units,
   4200×1000 viewBox at 100vh tall = 420vh wide horizontal-pin track).
@@ -399,12 +514,21 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   - `bg-paper` on `<DioramaTrack>` isolates from root FluidSim ink bleed.
   - `<DioramaTrack>` ScrollTrigger uses `kill(true)` on cleanup to revert
     pin spacers when reduced-motion / resize toggles desktop branch off.
+  - **Pin an INNER wrapper, never the `section#case-study` itself.**
+    The section is a direct child of `<main>`; ScrollTrigger's
+    pin-spacer re-parents the pinned element, and on client-side
+    navigation React's deletion pass calls `main.removeChild(section)`
+    → NotFoundError ("Failed to execute 'removeChild'"). Passive
+    effect cleanup (and the sceneHidden kill) runs AFTER that DOM
+    mutation on layout-mount routes (/cv, legal), so no store dance
+    can save it — only keeping the spacer INSIDE the section does.
+    Regression spec: tests/e2e/route-transitions.spec.ts.
   - `Polaroid` is case-study-exclusive; About-Portrait uses
     `src/components/ui/Portrait.tsx` (different component, no token cross-talk).
 - **Photography**: editorial-asymmetric flow (full-bleed + side-text-paired
   layouts), no sticky pins, no ScrollTrigger. Each `PhotoInkMask` owns an
-  isolated WebGL2 context with simplified two-program sim (advect + splat +
-  mask, no pressure solve). Trigger IO: `rootMargin: "-20% 0px -20% 0px"`,
+  isolated WebGL2 context with a simplified three-program sim (advect +
+  splat + mask, no pressure solve). Trigger IO: `rootMargin: "-20% 0px -20% 0px"`,
   `threshold: 0` — fires when photo enters central 60% band. Document
   pointermove listener detached + ambient queue cleared at reveal lock.
 - **Playground**: Tweakpane ships in prod (the demo IS runtime parameter
@@ -431,6 +555,122 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   routes through shared `<LegalDocument namespace>` server component.
   CH-conform DSG/revDSG + EU DSGVO informational. No cookie banner (site
   sets no cookies; documented in datenschutz).
+- **CV**: `/[locale]/cv` press proof (`CvDocument`, server component; own
+  `cv` i18n namespace — DE authored, EN translated, FR/IT DE-mirrored).
+  **`window.print()` IS the PDF export**: the `@media print` block in
+  globals.css strips chrome (`nav, [data-site-chrome], .skip-link,
+  .fixed` — the site Footer carries `data-site-chrome`; a bare `footer`
+  selector would also swallow the CV sheet's own footer) and forces
+  `print-color-adjust: exact`, so the PDF prints in the ACTIVE
+  ink character (Nachtdruck included) — don't add a build-time PDF
+  generator.
+  - **Print parity is the design rule**: the sheet is a fixed
+    `max-w-[184mm]` block, fixed rem type only (NO vw/clamp — viewport
+    units resolve differently against the A4 page box), `@page` margin
+    11mm. Screen and PDF share ONE geometry; only desk backdrop,
+    topbar, and shadow are `print:`-stripped. Never add `print:` size/
+    gap/column overrides — that reintroduces the shifted-PDF bug.
+  - **`break-inside-avoid` scales with block size.** A page-sized
+    section with an avoid gets shoved wholesale and strands a third
+    page (the original bug), so Berufserfahrung and Eigene Projekte
+    stay breakable and carry ITEM-level avoids. The short sidebar
+    sections (all <250px against a 1039px page) take a section-level
+    avoid via `CvSection keepTogether` — otherwise the boundary sliced
+    straight through Sprachen.
+  - **The sheet is a two-page budget, and it is TIGHT** (~2000px of
+    2078px available; EN has ~250px more headroom than DE/FR/IT).
+    Decorative height is not free: absolutely position ornaments.
+    `tests/e2e/cv-print.spec.ts` asserts exactly 2 pages in all four
+    locales via a real `page.pdf()` — if it fails after a content
+    edit, trim the sheet's vertical rhythm, not the content.
+  - Pressroom ornaments all ride tokens (theme-aware): Druckprobe
+    calibration bar, ink blobs/droplets, wobble rules with hanging
+    ink drips (`WobbleRule drips=`), misreg double ghost on the name
+    (`.cv-name` — a CLASS, never an inline style, so the per-theme
+    blocks can override it), and `CvInkStamp` — a client island that
+    names the active ink character by reading `<html data-sim-theme>`
+    (NOT the preset store: on reduced-motion/static tier the store may
+    hold a preset the sheet never applies).
+  - **Theme character on the sheet** (`CvSimFrame` + `.cv-theme-
+    texture`, per-theme blocks in globals.css). The sheet is opaque
+    paper sitting ON TOP of the sim, so none of the sim's look reaches
+    it on its own. `CvSimFrame` prints the render pass's posterized
+    ladder as a still frame (top + flipped at the foot) and each theme
+    adds its shader's signature: Wave overprint bands + channel-split
+    headings, Turbulenz halftone screen, Aquarell wet blur + pooled
+    corners, Nachtdruck additive screen blend + neon bloom. Riso stays
+    quiet on purpose (same hierarchy as the sim). All of it is colour /
+    text-shadow / filter, so `print-color-adjust: exact` carries it
+    into the PDF. Three rules this went through user feedback to reach:
+    - **Colour comes from the ACTIVE preset's dye ladder**, published
+      as `--cv-dye-1..4` by `CvDyeSync` reading `simPresets.ts`
+      directly. Painted in canonical Riso spots the sheet looked the
+      same in every theme, because the spots barely move between
+      presets while the sim runs blue-green under Wave and
+      violet/pink/wine under Nachtdruck. Never restate the ladder as a
+      hex table here — it would drift when a preset is retuned.
+    - **Bands tile edge to edge.** Each band is drawn as "everything
+      below my boundary" and painted top-down, with every boundary
+      running past both viewBox edges. Per-band ribbons ended at
+      different x positions and read as an accident. Opacity sits on
+      the group, never per band (overlapping bands accumulate alpha).
+    - **Don't invent a Turbulenz glow.** The sheet inherits the
+      site-wide `[data-sim-theme="warm"] main` paper halo verbatim; an
+      amber bloom substituted for it read as a different effect
+      ("mach das richtig oder gar nicht"). It works on the sheet
+      because the still frame puts dye under the headings for the halo
+      to cut through.
+    - `.cv-sheet` carries `isolation: isolate`, or Nachtdruck's screen
+      blend composites past the opaque paper against the live sim.
+    - **`CvSimFrame` needs an explicit `w-full` from every caller.** An
+      `<svg>` with a viewBox is a replaced element with an intrinsic
+      aspect ratio: given only `left-0 right-0` plus a percentage
+      height, the browser derives the WIDTH from that ratio instead of
+      from the offsets. At `h-[42%]` of a 2000px sheet the frame came
+      out 2240px wide against a 696px sheet and spilled ~1.5 screens
+      to the right, by a different amount per frame because their
+      heights differ. **An element screenshot of the `<article>` clips
+      to the article box and hides this entirely** — it survived two
+      rounds of print-screenshot review and only showed up in a
+      full-viewport shot. Check overflow with a page screenshot or by
+      comparing bounding boxes, never with an element shot.
+  - **The frame's bottom hem is a `clipPath`, not a band boundary.**
+    The bands run past the viewBox to tile it, so their bottom used to
+    be the viewport's straight edge and dye met bare paper along a
+    ruler-straight line. One shared clip gives the whole stack a wavy
+    hem; per-band bottoms would mean repeating and reversing the same
+    curve four times. The clip id is per instance (two frames per page,
+    duplicate ids are invalid markup).
+  - **`.cv-zoom` scales the proof on screen only** (1.15 from 1024px,
+    1.3 from 1440px, reset in print). It uses `zoom`, NOT
+    `transform: scale()`: zoom scales the layout box so nothing reflows
+    and the flow reserves the right height, whereas a transform leaves
+    the unscaled box behind and the footer overlaps. This does not
+    violate print parity — it is ONE layout at two scales, and the
+    cv-print spec still asserts 2 pages.
+  - **The /cv desk is opaque** (`bg-paper-shade`, not `/60`). The sheet
+    now carries its own band structure, and the live sim showing
+    through around it reads as those same bands continuing — except
+    the sim can't be aligned to anything. The theme is fully expressed
+    by the sheet itself, so the sim stays off this one page.
+  - **The saved PDF's filename is `document.title`.** The route sets
+    `title: { absolute: ... }` (the locale layout's template would
+    append the name a second time), and `CvActions` swaps in a title
+    carrying the active theme for the duration of the print, restoring
+    it on `afterprint` — otherwise five differently inked exports all
+    land in Downloads under one name.
+  - **The experience timeline spine is segmented per entry**, not one
+    border on the container: a container border runs through the
+    inter-entry gaps as well, so the page boundary sliced it mid-air
+    and the cut read as a printing error instead of a page turn.
+  - Contact chips: email, manuelheller.dev, GitHub only — visible text
+    must equal the destination; LinkedIn was cut (shortened label lied
+    about the URL, useless on paper).
+  - Content is the PUBLIC redaction of `docs/cv.md`: never add street
+    address, phone number, or birth date (privacy section of that doc).
+    Route is noindex+follow with self-canonical (legal-pages pattern),
+    excluded from sitemap, linked from footer document row and a
+    Contact direct channel. Axe scans it (tests/a11y PAGES list).
 - **404**: `src/app/not-found.tsx` owns its own `<html>`/`<body>` shell
   (root layout is pass-through). Strings come from `notFound` namespace at
   `routing.defaultLocale`. `<html lang="de">` hardcoded; `noindex`. Footer
@@ -459,19 +699,30 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 - **JSON-LD inlined as first child of `<body>`** (Next 16 App Router has no
   clean head-injection for arbitrary scripts). Documented Next.js workaround.
 - **`export const dynamic = "force-static"` on every metadata route** —
-  required by `output: "export"` for `icon.tsx`, `apple-icon.tsx`,
-  `manifest.ts`, `sitemap.ts`, `robots.ts`, `opengraph-image.tsx`,
-  `twitter-image.tsx`.
+  required by `output: "export"` for `manifest.ts`, `sitemap.ts`,
+  `robots.ts`, `opengraph-image.tsx`, `twitter-image.tsx`. The icons are
+  static files, not routes, so they need nothing.
 - **Favicon pipeline**: master at `public/brand/icon-source.svg`. Run
-  `node scripts/generate-favicons.mjs` after editing the source SVG to
-  regenerate `public/icon-{192,512}.png` + `icon-maskable-{192,512}.png`
-  (sharp pipeline, 80% safe-area for maskable). Tab favicon
-  (`src/app/icon.tsx`) ships transparent bg; iOS apple-icon
-  (`src/app/apple-icon.tsx`) ships `--color-paper` bg (iOS no transparency).
-  - **The 4 .tsx icon routes have inline ellipse coords for the misreg
-    ghosts** that don't auto-update from the source SVG. Hand-update
-    `icon.tsx`, `apple-icon.tsx`, `[locale]/opengraph-image.tsx`,
-    `[locale]/twitter-image.tsx` when the source SVG geometry changes.
+  `node scripts/generate-favicons.mjs` after editing the source SVG. It
+  emits BOTH the PWA sizes (`public/icon-{192,512}.png` +
+  `icon-maskable-{192,512}.png`, 80% safe-area for maskable) AND the
+  app-dir icons that Next 16 file-based metadata picks up automatically:
+  `src/app/icon.png` (32px, transparent, browser tab),
+  `src/app/favicon.ico` (byte-copy of icon.png), and
+  `src/app/apple-icon.png` (180px on `--color-paper` — iOS gives no
+  transparency). These are **generated PNGs, not `.tsx` routes** — an
+  earlier cut rendered them through `next/og` and that is gone. Never
+  hand-edit them; edit the source SVG and re-run the script.
+  - **Only `opengraph-image.tsx` and `twitter-image.tsx` are still
+    hand-written `.tsx`**, and they carry inline ellipse coords for the
+    misreg ghosts that do NOT auto-update from the source SVG. Hand-update
+    `[locale]/opengraph-image.tsx` and `[locale]/twitter-image.tsx`
+    whenever the source SVG geometry changes.
+- **The Nav wordmark is the site-wide return-to-home control.** On any
+  sub-route it is a plain `<Link href="/">`; ON HOME it preventDefaults
+  and Lenis-scrolls to the top, because the router treats a same-route
+  push as a no-op and the click otherwise did nothing at all for a
+  scrolled reader. Regression spec: `tests/e2e/home-return.spec.ts`.
 - **Mobile hamburger menu**: `useState` + custom toggle (not `<details>`) —
   needs JS for mq-resize-close behaviour anyway, and animation needs the
   open state to drive className transitions. Esc-to-close explicit.
@@ -497,6 +748,10 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 ## Never do
 
 - Hard-code strings (always via next-intl)
+- Write em dashes ("—") or ad-speak phrasing into user-visible copy
+- Pin a direct child of `<main>` with ScrollTrigger (removeChild crash
+  on route change — pin an inner wrapper)
+- Add `print:` overrides that change the CV sheet's sizes/gaps/columns
 - Center or left-align the hero — asymmetric right-align is the signature
 - Mount a second `<Canvas>` — share the one at root layout
 - Skip the reduced-motion branch — not optional

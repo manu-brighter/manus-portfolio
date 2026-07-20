@@ -70,7 +70,7 @@ const SLIDES: readonly [Slide, Slide, Slide, Slide, Slide] = [
     spot: "amber",
     aspect: 3 / 2,
     layout: "full",
-    widths: [800, 1200, 1600],
+    widths: [800, 1200, 1600, 2560],
   },
   {
     baseName: "02-koenigsegg",
@@ -79,7 +79,7 @@ const SLIDES: readonly [Slide, Slide, Slide, Slide, Slide] = [
     spot: "violet",
     aspect: 2 / 3,
     layout: "right60",
-    widths: [800, 1200, 1600],
+    widths: [800, 1200, 1600, 2200],
   },
   {
     baseName: "03-panorama",
@@ -97,7 +97,7 @@ const SLIDES: readonly [Slide, Slide, Slide, Slide, Slide] = [
     spot: "mint",
     aspect: 2 / 3,
     layout: "left70",
-    widths: [800, 1200, 1600],
+    widths: [800, 1200, 1600, 2200],
   },
   {
     baseName: "05-crocodile",
@@ -106,7 +106,7 @@ const SLIDES: readonly [Slide, Slide, Slide, Slide, Slide] = [
     spot: "rose",
     aspect: 16 / 9,
     layout: "full",
-    widths: [800, 1200, 1600],
+    widths: [800, 1200, 1600, 2560],
   },
 ];
 

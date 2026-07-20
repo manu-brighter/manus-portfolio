@@ -22,7 +22,7 @@ import { escapeForScript } from "@/lib/seo/escapeForScript";
  */
 
 export const metadata: Metadata = {
-  title: "Manuel Heller — Craft Portfolio",
+  title: "Manuel Heller · Craft Portfolio",
   robots: { index: false, follow: false },
 };
 

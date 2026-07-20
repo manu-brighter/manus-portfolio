@@ -88,7 +88,7 @@
           "heading": "Modulo di contatto",
           "body": [
             "Quando utilizzi il modulo di contatto, nome, indirizzo e-mail e messaggio vengono trasmessi in forma cifrata a un intermediario tecnico: la richiesta viene ricevuta all'edge di Cloudflare (Cloudflare, Inc., USA) da un Cloudflare Worker e mi viene recapitata come e-mail tramite il servizio di posta Resend (Resend, Inc., USA). Entrambi i provider sono coperti da Clausole Contrattuali Standard (art. 46 GDPR) per i trasferimenti di dati verso gli USA. Vengono trattati esclusivamente i dati che inserisci tu stesso nel modulo.",
-            "Se la trasmissione fallisce, il modulo offre in alternativa un link mailto — il messaggio passa allora dal tuo client e-mail e dal tuo provider, non da un server sotto il mio controllo.",
+            "Se la trasmissione fallisce, il modulo offre in alternativa un link mailto. Il messaggio passa allora dal tuo client e-mail e dal tuo provider, non da un server sotto il mio controllo.",
             "Base legale in entrambi i casi: il tuo consenso con l'invio (art. 6(1)(a) GDPR, art. 31(1) nLPD). I messaggi in arrivo vengono cancellati dopo la risposta, al più tardi dopo sei mesi. Puoi richiedere accesso, rettifica o cancellazione in qualsiasi momento. Scrivi semplicemente a manuelheller@bluewin.ch."
           ]
         },

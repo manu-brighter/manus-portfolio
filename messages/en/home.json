@@ -28,6 +28,10 @@
         "value": "React 19 · R3F 9 · WebGPU shaders"
       },
       {
+        "verb": "shipping",
+        "value": "Claude Code skills · an Electron app"
+      },
+      {
         "verb": "shooting",
         "value": "wildlife in Costa Rica & Thailand"
       },
@@ -48,7 +52,7 @@
     "heroSkill": {
       "eyebrow": "Hero Skill",
       "name": "AI Workflow & Vibecoding",
-      "description": "Custom agents, hooks, skills, multi-stage prompts. AI isn't the tool I use — it's the thing I use to create tools."
+      "description": "Custom agents, hooks, skills, multi-stage prompts. AI isn't the tool I use. It's the thing I use to create tools."
     },
     "vibecodedMarker": "vibecoded",
     "tiers": [
@@ -115,6 +119,10 @@
           },
           {
             "name": "Next.js",
+            "vibecoded": true
+          },
+          {
+            "name": "Electron",
             "vibecoded": true
           },
           {
@@ -314,7 +322,7 @@
           },
           {
             "label": "zvoove",
-            "year": "2021—"
+            "year": "2021–"
           }
         ]
       },
@@ -332,26 +340,48 @@
       "headline": "When the screen is off.",
       "currentlyBand": "Snapshot 2026 · Wildlife trip in planning · Winter season · Paddle within reach",
       "currentlyBandShort": "Snapshot 2026",
+      "revealCta": "View the picture",
+      "revealClose": "Close",
       "tiles": {
         "camera": {
           "name": "Camera",
-          "caption": "shooting · Sony α7 IV · wildlife"
+          "caption": "shooting · Sony α7 IV · wildlife",
+          "reveal": {
+            "alt": "Two young foxes between beech branches in the forest, wildlife shot on the Sony α7 IV",
+            "caption": "FOX CUBS · WILDLIFE · α7 IV"
+          }
         },
         "audi": {
           "name": "Audi S5",
-          "caption": "driving · B8.5 · tuning project"
+          "caption": "driving · B8.5 · tuning project",
+          "reveal": {
+            "alt": "Black Audi S5 B8.5 with silver wheels in front of a wooden barn at dusk",
+            "caption": "AUDI S5 · B8.5 · BLUE HOUR"
+          }
         },
         "joggediballa": {
           "name": "Jogge di Balla",
-          "caption": "co-running · club · vice-president"
+          "caption": "co-running · club · vice-president",
+          "reveal": {
+            "alt": "The Jogge di Balla team posing in front of a packed hall at a club event",
+            "caption": "JOGGE DI BALLA · FULL HOUSE"
+          }
         },
         "schnee": {
           "name": "Snow",
-          "caption": "carving · ski/snowboard · winter season"
+          "caption": "carving · ski/snowboard · winter season",
+          "reveal": {
+            "alt": "Snow-covered alpine peaks under a blue sky, seen from the ridge",
+            "caption": "ALPS · WINTER SEASON"
+          }
         },
         "tauchen": {
           "name": "Depth",
-          "caption": "diving · certified"
+          "caption": "diving · certified",
+          "reveal": {
+            "alt": "Manuel scuba diving at the reef, thumbs up to the camera",
+            "caption": "DIVE · THUMBS UP"
+          }
         },
         "pingpong": {
           "name": "Ping-pong",
@@ -388,7 +418,7 @@
         "metaNote": "You're surfing on a GPU fluid simulation right now. No iframe, no video loop, no Lottie file. Real frames.",
         "ctaLabel": "You're already here",
         "screenshot": {
-          "alt": "The hero section of manuelheller.dev split into five slices — one per ink character",
+          "alt": "The hero section of manuelheller.dev split into five slices, one per ink character",
           "caption": "manuelheller.dev · hero"
         },
         "reveal": {
@@ -420,7 +450,29 @@
         },
         "ctaLabel": "Case Study"
       }
-    ]
+    ],
+    "sideProjects": {
+      "label": "More projects · Public on GitHub",
+      "lede": "Two smaller projects, both in regular use.",
+      "items": [
+        {
+          "id": "shotCounter",
+          "title": "Shot-Counter",
+          "tagline": "Party scoreboard · Desktop app",
+          "description": "Live scoreboard for any number of teams: QR-code join over LAN, every tap lands on all devices instantly via server-sent events, and an atomic SQLite counter never loses a shot. Built as an Electron app for Windows & Linux.",
+          "stack": ["Vue 3", "Express 5", "SQLite", "SSE", "Electron"],
+          "ctaLabel": "Repo & download"
+        },
+        {
+          "id": "fullProjectRework",
+          "title": "full-project-rework",
+          "tagline": "Claude Code skill · Multi-agent",
+          "description": "One command, a full codebase overhaul: parallel analyzers across 20 categories, senior-reviewer triage, implementers with atomic commits and a final report. My AI workflow, distilled into an installable skill.",
+          "stack": ["Claude Code", "Subagents", "Skill", "MIT"],
+          "ctaLabel": "Repo & docs"
+        }
+      ]
+    }
   },
   "caseStudy": {
     "carousel": {
@@ -641,11 +693,11 @@
     },
     "channels": {
       "label": "Direct channels",
-      "note": "GitHub is only semi-active, not a 100-repo polished-facade account.",
       "email": "Email",
       "github": "GitHub",
       "linkedin": "LinkedIn",
-      "photos": "Photos"
+      "photos": "Photos",
+      "cv": "CV"
     },
     "form": {
       "name": {
@@ -670,8 +722,8 @@
       "requiredNote": "All fields required",
       "status": {
         "fromLabel": "From:",
-        "success": "Thanks, your message arrived — I'll be in touch.",
-        "error": "Didn't go through — write me directly:",
+        "success": "Thanks, your message arrived. I'll be in touch.",
+        "error": "Didn't go through, write me directly:",
         "mailSubject": "Enquiry via manuelheller.dev"
       }
     }

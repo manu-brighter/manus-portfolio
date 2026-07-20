@@ -28,11 +28,15 @@
         "value": "React 19 · R3F 9 · shaders WebGPU"
       },
       {
-        "verb": "lis",
+        "verb": "publie",
+        "value": "des skills Claude Code · une app Electron"
+      },
+      {
+        "verb": "shoote",
         "value": "wildlife au Costa Rica & en Thaïlande"
       },
       {
-        "verb": "écoute",
+        "verb": "roule en",
         "value": "Audi S5 B8.5 (projet tuning)"
       },
       {
@@ -48,7 +52,7 @@
     "heroSkill": {
       "eyebrow": "Hero Skill",
       "name": "AI Workflow & Vibecoding",
-      "description": "Custom agents, hooks, skills, prompts multi-étapes. L'IA n'est pas l'outil que j'utilise — c'est l'outil avec lequel je crée des outils."
+      "description": "Custom agents, hooks, skills, prompts multi-étapes. L'IA n'est pas l'outil que j'utilise. C'est l'outil avec lequel je crée des outils."
     },
     "vibecodedMarker": "vibecoded",
     "tiers": [
@@ -115,6 +119,10 @@
           },
           {
             "name": "Next.js",
+            "vibecoded": true
+          },
+          {
+            "name": "Electron",
             "vibecoded": true
           },
           {
@@ -314,7 +322,7 @@
           },
           {
             "label": "zvoove",
-            "year": "2021—"
+            "year": "2021–"
           }
         ]
       },
@@ -332,26 +340,48 @@
       "headline": "Quand l'écran est éteint.",
       "currentlyBand": "Snapshot 2026 · Voyage wildlife en préparation · Saison d'hiver · Pagaie à portée de main",
       "currentlyBandShort": "Snapshot 2026",
+      "revealCta": "Voir l'image",
+      "revealClose": "Fermer",
       "tiles": {
         "camera": {
           "name": "Appareil",
-          "caption": "shooting · Sony α7 IV · wildlife"
+          "caption": "shooting · Sony α7 IV · wildlife",
+          "reveal": {
+            "alt": "Deux jeunes renards entre les branches de hêtre en forêt, photo wildlife au Sony α7 IV",
+            "caption": "RENARDEAUX · WILDLIFE · α7 IV"
+          }
         },
         "audi": {
           "name": "Audi S5",
-          "caption": "driving · B8.5 · projet tuning"
+          "caption": "driving · B8.5 · projet tuning",
+          "reveal": {
+            "alt": "Audi S5 B8.5 noire aux jantes argentées devant une grange en bois au crépuscule",
+            "caption": "AUDI S5 · B8.5 · HEURE BLEUE"
+          }
         },
         "joggediballa": {
           "name": "Jogge di Balla",
-          "caption": "co-running · association · vice-président"
+          "caption": "co-running · association · vice-président",
+          "reveal": {
+            "alt": "L'équipe Jogge di Balla pose devant une salle comble lors d'un événement du club",
+            "caption": "JOGGE DI BALLA · SALLE COMBLE"
+          }
         },
         "schnee": {
           "name": "Neige",
-          "caption": "carving · ski/snowboard · saison d'hiver"
+          "caption": "carving · ski/snowboard · saison d'hiver",
+          "reveal": {
+            "alt": "Sommets alpins enneigés sous un ciel bleu, vus depuis la crête",
+            "caption": "ALPES · SAISON D'HIVER"
+          }
         },
         "tauchen": {
           "name": "Profondeur",
-          "caption": "diving · certifié"
+          "caption": "diving · certifié",
+          "reveal": {
+            "alt": "Manuel en plongée au récif, pouce levé vers la caméra",
+            "caption": "PLONGÉE · POUCE LEVÉ"
+          }
         },
         "pingpong": {
           "name": "Ping-pong",
@@ -388,7 +418,7 @@
         "metaNote": "Tu surfes en ce moment sur une simulation de fluide GPU. Pas d'iframe, pas de boucle vidéo, pas de fichier Lottie. De vraies frames.",
         "ctaLabel": "Tu y es déjà",
         "screenshot": {
-          "alt": "La section hero de manuelheller.dev en cinq bandes — une par caractère d'encre",
+          "alt": "La section hero de manuelheller.dev en cinq bandes, une par caractère d'encre",
           "caption": "manuelheller.dev · hero"
         },
         "reveal": {
@@ -420,7 +450,29 @@
         },
         "ctaLabel": "Case Study"
       }
-    ]
+    ],
+    "sideProjects": {
+      "label": "Autres projets · Publics sur GitHub",
+      "lede": "Deux projets plus petits, tous deux utilisés régulièrement.",
+      "items": [
+        {
+          "id": "shotCounter",
+          "title": "Shot-Counter",
+          "tagline": "Scoreboard de soirée · App desktop",
+          "description": "Scoreboard live pour un nombre illimité d'équipes : on rejoint par QR code sur le LAN, chaque tap arrive instantanément sur tous les appareils via server-sent events, et un compteur SQLite atomique ne perd aucun shot. Construit comme app Electron pour Windows & Linux.",
+          "stack": ["Vue 3", "Express 5", "SQLite", "SSE", "Electron"],
+          "ctaLabel": "Repo & téléchargement"
+        },
+        {
+          "id": "fullProjectRework",
+          "title": "full-project-rework",
+          "tagline": "Skill Claude Code · Multi-agents",
+          "description": "Une commande, un overhaul complet du codebase : analyzers parallèles sur 20 catégories, triage par des reviewers seniors, implementers avec commits atomiques et rapport final. Mon workflow AI, distillé en un skill installable.",
+          "stack": ["Claude Code", "Subagents", "Skill", "MIT"],
+          "ctaLabel": "Repo & docs"
+        }
+      ]
+    }
   },
   "caseStudy": {
     "carousel": {
@@ -641,11 +693,11 @@
     },
     "channels": {
       "label": "Canaux directs",
-      "note": "GitHub n'est que semi-actif, ce n'est pas un compte vitrine à 100 repos.",
       "email": "E-mail",
       "github": "GitHub",
       "linkedin": "LinkedIn",
-      "photos": "Photos"
+      "photos": "Photos",
+      "cv": "CV"
     },
     "form": {
       "name": {
@@ -670,8 +722,8 @@
       "requiredNote": "Tous les champs sont obligatoires",
       "status": {
         "fromLabel": "De :",
-        "success": "Merci, ton message est bien arrivé — je te recontacte.",
-        "error": "Ça n'a pas fonctionné — écris-moi directement :",
+        "success": "Merci, ton message est bien arrivé. Je te recontacte.",
+        "error": "Ça n'a pas fonctionné, écris-moi directement :",
         "mailSubject": "Demande via manuelheller.dev"
       }
     }

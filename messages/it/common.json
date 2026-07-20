@@ -1,8 +1,8 @@
 {
   "meta": {
-    "title": "Manuel Heller — Portfolio",
+    "title": "Manuel Heller · Portfolio",
     "titleTemplate": "%s · Manuel Heller",
-    "description": "Sviluppatore full-stack con un occhio da artista. Codice, foto, design: stesso mestiere, superficie diversa. — Manuel Heller, sviluppatore full-stack da Basilea.",
+    "description": "Sviluppatore full-stack con un occhio da artista. Codice, foto, design: stesso mestiere, superficie diversa. Manuel Heller, sviluppatore full-stack da Basilea.",
     "keywords": [
       "Manuel Heller",
       "Portfolio",
@@ -20,7 +20,7 @@
   },
   "brand": {
     "label": "MH·STUDIO",
-    "aria": "Manuel Heller — pagina iniziale"
+    "aria": "Manuel Heller, pagina iniziale"
   },
   "nav": {
     "ariaLabel": "Navigazione principale",
@@ -31,6 +31,7 @@
       "contact": "Contatto",
       "impressum": "Note legali",
       "datenschutz": "Privacy",
+      "cv": "CV",
       "skills": "Skills",
       "casestudy": "Caso studio",
       "photography": "Fotografia"
@@ -74,6 +75,7 @@
   },
   "simPresets": {
     "label": "Carattere dell'inchiostro",
+    "hint": "Psst, cambia tema qui!",
     "riso": "Riso",
     "wave": "Onda",
     "turbulenz": "Turbolenza",

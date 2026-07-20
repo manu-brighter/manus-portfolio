@@ -18,6 +18,7 @@
 // fixes the type-vs-source drift at the i18n boundary.
 
 import type deCommon from "../../messages/de/common.json";
+import type deCv from "../../messages/de/cv.json";
 import type deHome from "../../messages/de/home.json";
 import type deLegal from "../../messages/de/legal.json";
 
@@ -41,6 +42,7 @@ export type SkillsTiers = (typeof deHome)["skills"]["tiers"];
 // --- work -----------------------------------------------------------
 
 export type WorkProjects = (typeof deHome)["work"]["projects"];
+export type WorkSideProjects = (typeof deHome)["work"]["sideProjects"]["items"];
 
 // --- caseStudy ------------------------------------------------------
 
@@ -65,3 +67,13 @@ export type CaseStudyHighlightFeature = CaseStudyHighlight["features"][number];
 // Impressum + Datenschutz share the same `sections` shape; either works
 // for the `LegalDocument` cast since the renderer is namespace-agnostic.
 export type LegalSections = (typeof deLegal)["legal"]["impressum"]["sections"];
+
+// --- cv -------------------------------------------------------------
+
+export type CvExperienceItems = (typeof deCv)["cv"]["experience"]["items"];
+export type CvProjectItems = (typeof deCv)["cv"]["projects"]["items"];
+export type CvSkillGroups = (typeof deCv)["cv"]["skills"]["groups"];
+export type CvEducationItems = (typeof deCv)["cv"]["education"]["items"];
+export type CvLanguageItems = (typeof deCv)["cv"]["languages"]["items"];
+export type CvEngagementItems = (typeof deCv)["cv"]["engagement"]["items"];
+export type CvStrengthItems = (typeof deCv)["cv"]["strengths"]["items"];

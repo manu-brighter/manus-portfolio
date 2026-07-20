@@ -28,6 +28,10 @@
         "value": "React 19 · R3F 9 · WebGPU-Shader"
       },
       {
+        "verb": "shippe",
+        "value": "Claude-Code-Skills · eine Electron-App"
+      },
+      {
         "verb": "schieße",
         "value": "Wildlife in Costa Rica & Thailand"
       },
@@ -115,6 +119,10 @@
           },
           {
             "name": "Next.js",
+            "vibecoded": true
+          },
+          {
+            "name": "Electron",
             "vibecoded": true
           },
           {
@@ -314,7 +322,7 @@
           },
           {
             "label": "zvoove",
-            "year": "2021—"
+            "year": "2021–"
           }
         ]
       },
@@ -332,26 +340,48 @@
       "headline": "Wenn der Bildschirm aus ist.",
       "currentlyBand": "Snapshot 2026 · Wildlife-Reise in Planung · Wintersaison · Paddle griffbereit",
       "currentlyBandShort": "Snapshot 2026",
+      "revealCta": "Bild ansehen",
+      "revealClose": "Schliessen",
       "tiles": {
         "camera": {
           "name": "Kamera",
-          "caption": "shooting · Sony α7 IV · Wildlife"
+          "caption": "shooting · Sony α7 IV · Wildlife",
+          "reveal": {
+            "alt": "Zwei junge Füchse zwischen Buchenzweigen im Wald, Wildlife-Aufnahme mit der Sony α7 IV",
+            "caption": "JUNGFÜCHSE · WILDLIFE · α7 IV"
+          }
         },
         "audi": {
           "name": "Audi S5",
-          "caption": "driving · B8.5 · Tuning-Projekt"
+          "caption": "driving · B8.5 · Tuning-Projekt",
+          "reveal": {
+            "alt": "Schwarzer Audi S5 B8.5 mit silbernen Felgen vor einer Holzscheune in der Abenddämmerung",
+            "caption": "AUDI S5 · B8.5 · BLAUE STUNDE"
+          }
         },
         "joggediballa": {
           "name": "Jogge di Balla",
-          "caption": "co-running · Verein · Vize-Präsident"
+          "caption": "co-running · Verein · Vize-Präsident",
+          "reveal": {
+            "alt": "Das Jogge-di-Balla-Team posiert vor vollem Saal an einem Vereinsevent",
+            "caption": "JOGGE DI BALLA · VOLLES HAUS"
+          }
         },
         "schnee": {
           "name": "Schnee",
-          "caption": "carving · Ski/Snowboard · Wintersaison"
+          "caption": "carving · Ski/Snowboard · Wintersaison",
+          "reveal": {
+            "alt": "Verschneite Alpengipfel unter blauem Himmel, vom Grat aus gesehen",
+            "caption": "ALPEN · WINTERSAISON"
+          }
         },
         "tauchen": {
           "name": "Tiefe",
-          "caption": "diving · certified"
+          "caption": "diving · certified",
+          "reveal": {
+            "alt": "Manuel beim Tauchgang am Riff, Daumen hoch in die Kamera",
+            "caption": "TAUCHGANG · DAUMEN HOCH"
+          }
         },
         "pingpong": {
           "name": "Ping-Pong",
@@ -388,7 +418,7 @@
         "metaNote": "Du surfst gerade auf einer GPU-Fluid-Simulation. Kein Iframe, kein Video-Loop, keine Lottie-Datei. Echte Frames.",
         "ctaLabel": "Du bist schon hier",
         "screenshot": {
-          "alt": "Die Hero-Section von manuelheller.dev in fünf Streifen — je einer pro Tinten-Charakter",
+          "alt": "Die Hero-Section von manuelheller.dev in fünf Streifen, je einer pro Tinten-Charakter",
           "caption": "manuelheller.dev · hero"
         },
         "reveal": {
@@ -420,7 +450,29 @@
         },
         "ctaLabel": "Case Study"
       }
-    ]
+    ],
+    "sideProjects": {
+      "label": "Weitere Projekte · Public auf GitHub",
+      "lede": "Zwei kleinere Projekte, beide regelmässig im Einsatz.",
+      "items": [
+        {
+          "id": "shotCounter",
+          "title": "Shot-Counter",
+          "tagline": "Party-Scoreboard · Desktop-App",
+          "description": "Live-Scoreboard für beliebig viele Teams: QR-Code-Join übers LAN, jeder Tap landet per Server-Sent Events sofort auf allen Geräten, ein atomarer SQLite-Zähler verliert keinen Shot. Gebaut als Electron-App für Windows & Linux.",
+          "stack": ["Vue 3", "Express 5", "SQLite", "SSE", "Electron"],
+          "ctaLabel": "Repo & Download"
+        },
+        {
+          "id": "fullProjectRework",
+          "title": "full-project-rework",
+          "tagline": "Claude-Code-Skill · Multi-Agent",
+          "description": "Ein Befehl, kompletter Codebase-Overhaul: parallele Analyzer über 20 Kategorien, Senior-Reviewer-Triage, Implementer mit atomaren Commits und Abschluss-Report. Mein AI-Workflow, destilliert in ein installierbares Skill.",
+          "stack": ["Claude Code", "Subagents", "Skill", "MIT"],
+          "ctaLabel": "Repo & Doku"
+        }
+      ]
+    }
   },
   "caseStudy": {
     "carousel": {
@@ -442,7 +494,7 @@
     },
     "sectionLabel": "Section 04 · Case Study",
     "headline": "Vom Vereins-Chaos zur eigenen Plattform.",
-    "hook": "Alle Vereine kämpfen alle mit demselben Mist: Excel-Listen, statische Websites, File-/Information-Sharing, isolierte Tools. Für Jogge di Balla habe ich das aufgeräumt — eine massgeschneiderte Plattform, die von Mitgliederverwaltung bis Twitch-Overlay alles abdeckt. Vibecoded, selbst gehostet, übertrieben.",
+    "hook": "Alle Vereine kämpfen alle mit demselben Mist: Excel-Listen, statische Websites, File-/Information-Sharing, isolierte Tools. Für Jogge di Balla habe ich das aufgeräumt: eine massgeschneiderte Plattform, die von Mitgliederverwaltung bis Twitch-Overlay alles abdeckt. Vibecoded, selbst gehostet, übertrieben.",
     "context": {
       "label": "Was ist Jogge di Balla?",
       "facts": [
@@ -508,7 +560,7 @@
           "features": [
             {
               "title": "Dynamisches Berechtigungssystem",
-              "body": "Granulare Rechte (edit_events, manage_sponsors, edit_shotcounter, …) per Card pro Rolle zuweisbar — ohne Code-Änderung. Backend prüft jeden tRPC-Call durch eine eigene requirePermission()-Middleware."
+              "body": "Granulare Rechte (edit_events, manage_sponsors, edit_shotcounter, …) per Card pro Rolle zuweisbar, ohne Code-Änderung. Backend prüft jeden tRPC-Call durch eine eigene requirePermission()-Middleware."
             },
             {
               "title": "Anwesenheitsverwaltung mit Statistik",
@@ -538,7 +590,7 @@
             },
             {
               "title": "Reichweite ehrlich klein",
-              "body": "~15–20 concurrent Viewer, ~100 total. Das Tooling ist trotzdem solide gebaut — und übertragbar."
+              "body": "~15–20 concurrent Viewer, ~100 total. Das Tooling ist trotzdem solide gebaut und übertragbar."
             }
           ]
         }
@@ -634,18 +686,18 @@
   "contact": {
     "sectionLabel": "Section 07 · Contact",
     "headline": "Lass uns reden.",
-    "subhead": "Auftrag, Frage, Tipp oder einfach Hallo — die Inbox ist offen.",
+    "subhead": "Auftrag, Frage, Tipp oder einfach Hallo: die Inbox ist offen.",
     "intro": {
       "label": "Ein paar Worte vorab",
       "body": "Ich antworte üblicherweise innerhalb von ein bis zwei Tagen. Für Recruiter und Anfragen aus der Vereinswelt: bitte kurz schreiben woher du kommst, das spart die zweite Mail."
     },
     "channels": {
       "label": "Direkt-Kanäle",
-      "note": "GitHub ist nur semi-aktiv — kein 100-Repo-Glanzfassaden-Account.",
       "email": "E-Mail",
       "github": "GitHub",
       "linkedin": "LinkedIn",
-      "photos": "Fotos"
+      "photos": "Fotos",
+      "cv": "CV"
     },
     "form": {
       "name": {
@@ -670,8 +722,8 @@
       "requiredNote": "Alle Felder erforderlich",
       "status": {
         "fromLabel": "Von:",
-        "success": "Danke, deine Nachricht ist angekommen — ich melde mich.",
-        "error": "Hat nicht geklappt — schreib mir direkt:",
+        "success": "Danke, deine Nachricht ist angekommen. Ich melde mich.",
+        "error": "Hat nicht geklappt, schreib mir direkt:",
         "mailSubject": "Anfrage über manuelheller.dev"
       }
     }

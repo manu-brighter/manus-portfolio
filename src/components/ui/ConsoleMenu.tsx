@@ -57,7 +57,7 @@ function install(): void {
   installed = true;
 
   console.log(
-    `%c${BANNER}%c\n  ${SITE.shortName} — ${SITE.tagline}\n  ${SITE.url}\n\n%c  The ink under your cursor is a real-time GPU Navier-Stokes sim,\n  cel-shaded into a Risograph print. Five inkings, one paper.\n\n%c  > manu.help()  — take the print controls\n`,
+    `%c${BANNER}%c\n  ${SITE.shortName} · ${SITE.tagline}\n  ${SITE.url}\n\n%c  The ink under your cursor is a real-time GPU Navier-Stokes sim,\n  cel-shaded into a Risograph print. Five inkings, one paper.\n\n%c  > manu.help()  · take the print controls\n`,
     `color: ${SPOT_HEX.rose}; font-family: monospace;`,
     "color: inherit; font-weight: bold;",
     "color: inherit; font-weight: normal;",
@@ -68,7 +68,7 @@ function install(): void {
     help: () => {
       console.log(
         [
-          "manu — print controls",
+          "manu · print controls",
           "",
           `  manu.preset(id)   switch the ink character (${PRESET_IDS})`,
           "  manu.preset()     show the active preset",

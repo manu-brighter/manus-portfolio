@@ -28,11 +28,15 @@
         "value": "React 19 · R3F 9 · shader WebGPU"
       },
       {
-        "verb": "leggo",
+        "verb": "pubblico",
+        "value": "skill per Claude Code · un'app Electron"
+      },
+      {
+        "verb": "fotografo",
         "value": "wildlife in Costa Rica & Thailandia"
       },
       {
-        "verb": "ascolto",
+        "verb": "guido",
         "value": "Audi S5 B8.5 (progetto tuning)"
       },
       {
@@ -48,7 +52,7 @@
     "heroSkill": {
       "eyebrow": "Hero Skill",
       "name": "AI Workflow & Vibecoding",
-      "description": "Custom agents, hooks, skills, prompt a più stadi. L'IA non è lo strumento che uso — è lo strumento con cui creo strumenti."
+      "description": "Custom agents, hooks, skills, prompt a più stadi. L'IA non è lo strumento che uso. È lo strumento con cui creo strumenti."
     },
     "vibecodedMarker": "vibecoded",
     "tiers": [
@@ -115,6 +119,10 @@
           },
           {
             "name": "Next.js",
+            "vibecoded": true
+          },
+          {
+            "name": "Electron",
             "vibecoded": true
           },
           {
@@ -314,7 +322,7 @@
           },
           {
             "label": "zvoove",
-            "year": "2021—"
+            "year": "2021–"
           }
         ]
       },
@@ -332,26 +340,48 @@
       "headline": "Quando lo schermo è spento.",
       "currentlyBand": "Snapshot 2026 · Viaggio wildlife in pianificazione · Stagione invernale · Pagaia a portata di mano",
       "currentlyBandShort": "Snapshot 2026",
+      "revealCta": "Guarda l'immagine",
+      "revealClose": "Chiudi",
       "tiles": {
         "camera": {
           "name": "Macchina",
-          "caption": "shooting · Sony α7 IV · wildlife"
+          "caption": "shooting · Sony α7 IV · wildlife",
+          "reveal": {
+            "alt": "Due giovani volpi tra i rami di faggio nel bosco, scatto wildlife con la Sony α7 IV",
+            "caption": "VOLPACCHIOTTI · WILDLIFE · α7 IV"
+          }
         },
         "audi": {
           "name": "Audi S5",
-          "caption": "driving · B8.5 · progetto tuning"
+          "caption": "driving · B8.5 · progetto tuning",
+          "reveal": {
+            "alt": "Audi S5 B8.5 nera con cerchi argento davanti a un fienile in legno al crepuscolo",
+            "caption": "AUDI S5 · B8.5 · ORA BLU"
+          }
         },
         "joggediballa": {
           "name": "Jogge di Balla",
-          "caption": "co-running · associazione · vicepresidente"
+          "caption": "co-running · associazione · vicepresidente",
+          "reveal": {
+            "alt": "Il team Jogge di Balla in posa davanti a una sala piena a un evento del club",
+            "caption": "JOGGE DI BALLA · SALA PIENA"
+          }
         },
         "schnee": {
           "name": "Neve",
-          "caption": "carving · sci/snowboard · stagione invernale"
+          "caption": "carving · sci/snowboard · stagione invernale",
+          "reveal": {
+            "alt": "Cime alpine innevate sotto un cielo blu, viste dalla cresta",
+            "caption": "ALPI · STAGIONE INVERNALE"
+          }
         },
         "tauchen": {
           "name": "Profondità",
-          "caption": "diving · certificato"
+          "caption": "diving · certificato",
+          "reveal": {
+            "alt": "Manuel in immersione sulla barriera, pollice in su verso la camera",
+            "caption": "IMMERSIONE · POLLICE IN SU"
+          }
         },
         "pingpong": {
           "name": "Ping-pong",
@@ -388,7 +418,7 @@
         "metaNote": "Stai surfando in questo momento su una simulazione di fluido GPU. Niente iframe, niente video in loop, niente file Lottie. Frame veri.",
         "ctaLabel": "Sei già qui",
         "screenshot": {
-          "alt": "La sezione hero di manuelheller.dev in cinque strisce — una per carattere d'inchiostro",
+          "alt": "La sezione hero di manuelheller.dev in cinque strisce, una per carattere d'inchiostro",
           "caption": "manuelheller.dev · hero"
         },
         "reveal": {
@@ -420,7 +450,29 @@
         },
         "ctaLabel": "Case Study"
       }
-    ]
+    ],
+    "sideProjects": {
+      "label": "Altri progetti · Pubblici su GitHub",
+      "lede": "Due progetti più piccoli, entrambi usati regolarmente.",
+      "items": [
+        {
+          "id": "shotCounter",
+          "title": "Shot-Counter",
+          "tagline": "Scoreboard da festa · App desktop",
+          "description": "Scoreboard live per un numero qualsiasi di team: si entra via QR code sulla LAN, ogni tap arriva subito su tutti i dispositivi via server-sent events, e un contatore SQLite atomico non perde nessuno shot. Costruito come app Electron per Windows & Linux.",
+          "stack": ["Vue 3", "Express 5", "SQLite", "SSE", "Electron"],
+          "ctaLabel": "Repo & download"
+        },
+        {
+          "id": "fullProjectRework",
+          "title": "full-project-rework",
+          "tagline": "Skill Claude Code · Multi-agente",
+          "description": "Un comando, overhaul completo del codebase: analyzer paralleli su 20 categorie, triage di reviewer senior, implementer con commit atomici e report finale. Il mio workflow AI, distillato in uno skill installabile.",
+          "stack": ["Claude Code", "Subagents", "Skill", "MIT"],
+          "ctaLabel": "Repo & docs"
+        }
+      ]
+    }
   },
   "caseStudy": {
     "carousel": {
@@ -641,11 +693,11 @@
     },
     "channels": {
       "label": "Canali diretti",
-      "note": "GitHub è solo semi-attivo, non è un account vetrina da 100 repo.",
       "email": "E-mail",
       "github": "GitHub",
       "linkedin": "LinkedIn",
-      "photos": "Foto"
+      "photos": "Foto",
+      "cv": "CV"
     },
     "form": {
       "name": {
@@ -670,8 +722,8 @@
       "requiredNote": "Tutti i campi sono obbligatori",
       "status": {
         "fromLabel": "Da:",
-        "success": "Grazie, il tuo messaggio è arrivato — ti rispondo presto.",
-        "error": "Non è andato a buon fine — scrivimi direttamente:",
+        "success": "Grazie, il tuo messaggio è arrivato. Ti rispondo presto.",
+        "error": "Non è andato a buon fine, scrivimi direttamente:",
         "mailSubject": "Richiesta tramite manuelheller.dev"
       }
     }

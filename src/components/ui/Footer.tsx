@@ -29,7 +29,10 @@ import { Link, usePathname, useRouter } from "@/i18n/navigation";
  * Component must be "use client" because of the click handler.
  */
 
+// Document routes in the footer row — the CV sheet leads, legal
+// follows. All three share the pin-killing click handler below.
 const LEGAL_LINKS = [
+  { href: "/cv", key: "cv" },
   { href: "/impressum", key: "impressum" },
   { href: "/datenschutz", key: "datenschutz" },
 ] as const;
@@ -67,7 +70,10 @@ export function Footer() {
     };
 
   return (
-    <footer className="relative z-10 border-paper-line border-t-2 bg-paper-shade">
+    // data-site-chrome: the print stylesheet hides site chrome via this
+    // attribute (a bare `footer` selector would also swallow the CV
+    // sheet's own footer — see the @media print block in globals.css).
+    <footer data-site-chrome className="relative z-10 border-paper-line border-t-2 bg-paper-shade">
       <div className="container-page flex flex-col items-start justify-between gap-6 py-12 md:flex-row md:items-center">
         <p className="type-label text-ink-muted">
           <FadeIn y={8}>

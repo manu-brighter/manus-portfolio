@@ -60,7 +60,7 @@ const COPYRIGHT_EXIF = {
  *   widths: number[],
  *   codecs?: ("avif" | "webp" | "jpg")[],
  *   jpgFallbackWidth?: number | number[],
- *   resize?: { width?: number, height?: number, fit?: "cover" | "inside" },
+ *   resize?: { width?: number, height?: number, fit?: "cover" | "inside", position?: string },
  *   quality?: { avif?: number, webp?: number, jpg?: number },
  *   copyright?: boolean,
  * }} Task */
@@ -68,15 +68,20 @@ const COPYRIGHT_EXIF = {
 /** @type {Task[]} */
 const TASKS = [
   // — Phase 9 · Photography — (copyright: true → embeds EXIF Copyright + Artist)
+  // Quality floor is avif 60 / webp 82 site-wide for pro photos: the
+  // earlier q38-50 range showed visible compression at display size
+  // (explicit user feedback — this section exists to show photography
+  // skills). Full-bleed layouts (sizes=100vw) additionally carry a
+  // 2560w rung so large/high-DPR screens don't upscale 1600w.
   {
     group: "photography",
-    source: "content-input/photography/source/DSC05426-Verbessert-RR.jpg",
+    source: "content-input/photography/source/DSC05422-Verbessert-RR.jpg",
     outDir: "public/photography",
     outName: "01-pelican",
-    widths: [800, 1200, 1600],
+    widths: [800, 1200, 1600, 2560],
     codecs: ["avif", "webp"],
     jpgFallbackWidth: 1200,
-    quality: { avif: 42, webp: 70 },
+    quality: { avif: 60, webp: 82 },
     copyright: true,
   },
   {
@@ -84,10 +89,10 @@ const TASKS = [
     source: "content-input/photography/source/DSC00947.jpg",
     outDir: "public/photography",
     outName: "02-koenigsegg",
-    widths: [800, 1200, 1600],
+    widths: [800, 1200, 1600, 2200],
     codecs: ["avif", "webp"],
     jpgFallbackWidth: 1200,
-    quality: { avif: 42, webp: 70 },
+    quality: { avif: 60, webp: 82 },
     copyright: true,
   },
   {
@@ -98,7 +103,7 @@ const TASKS = [
     widths: [1200, 1920, 2880],
     codecs: ["avif", "webp"],
     jpgFallbackWidth: 1920,
-    quality: { avif: 50, webp: 75 },
+    quality: { avif: 60, webp: 82 },
     copyright: true,
   },
   {
@@ -106,10 +111,10 @@ const TASKS = [
     source: "content-input/photography/source/DSC07960.jpg",
     outDir: "public/photography",
     outName: "04-tree-lake",
-    widths: [800, 1200, 1600],
+    widths: [800, 1200, 1600, 2200],
     codecs: ["avif", "webp"],
     jpgFallbackWidth: 1200,
-    quality: { avif: 38, webp: 65 },
+    quality: { avif: 60, webp: 82 },
     copyright: true,
   },
   {
@@ -117,14 +122,14 @@ const TASKS = [
     source: "content-input/photography/source/DSC06599-Verbessert-RR.jpg",
     outDir: "public/photography",
     outName: "05-crocodile",
-    widths: [800, 1200, 1600],
+    widths: [800, 1200, 1600, 2560],
     codecs: ["avif", "webp"],
     jpgFallbackWidth: 1200,
     // 16:9 aspect crop. Source frames the croc head with the butterfly
     // off-centre; sharp's `fit: cover` centres + crops to the target
     // ratio without distortion.
     resize: { width: 1920, height: 1080, fit: "cover" },
-    quality: { avif: 42, webp: 70 },
+    quality: { avif: 60, webp: 82 },
     copyright: true,
   },
   // — Phase 6 · Profile portrait —
@@ -211,6 +216,44 @@ const TASKS = [
     resize: { width: 1440, height: 2560, fit: "cover" },
     quality: { avif: 55, webp: 78 },
   })),
+  // — Creative pass · Off-the-screen tile reveals —
+  // Manuel provides BOTH crops per tile at
+  // content-input/about/tiles/{key}-{landscape|portrait}.{jpg|png} —
+  // uniformly 16:9 landscape / 2:3 portrait since the second image
+  // drop. The pipeline only scales, it never re-crops (the author's
+  // framing IS the framing). TileRevealOverlay picks the orientation
+  // via <source media>. Missing masters skip with a warning, so tiles
+  // go live one at a time as photos land; mirror the live set in
+  // src/components/about/tileReveals.ts (TILE_REVEAL_KEYS + width
+  // tables). pingpong has no master yet. tauchen masters are video
+  // stills (PNG, 1363w/843w) — widths capped so the srcset never
+  // advertises upscales. Quality sits deliberately high (avif 60 /
+  // webp 82): the overlay is a photography showcase, loads on click
+  // only, and visible compression here was explicit user feedback.
+  ...["camera", "audi", "joggediballa", "schnee", "tauchen", "pingpong"].flatMap((key) => [
+    {
+      group: "about-tiles",
+      source: `content-input/about/tiles/${key}-landscape.jpg`,
+      outDir: "public/about/tiles",
+      outName: `${key}-landscape`,
+      widths: key === "tauchen" ? [800, 1200] : [1200, 1920, 2560],
+      codecs: ["avif", "webp"],
+      jpgFallbackWidth: key === "tauchen" ? 1200 : 1920,
+      quality: { avif: 60, webp: 82, jpg: 85 },
+      copyright: true,
+    },
+    {
+      group: "about-tiles",
+      source: `content-input/about/tiles/${key}-portrait.jpg`,
+      outDir: "public/about/tiles",
+      outName: `${key}-portrait`,
+      widths: key === "tauchen" ? [540, 810] : [720, 1080, 1440],
+      codecs: ["avif", "webp"],
+      jpgFallbackWidth: key === "tauchen" ? 540 : 1080,
+      quality: { avif: 60, webp: 82, jpg: 85 },
+      copyright: true,
+    },
+  ]),
 ];
 
 const groupFilter = process.argv[2];
@@ -225,7 +268,13 @@ if (tasks.length === 0) {
 }
 
 for (const task of tasks) {
-  const src = resolve(root, task.source);
+  let src = resolve(root, task.source);
+  // Some masters arrive as PNG (e.g. the tauchen video stills) — try
+  // the .png sibling before declaring the source missing.
+  if (!existsSync(src) && task.source.endsWith(".jpg")) {
+    const pngAlt = resolve(root, task.source.replace(/\.jpg$/, ".png"));
+    if (existsSync(pngAlt)) src = pngAlt;
+  }
   if (!existsSync(src)) {
     // biome-ignore lint/suspicious/noConsole: CLI script
     console.warn(`⊘ ${task.group} · ${task.outName} — source not found, skipped (${task.source})`);
@@ -245,10 +294,23 @@ for (const task of tasks) {
 
   for (const w of task.widths) {
     let base = sharp(src);
-    if (task.resize) {
-      base = base.resize(task.resize);
+    if (task.resize?.width && task.resize?.height) {
+      // Aspect-crop and width-scale in ONE resize call — sharp only
+      // honours the last resize() in a pipeline, so the previous
+      // two-step (crop, then scale) silently dropped the crop and
+      // outputs kept the source aspect. Unnoticed until the
+      // about-tiles portrait crops because every earlier master was
+      // already pre-cropped to the task's target aspect.
+      const h = Math.round((w * task.resize.height) / task.resize.width);
+      base = base.resize({
+        width: w,
+        height: h,
+        fit: task.resize.fit ?? "cover",
+        position: task.resize.position,
+      });
+    } else {
+      base = base.resize({ width: w, withoutEnlargement: true });
     }
-    base = base.resize({ width: w, withoutEnlargement: true });
     if (task.copyright) {
       base = base.withMetadata(COPYRIGHT_EXIF);
     }
@@ -263,14 +325,22 @@ for (const task of tasks) {
 
   for (const fallbackW of fallbackWidths) {
     let jpgBase = sharp(src);
-    if (task.resize) {
-      jpgBase = jpgBase.resize(task.resize);
+    if (task.resize?.width && task.resize?.height) {
+      // Same single-resize rule as the AVIF/WebP loop above.
+      const h = Math.round((fallbackW * task.resize.height) / task.resize.width);
+      jpgBase = jpgBase.resize({
+        width: fallbackW,
+        height: h,
+        fit: task.resize.fit ?? "cover",
+        position: task.resize.position,
+      });
+    } else {
+      jpgBase = jpgBase.resize({ width: fallbackW, withoutEnlargement: true });
     }
     if (task.copyright) {
       jpgBase = jpgBase.withMetadata(COPYRIGHT_EXIF);
     }
     await jpgBase
-      .resize({ width: fallbackW, withoutEnlargement: true })
       .jpeg({ quality: q.jpg, mozjpeg: true })
       .toFile(`${outDir}/${task.outName}-${fallbackW}w.jpg`);
   }

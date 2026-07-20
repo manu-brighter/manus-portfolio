@@ -11,7 +11,7 @@
 export const SITE = {
   url: "https://manuelheller.dev",
   alias: "https://manuelheller.ch",
-  name: "Manuel Heller — Craft Portfolio",
+  name: "Manuel Heller · Craft Portfolio",
   shortName: "Manuel Heller",
   tagline: "Full-Stack Developer · Visual Tinkerer",
   description:
@@ -26,5 +26,12 @@ export const SITE = {
       photos: "https://manuelheller.myportfolio.com/portfolio",
       instagram: "https://instagram.com/joggediballa",
     },
+  },
+  /** Public repos referenced from the Work side-projects strip. URLs
+   *  live here, not in the i18n catalogs — one file beats four JSONs
+   *  in sync (same rationale as the socials). */
+  repos: {
+    fullProjectRework: "https://github.com/manu-brighter/full-project-rework",
+    shotCounter: "https://github.com/manu-brighter/shot-counter",
   },
 } as const;

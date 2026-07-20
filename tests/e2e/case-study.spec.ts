@@ -7,10 +7,11 @@ test.describe("@case-study fallback breakpoint", () => {
     await page.goto("/de/");
     const section = page.locator("section#case-study");
     await expect(section).toBeVisible();
-    // Desktop branch has the inner 420vh-wide track div as a child
-    // of the section. Fallback branch has only the .container-page
-    // children directly under the section.
-    const track = section.locator(`> div[style*="width:420vh"]`);
+    // Desktop branch mounts the 420vh-wide track inside the pin
+    // wrapper (descendant, not direct child — the wrapper exists so
+    // ScrollTrigger's pin-spacer never wraps the section itself).
+    // Fallback branch renders no track at all.
+    const track = section.locator(`div[style*="width:420vh"]`);
     await expect(track, "diorama track must mount on desktop").toHaveCount(1);
   });
 
@@ -23,7 +24,7 @@ test.describe("@case-study fallback breakpoint", () => {
     await page.goto("/de/");
     const section = page.locator("section#case-study");
     await expect(section).toBeVisible();
-    const track = section.locator(`> div[style*="width:420vh"]`);
+    const track = section.locator(`div[style*="width:420vh"]`);
     await expect(track, "diorama track must NOT mount on short viewport").toHaveCount(0);
     // Fallback uses .container-page wrapper.
     const fallbackContainer = section.locator("> div.container-page");
@@ -35,7 +36,7 @@ test.describe("@case-study fallback breakpoint", () => {
     await page.goto("/de/");
     const section = page.locator("section#case-study");
     await expect(section).toBeVisible();
-    const track = section.locator(`> div[style*="width:420vh"]`);
+    const track = section.locator(`div[style*="width:420vh"]`);
     await expect(track, "diorama track must NOT mount on mobile").toHaveCount(0);
   });
 });

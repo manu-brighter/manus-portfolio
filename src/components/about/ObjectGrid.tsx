@@ -1,8 +1,16 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import type { CSSProperties } from "react";
+import {
+  type CSSProperties,
+  type MouseEvent as ReactMouseEvent,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { PlateCornerMarks } from "@/components/ui/PlateCornerMarks";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { dispatchSplat } from "@/lib/fluidBus";
 import { AudiStamp } from "./stamps/AudiStamp";
 import { CameraStamp } from "./stamps/CameraStamp";
 import { JoggediballaStamp } from "./stamps/JoggediballaStamp";
@@ -10,6 +18,8 @@ import { PingPongStamp } from "./stamps/PingPongStamp";
 import { SchneeStamp } from "./stamps/SchneeStamp";
 import { TauchenStamp } from "./stamps/TauchenStamp";
 import { TileFigure } from "./TileFigure";
+import { TileRevealOverlay } from "./TileRevealOverlay";
+import { hasTileReveal, type RevealTileKey, type StampKey } from "./tileReveals";
 
 /**
  * ObjectGrid — Block 06 of the rewritten About. Replaces the old
@@ -19,8 +29,22 @@ import { TileFigure } from "./TileFigure";
  * tile has its own spot-color rotation; on hover (or viewport-center
  * on coarse pointers, via TileFigure) the tile rotates ~2°, a soft
  * spot-color flood washes from one corner, and the caption shifts
- * +2px (live Riso-misregistration). Tiles are not interactive —
- * hover effects are decorative.
+ * +2px (live Riso-misregistration).
+ *
+ * Creative-pass upgrade: tiles with a reveal manifest entry (see
+ * tileReveals.ts) carry a stretched button — clicking opens
+ * TileRevealOverlay immediately with its ~350ms "Stempelpress"
+ * choreography (the earlier full-page ink-wipe reuse took ~1s and
+ * felt slow — user feedback). The click also drops a real sim splat
+ * at the pointer (visible for the beat before the backdrop covers),
+ * and closing leaves a small ink burst where the plate was pulled —
+ * both ride the always-on hero FluidSim via fluidBus, so they no-op
+ * on coarse pointers (no subscriber) and under reduced motion.
+ * The corner "+" chip is the standing affordance; it rotates with the
+ * hover choreography. Tiles without assets (pingpong) stay decorative
+ * figures until their masters land.
+ *
+ * Reduced-motion: the overlay opens statically, no splats.
  *
  * The former `mobile-strip` horizontal swiper variant was retired in
  * the mobile wow-pass (Manuel: too many side-swipe carousels) — the
@@ -30,8 +54,6 @@ import { TileFigure } from "./TileFigure";
  * a physical-object equivalent) survives as a mono sub-band under
  * the grid header.
  */
-
-type StampKey = "camera" | "audi" | "joggediballa" | "schnee" | "tauchen" | "pingpong";
 
 type Tile = {
   key: StampKey;
@@ -74,6 +96,73 @@ function TileStamp({ k, spotVar }: { k: StampKey; spotVar: string }) {
 
 export function ObjectGrid() {
   const t = useTranslations("about.objectGrid");
+  const reducedMotion = useReducedMotion();
+
+  const [openTile, setOpenTile] = useState<RevealTileKey | null>(null);
+  const openerRef = useRef<HTMLButtonElement | null>(null);
+  // Close-burst stagger timers — tracked per the project's setTimeout
+  // discipline and cleared on unmount.
+  const splatTimersRef = useRef<Set<number>>(new Set());
+  const openSpotRef = useRef<Tile["spot"]>("rose");
+
+  useEffect(() => {
+    const timers = splatTimersRef.current;
+    return () => {
+      for (const id of timers) window.clearTimeout(id);
+      timers.clear();
+    };
+  }, []);
+
+  const openReveal = (tile: Tile, key: RevealTileKey, e: ReactMouseEvent<HTMLButtonElement>) => {
+    openerRef.current = e.currentTarget;
+    openSpotRef.current = tile.spot;
+    if (!reducedMotion && typeof window !== "undefined") {
+      // Keyboard activations report detail 0 (and clientX/Y 0,0) —
+      // splat from the tile centre instead of the corner then.
+      let x = e.clientX;
+      let y = e.clientY;
+      if (e.detail === 0) {
+        const rect = e.currentTarget.getBoundingClientRect();
+        x = rect.left + rect.width / 2;
+        y = rect.top + rect.height / 2;
+      }
+      dispatchSplat({
+        x: x / window.innerWidth,
+        y: 1 - y / window.innerHeight,
+        color: tile.spot,
+      });
+    }
+    setOpenTile(key);
+  };
+
+  const closeReveal = () => {
+    setOpenTile(null);
+    const opener = openerRef.current;
+    opener?.focus();
+    openerRef.current = null;
+    // Pulling the plate leaves ink behind — a staggered two-splat
+    // burst at the tile, visible the moment the backdrop is gone.
+    if (!reducedMotion && opener && typeof window !== "undefined") {
+      const rect = opener.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const spot = openSpotRef.current;
+      const timers = splatTimersRef.current;
+      for (let i = 0; i < 2; i++) {
+        const id = window.setTimeout(() => {
+          timers.delete(id);
+          dispatchSplat({
+            x: (cx + (Math.random() - 0.5) * 80) / window.innerWidth,
+            y: 1 - (cy + (Math.random() - 0.5) * 80) / window.innerHeight,
+            color: spot,
+          });
+        }, i * 90);
+        timers.add(id);
+      }
+    }
+  };
+
+  const openSpot = TILES.find((tile) => tile.key === openTile)?.spot ?? "rose";
 
   return (
     <section
@@ -94,6 +183,10 @@ export function ObjectGrid() {
       <ul className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6">
         {TILES.map((tile) => {
           const cssVars = { "--tile-spot": SPOT_VAR[tile.spot] } as CSSProperties;
+          // Narrow once — the guard result IS the key, so the button
+          // path below stays cast-free (a loosened gate would surface
+          // as a type error, not a broken image at runtime).
+          const revealKey = hasTileReveal(tile.key) ? tile.key : null;
           return (
             <li key={tile.key} className="list-none">
               <TileFigure
@@ -117,11 +210,40 @@ export function ObjectGrid() {
                     {t(`tiles.${tile.i18nKey}.caption`)}
                   </p>
                 </figcaption>
+                {revealKey ? (
+                  <>
+                    {/* Stretched action — the whole tile opens the
+                        plate pull. Sits above the decorative layers;
+                        the sr-only text names the action + subject. */}
+                    <button
+                      type="button"
+                      onClick={(e) => openReveal(tile, revealKey, e)}
+                      className="absolute inset-0 z-10 cursor-pointer [-webkit-tap-highlight-color:transparent] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+                    >
+                      <span className="sr-only">
+                        {t("revealCta")}: {t(`tiles.${tile.i18nKey}.name`)}
+                      </span>
+                    </button>
+                    {/* Corner affordance chip — rotates with the hover
+                        choreography so interactive tiles read as
+                        openable, not just decorated. */}
+                    <span
+                      aria-hidden="true"
+                      className="absolute top-3 right-3 grid size-7 place-items-center border-[1.5px] border-ink bg-paper font-mono text-ink text-sm transition-transform duration-[280ms] ease-out group-hover:rotate-90 group-data-[active=true]:rotate-90"
+                    >
+                      +
+                    </span>
+                  </>
+                ) : null}
               </TileFigure>
             </li>
           );
         })}
       </ul>
+
+      {openTile ? (
+        <TileRevealOverlay tile={openTile} spot={openSpot} onClose={closeReveal} />
+      ) : null}
     </section>
   );
 }

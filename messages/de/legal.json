@@ -53,7 +53,7 @@
     },
     "datenschutz": {
       "metaTitle": "Datenschutz · Manuel Heller",
-      "metaDescription": "Datenschutzerklärung für manuelheller.dev — keine Cookies, kein Analytics, kein Tracking.",
+      "metaDescription": "Datenschutzerklärung für manuelheller.dev: keine Cookies, kein Analytics, kein Tracking.",
       "sectionLabel": "Legal · Datenschutz",
       "headline": "Datenschutzerklärung",
       "lede": "Kurzfassung: Diese Seite setzt keine Cookies, nutzt kein Tracking und kein Analytics. Es gibt keinen Cookie-Banner, weil es nichts gibt das einer Einwilligung bedürfte.",
@@ -79,7 +79,7 @@
           "id": "logs",
           "heading": "Server-Logs",
           "body": [
-            "Der Hosting-Server (Linux mit nginx) wird selbst betrieben und steht beim Anbieter mc-host24.de in Deutschland. Die DNS-Auflösung läuft über Cloudflare (Cloudflare, Inc., USA), das gleichzeitig als Proxy-Schutz vor Bot-Angriffen dient — dabei werden IP-Adressen technisch verarbeitet, jedoch nicht zu Tracking-Zwecken gespeichert. Der Server protokolliert technisch notwendige Zugriffe: IP-Adresse, Zeitstempel, abgerufene URL, Referrer, User-Agent. Diese Logs werden nach 14 Tagen automatisch gelöscht und ausschliesslich zur Fehleranalyse und Sicherheitsüberwachung verwendet (Rechtsgrundlage: berechtigtes Interesse, DSGVO Art. 6 Abs. 1 lit. f, sowie Art. 31 Abs. 2 lit. b DSG).",
+            "Der Hosting-Server (Linux mit nginx) wird selbst betrieben und steht beim Anbieter mc-host24.de in Deutschland. Die DNS-Auflösung läuft über Cloudflare (Cloudflare, Inc., USA), das gleichzeitig als Proxy-Schutz vor Bot-Angriffen dient. Dabei werden IP-Adressen technisch verarbeitet, jedoch nicht zu Tracking-Zwecken gespeichert. Der Server protokolliert technisch notwendige Zugriffe: IP-Adresse, Zeitstempel, abgerufene URL, Referrer, User-Agent. Diese Logs werden nach 14 Tagen automatisch gelöscht und ausschliesslich zur Fehleranalyse und Sicherheitsüberwachung verwendet (Rechtsgrundlage: berechtigtes Interesse, DSGVO Art. 6 Abs. 1 lit. f, sowie Art. 31 Abs. 2 lit. b DSG).",
             "Cloudflare ist über Standard-Vertragsklauseln (Art. 46 DSGVO) für Datentransfers in die USA abgesichert."
           ]
         },
@@ -88,8 +88,8 @@
           "heading": "Kontaktformular",
           "body": [
             "Bei Nutzung des Kontaktformulars werden Name, E-Mail-Adresse und Nachricht verschlüsselt an einen technischen Mittler übermittelt: Die Anfrage wird an der Cloudflare-Edge (Cloudflare, Inc., USA) von einem Cloudflare Worker entgegengenommen und über den E-Mail-Dienst Resend (Resend, Inc., USA) als E-Mail an mich zugestellt. Beide Anbieter sind über Standard-Vertragsklauseln (Art. 46 DSGVO) für Datentransfers in die USA abgesichert. Verarbeitet werden ausschliesslich die Daten, die du selbst in das Formular eingibst.",
-            "Schlägt die Übermittlung fehl, bietet das Formular ersatzweise einen mailto-Link an — die Nachricht läuft dann über deinen eigenen E-Mail-Client und E-Mail-Provider, nicht über einen Server unter meiner Kontrolle.",
-            "Rechtsgrundlage in beiden Fällen: deine Einwilligung durch das Absenden (Art. 6 Abs. 1 lit. a DSGVO, Art. 31 Abs. 1 DSG). Eingehende Nachrichten werden nach Beantwortung gelöscht, spätestens jedoch nach sechs Monaten. Du kannst jederzeit Auskunft, Berichtigung oder Löschung verlangen — schreib einfach an manuelheller@bluewin.ch."
+            "Schlägt die Übermittlung fehl, bietet das Formular ersatzweise einen mailto-Link an. Die Nachricht läuft dann über deinen eigenen E-Mail-Client und E-Mail-Provider, nicht über einen Server unter meiner Kontrolle.",
+            "Rechtsgrundlage in beiden Fällen: deine Einwilligung durch das Absenden (Art. 6 Abs. 1 lit. a DSGVO, Art. 31 Abs. 1 DSG). Eingehende Nachrichten werden nach Beantwortung gelöscht, spätestens jedoch nach sechs Monaten. Du kannst jederzeit Auskunft, Berichtigung oder Löschung verlangen. Schreib einfach an manuelheller@bluewin.ch."
           ]
         },
         {
