@@ -68,15 +68,25 @@ const COPYRIGHT_EXIF = {
 /** @type {Task[]} */
 const TASKS = [
   // — Phase 9 · Photography — (copyright: true → embeds EXIF Copyright + Artist)
+  // Quality floor is avif 60 / webp 82 site-wide for pro photos: the
+  // earlier q38-50 range showed visible compression at display size
+  // (explicit user feedback — this section exists to show photography
+  // skills). Full-bleed layouts (sizes=100vw) additionally carry a
+  // 2560w rung so large/high-DPR screens don't upscale 1600w.
+  // NOTE: the 01-pelican master (DSC05426) is currently missing from
+  // content-input/photography/source — the task skips with a warning
+  // and public/ keeps the older 800/1200/1600 q42 set. Drop the master
+  // back in, re-run, and add the 2560w rung to Photography.tsx's
+  // widths for slide 01.
   {
     group: "photography",
     source: "content-input/photography/source/DSC05426-Verbessert-RR.jpg",
     outDir: "public/photography",
     outName: "01-pelican",
-    widths: [800, 1200, 1600],
+    widths: [800, 1200, 1600, 2560],
     codecs: ["avif", "webp"],
     jpgFallbackWidth: 1200,
-    quality: { avif: 42, webp: 70 },
+    quality: { avif: 60, webp: 82 },
     copyright: true,
   },
   {
@@ -84,10 +94,10 @@ const TASKS = [
     source: "content-input/photography/source/DSC00947.jpg",
     outDir: "public/photography",
     outName: "02-koenigsegg",
-    widths: [800, 1200, 1600],
+    widths: [800, 1200, 1600, 2200],
     codecs: ["avif", "webp"],
     jpgFallbackWidth: 1200,
-    quality: { avif: 42, webp: 70 },
+    quality: { avif: 60, webp: 82 },
     copyright: true,
   },
   {
@@ -98,7 +108,7 @@ const TASKS = [
     widths: [1200, 1920, 2880],
     codecs: ["avif", "webp"],
     jpgFallbackWidth: 1920,
-    quality: { avif: 50, webp: 75 },
+    quality: { avif: 60, webp: 82 },
     copyright: true,
   },
   {
@@ -106,10 +116,10 @@ const TASKS = [
     source: "content-input/photography/source/DSC07960.jpg",
     outDir: "public/photography",
     outName: "04-tree-lake",
-    widths: [800, 1200, 1600],
+    widths: [800, 1200, 1600, 2200],
     codecs: ["avif", "webp"],
     jpgFallbackWidth: 1200,
-    quality: { avif: 38, webp: 65 },
+    quality: { avif: 60, webp: 82 },
     copyright: true,
   },
   {
@@ -117,14 +127,14 @@ const TASKS = [
     source: "content-input/photography/source/DSC06599-Verbessert-RR.jpg",
     outDir: "public/photography",
     outName: "05-crocodile",
-    widths: [800, 1200, 1600],
+    widths: [800, 1200, 1600, 2560],
     codecs: ["avif", "webp"],
     jpgFallbackWidth: 1200,
     // 16:9 aspect crop. Source frames the croc head with the butterfly
     // off-centre; sharp's `fit: cover` centres + crops to the target
     // ratio without distortion.
     resize: { width: 1920, height: 1080, fit: "cover" },
-    quality: { avif: 42, webp: 70 },
+    quality: { avif: 60, webp: 82 },
     copyright: true,
   },
   // — Phase 6 · Profile portrait —
@@ -213,26 +223,28 @@ const TASKS = [
   })),
   // — Creative pass · Off-the-screen tile reveals —
   // Manuel provides BOTH crops per tile at
-  // content-input/about/tiles/{key}-{landscape|portrait}.jpg — the
-  // pipeline only scales, it never re-crops (the author's framing IS
-  // the framing; aspect ratios vary per tile and that's fine, the
-  // overlay renders object-contain). TileRevealOverlay picks the
-  // orientation via <source media>. Missing masters skip with a
-  // warning, so tiles go live one at a time as photos land; mirror
-  // the live set in src/components/about/tileReveals.ts
-  // (TILE_REVEAL_KEYS). pingpong has no master yet. The tauchen
-  // portrait master is a 648px video still — widths capped so the
-  // srcset never advertises upscales.
+  // content-input/about/tiles/{key}-{landscape|portrait}.{jpg|png} —
+  // uniformly 16:9 landscape / 2:3 portrait since the second image
+  // drop. The pipeline only scales, it never re-crops (the author's
+  // framing IS the framing). TileRevealOverlay picks the orientation
+  // via <source media>. Missing masters skip with a warning, so tiles
+  // go live one at a time as photos land; mirror the live set in
+  // src/components/about/tileReveals.ts (TILE_REVEAL_KEYS + width
+  // tables). pingpong has no master yet. tauchen masters are video
+  // stills (PNG, 1363w/843w) — widths capped so the srcset never
+  // advertises upscales. Quality sits deliberately high (avif 60 /
+  // webp 82): the overlay is a photography showcase, loads on click
+  // only, and visible compression here was explicit user feedback.
   ...["camera", "audi", "joggediballa", "schnee", "tauchen", "pingpong"].flatMap((key) => [
     {
       group: "about-tiles",
       source: `content-input/about/tiles/${key}-landscape.jpg`,
       outDir: "public/about/tiles",
       outName: `${key}-landscape`,
-      widths: [800, 1200, 1600],
+      widths: key === "tauchen" ? [800, 1200] : [1200, 1920, 2560],
       codecs: ["avif", "webp"],
-      jpgFallbackWidth: 1200,
-      quality: { avif: 46, webp: 72 },
+      jpgFallbackWidth: key === "tauchen" ? 1200 : 1920,
+      quality: { avif: 60, webp: 82, jpg: 85 },
       copyright: true,
     },
     {
@@ -240,10 +252,10 @@ const TASKS = [
       source: `content-input/about/tiles/${key}-portrait.jpg`,
       outDir: "public/about/tiles",
       outName: `${key}-portrait`,
-      widths: key === "tauchen" ? [540] : [540, 810, 1080],
+      widths: key === "tauchen" ? [540, 810] : [720, 1080, 1440],
       codecs: ["avif", "webp"],
-      jpgFallbackWidth: 540,
-      quality: { avif: 46, webp: 72 },
+      jpgFallbackWidth: key === "tauchen" ? 540 : 1080,
+      quality: { avif: 60, webp: 82, jpg: 85 },
       copyright: true,
     },
   ]),
@@ -261,7 +273,13 @@ if (tasks.length === 0) {
 }
 
 for (const task of tasks) {
-  const src = resolve(root, task.source);
+  let src = resolve(root, task.source);
+  // Some masters arrive as PNG (e.g. the tauchen video stills) — try
+  // the .png sibling before declaring the source missing.
+  if (!existsSync(src) && task.source.endsWith(".jpg")) {
+    const pngAlt = resolve(root, task.source.replace(/\.jpg$/, ".png"));
+    if (existsSync(pngAlt)) src = pngAlt;
+  }
   if (!existsSync(src)) {
     // biome-ignore lint/suspicious/noConsole: CLI script
     console.warn(`⊘ ${task.group} · ${task.outName} — source not found, skipped (${task.source})`);
