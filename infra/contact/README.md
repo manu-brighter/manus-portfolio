@@ -1,10 +1,30 @@
 # Contact form endpoint (self-hosted PHP → SMTP)
 
+> ## ⚠️ SUPERSEDED. DO NOT DEPLOY.
+>
+> This PHP template is **unused**. The live `/api/contact` endpoint is a
+> **Cloudflare Worker → Resend** bridge, in production since 2026-06-19 and
+> documented in [`../contact-worker/README.md`](../contact-worker/README.md).
+> The Worker is bound to the route `manuelheller.dev/api/contact` and answers
+> **at the Cloudflare edge, before nginx**, so the request never reaches the
+> box at all.
+>
+> The box has **no PHP and no PHP-FPM installed**, so nothing in this
+> directory runs. The sibling nginx snippet
+> [`../nginx/contact-endpoint.conf`](../nginx/contact-endpoint.conf) is dead
+> for the same reason: do not include it in the vhost.
+>
+> Kept as a reference implementation only. The Worker mirrors its contract
+> (status codes, honeypot, validation bounds, per-IP rate limit), so this file
+> stays useful as the fallback design if the endpoint ever moves back onto the
+> origin. Everything below describes that hypothetical setup, not reality.
+
 The site is a static export (no Node runtime). The contact form
 (`src/components/ui/ContactForm.tsx`) POSTs JSON to the **same-origin**
-path `/api/contact`, which nginx maps to `contact.php` here. That keeps it
-inside the existing CSP `connect-src 'self'` (no CSP change) and means no
-third party ever sees a submission.
+path `/api/contact`. In this design nginx would map that path to `contact.php`
+here. Same-origin keeps it inside the existing CSP `connect-src 'self'` (no CSP
+change) and means no third party ever sees a submission. The live Worker keeps
+exactly the same property, since its route sits on the site's own origin.
 
 If the request fails for any reason, the form degrades gracefully to a
 pre-filled `mailto:` link, so messages are never lost while you wire this up.
@@ -15,9 +35,13 @@ pre-filled `mailto:` link, so messages are never lost while you wire this up.
 | --- | --- |
 | `contact.php` | The endpoint: validate → honeypot → rate-limit → mail via SMTP. |
 | `config.example.php` | Template for SMTP credentials. Copy to `config.php`. |
-| `../nginx/contact-endpoint.conf` | nginx `location = /api/contact` → PHP-FPM. |
+| `../nginx/contact-endpoint.conf` | nginx `location = /api/contact` → PHP-FPM. Not included by the vhost. |
 
 ## Setup on the server
+
+*Reference only. Do not run these steps: the live endpoint is the Cloudflare
+Worker, and deploying this in parallel would put a second handler on the same
+path.*
 
 1. **PHP-FPM** — ensure it's installed and running for the box
    (e.g. `apt install php-fpm`; note the socket, e.g. `/run/php/php-fpm.sock`).

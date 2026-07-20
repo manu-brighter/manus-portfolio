@@ -3,6 +3,7 @@
 **Branch**: `chore/sf2-csp-headers`
 **Status**: deliverable-only — Manuel applies the nginx config manually on `mc-host24.de`.
 **Roll-out**: ship enforcing directly (the box already had a narrower enforcing CSP since initial setup — see "Server-state audit" below). Phase 2 = SHA-256 hashes replace `'unsafe-inline'`.
+**Scope**: this document covers `security-headers.conf`, the only file in this directory that is live on the box. The sibling `contact-endpoint.conf` (PHP-FPM mapping for `/api/contact`) is **dead and must not be included in the vhost**: that endpoint is now a Cloudflare Worker answering at the edge, see `infra/contact-worker/README.md`.
 
 ---
 
@@ -24,13 +25,14 @@ Static export (`output: "export"`), so Next's `headers()` config is inert; all e
 Two inline `<script>` blocks ship in the static export:
 
 1. **`src/app/page.tsx:65`** — `REDIRECT_SCRIPT` (real JavaScript). Detects `navigator.languages` and redirects to the matching `/[locale]/`. Build-time controlled, no template substitution from any input. ~600 bytes.
-2. **`src/app/[locale]/layout.tsx:64`** — `type="application/ld+json"`. Structured data, not executable. CSP `script-src` still applies (browsers gate ALL `<script>` tags through `script-src`), so it needs an allowance too. ~3 KB.
+2. **`src/app/[locale]/layout.tsx:75`** — `type="application/ld+json"`. Structured data, not executable. CSP `script-src` still applies (browsers gate ALL `<script>` tags through `script-src`), so it needs an allowance too. ~3 KB.
 
 Third-party / external resources currently shipped: **none**. All JS, CSS, fonts, images, video are same-origin (static export served by Nginx). The R3F/Three.js stack contains no `eval()` or `new Function()` — the `eval*` matches in `three.module.js` are GLSL shader function names embedded in JS strings, not JavaScript evaluation.
 
 Planned future origins (not in this commit):
 - **Plausible self-hosted** (per `reference_deployment.md` memory) — will need `script-src` + `connect-src` entries pointing at the analytics host (likely `analytics.manuelheller.dev` or similar — TBD).
-- **Cloudflare Worker → Resend** (Contact form, deferred sprint) — `connect-src` entry for the Worker's URL.
+
+**Settled since (2026-06-19): the Contact-form bridge needs no CSP change.** The Cloudflare Worker → Resend endpoint (`infra/contact-worker/`) is bound to the route `manuelheller.dev/api/contact`, so the form's `fetch()` targets the site's **own origin** and `connect-src 'self'` already covers it. The Worker intercepts at the Cloudflare edge before nginx, which is also why no vhost change was needed. Only the Worker's own outbound call to `api.resend.com` leaves the origin, and that runs server-side at the edge where page CSP does not apply.
 
 ## Inline-script enforcement strategy
 
@@ -42,7 +44,7 @@ Three options for the two inline scripts:
 | Per-request nonce | Strongest hardening; browsers reject `'unsafe-inline'` if `'nonce-...'` is also present. | Static export emits one HTML per build — a fixed-at-build nonce is reusable across visitors, which CSP3 still accepts but reduces nonce hygiene. To get per-request nonces we'd need to inject them at the Nginx layer with `sub_filter` (fragile + extra worker CPU). | **Skip.** |
 | SHA-256 hash | Strong; static, build-time computable. | Hash changes whenever either script's bytes change, which (for `jsonLd`) happens whenever site metadata or locale strings change. Hash list must be regenerated and committed alongside the nginx conf. | **Phase 2 target.** Requires a build-time helper (see step 5). |
 
-**Decision**: Phase 1 keeps `script-src 'self' 'unsafe-inline'` (status quo on the box). Phase 2 swaps `'unsafe-inline'` for two `'sha256-...'` entries once a deploy-pipeline helper extracts them. Add Plausible self-hosted entries to `script-src` + `connect-src` once Plausible is deployed; add the Worker URL to `connect-src` + `form-action` once the Contact form bridge lands.
+**Decision**: Phase 1 keeps `script-src 'self' 'unsafe-inline'` (status quo on the box). Phase 2 swaps `'unsafe-inline'` for two `'sha256-...'` entries once a deploy-pipeline helper extracts them. Add Plausible self-hosted entries to `script-src` + `connect-src` once Plausible is deployed. The Contact-form bridge has since landed and needed no directive change (same-origin route, see above).
 
 ## Per-directive reasoning
 
@@ -53,17 +55,17 @@ Three options for the two inline scripts:
 | `style-src` | `'self' 'unsafe-inline'` | Tailwind v4 emits some inline `style` attributes; Next.js injects critical CSS inline. Removing `'unsafe-inline'` here breaks the build. No realistic XSS lever via style alone (older browsers + IE only). |
 | `img-src` | `'self' data: blob:` | `data:` for inline favicon SVGs + OG image hash URLs; `blob:` for any future canvas exports. |
 | `font-src` | `'self'` | `@fontsource-variable/*` ships fonts under `/_next/static/media/`. No `data:` URIs in font payloads — verified before flipping the prior policy's `'self' data:` to `'self'`. |
-| `connect-src` | `'self'` | No external fetches today. Sprint 6 adds Worker URL (TBD); analytics adds Plausible host. |
-| `media-src` | `'self'` | `AmbientVideo` ships from same origin. |
-| `worker-src` | `'self'` | No Workers today. Explicit because CSP3 falls back through `child-src` → `default-src`, which works but obscures intent — and a future Plausible self-hosted script (or any tracker) could pull in a Worker without our noticing. |
+| `connect-src` | `'self'` | No cross-origin fetches. The only runtime fetch is the Contact form's POST to `/api/contact`, which is same-origin (Cloudflare Worker on the site's own route), so `'self'` covers it. Analytics would add the Plausible host. |
+| `media-src` | `'self'` | No media element ships today: the `AmbientVideo` tablet fallback was retired in the mobile wow-pass (all coarse-pointer devices run the live `MobileBackgroundSim`) and its mp4 was deleted. Kept at `'self'` so a re-added same-origin asset just works, and cross-origin media stays denied. |
+| `worker-src` | `'self'` | No browser Web Workers today (unrelated to the Cloudflare Worker, which runs at the edge and never loads through a page CSP). Explicit because CSP3 falls back through `child-src` → `default-src`, which works but obscures intent — and a future Plausible self-hosted script (or any tracker) could pull in a Worker without our noticing. |
 | `frame-src` | `'none'` | Site embeds no iframes. |
 | `frame-ancestors` | `'none'` | Site refuses to be iframed (legacy X-Frame-Options DENY shim kept too). |
 | `base-uri` | `'self'` | Pins `<base href>` injection vector. |
 | `object-src` | `'none'` | No `<object>` / `<embed>` / `<applet>`. |
-| `form-action` | `'self' mailto:` | Defensive padding — the Contact form currently uses `<a href="mailto:…">` (anchor), not `<form action="mailto:…">`, so this directive doesn't apply yet. Kept for the case the form is rewired to a mailto submit, and the future Worker URL lands here too. |
+| `form-action` | `'self' mailto:` | Defensive padding, still not exercised. The Contact form is a real `<form>`, but it has no `action` and its submit is `preventDefault`-ed into a `fetch()`, so no navigation happens and `form-action` never fires; the mailto fallback is an `<a href>`, which this directive also doesn't govern. Kept for the case the form is rewired to a native submit. The Worker needs no entry here (same-origin route, covered by `'self'`). |
 | `manifest-src` | `'self'` | `manifest.webmanifest` is same-origin. |
 | `upgrade-insecure-requests` | (present, no value) | Belt-and-suspenders for any future http:// asset that sneaks in. |
-| `report-to` / `report-uri` | (deferred) | Without a report-collector endpoint set up (Cloudflare's CSP reports or a Worker), violations only land in browser DevTools. Add once Plausible / a Worker is in place. |
+| `report-to` / `report-uri` | (deferred) | Without a report-collector endpoint set up (Cloudflare's CSP reports or a Worker), violations only land in browser DevTools. Still open: the contact Worker is a mail bridge, not a report sink, so it does not satisfy this. Add once a collector (Plausible, or a second Worker) exists. |
 
 ## Other security headers
 
