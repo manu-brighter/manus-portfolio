@@ -126,6 +126,21 @@ export function Nav() {
     router.push("/");
   };
 
+  // The wordmark is the site's "back to the top of home" control. As a
+  // bare <Link href="/"> it dead-ended on the home page itself: the
+  // router treats it as a same-route navigation, so a user scrolled
+  // deep into the page clicked it and nothing moved. On home we take
+  // over and scroll; everywhere else the link navigates as before.
+  const handleBrand = (e: MouseEvent<HTMLAnchorElement>) => {
+    if (!onHome) return;
+    e.preventDefault();
+    if (lenis && !reducedMotion) {
+      lenis.scrollTo(0, { immediate: reducedMotion });
+    } else {
+      window.scrollTo({ top: 0, behavior: reducedMotion ? "auto" : "smooth" });
+    }
+  };
+
   // Scroll-spy: tracks which page section currently sits in the central
   // viewport band. rootMargin "-20% 0px -70% 0px" treats a section as
   // active only once its top crosses into the 20%–30% viewport strip,
@@ -185,7 +200,12 @@ export function Nav() {
       className="sticky top-0 z-50 border-paper-line border-b bg-paper/90 backdrop-blur-sm"
     >
       <div className="container-page flex items-center justify-between gap-6 py-4">
-        <Link href="/" className="type-label-stamp" aria-label={t("brand.aria")}>
+        <Link
+          href="/"
+          onClick={handleBrand}
+          className="type-label-stamp"
+          aria-label={t("brand.aria")}
+        >
           {t("brand.label")}
         </Link>
 
