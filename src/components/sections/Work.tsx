@@ -158,21 +158,28 @@ export function Work() {
           <h3 className="type-label-stamp">{t("sideProjects.label")}</h3>
           <p className="type-label text-ink-muted">{t("sideProjects.lede")}</p>
         </div>
-        <div className="grid gap-6 md:grid-cols-2 md:gap-8 lg:max-w-4xl">
+        {/* Side-scroll rail on phones, two-column grid from `md`. The
+            per-card wrapper is what `.side-rail` sizes and snaps, so
+            SideProjectCard itself stays layout-agnostic. Carousels are
+            used sparingly here (see CLAUDE.md); this one earns it by
+            keeping a quiet open-source shelf from eating a full screen
+            of vertical scroll on the way to Contact. */}
+        <div className="side-rail lg:max-w-4xl">
           {sideProjects.map((project) => {
             if (!isSideProjectId(project.id)) return null;
             const meta = SIDE_PROJECT_META[project.id];
             return (
-              <SideProjectCard
-                key={project.id}
-                title={project.title}
-                tagline={project.tagline}
-                description={project.description}
-                stack={project.stack}
-                ctaLabel={project.ctaLabel}
-                href={meta.href}
-                spot={meta.spot}
-              />
+              <div key={project.id}>
+                <SideProjectCard
+                  title={project.title}
+                  tagline={project.tagline}
+                  description={project.description}
+                  stack={project.stack}
+                  ctaLabel={project.ctaLabel}
+                  href={meta.href}
+                  spot={meta.spot}
+                />
+              </div>
             );
           })}
         </div>

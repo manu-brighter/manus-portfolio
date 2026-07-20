@@ -805,6 +805,64 @@
     padding-inline: var(--container-gutter);
   }
 
+  /* Side-scroll rail below `md`, two-column grid from `md` up. Used by
+   * the Work side-projects strip.
+   *
+   * CSS-only on purpose: Work and SideProjectCard are server
+   * components, and a JS carousel (arrows, dots, aria-live, like the
+   * Case-Study one) would drag both across the client boundary for a
+   * two-card shelf. Snap points plus a peeking neighbour carry the
+   * whole affordance.
+   *
+   * The negative margin cancels the section's gutter so cards bleed to
+   * the viewport edges and the next one peeks in; the matching padding
+   * puts the first card back on the text grid. `padding-block` is not
+   * decoration: the cards translate -2px on hover and carry a
+   * ring-offset-4 focus ring, and `overflow-x: auto` forces
+   * `overflow-y` to compute to `auto` as well, so without the room a
+   * focused card would spawn a nested vertical scrollbar.
+   *
+   * NOT given `tabIndex`: axe's scrollable-region-focusable rule only
+   * fires when a scrollable region has no focusable descendants, and
+   * every card here is a link. Tabbing to a card scrolls it into view,
+   * so the extra stop would be keyboard noise. */
+  .side-rail {
+    display: flex;
+    gap: 1.5rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    margin-inline: calc(var(--container-gutter) * -1);
+    padding-inline: var(--container-gutter);
+    padding-block: 0.5rem;
+    scrollbar-width: none;
+  }
+
+  .side-rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .side-rail > * {
+    flex: 0 0 84%;
+    scroll-snap-align: center;
+  }
+
+  @media (min-width: 768px) {
+    .side-rail {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 2rem;
+      overflow-x: visible;
+      margin-inline: 0;
+      padding-inline: 0;
+      padding-block: 0;
+    }
+
+    .side-rail > * {
+      flex: initial;
+    }
+  }
+
   /* 12-col grid — opt-in. Compose onto .container-page (same element)
    * for full-bleed section grids, or nest inside for padded sub-grids. */
   .grid-12 {

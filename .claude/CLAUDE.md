@@ -357,6 +357,25 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   (desk slides, mirroring the Desktop horizontal-pin track) — Manuel
   explicitly asked for it back after a first cut removed it. A new
   carousel needs a reason like that, not just "content overflows".
+  The Work side-projects strip got one too (Manuel asked directly):
+  it is a quiet open-source shelf, and stacking two cards vertically
+  cost a full phone screen of scroll on the way to Contact.
+- **`.side-rail` (globals.css) is the LIGHT carousel pattern** — a
+  side-scroll rail below `md`, a two-column grid from `md` up, pure
+  CSS. Reach for this before `CaseStudyMobileCarousel`'s machinery
+  (arrows, dots, aria-live, keyboard handler): that one drags its
+  consumers across the client boundary, and Work/SideProjectCard are
+  server components. Snap points plus a peeking neighbour carry the
+  affordance on their own. Two traps it already encodes:
+  - `overflow-x: auto` makes `overflow-y` compute to `auto` as well,
+    so the rail needs `padding-block` or a card's hover translate and
+    `ring-offset-4` focus ring spawn a nested vertical scrollbar.
+  - It deliberately has **no `tabIndex`**. Axe's
+    `scrollable-region-focusable` only fires when a scrollable region
+    has no focusable descendants, and every card is a link — tabbing
+    to one scrolls it into view, so a tab stop on the rail would be
+    keyboard noise (verified: a11y suite passes without it).
+  Regression spec: `tests/e2e/side-projects-rail.spec.ts`.
 - **FadeIn on potentially-viewport-tall blocks needs a low `threshold`**
   (~0.15): IO `intersectionRatio` can never reach the default 0.35 when the
   element is taller than the viewport → entrance never fires.
