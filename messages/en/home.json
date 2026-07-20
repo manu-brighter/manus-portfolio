@@ -52,11 +52,7 @@
     "heroSkill": {
       "eyebrow": "Hero Skill",
       "name": "AI Workflow & Vibecoding",
-      "description": "Custom agents, hooks, skills, multi-stage prompts. AI isn't the tool I use — it's the thing I use to create tools.",
-      "proof": {
-        "lede": "Not an empty claim — my multi-agent rework skill for Claude Code is public: parallel analyzers, reviewer triage, atomic implementer commits.",
-        "ctaLabel": "GitHub · full-project-rework"
-      }
+      "description": "Custom agents, hooks, skills, multi-stage prompts. AI isn't the tool I use. It's the thing I use to create tools."
     },
     "vibecodedMarker": "vibecoded",
     "tiers": [
@@ -326,7 +322,7 @@
           },
           {
             "label": "zvoove",
-            "year": "2021—"
+            "year": "2021–"
           }
         ]
       },
@@ -351,7 +347,7 @@
           "name": "Camera",
           "caption": "shooting · Sony α7 IV · wildlife",
           "reveal": {
-            "alt": "Two young foxes between beech branches in the forest — wildlife shot on the Sony α7 IV",
+            "alt": "Two young foxes between beech branches in the forest, wildlife shot on the Sony α7 IV",
             "caption": "FOX CUBS · WILDLIFE · α7 IV"
           }
         },
@@ -422,7 +418,7 @@
         "metaNote": "You're surfing on a GPU fluid simulation right now. No iframe, no video loop, no Lottie file. Real frames.",
         "ctaLabel": "You're already here",
         "screenshot": {
-          "alt": "The hero section of manuelheller.dev split into five slices — one per ink character",
+          "alt": "The hero section of manuelheller.dev split into five slices, one per ink character",
           "caption": "manuelheller.dev · hero"
         },
         "reveal": {
@@ -456,8 +452,8 @@
       }
     ],
     "sideProjects": {
-      "label": "B-sides · Public on GitHub",
-      "lede": "Smaller than the two main projects, but real and in use.",
+      "label": "More projects · Public on GitHub",
+      "lede": "Two smaller projects, both in regular use.",
       "items": [
         {
           "id": "shotCounter",
@@ -726,8 +722,8 @@
       "requiredNote": "All fields required",
       "status": {
         "fromLabel": "From:",
-        "success": "Thanks, your message arrived — I'll be in touch.",
-        "error": "Didn't go through — write me directly:",
+        "success": "Thanks, your message arrived. I'll be in touch.",
+        "error": "Didn't go through, write me directly:",
         "mailSubject": "Enquiry via manuelheller.dev"
       }
     }

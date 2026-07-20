@@ -52,11 +52,7 @@
     "heroSkill": {
       "eyebrow": "Hero Skill",
       "name": "AI Workflow & Vibecoding",
-      "description": "Custom agents, hooks, skills, prompts multi-étapes. L'IA n'est pas l'outil que j'utilise — c'est l'outil avec lequel je crée des outils.",
-      "proof": {
-        "lede": "Pas une promesse en l'air — mon skill de rework multi-agents pour Claude Code est public : analyzers parallèles, triage par reviewers, commits atomiques.",
-        "ctaLabel": "GitHub · full-project-rework"
-      }
+      "description": "Custom agents, hooks, skills, prompts multi-étapes. L'IA n'est pas l'outil que j'utilise. C'est l'outil avec lequel je crée des outils."
     },
     "vibecodedMarker": "vibecoded",
     "tiers": [
@@ -326,7 +322,7 @@
           },
           {
             "label": "zvoove",
-            "year": "2021—"
+            "year": "2021–"
           }
         ]
       },
@@ -351,7 +347,7 @@
           "name": "Appareil",
           "caption": "shooting · Sony α7 IV · wildlife",
           "reveal": {
-            "alt": "Deux jeunes renards entre les branches de hêtre en forêt — photo wildlife au Sony α7 IV",
+            "alt": "Deux jeunes renards entre les branches de hêtre en forêt, photo wildlife au Sony α7 IV",
             "caption": "RENARDEAUX · WILDLIFE · α7 IV"
           }
         },
@@ -422,7 +418,7 @@
         "metaNote": "Tu surfes en ce moment sur une simulation de fluide GPU. Pas d'iframe, pas de boucle vidéo, pas de fichier Lottie. De vraies frames.",
         "ctaLabel": "Tu y es déjà",
         "screenshot": {
-          "alt": "La section hero de manuelheller.dev en cinq bandes — une par caractère d'encre",
+          "alt": "La section hero de manuelheller.dev en cinq bandes, une par caractère d'encre",
           "caption": "manuelheller.dev · hero"
         },
         "reveal": {
@@ -456,8 +452,8 @@
       }
     ],
     "sideProjects": {
-      "label": "Faces B · Public sur GitHub",
-      "lede": "Plus petits que les deux projets principaux, mais réels et en service.",
+      "label": "Autres projets · Publics sur GitHub",
+      "lede": "Deux projets plus petits, tous deux utilisés régulièrement.",
       "items": [
         {
           "id": "shotCounter",
@@ -726,8 +722,8 @@
       "requiredNote": "Tous les champs sont obligatoires",
       "status": {
         "fromLabel": "De :",
-        "success": "Merci, ton message est bien arrivé — je te recontacte.",
-        "error": "Ça n'a pas fonctionné — écris-moi directement :",
+        "success": "Merci, ton message est bien arrivé. Je te recontacte.",
+        "error": "Ça n'a pas fonctionné, écris-moi directement :",
         "mailSubject": "Demande via manuelheller.dev"
       }
     }

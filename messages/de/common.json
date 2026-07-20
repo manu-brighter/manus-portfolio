@@ -1,8 +1,8 @@
 {
   "meta": {
-    "title": "Manuel Heller — Craft Portfolio",
+    "title": "Manuel Heller · Craft Portfolio",
     "titleTemplate": "%s · Manuel Heller",
-    "description": "Full-Stack Developer mit künstlerischem Auge. Code, Foto, Design: alles dasselbe Handwerk in unterschiedlicher Form. — Manuel Heller, Full-Stack Developer aus Basel.",
+    "description": "Full-Stack Developer mit künstlerischem Auge. Code, Foto, Design: alles dasselbe Handwerk in unterschiedlicher Form. Manuel Heller, Full-Stack Developer aus Basel.",
     "keywords": [
       "Manuel Heller",
       "Portfolio",
@@ -20,7 +20,7 @@
   },
   "brand": {
     "label": "MH·STUDIO",
-    "aria": "Manuel Heller — Startseite"
+    "aria": "Manuel Heller, Startseite"
   },
   "nav": {
     "ariaLabel": "Hauptnavigation",
@@ -75,7 +75,7 @@
   },
   "simPresets": {
     "label": "Tinten-Charakter",
-    "hint": "Psst — hier wechselst du die Tinte!",
+    "hint": "Psst, hier wechselst du die Tinte!",
     "riso": "Riso",
     "wave": "Wave",
     "turbulenz": "Turbulenz",

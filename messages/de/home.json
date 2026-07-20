@@ -52,11 +52,7 @@
     "heroSkill": {
       "eyebrow": "Hero-Skill",
       "name": "AI-Workflow & Vibecoding",
-      "description": "Custom Agents, Hooks, Skills, mehrstufige Prompts. AI ist nicht das Tool, das ich nutze, sondern das Werkzeug, mit dem ich Tools baue.",
-      "proof": {
-        "lede": "Kein leeres Versprechen — mein Multi-Agent-Rework-Skill für Claude Code ist public: parallele Analyzer, Reviewer-Triage, atomare Implementer-Commits.",
-        "ctaLabel": "GitHub · full-project-rework"
-      }
+      "description": "Custom Agents, Hooks, Skills, mehrstufige Prompts. AI ist nicht das Tool, das ich nutze, sondern das Werkzeug, mit dem ich Tools baue."
     },
     "vibecodedMarker": "vibecoded",
     "tiers": [
@@ -326,7 +322,7 @@
           },
           {
             "label": "zvoove",
-            "year": "2021—"
+            "year": "2021–"
           }
         ]
       },
@@ -351,7 +347,7 @@
           "name": "Kamera",
           "caption": "shooting · Sony α7 IV · Wildlife",
           "reveal": {
-            "alt": "Zwei junge Füchse zwischen Buchenzweigen im Wald — Wildlife-Aufnahme mit der Sony α7 IV",
+            "alt": "Zwei junge Füchse zwischen Buchenzweigen im Wald, Wildlife-Aufnahme mit der Sony α7 IV",
             "caption": "JUNGFÜCHSE · WILDLIFE · α7 IV"
           }
         },
@@ -422,7 +418,7 @@
         "metaNote": "Du surfst gerade auf einer GPU-Fluid-Simulation. Kein Iframe, kein Video-Loop, keine Lottie-Datei. Echte Frames.",
         "ctaLabel": "Du bist schon hier",
         "screenshot": {
-          "alt": "Die Hero-Section von manuelheller.dev in fünf Streifen — je einer pro Tinten-Charakter",
+          "alt": "Die Hero-Section von manuelheller.dev in fünf Streifen, je einer pro Tinten-Charakter",
           "caption": "manuelheller.dev · hero"
         },
         "reveal": {
@@ -456,8 +452,8 @@
       }
     ],
     "sideProjects": {
-      "label": "B-Seiten · Public auf GitHub",
-      "lede": "Kleiner als die zwei Hauptprojekte, aber echt und im Einsatz.",
+      "label": "Weitere Projekte · Public auf GitHub",
+      "lede": "Zwei kleinere Projekte, beide regelmässig im Einsatz.",
       "items": [
         {
           "id": "shotCounter",
@@ -498,7 +494,7 @@
     },
     "sectionLabel": "Section 04 · Case Study",
     "headline": "Vom Vereins-Chaos zur eigenen Plattform.",
-    "hook": "Alle Vereine kämpfen alle mit demselben Mist: Excel-Listen, statische Websites, File-/Information-Sharing, isolierte Tools. Für Jogge di Balla habe ich das aufgeräumt — eine massgeschneiderte Plattform, die von Mitgliederverwaltung bis Twitch-Overlay alles abdeckt. Vibecoded, selbst gehostet, übertrieben.",
+    "hook": "Alle Vereine kämpfen alle mit demselben Mist: Excel-Listen, statische Websites, File-/Information-Sharing, isolierte Tools. Für Jogge di Balla habe ich das aufgeräumt: eine massgeschneiderte Plattform, die von Mitgliederverwaltung bis Twitch-Overlay alles abdeckt. Vibecoded, selbst gehostet, übertrieben.",
     "context": {
       "label": "Was ist Jogge di Balla?",
       "facts": [
@@ -564,7 +560,7 @@
           "features": [
             {
               "title": "Dynamisches Berechtigungssystem",
-              "body": "Granulare Rechte (edit_events, manage_sponsors, edit_shotcounter, …) per Card pro Rolle zuweisbar — ohne Code-Änderung. Backend prüft jeden tRPC-Call durch eine eigene requirePermission()-Middleware."
+              "body": "Granulare Rechte (edit_events, manage_sponsors, edit_shotcounter, …) per Card pro Rolle zuweisbar, ohne Code-Änderung. Backend prüft jeden tRPC-Call durch eine eigene requirePermission()-Middleware."
             },
             {
               "title": "Anwesenheitsverwaltung mit Statistik",
@@ -594,7 +590,7 @@
             },
             {
               "title": "Reichweite ehrlich klein",
-              "body": "~15–20 concurrent Viewer, ~100 total. Das Tooling ist trotzdem solide gebaut — und übertragbar."
+              "body": "~15–20 concurrent Viewer, ~100 total. Das Tooling ist trotzdem solide gebaut und übertragbar."
             }
           ]
         }
@@ -690,7 +686,7 @@
   "contact": {
     "sectionLabel": "Section 07 · Contact",
     "headline": "Lass uns reden.",
-    "subhead": "Auftrag, Frage, Tipp oder einfach Hallo — die Inbox ist offen.",
+    "subhead": "Auftrag, Frage, Tipp oder einfach Hallo: die Inbox ist offen.",
     "intro": {
       "label": "Ein paar Worte vorab",
       "body": "Ich antworte üblicherweise innerhalb von ein bis zwei Tagen. Für Recruiter und Anfragen aus der Vereinswelt: bitte kurz schreiben woher du kommst, das spart die zweite Mail."
@@ -726,8 +722,8 @@
       "requiredNote": "Alle Felder erforderlich",
       "status": {
         "fromLabel": "Von:",
-        "success": "Danke, deine Nachricht ist angekommen — ich melde mich.",
-        "error": "Hat nicht geklappt — schreib mir direkt:",
+        "success": "Danke, deine Nachricht ist angekommen. Ich melde mich.",
+        "error": "Hat nicht geklappt, schreib mir direkt:",
         "mailSubject": "Anfrage über manuelheller.dev"
       }
     }

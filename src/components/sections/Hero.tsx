@@ -67,7 +67,7 @@ export function Hero() {
 
       <p className="type-body-lg col-span-12 ml-auto text-right text-ink-soft md:col-span-7">
         {t("tagline")}
-        <span aria-hidden="true"> — </span>
+        <span aria-hidden="true"> · </span>
         <em>{t("taglineSuffix")}</em>
       </p>
     </section>

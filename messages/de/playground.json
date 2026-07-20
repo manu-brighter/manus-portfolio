@@ -19,7 +19,7 @@
         "buttonFreeze": "FREEZE",
         "buttonResume": "RESUME",
         "buttonReset": "RESET",
-        "reducedMotionNote": "Dieses Experiment ist eine bewegte Spielwiese. Unter prefers-reduced-motion blende ich die laufende Simulation aus — zurück zum Playground für eine ruhigere Section."
+        "reducedMotionNote": "Dieses Experiment ist eine bewegte Spielwiese. Unter prefers-reduced-motion blende ich die laufende Simulation aus. Zurück zum Playground für eine ruhigere Section."
       },
       "typeAsFluid": {
         "cardTitle": "Type-as-Fluid",
@@ -30,7 +30,7 @@
         "inputLabel": "TIPPE EIN WORT",
         "inputPlaceholder": "Manuel",
         "triggerLabel": "Wort erneut drucken",
-        "reducedMotionNote": "Dieses Experiment druckt Wörter live in eine laufende Fluid-Simulation. Unter prefers-reduced-motion blende ich die Animation aus — zurück zum Playground für eine ruhigere Section."
+        "reducedMotionNote": "Dieses Experiment druckt Wörter live in eine laufende Fluid-Simulation. Unter prefers-reduced-motion blende ich die Animation aus. Zurück zum Playground für eine ruhigere Section."
       }
     }
   }

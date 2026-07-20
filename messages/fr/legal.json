@@ -88,7 +88,7 @@
           "heading": "Formulaire de contact",
           "body": [
             "Lors de l'utilisation du formulaire de contact, ton nom, ton adresse e-mail et ton message sont transmis chiffrés à un intermédiaire technique : la requête est reçue à la périphérie Cloudflare (Cloudflare, Inc., USA) par un Cloudflare Worker et me parvient sous forme d'e-mail via le service de messagerie Resend (Resend, Inc., USA). Les deux fournisseurs sont couverts par les clauses contractuelles types (art. 46 RGPD) pour les transferts de données vers les USA. Seules les données que tu saisis toi-même dans le formulaire sont traitées.",
-            "Si la transmission échoue, le formulaire propose en remplacement un lien mailto — le message passe alors par ton propre client e-mail et ton fournisseur de messagerie, pas par un serveur sous mon contrôle.",
+            "Si la transmission échoue, le formulaire propose en remplacement un lien mailto. Le message passe alors par ton propre client e-mail et ton fournisseur de messagerie, pas par un serveur sous mon contrôle.",
             "Base légale dans les deux cas : ton consentement par l'envoi (art. 6(1)(a) RGPD, art. 31(1) nLPD). Les messages entrants sont supprimés après réponse, au plus tard après six mois. Tu peux à tout moment demander l'accès, la rectification ou la suppression. Écris simplement à manuelheller@bluewin.ch."
           ]
         },

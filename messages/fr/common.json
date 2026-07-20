@@ -1,8 +1,8 @@
 {
   "meta": {
-    "title": "Manuel Heller — Portfolio",
+    "title": "Manuel Heller · Portfolio",
     "titleTemplate": "%s · Manuel Heller",
-    "description": "Développeur full-stack avec un œil d'artiste. Code, photo, design : même artisanat, surface différente. — Manuel Heller, développeur full-stack à Bâle.",
+    "description": "Développeur full-stack avec un œil d'artiste. Code, photo, design : même artisanat, surface différente. Manuel Heller, développeur full-stack à Bâle.",
     "keywords": [
       "Manuel Heller",
       "Portfolio",
@@ -20,7 +20,7 @@
   },
   "brand": {
     "label": "MH·STUDIO",
-    "aria": "Manuel Heller — accueil"
+    "aria": "Manuel Heller, accueil"
   },
   "nav": {
     "ariaLabel": "Navigation principale",
@@ -75,7 +75,7 @@
   },
   "simPresets": {
     "label": "Caractère d'encre",
-    "hint": "Psst — change d'encre ici !",
+    "hint": "Psst, change d'encre ici !",
     "riso": "Riso",
     "wave": "Vague",
     "turbulenz": "Turbulence",
