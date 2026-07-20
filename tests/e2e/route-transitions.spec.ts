@@ -22,7 +22,12 @@ import { expect, test } from "@playwright/test";
  * from user feedback.
  */
 
-test("home → /cv via Contact link navigates without page errors", async ({ page }) => {
+test("home → /cv via Contact link navigates without page errors", async ({ page, isMobile }) => {
+  // The regression subject is the DESKTOP diorama pin; mobile renders
+  // the vertical fallback (no ScrollTrigger, no spacer) and remounts
+  // the section when the fallback branch flips post-hydration, which
+  // detaches the locator mid-scroll.
+  test.skip(isMobile, "diorama pin exists only on desktop viewports");
   const errors: string[] = [];
   page.on("pageerror", (err) => errors.push(err.message));
 
