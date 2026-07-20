@@ -194,25 +194,31 @@ export function ScrollProgress() {
       aria-label={t("ariaLabel")}
       className="fixed top-1/2 right-5 z-40 -translate-y-1/2 md:right-6"
     >
-      <ol className="relative flex flex-col items-center gap-5">
-        {/* Connecting line behind dots */}
-        {sections.length > 1 && (
+      {/* Connecting line behind the dots. It is a SIBLING of the <ol>,
+          not a child: an <ol> may only directly contain <li>, <script>
+          or <template>, and a bare <div> in there trips axe's `list`
+          rule (WCAG 2 A, serious). It only surfaced intermittently
+          because this component mounts client-side and often missed the
+          scan window. The <nav> is `fixed`, so it is already a
+          containing block and the absolute geometry is unchanged. */}
+      {sections.length > 1 && (
+        <div
+          className="absolute top-2 bottom-2 left-1/2 w-px -translate-x-1/2"
+          style={{ backgroundColor: "var(--color-paper-line)" }}
+        >
           <div
-            className="absolute top-2 bottom-2 w-px"
-            style={{ backgroundColor: "var(--color-paper-line)" }}
-          >
-            <div
-              ref={lineRef}
-              className="w-full origin-top transition-transform duration-150"
-              style={{
-                backgroundColor: sections[activeIndex]?.color ?? "var(--color-ink-faint)",
-                height: "100%",
-                transform: `scaleY(${fillProgress})`,
-              }}
-            />
-          </div>
-        )}
+            ref={lineRef}
+            className="w-full origin-top transition-transform duration-150"
+            style={{
+              backgroundColor: sections[activeIndex]?.color ?? "var(--color-ink-faint)",
+              height: "100%",
+              transform: `scaleY(${fillProgress})`,
+            }}
+          />
+        </div>
+      )}
 
+      <ol className="relative flex flex-col items-center gap-5">
         {sections.map((section, i) => (
           <li key={section.id} className="relative">
             <button
