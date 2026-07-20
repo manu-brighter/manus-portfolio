@@ -24,13 +24,7 @@
       "Edit(content/**)",
       "Edit(messages/**)",
       "Edit(.claude/**)",
-      "Edit(tests/**)",
-      "Edit(docs/**)",
-      "Write(src/**)",
-      "Write(content/**)",
-      "Write(messages/**)",
-      "Write(.claude/**)",
-      "Write(tests/**)"
+      "Edit(tests/**)"
     ],
     "deny": [
       "Bash(rsync * deploy@*)",
