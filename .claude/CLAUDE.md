@@ -360,22 +360,40 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   The Work side-projects strip got one too (Manuel asked directly):
   it is a quiet open-source shelf, and stacking two cards vertically
   cost a full phone screen of scroll on the way to Contact.
-- **`.side-rail` (globals.css) is the LIGHT carousel pattern** — a
-  side-scroll rail below `md`, a two-column grid from `md` up, pure
-  CSS. Reach for this before `CaseStudyMobileCarousel`'s machinery
-  (arrows, dots, aria-live, keyboard handler): that one drags its
-  consumers across the client boundary, and Work/SideProjectCard are
-  server components. Snap points plus a peeking neighbour carry the
-  affordance on their own. Two traps it already encodes:
+- **The side-projects strip is the LIGHT carousel pattern** — a
+  side-scroll rail below `md`, a two-column grid from `md` up, no JS.
+  Reach for this before `CaseStudyMobileCarousel`'s machinery (arrows,
+  dots, aria-live, keyboard handler): that one drags its consumers
+  across the client boundary, and Work/SideProjectCard are server
+  components. Snap points plus a peeking neighbour carry the
+  affordance on their own. Four things it encodes:
+  - **Build it from Tailwind UTILITIES, not a hand-written component
+    class.** The first cut used a `.side-rail` rule, which made the
+    DESKTOP grid depend on that single rule shipping — when it didn't,
+    desktop regressed from a working grid to a plain stack, i.e. a
+    mobile-only feature took desktop down with it. Utilities are
+    emitted from a source scan and the grid classes predate the
+    feature, so desktop can't become collateral damage. Custom CSS is
+    fine for cosmetics (`.no-scrollbar`), never for layout.
   - `overflow-x: auto` makes `overflow-y` compute to `auto` as well,
-    so the rail needs `padding-block` or a card's hover translate and
+    so the rail needs `py-2` or a card's hover translate and
     `ring-offset-4` focus ring spawn a nested vertical scrollbar.
   - It deliberately has **no `tabIndex`**. Axe's
     `scrollable-region-focusable` only fires when a scrollable region
     has no focusable descendants, and every card is a link — tabbing
     to one scrolls it into view, so a tab stop on the rail would be
     keyboard noise (verified: a11y suite passes without it).
-  Regression spec: `tests/e2e/side-projects-rail.spec.ts`.
+  - The bleed is `-mx-[var(--container-gutter)] px-[var(--container-gutter)]`,
+    reset with `md:mx-0 md:px-0`.
+  Regression spec: `tests/e2e/side-projects-rail.spec.ts` (targets
+  `data-testid="side-rail"`).
+- **A long-running `next dev` can serve stale `globals.css` for hours.**
+  Editing the file HMRs the page but the CSS chunk kept the previous
+  content: newly added rules were simply absent while older ones were
+  present. This cost real debugging time twice — once chasing a CSS
+  rule that was correct all along. When a style "doesn't apply",
+  confirm against a fresh `next dev` or `next build` BEFORE touching
+  the CSS, and grep the served chunk for the selector.
 - **FadeIn on potentially-viewport-tall blocks needs a low `threshold`**
   (~0.15): IO `intersectionRatio` can never reach the default 0.35 when the
   element is taller than the viewport → entrance never fires.
