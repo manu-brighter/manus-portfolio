@@ -81,7 +81,9 @@ const RETURNING_APPEAR_MS = 600;
 // How long the appear-time discoverability peek holds the row open.
 // Long enough for the SwitcherHint choreography (arrow draw ~0.9s +
 // typewriter ~1.5s) plus reading time — the hint fades with the peek.
-const INTRO_PEEK_MS = 6500;
+// Bumped 6.5s -> 8.5s on user feedback: the note finished typing and
+// left again before it had actually been read.
+const INTRO_PEEK_MS = 8500;
 
 export function SimPresetSwitcher() {
   const t = useTranslations("simPresets");
