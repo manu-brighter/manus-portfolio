@@ -73,14 +73,9 @@ const TASKS = [
   // (explicit user feedback — this section exists to show photography
   // skills). Full-bleed layouts (sizes=100vw) additionally carry a
   // 2560w rung so large/high-DPR screens don't upscale 1600w.
-  // NOTE: the 01-pelican master (DSC05426) is currently missing from
-  // content-input/photography/source — the task skips with a warning
-  // and public/ keeps the older 800/1200/1600 q42 set. Drop the master
-  // back in, re-run, and add the 2560w rung to Photography.tsx's
-  // widths for slide 01.
   {
     group: "photography",
-    source: "content-input/photography/source/DSC05426-Verbessert-RR.jpg",
+    source: "content-input/photography/source/DSC05422-Verbessert-RR.jpg",
     outDir: "public/photography",
     outName: "01-pelican",
     widths: [800, 1200, 1600, 2560],

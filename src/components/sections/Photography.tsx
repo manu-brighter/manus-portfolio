@@ -70,10 +70,7 @@ const SLIDES: readonly [Slide, Slide, Slide, Slide, Slide] = [
     spot: "amber",
     aspect: 3 / 2,
     layout: "full",
-    // Still the pre-quality-bump set: the DSC05426 master is missing
-    // from content-input, so the pipeline can't regenerate this slide
-    // (see the 01-pelican note in scripts/optimize-assets.mjs).
-    widths: [800, 1200, 1600],
+    widths: [800, 1200, 1600, 2560],
   },
   {
     baseName: "02-koenigsegg",
