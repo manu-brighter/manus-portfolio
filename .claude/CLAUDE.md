@@ -399,15 +399,31 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 - **Object-Grid tile reveals** (creative pass): tiles listed in
   `src/components/about/tileReveals.ts` (`TILE_REVEAL_KEYS`) carry a
   stretched button + corner "+" chip; click opens `TileRevealOverlay`
-  IMMEDIATELY with a ~350ms "Stempelpress" choreography (backdrop fade,
-  overshoot plate press, box-shadow seats from out-of-register, spot
-  ink rim + spray squishes out behind the frame, caption stamps in a
-  beat later — keyframes `tile-press-in` & friends in globals.css).
-  The original full-page ink-wipe reuse (~1s grow/hold/retract) was
-  cut after user feedback: too slow. Open drops one fluidBus splat at
+  IMMEDIATELY with a ~320ms "Andruck" registration snap: the spot
+  plate (a rough-edged SVG rect behind the photo) travels in from
+  translate(38,42)+1.4deg, overshoots past its resting 8px offset and
+  seats; the photo fades 0.55→1 over scale 1.04→1; the caption stamps
+  a beat later (`tile-plate-in` & friends in globals.css). Three
+  iterations got here, so don't undo any of them:
+  - The original full-page ink-wipe reuse (~1s) was cut as too slow.
+  - v2 animated **`box-shadow`** from out-of-register and scaled the
+    whole `<figure>` from 1.14 behind a blobby ink rim. box-shadow is
+    not compositor-animatable (it repainted a fullscreen photo every
+    frame → "holprig"), the figure scale dragged the caption, and the
+    rim pushed past the viewport ("unten abgeschnitten"). Everything
+    animated is now transform/opacity only.
+  - The plate's timing function must **not** overshoot on its own: a
+    back-ease applies per keyframe segment and consumed ~85% of the
+    travel in the first 60ms, making the move invisible. Overshoot
+    belongs in the keyframes, the curve only decelerates.
+  - The plate's `inset-0` must resolve against the PHOTO (own
+    `relative` wrapper), not the `<figure>` — anchored to the figure
+    it painted a solid spot block behind the caption text.
+  - The photo may not start at opacity 0: that flashed the bare
+    full-size spot plate for ~2 frames.
+  Open drops one fluidBus splat at
   the pointer, close leaves a two-splat burst at the tile (desktop
-  only — no mobile subscriber). The ink rim must stay a RIM
-  (-inset ~2.5%): sized bigger it reads as a balloon, not pressed ink.
+  only — no mobile subscriber).
   The overlay is a **fixed div, NOT `dialog.showModal()`** with manual
   focus pin/restore (single close control). Heads-up for tests: the
   mobile hamburger nav keeps a permanent `role="dialog"` node in the
@@ -430,11 +446,10 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   earlier q38–50 range showed visible compression at display size —
   explicit user feedback ("da will ich meine Photography-Skills
   zeigen"). Full-bleed photography slides (sizes=100vw) also need a
-  ~2560w srcset rung or large/high-DPR screens upscale 1600w. KNOWN
-  GAP: the 01-pelican master (DSC05426-Verbessert-RR.jpg) is missing
-  from content-input/photography/source — that slide still ships the
-  old low-quality 800/1200/1600 set; drop the master back in, re-run
-  the pipeline, and add the 2560w rung in Photography.tsx.
+  ~2560w srcset rung or large/high-DPR screens upscale 1600w. All five
+  slides now ship the full set; 01-pelican's master is
+  `DSC05422-Verbessert-RR.jpg` (4524×3016, native 3:2 — an earlier
+  note pointed at DSC05426, which does not exist).
 - **Skills**: `VibecodedStamp` IO `threshold: 0.4`; stagger via parent
   `delay={i * 0.08}` prop. `HeroSkillPulse` loops continuously without IO
   gate (cheap, avoids re-mount cycle restart).
@@ -515,15 +530,41 @@ Source of truth: `src/app/globals.css` (`@theme` block).
     11mm. Screen and PDF share ONE geometry; only desk backdrop,
     topbar, and shadow are `print:`-stripped. Never add `print:` size/
     gap/column overrides — that reintroduces the shifted-PDF bug.
-  - **`break-inside-avoid` on ITEMS/cards only, never whole sections**
-    — a section-level avoid shoves page-sized blocks and produced a
-    3-page PDF with a straggler; item-level breaks give a clean 2 pages.
+  - **`break-inside-avoid` scales with block size.** A page-sized
+    section with an avoid gets shoved wholesale and strands a third
+    page (the original bug), so Berufserfahrung and Eigene Projekte
+    stay breakable and carry ITEM-level avoids. The short sidebar
+    sections (all <250px against a 1039px page) take a section-level
+    avoid via `CvSection keepTogether` — otherwise the boundary sliced
+    straight through Sprachen.
+  - **The sheet is a two-page budget, and it is TIGHT** (~2000px of
+    2078px available; EN has ~250px more headroom than DE/FR/IT).
+    Decorative height is not free: absolutely position ornaments.
+    `tests/e2e/cv-print.spec.ts` asserts exactly 2 pages in all four
+    locales via a real `page.pdf()` — if it fails after a content
+    edit, trim the sheet's vertical rhythm, not the content.
   - Pressroom ornaments all ride tokens (theme-aware): Druckprobe
-    calibration bar, ink blobs/droplets, wobble rules (`WobbleRule`),
-    misreg double ghost on the name, and `CvInkStamp` — a client
-    island that names the active ink character by reading
-    `<html data-sim-theme>` (NOT the preset store: on reduced-motion/
-    static tier the store may hold a preset the sheet never applies).
+    calibration bar, ink blobs/droplets, wobble rules with hanging
+    ink drips (`WobbleRule drips=`), misreg double ghost on the name
+    (`.cv-name` — a CLASS, never an inline style, so the per-theme
+    blocks can override it), and `CvInkStamp` — a client island that
+    names the active ink character by reading `<html data-sim-theme>`
+    (NOT the preset store: on reduced-motion/static tier the store may
+    hold a preset the sheet never applies).
+  - **Theme character on the sheet** (`CvSimFrame` + `.cv-theme-
+    texture`, per-theme blocks in globals.css). The sheet is opaque
+    paper sitting ON TOP of the sim, so none of the sim's look reaches
+    it and the site-wide warm halo (paper-on-paper) is invisible there
+    — switching presets only re-tinted the background, which read as
+    "the theme barely changes" and "the Turbulenz glow is missing".
+    Fix: `CvSimFrame` prints the render pass's ladder terraces as a
+    still frame in spot tokens (top + flipped at the foot), and each
+    theme adds its shader's signature — Wave overprint bands +
+    channel-split headings, Turbulenz halftone screen + amber glow,
+    Aquarell wet blur + pooled corners, Nachtdruck additive screen
+    blend + neon bloom. Riso stays quiet on purpose (same hierarchy as
+    the sim). All of it is colour/text-shadow/filter, so
+    `print-color-adjust: exact` carries it into the PDF.
   - Contact chips: email, manuelheller.dev, GitHub only — visible text
     must equal the destination; LinkedIn was cut (shortened label lied
     about the URL, useless on paper).
