@@ -40,8 +40,9 @@ test.describe("@seo JSON-LD schema validation", () => {
       expect(image?.contentUrl, "ImageObject.contentUrl").toBeTruthy();
       expect(image?.creator, "ImageObject.creator").toBeDefined();
       expect(image?.copyrightHolder, "ImageObject.copyrightHolder").toBeDefined();
-      expect(Array.isArray(person?.sameAs), "Person.sameAs must be an array").toBe(true);
-      expect((person?.sameAs as unknown[]).length, "Person.sameAs non-empty").toBeGreaterThan(0);
+      const sameAs = person?.sameAs as unknown[] | undefined;
+      expect(Array.isArray(sameAs), "Person.sameAs must be an array").toBe(true);
+      expect(sameAs?.length, "Person.sameAs non-empty").toBeGreaterThan(0);
 
       // WebSite shape
       expect(webSite?.name, "WebSite.name").toBeTruthy();
