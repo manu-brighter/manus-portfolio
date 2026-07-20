@@ -223,6 +223,25 @@
  * printed proof matches the screen exactly.
  * -------------------------------------------------------------- */
 
+/* Dye ladder for the CV still frame. CvDyeSync overwrites these on
+ * <html> with the ACTIVE preset's ladder straight out of simPresets.ts;
+ * the defaults here are Riso's, which IS the four canonical spots (its
+ * `visuals.ladder` is undefined, so it ships the orchestrator default).
+ * They also cover the pre-hydration render and the no-JS case. */
+:root {
+  --cv-dye-1: var(--color-spot-mint);
+  --cv-dye-2: var(--color-spot-amber);
+  --cv-dye-3: var(--color-spot-rose);
+  --cv-dye-4: var(--color-spot-violet);
+}
+
+/* Group opacity, never per band: the bands are drawn overlapping (each
+ * one is "everything below my boundary"), so per-band alpha would
+ * accumulate downwards instead of giving four even steps. */
+.cv-sim-frame-bands {
+  opacity: 0.17;
+}
+
 /* The sheet is its own blend group. Without this, Nachtdruck's
  * `mix-blend-mode: screen` on the still frame blends past the opaque
  * paper and against the live sim behind the page, washing the whole
@@ -263,11 +282,16 @@
     -1.5px 0 0 color-mix(in srgb, var(--color-spot-amber) 42%, transparent);
 }
 
-/* Turbulenz — screenprint: halftone dot screen over the sheet, and
- * the glow the rest of the site gets, here as an amber bloom (the
- * paper-colored variant is invisible on opaque paper). Specificity
- * has to clear `[data-sim-theme="warm"] main` above, hence the
- * two-attribute selector. */
+/* Turbulenz — screenprint: halftone dot screen over the sheet. The
+ * glow is deliberately NOT reinvented here: the sheet simply inherits
+ * the site-wide `[data-sim-theme="warm"] main` halo above, which is
+ * the identical declaration the rest of the page uses. An earlier cut
+ * substituted an amber bloom, which read as a different effect
+ * altogether (user: "nicht annähernd der gleiche wie auf der Website
+ * ... mach das richtig oder gar nicht"). It works on the sheet now
+ * because the still frame puts real dye under the headings for the
+ * paper halo to cut through — over bare paper it is invisible by
+ * design, exactly as it is over bare paper anywhere else. */
 [data-sim-theme="warm"] .cv-theme-texture {
   background-image: radial-gradient(
     color-mix(in srgb, var(--color-spot-amber) 52%, transparent) 1.05px,
@@ -276,20 +300,20 @@
   background-size: 7px 7px;
   opacity: 0.55;
 }
-[data-sim-theme="warm"] [data-page="cv"] :is(h1, h2, h3) {
-  text-shadow:
-    0 0 3px var(--color-paper),
-    0 0 8px color-mix(in srgb, var(--color-spot-amber) 90%, transparent),
-    0 0 18px color-mix(in srgb, var(--color-spot-amber) 65%, transparent),
-    0 0 30px color-mix(in srgb, var(--color-spot-rose) 40%, transparent);
-}
+/* The name carries an inline-equivalent misregistration from
+ * `.cv-name`, which would otherwise replace the inherited halo
+ * outright — restate both together. The layer list is the site halo
+ * verbatim, plus the two plates. */
 [data-sim-theme="warm"] [data-page="cv"] h1.cv-name {
-  /* Keep the misregistered plates AND take the glow. */
   text-shadow:
     4px 3px 0 color-mix(in srgb, var(--color-spot-rose) 50%, transparent),
     -3px -2px 0 color-mix(in srgb, var(--color-spot-mint) 40%, transparent),
-    0 0 10px color-mix(in srgb, var(--color-spot-amber) 65%, transparent),
-    0 0 22px color-mix(in srgb, var(--color-spot-amber) 40%, transparent);
+    0 0 2px var(--color-paper),
+    0 0 2px var(--color-paper),
+    0 0 4px var(--color-paper),
+    0 0 8px var(--color-paper),
+    0 0 14px var(--color-paper),
+    0 0 22px var(--color-paper);
 }
 
 /* Aquarell — wet: the still frame bleeds, corners pool. */

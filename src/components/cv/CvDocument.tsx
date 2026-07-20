@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import type { CSSProperties, ReactNode } from "react";
 import { CvActions } from "@/components/cv/CvActions";
+import { CvDyeSync } from "@/components/cv/CvDyeSync";
 import { CvInkStamp } from "@/components/cv/CvInkStamp";
 import { PlateCornerMarks } from "@/components/ui/PlateCornerMarks";
 import { Link } from "@/i18n/navigation";
@@ -161,15 +162,28 @@ function WobbleRule({
 
 /** Frozen frame of the fluid sim, printed onto the sheet.
  *
- *  Four wavy terraces in the ladder order (mint / amber / rose /
- *  violet — the legacy uniform order the render shaders use), stacked
- *  and bleeding off both edges: the posterized band structure the riso
- *  render pass actually outputs, held still. Every band rides a spot
- *  token, so a preset switch re-inks the still frame exactly like it
- *  re-inks the sim, and `print-color-adjust: exact` carries it into
- *  the PDF. Per-theme character (halftone under Turbulenz, wet blur
- *  under Aquarell, additive glow under Nachtdruck) is layered on in
- *  globals.css via the `cv-sim-frame` hook. */
+ *  A four-step posterized ladder with wandering band boundaries: what
+ *  the render pass actually outputs when dye has settled, held still.
+ *  Two properties matter and both came out of user feedback.
+ *
+ *  COLOUR is the ACTIVE preset's dye ladder (`--cv-dye-1..4`, published
+ *  by CvDyeSync from `simPresets.ts`), not the canonical Riso spots.
+ *  The spots barely move between presets, so the sheet used to look the
+ *  same in every theme while the sim behind it ran blue-green under
+ *  Wave and violet/pink/wine under Nachtdruck. Riso leaves the vars
+ *  unset and falls back to the spot tokens, which IS its ladder.
+ *
+ *  GEOMETRY is edge to edge. Each band is drawn as "everything below my
+ *  top boundary", painted top-down, so the bands tile the frame with no
+ *  gaps and every boundary runs from x=-20 to x=420 in a 0..400 viewBox
+ *  — the SVG viewport clips them flush to the sheet. The first cut drew
+ *  each band as its own ribbon, which left them ending at different
+ *  x positions and reading as an accident rather than a design.
+ *
+ *  Opacity lives on the group, not per band: the bands overlap by
+ *  construction, so per-band alpha would accumulate towards the bottom
+ *  instead of giving four even steps. `print-color-adjust: exact`
+ *  carries the whole thing into the PDF. */
 function CvSimFrame({ className }: { className?: string }) {
   return (
     <svg
@@ -178,30 +192,21 @@ function CvSimFrame({ className }: { className?: string }) {
       preserveAspectRatio="none"
       className={`cv-sim-frame pointer-events-none ${className ?? ""}`}
     >
-      <path
-        d="M-10 0 C 60 6, 120 30, 190 24 C 258 18, 300 40, 360 34 C 385 31, 400 26, 410 28 L 410 -10 L -10 -10 Z"
-        fill="var(--color-spot-mint)"
-        opacity="0.16"
-      />
-      <path
-        d="M-10 26 C 52 42, 128 20, 196 40 C 262 59, 312 34, 366 48 C 388 54, 400 52, 410 50 L 410 20 C 380 26, 340 12, 288 20 C 226 30, 172 8, 108 14 C 60 18, 24 12, -10 4 Z"
-        fill="var(--color-spot-amber)"
-        opacity="0.2"
-      />
-      <path
-        d="M-10 62 C 48 80, 118 54, 184 74 C 250 94, 306 66, 362 82 C 386 89, 400 88, 410 86 L 410 54 C 372 60, 330 40, 274 48 C 214 57, 158 32, 96 40 C 52 46, 20 40, -10 34 Z"
-        fill="var(--color-spot-rose)"
-        opacity="0.17"
-      />
-      <path
-        d="M-10 104 C 54 124, 124 96, 190 116 C 254 135, 310 108, 366 124 C 388 130, 400 130, 410 128 L 410 96 C 374 102, 332 82, 276 90 C 216 99, 160 74, 98 82 C 54 88, 20 82, -10 76 Z"
-        fill="var(--color-spot-violet)"
-        opacity="0.14"
-      />
-      {/* Loose dye that broke off the bands. */}
-      <ellipse cx="318" cy="16" rx="9" ry="5" fill="var(--color-spot-rose)" opacity="0.3" />
-      <ellipse cx="64" cy="96" rx="7" ry="4" fill="var(--color-spot-mint)" opacity="0.28" />
-      <ellipse cx="238" cy="132" rx="11" ry="5" fill="var(--color-spot-amber)" opacity="0.24" />
+      <g className="cv-sim-frame-bands">
+        <rect x="-20" y="-20" width="440" height="190" fill="var(--cv-dye-1)" />
+        <path
+          d="M-20 30 C 46 20, 112 44, 182 36 C 250 28, 302 50, 368 42 C 392 39, 408 43, 420 40 L 420 170 L -20 170 Z"
+          fill="var(--cv-dye-2)"
+        />
+        <path
+          d="M-20 68 C 52 56, 120 82, 190 72 C 256 62, 310 86, 374 76 C 396 73, 410 77, 420 74 L 420 170 L -20 170 Z"
+          fill="var(--cv-dye-3)"
+        />
+        <path
+          d="M-20 108 C 48 94, 118 122, 188 110 C 254 99, 308 124, 372 114 C 395 110, 409 114, 420 111 L 420 170 L -20 170 Z"
+          fill="var(--cv-dye-4)"
+        />
+      </g>
     </svg>
   );
 }
@@ -308,6 +313,15 @@ function CvSection({
 
 export function CvDocument() {
   const t = useTranslations("cv");
+  // Preset names come from the shared `simPresets` namespace so the
+  // saved PDF's filename suffix matches the switcher's own labels.
+  const tPresets = useTranslations("simPresets");
+  const presetNames = Object.fromEntries(
+    (["riso", "wave", "turbulenz", "aquarell", "nachtdruck"] as const).map((id) => [
+      id,
+      tPresets(id),
+    ]),
+  );
 
   const experience = t.raw("experience.items") as CvExperienceItems;
   const projects = t.raw("projects.items") as CvProjectItems;
@@ -341,7 +355,12 @@ export function CvDocument() {
           <span aria-hidden="true">← </span>
           {t("backLabel")}
         </Link>
-        <CvActions label={t("download.label")} hint={t("download.hint")} />
+        <CvActions
+          label={t("download.label")}
+          hint={t("download.hint")}
+          docTitle={t("metaTitle")}
+          presetNames={presetNames}
+        />
       </div>
 
       {/* The sheet. Fixed 184mm width, fixed type sizes — identical on
@@ -351,6 +370,7 @@ export function CvDocument() {
         className="cv-sheet plate-corners relative mx-auto w-full max-w-[184mm] bg-paper-tint px-5 py-8 shadow-[10px_10px_0_color-mix(in_srgb,var(--color-ink)_18%,transparent)] print:shadow-none sm:px-[11mm] sm:py-[12mm]"
       >
         <PlateCornerMarks />
+        <CvDyeSync />
 
         {/* Per-theme wash (halftone / bands / wet pools / neon bloom).
             Empty under Riso — see globals.css. */}
@@ -438,14 +458,23 @@ export function CvDocument() {
         <div className="relative z-10 mt-8 grid grid-cols-1 gap-x-8 gap-y-9 sm:grid-cols-[1.45fr_1fr]">
           <div className="flex flex-col gap-10">
             <CvSection index={0} label={t("experience.label")}>
-              {/* Timeline spine — the left rule + registration dots
-                  encode real chronology, newest at the top. */}
-              <div className="flex flex-col gap-6 border-ink/70 border-l-2 pl-5">
+              {/* Timeline spine — registration dots and a rule segment
+                  encode real chronology, newest at the top.
+                  The spine is PER ENTRY, not one continuous border on
+                  the container: a container border runs through the
+                  inter-entry gaps too, so the PDF page boundary sliced
+                  it mid-air and the cut read as a printing error rather
+                  than a page turn. Segmented, the break always lands in
+                  a gap between two segments. */}
+              <div className="flex flex-col gap-6">
                 {experience.map((item, i) => (
-                  <div key={`${item.period}-${item.org}`} className="relative break-inside-avoid">
+                  <div
+                    key={`${item.period}-${item.org}`}
+                    className="relative break-inside-avoid border-ink/70 border-l-2 pl-5"
+                  >
                     <span
                       aria-hidden="true"
-                      className="absolute top-[0.2rem] left-[-27px] size-3 rounded-full border-2 border-ink"
+                      className="absolute top-[0.2rem] left-[-7px] size-3 rounded-full border-2 border-ink"
                       style={{ background: spotAt(i) }}
                     />
                     <p className="font-mono text-[0.65rem] text-ink-muted uppercase tracking-[0.16em]">
