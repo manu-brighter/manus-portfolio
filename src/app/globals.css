@@ -344,24 +344,104 @@
   }
 }
 
-/* Off-the-screen tile reveal — the plate settles in while (on the
- * motion path) the ink wipe still covers the viewport, so the retract
- * unveils a finished composition. Reduced-motion opens the overlay
- * directly, hence the hard disable. */
+/* Off-the-screen tile reveal — "Stempelpress". No full-page ink wipe
+ * anymore (the ~1s grow/hold/retract read as lag — user feedback):
+ * the overlay owns a ~350ms press choreography instead. The plate
+ * slams onto the paper with an overshoot scale, the spot-color
+ * shadow starts out of register and seats into the resting 8px
+ * offset, an ink blob squishes out from under the plate, and the
+ * caption row stamps in a beat later. Reduced-motion opens the
+ * overlay statically (hard disable below). */
+.tile-reveal-backdrop {
+  animation: tile-backdrop-in 140ms ease-out;
+}
+
 .tile-reveal-figure {
-  animation: tile-reveal-in 340ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: tile-press-in 340ms cubic-bezier(0.3, 1.4, 0.4, 1);
+}
+
+/* Ends at the picture's static Tailwind shadow (8px 8px spot), so no
+ * fill-mode is needed — the animation hands off seamlessly. */
+.tile-reveal-shadow {
+  animation: tile-shadow-seat 420ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tile-reveal-splat {
+  transform-origin: 50% 50%;
+  animation: tile-splat-in 380ms cubic-bezier(0.34, 1.56, 0.64, 1) 40ms backwards;
+}
+
+.tile-reveal-meta {
+  animation: tile-meta-in 220ms ease-out 120ms backwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tile-reveal-figure {
+  .tile-reveal-backdrop,
+  .tile-reveal-figure,
+  .tile-reveal-shadow,
+  .tile-reveal-splat,
+  .tile-reveal-meta {
     animation: none;
   }
 }
 
-@keyframes tile-reveal-in {
+@keyframes tile-backdrop-in {
   from {
     opacity: 0;
-    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes tile-press-in {
+  0% {
+    opacity: 0;
+    transform: scale(1.14) rotate(1.4deg);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(0.982) rotate(-0.5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes tile-shadow-seat {
+  0% {
+    box-shadow:
+      22px 26px 0 var(--tile-spot),
+      -12px -10px 0 color-mix(in srgb, var(--color-ink) 30%, transparent);
+  }
+  60% {
+    box-shadow:
+      5px 6px 0 var(--tile-spot),
+      0 0 0 transparent;
+  }
+  100% {
+    box-shadow:
+      8px 8px 0 var(--tile-spot),
+      0 0 0 transparent;
+  }
+}
+
+@keyframes tile-splat-in {
+  from {
+    opacity: 0;
+    transform: scale(0.4) rotate(-14deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes tile-meta-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
   }
   to {
     opacity: 1;

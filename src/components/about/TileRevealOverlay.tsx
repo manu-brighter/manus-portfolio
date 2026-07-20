@@ -12,17 +12,21 @@ import {
 } from "./tileReveals";
 
 /**
- * TileRevealOverlay — the "plate pull" behind an Off-the-screen tile.
+ * TileRevealOverlay — the "Stempelpress" behind an Off-the-screen tile.
  *
- * A fixed overlay (NOT a top-layer `dialog.showModal()`): the ink-wipe
- * canvas sits at z-[10000] and must stay ABOVE this overlay so the
- * open choreography works — ObjectGrid fires the wipe, mounts this
- * under full ink cover, and the retract then reveals the settled
- * photo. The native dialog top layer would paint over the ink and
- * kill the transition, so focus handling is manual here:
- * single-control dialog (close button only) — focus lands on close,
- * Tab is pinned to it, Esc and backdrop click close, and ObjectGrid
- * restores focus to the opening tile after unmount.
+ * Opens instantly (no page-wide ink wipe — its ~1s grow/retract felt
+ * slow; user feedback) and owns a ~350ms press choreography instead:
+ * backdrop fades in fast, the framed photo slams down with an
+ * overshoot scale, its spot shadow seats from out-of-register into
+ * the resting 8px offset, an ink blob squishes out from under the
+ * plate, and the caption row stamps in a beat later. Keyframes live
+ * in globals.css (`tile-press-in` and friends); reduced-motion
+ * disables all of them and the overlay opens statically.
+ *
+ * Still a fixed div, NOT `dialog.showModal()` — focus handling stays
+ * manual: single-control dialog (close button only), focus lands on
+ * close, Tab is pinned to it, Esc and backdrop click close, and
+ * ObjectGrid restores focus to the opening tile after unmount.
  *
  * Photo framing follows the site-wide policy: paper-shade backing +
  * ink border + spot-color offset shadow, mono caption stamps below —
@@ -107,13 +111,34 @@ export function TileRevealOverlay({ tile, spot, onClose }: TileRevealOverlayProp
       onClick={(e) => {
         if (e.target === e.currentTarget) requestClose();
       }}
-      className={`fixed inset-0 z-[9000] grid place-items-center bg-paper-tint/85 p-5 backdrop-blur-sm transition-opacity duration-200 md:p-10 ${
+      className={`tile-reveal-backdrop fixed inset-0 z-[9000] grid place-items-center bg-paper-tint/85 p-5 backdrop-blur-sm transition-opacity duration-200 md:p-10 ${
         leaving ? "opacity-0" : "opacity-100"
       }`}
       style={{ "--tile-spot": SPOT_CSS_VAR[spot] } as CSSProperties}
     >
-      <figure className="tile-reveal-figure max-w-full">
-        <picture className="block border-[2px] border-ink bg-paper-shade p-2 shadow-[8px_8px_0_var(--tile-spot)] md:p-3">
+      <figure className="tile-reveal-figure relative max-w-full">
+        {/* Ink squishing out from under the plate — a thin irregular
+            rim around the frame plus a few spray droplets, riding the
+            tile spot token so it re-inks with the theme. Sized just a
+            few percent past the frame: any bigger and it reads as a
+            balloon instead of pressed-out ink (screenshot-verified).
+            preserveAspectRatio="none" stretches the wobble to the
+            photo's aspect, which only makes it more organic. */}
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 120 100"
+          preserveAspectRatio="none"
+          className="tile-reveal-splat pointer-events-none absolute -inset-[2.5%] -z-10 h-[105%] w-[105%]"
+          style={{ fill: "var(--tile-spot)" }}
+        >
+          <path d="M60 2 C78 0 96 4 106 10 C116 16 114 28 117 42 C120 57 115 70 110 82 C104 94 88 96 70 98 C52 100 32 98 20 92 C8 86 6 72 3 58 C0 44 4 28 12 16 C20 5 42 4 60 2 Z" />
+          <circle cx="4" cy="6" r="2.6" />
+          <circle cx="117" cy="8" r="2.2" />
+          <circle cx="116" cy="94" r="2.8" />
+          <circle cx="5" cy="95" r="2" />
+          <circle cx="60" cy="99" r="1.6" />
+        </svg>
+        <picture className="tile-reveal-shadow relative block border-[2px] border-ink bg-paper-shade p-2 shadow-[8px_8px_0_var(--tile-spot)] md:p-3">
           <source
             media="(orientation: portrait)"
             type="image/avif"
@@ -145,7 +170,7 @@ export function TileRevealOverlay({ tile, spot, onClose }: TileRevealOverlayProp
         </picture>
         <figcaption
           id="tile-reveal-caption"
-          className="mt-4 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2"
+          className="tile-reveal-meta mt-4 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2"
         >
           <span className="type-label-stamp">{t(`tiles.${tile}.name`)}</span>
           <span className="font-mono text-ink-muted text-xs uppercase tracking-[0.2em]">
@@ -158,7 +183,7 @@ export function TileRevealOverlay({ tile, spot, onClose }: TileRevealOverlayProp
         type="button"
         onClick={requestClose}
         aria-label={t("revealClose")}
-        className="absolute top-5 right-5 grid size-12 place-items-center border-[1.5px] border-ink bg-paper text-2xl text-ink leading-none shadow-[3px_3px_0_var(--color-ink)] transition-[transform,box-shadow] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[1px_1px_0_var(--color-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper motion-reduce:transition-none md:top-8 md:right-8"
+        className="tile-reveal-meta absolute top-5 right-5 grid size-12 place-items-center border-[1.5px] border-ink bg-paper text-2xl text-ink leading-none shadow-[3px_3px_0_var(--color-ink)] transition-[transform,box-shadow] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[1px_1px_0_var(--color-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper motion-reduce:transition-none md:top-8 md:right-8"
       >
         <span aria-hidden="true">×</span>
       </button>

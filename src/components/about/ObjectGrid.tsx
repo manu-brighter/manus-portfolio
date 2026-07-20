@@ -10,7 +10,7 @@ import {
 } from "react";
 import { PlateCornerMarks } from "@/components/ui/PlateCornerMarks";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { GROW_MS, useInkWipeStore } from "@/lib/inkWipeStore";
+import { dispatchSplat } from "@/lib/fluidBus";
 import { AudiStamp } from "./stamps/AudiStamp";
 import { CameraStamp } from "./stamps/CameraStamp";
 import { JoggediballaStamp } from "./stamps/JoggediballaStamp";
@@ -32,15 +32,19 @@ import { hasTileReveal, type RevealTileKey, type StampKey } from "./tileReveals"
  * +2px (live Riso-misregistration).
  *
  * Creative-pass upgrade: tiles with a reveal manifest entry (see
- * tileReveals.ts) carry a stretched button — clicking fires the
- * site's ink-wipe (same primitive as the playground transition, no
- * route change), mounts TileRevealOverlay under full ink cover, and
- * the retract unveils the tile's real photo (orientation-aware crop).
+ * tileReveals.ts) carry a stretched button — clicking opens
+ * TileRevealOverlay immediately with its ~350ms "Stempelpress"
+ * choreography (the earlier full-page ink-wipe reuse took ~1s and
+ * felt slow — user feedback). The click also drops a real sim splat
+ * at the pointer (visible for the beat before the backdrop covers),
+ * and closing leaves a small ink burst where the plate was pulled —
+ * both ride the always-on hero FluidSim via fluidBus, so they no-op
+ * on coarse pointers (no subscriber) and under reduced motion.
  * The corner "+" chip is the standing affordance; it rotates with the
  * hover choreography. Tiles without assets (pingpong) stay decorative
  * figures until their masters land.
  *
- * Reduced-motion: no wipe — the overlay opens directly.
+ * Reduced-motion: the overlay opens statically, no splats.
  *
  * The former `mobile-strip` horizontal swiper variant was retired in
  * the mobile wow-pass (Manuel: too many side-swipe carousels) — the
@@ -93,50 +97,69 @@ function TileStamp({ k, spotVar }: { k: StampKey; spotVar: string }) {
 export function ObjectGrid() {
   const t = useTranslations("about.objectGrid");
   const reducedMotion = useReducedMotion();
-  const startGrow = useInkWipeStore((s) => s.startGrow);
 
   const [openTile, setOpenTile] = useState<RevealTileKey | null>(null);
-  // Open-delay timer (wipe cover window) — tracked per the project's
-  // setTimeout discipline and cleared on unmount.
-  const openTimerRef = useRef<number | null>(null);
   const openerRef = useRef<HTMLButtonElement | null>(null);
+  // Close-burst stagger timers — tracked per the project's setTimeout
+  // discipline and cleared on unmount.
+  const splatTimersRef = useRef<Set<number>>(new Set());
+  const openSpotRef = useRef<Tile["spot"]>("rose");
 
-  useEffect(
-    () => () => {
-      if (openTimerRef.current !== null) window.clearTimeout(openTimerRef.current);
-    },
-    [],
-  );
+  useEffect(() => {
+    const timers = splatTimersRef.current;
+    return () => {
+      for (const id of timers) window.clearTimeout(id);
+      timers.clear();
+    };
+  }, []);
 
   const openReveal = (tile: Tile, key: RevealTileKey, e: ReactMouseEvent<HTMLButtonElement>) => {
     openerRef.current = e.currentTarget;
-    if (reducedMotion) {
-      setOpenTile(key);
-      return;
+    openSpotRef.current = tile.spot;
+    if (!reducedMotion && typeof window !== "undefined") {
+      // Keyboard activations report detail 0 (and clientX/Y 0,0) —
+      // splat from the tile centre instead of the corner then.
+      let x = e.clientX;
+      let y = e.clientY;
+      if (e.detail === 0) {
+        const rect = e.currentTarget.getBoundingClientRect();
+        x = rect.left + rect.width / 2;
+        y = rect.top + rect.height / 2;
+      }
+      dispatchSplat({
+        x: x / window.innerWidth,
+        y: 1 - y / window.innerHeight,
+        color: tile.spot,
+      });
     }
-    // Keyboard activations report detail 0 (and clientX/Y 0,0) — grow
-    // the wipe from the tile centre instead of the corner then.
-    let x = e.clientX;
-    let y = e.clientY;
-    if (e.detail === 0) {
-      const rect = e.currentTarget.getBoundingClientRect();
-      x = rect.left + rect.width / 2;
-      y = rect.top + rect.height / 2;
-    }
-    startGrow({ x: x / window.innerWidth, y: y / window.innerHeight, color: tile.spot });
-    // Mount the overlay just before the grow completes so the photo
-    // settles during the covered window — the retract then unveils it
-    // (same timing pattern as PlaygroundCard's route swap).
-    openTimerRef.current = window.setTimeout(() => {
-      openTimerRef.current = null;
-      setOpenTile(key);
-    }, GROW_MS - 60);
+    setOpenTile(key);
   };
 
   const closeReveal = () => {
     setOpenTile(null);
-    openerRef.current?.focus();
+    const opener = openerRef.current;
+    opener?.focus();
     openerRef.current = null;
+    // Pulling the plate leaves ink behind — a staggered two-splat
+    // burst at the tile, visible the moment the backdrop is gone.
+    if (!reducedMotion && opener && typeof window !== "undefined") {
+      const rect = opener.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const spot = openSpotRef.current;
+      const timers = splatTimersRef.current;
+      for (let i = 0; i < 2; i++) {
+        const id = window.setTimeout(() => {
+          timers.delete(id);
+          dispatchSplat({
+            x: (cx + (Math.random() - 0.5) * 80) / window.innerWidth,
+            y: 1 - (cy + (Math.random() - 0.5) * 80) / window.innerHeight,
+            color: spot,
+          });
+        }, i * 90);
+        timers.add(id);
+      }
+    }
   };
 
   const openSpot = TILES.find((tile) => tile.key === openTile)?.spot ?? "rose";
@@ -198,7 +221,7 @@ export function ObjectGrid() {
                       className="absolute inset-0 z-10 cursor-pointer [-webkit-tap-highlight-color:transparent] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
                     >
                       <span className="sr-only">
-                        {t("revealCta")} — {t(`tiles.${tile.i18nKey}.name`)}
+                        {t("revealCta")}: {t(`tiles.${tile.i18nKey}.name`)}
                       </span>
                     </button>
                     {/* Corner affordance chip — rotates with the hover
