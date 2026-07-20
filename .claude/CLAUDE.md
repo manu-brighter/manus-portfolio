@@ -594,6 +594,20 @@ Source of truth: `src/app/globals.css` (`@theme` block).
       rounds of print-screenshot review and only showed up in a
       full-viewport shot. Check overflow with a page screenshot or by
       comparing bounding boxes, never with an element shot.
+  - **The frame's bottom hem is a `clipPath`, not a band boundary.**
+    The bands run past the viewBox to tile it, so their bottom used to
+    be the viewport's straight edge and dye met bare paper along a
+    ruler-straight line. One shared clip gives the whole stack a wavy
+    hem; per-band bottoms would mean repeating and reversing the same
+    curve four times. The clip id is per instance (two frames per page,
+    duplicate ids are invalid markup).
+  - **`.cv-zoom` scales the proof on screen only** (1.15 from 1024px,
+    1.3 from 1440px, reset in print). It uses `zoom`, NOT
+    `transform: scale()`: zoom scales the layout box so nothing reflows
+    and the flow reserves the right height, whereas a transform leaves
+    the unscaled box behind and the footer overlaps. This does not
+    violate print parity — it is ONE layout at two scales, and the
+    cv-print spec still asserts 2 pages.
   - **The /cv desk is opaque** (`bg-paper-shade`, not `/60`). The sheet
     now carries its own band structure, and the live sim showing
     through around it reads as those same bands continuing — except

@@ -194,7 +194,8 @@ function WobbleRule({
  *  and by a different amount per frame because their heights differ.
  *  Screenshotting the <article> hides this: an element screenshot
  *  clips to that element's box. */
-function CvSimFrame({ className }: { className?: string }) {
+function CvSimFrame({ id, className }: { id: string; className?: string }) {
+  const clipId = `${id}-clip`;
   return (
     <svg
       aria-hidden="true"
@@ -202,7 +203,22 @@ function CvSimFrame({ className }: { className?: string }) {
       preserveAspectRatio="none"
       className={`cv-sim-frame pointer-events-none ${className ?? ""}`}
     >
-      <g className="cv-sim-frame-bands">
+      {/* The bands run past the bottom of the viewBox, so without this
+          they ended on the viewport's straight edge and the dye met
+          bare paper along a ruler-straight line. The clip gives the
+          whole stack one shared wavy hem — a per-band bottom curve
+          would have to be repeated four times and reversed each time.
+          `clipPathUnits="userSpaceOnUse"` keeps it in viewBox
+          coordinates so it stretches with preserveAspectRatio="none",
+          and it survives into the PDF. The id is per instance: two
+          frames share this component on one page and duplicate ids are
+          invalid markup. */}
+      <defs>
+        <clipPath id={clipId} clipPathUnits="userSpaceOnUse">
+          <path d="M-20 -20 L 420 -20 L 420 126 C 354 139, 298 117, 234 130 C 170 143, 116 121, 52 134 C 26 139, 2 135, -20 139 Z" />
+        </clipPath>
+      </defs>
+      <g className="cv-sim-frame-bands" clipPath={`url(#${clipId})`}>
         <rect x="-20" y="-20" width="440" height="190" fill="var(--cv-dye-1)" />
         <path
           d="M-20 30 C 46 20, 112 44, 182 36 C 250 28, 302 50, 368 42 C 392 39, 408 43, 420 40 L 420 170 L -20 170 Z"
@@ -213,7 +229,7 @@ function CvSimFrame({ className }: { className?: string }) {
           fill="var(--cv-dye-3)"
         />
         <path
-          d="M-20 108 C 48 94, 118 122, 188 110 C 254 99, 308 124, 372 114 C 395 110, 409 114, 420 111 L 420 170 L -20 170 Z"
+          d="M-20 104 C 48 90, 118 118, 188 106 C 254 95, 308 120, 372 110 C 395 106, 409 110, 420 107 L 420 170 L -20 170 Z"
           fill="var(--cv-dye-4)"
         />
       </g>
@@ -366,284 +382,304 @@ export function CvDocument() {
       data-page="cv"
       className="min-h-screen bg-paper-shade py-10 print:min-h-0 print:bg-transparent print:py-0 md:py-16"
     >
-      {/* Topbar — screen chrome, never printed. Lives OUTSIDE the sheet
-          so the printable geometry stays untouched. */}
-      <div className="mx-auto mb-8 flex w-full max-w-[184mm] flex-wrap items-start justify-between gap-4 px-4 print:hidden sm:px-0">
-        <Link
-          href="/"
-          className="type-label-stamp bg-paper transition-colors hover:bg-ink hover:text-paper-tint"
-        >
-          <span aria-hidden="true">← </span>
-          {t("backLabel")}
-        </Link>
-        <CvActions
-          label={t("download.label")}
-          hint={t("download.hint")}
-          docTitle={t("metaTitle")}
-          presetNames={presetNames}
-        />
-      </div>
-
-      {/* The sheet. Fixed 184mm width, fixed type sizes — identical on
-          screen and in the printed PDF. */}
-      <article
-        aria-labelledby="cv-heading"
-        className="cv-sheet plate-corners relative mx-auto w-full max-w-[184mm] bg-paper-tint px-5 py-8 shadow-[10px_10px_0_color-mix(in_srgb,var(--color-ink)_18%,transparent)] print:shadow-none sm:px-[11mm] sm:py-[12mm]"
-      >
-        <PlateCornerMarks />
-        <CvDyeSync />
-
-        {/* Per-theme wash (halftone / bands / wet pools / neon bloom).
-            Empty under Riso — see globals.css. */}
-        <div aria-hidden="true" className="cv-theme-texture" />
-
-        {/* Margin ink — registration droplets in the sheet's gutter,
-            outside every text block. */}
-        <InkBlob
-          spot={SPOT_CSS_VAR.amber}
-          variant={1}
-          className="absolute top-[36%] right-1.5 h-4 w-5 rotate-[24deg] opacity-80"
-        />
-        <span
-          aria-hidden="true"
-          className="absolute top-[38.5%] right-4 size-1.5 rounded-full opacity-70"
-          style={{ background: SPOT_CSS_VAR.violet }}
-        />
-        <InkBlob
-          spot={SPOT_CSS_VAR.mint}
-          variant={0}
-          className="absolute bottom-[22%] left-2 h-3.5 w-4 rotate-[-12deg] opacity-80"
-        />
-
-        {/* Sim still frame — the ladder terraces bled onto the sheet,
-            edge to edge (negative insets cancel the sheet padding).
-            Positioned, so the also-positioned <header> after it in DOM
-            order paints on top. */}
-        <CvSimFrame className="absolute top-0 left-0 z-0 h-[42%] w-full opacity-75" />
-
-        {/* ---- Header ---- */}
-        <header className="relative z-10">
-          <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
-            <p className="type-label-stamp rotate-[-1deg] bg-paper">
-              {t("sectionLabel")}
-              <span aria-hidden="true"> · </span>
-              {t("editionStamp")}
-            </p>
-            <CalibrationBar label={t("calibrationLabel")} />
-          </div>
-
-          <div className="relative mt-7">
-            <InkBlob
-              spot={SPOT_CSS_VAR.rose}
-              className="absolute top-[-1.1rem] left-[-1.2rem] h-[4.6rem] w-[6.4rem] rotate-[-9deg] opacity-90"
-            />
-            {/* Misregistration lives in `.cv-name` (globals.css), not
-                in an inline style: the per-theme blocks need to be
-                able to replace it, and an inline text-shadow beats
-                every stylesheet rule. */}
-            <h1
-              id="cv-heading"
-              className="cv-name relative font-display text-[2.5rem] text-ink italic leading-[0.98] tracking-[-0.02em] sm:text-[3.3rem]"
-            >
-              {t("name")}
-            </h1>
-          </div>
-          <p className="mt-3 font-mono text-[0.75rem] text-ink-soft uppercase tracking-[0.2em]">
-            {t("role")}
-            <span aria-hidden="true"> · </span>
-            {t("region")}
-          </p>
-
-          <WobbleRule className="mt-4" />
-
-          <p className="mt-4 max-w-[66ch] type-body-sm text-ink leading-relaxed">{t("profile")}</p>
-
-          <ul className="mt-4 flex flex-wrap gap-x-2.5 gap-y-2" aria-label={t("contactLabel")}>
-            {contacts.map((contact) => (
-              <li key={contact.label}>
-                <a
-                  href={contact.href}
-                  {...(contact.href.startsWith("http")
-                    ? { target: "_blank", rel: "noopener noreferrer" }
-                    : {})}
-                  className="inline-block rounded-[2px] border border-ink bg-paper px-2.5 py-1 font-mono text-[0.7rem] text-ink tracking-[0.08em] transition-colors hover:bg-ink hover:text-paper-tint"
-                >
-                  {contact.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </header>
-
-        {/* ---- Body: main flow + side rail ---- */}
-        <div className="relative z-10 mt-8 grid grid-cols-1 gap-x-8 gap-y-9 sm:grid-cols-[1.45fr_1fr]">
-          <div className="flex flex-col gap-10">
-            <CvSection index={0} label={t("experience.label")}>
-              {/* Timeline spine — registration dots and a rule segment
-                  encode real chronology, newest at the top.
-                  The spine is PER ENTRY, not one continuous border on
-                  the container: a container border runs through the
-                  inter-entry gaps too, so the PDF page boundary sliced
-                  it mid-air and the cut read as a printing error rather
-                  than a page turn. Segmented, the break always lands in
-                  a gap between two segments. */}
-              <div className="flex flex-col gap-6">
-                {experience.map((item, i) => (
-                  <div
-                    key={`${item.period}-${item.org}`}
-                    className="relative break-inside-avoid border-ink/70 border-l-2 pl-5"
-                  >
-                    <span
-                      aria-hidden="true"
-                      className="absolute top-[0.2rem] left-[-7px] size-3 rounded-full border-2 border-ink"
-                      style={{ background: spotAt(i) }}
-                    />
-                    <p className="font-mono text-[0.65rem] text-ink-muted uppercase tracking-[0.16em]">
-                      {item.period}
-                      <span aria-hidden="true"> · </span>
-                      {item.org}
-                    </p>
-                    <h3 className="mt-1 font-display text-[1.35rem] text-ink italic leading-snug">
-                      {item.role}
-                    </h3>
-                    <ul className="mt-2 flex list-none flex-col gap-1.5">
-                      {item.bullets.map((bullet) => (
-                        <li key={bullet} className="flex gap-2 type-body-sm text-ink">
-                          <span
-                            aria-hidden="true"
-                            className="mt-[0.5em] size-1.5 shrink-0 bg-ink/80"
-                          />
-                          {bullet}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </CvSection>
-
-            <CvSection index={1} label={t("projects.label")}>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {projects.map((project, i) => (
-                  <div
-                    key={project.title}
-                    className="relative break-inside-avoid border border-ink/40 bg-paper/60 p-3"
-                    style={{ "--card-spot": spotAt(i) } as CSSProperties}
-                  >
-                    <span
-                      aria-hidden="true"
-                      className="absolute top-0 right-0 size-2"
-                      style={{ background: "var(--card-spot)" }}
-                    />
-                    <h3 className="font-display text-[1rem] text-ink italic">{project.title}</h3>
-                    <p className="mt-0.5 font-mono text-[0.58rem] text-ink-muted uppercase tracking-[0.12em]">
-                      {project.meta}
-                    </p>
-                    <p className="mt-1.5 text-[0.72rem] text-ink-soft leading-relaxed">
-                      {project.description}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </CvSection>
-          </div>
-
-          <div className="flex flex-col gap-8">
-            <CvSection index={2} keepTogether label={t("skills.label")}>
-              <dl className="flex flex-col gap-3">
-                {skillGroups.map((group) => (
-                  <div key={group.label} className="break-inside-avoid">
-                    <dt className="font-mono text-[0.62rem] text-ink-muted uppercase tracking-[0.14em]">
-                      {group.label}
-                    </dt>
-                    <dd className="mt-0.5 text-[0.74rem] text-ink leading-relaxed">
-                      {group.items}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            </CvSection>
-
-            <CvSection index={3} keepTogether label={t("languages.label")}>
-              <dl className="flex flex-col gap-1.5">
-                {languages.map((language) => (
-                  <div key={language.name} className="flex items-baseline justify-between gap-4">
-                    <dt className="text-[0.74rem] text-ink">{language.name}</dt>
-                    <dd className="font-mono text-[0.62rem] text-ink-muted uppercase tracking-[0.12em]">
-                      {language.level}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            </CvSection>
-
-            <CvSection index={0} keepTogether label={t("engagement.label")}>
-              <div className="flex flex-col gap-3">
-                {engagement.map((item) => (
-                  <div key={item.title} className="break-inside-avoid">
-                    <p className="font-mono text-[0.62rem] text-ink-muted uppercase tracking-[0.14em]">
-                      {item.period}
-                    </p>
-                    <h3 className="mt-0.5 font-display text-[0.95rem] text-ink italic">
-                      {item.title}
-                    </h3>
-                    <p className="mt-1 text-[0.72rem] text-ink-soft leading-relaxed">
-                      {item.description}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </CvSection>
-
-            <CvSection index={1} keepTogether label={t("strengths.label")}>
-              <ul className="flex list-none flex-col gap-1.5">
-                {strengths.map((strength) => (
-                  <li key={strength} className="flex gap-2 text-[0.74rem] text-ink">
-                    <span aria-hidden="true" className="mt-[0.5em] size-1.5 shrink-0 bg-ink/80" />
-                    {strength}
-                  </li>
-                ))}
-              </ul>
-            </CvSection>
-
-            <CvSection index={2} keepTogether label={t("education.label")}>
-              <dl className="flex flex-col gap-2.5">
-                {education.map((item) => (
-                  <div key={item.title} className="break-inside-avoid">
-                    <dt className="font-mono text-[0.62rem] text-ink-muted uppercase tracking-[0.14em]">
-                      {item.period}
-                    </dt>
-                    <dd className="mt-0.5 text-[0.74rem] text-ink">
-                      {item.title}
-                      <span className="text-ink-muted"> · {item.org}</span>
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            </CvSection>
-          </div>
+      {/* `.cv-zoom` scales the proof up on wide screens so it fills more
+          of the viewport. It uses `zoom`, NOT `transform: scale()`:
+          zoom scales the layout itself, so nothing reflows (the sheet's
+          mm width and rem type keep their exact proportions, they are
+          just rendered larger) and the surrounding flow reserves the
+          right height. A transform would leave the original box behind
+          and overlap the footer. Print resets it to 1, so the PDF is
+          untouched and screen/PDF stay one geometry at two scales.
+          The topbar sits inside the wrapper so it keeps aligning with
+          the sheet's edges. */}
+      <div className="cv-zoom">
+        {/* Topbar — screen chrome, never printed. Lives OUTSIDE the sheet
+            so the printable geometry stays untouched. */}
+        <div className="mx-auto mb-8 flex w-full max-w-[184mm] flex-wrap items-start justify-between gap-4 px-4 print:hidden sm:px-0">
+          <Link
+            href="/"
+            className="type-label-stamp bg-paper transition-colors hover:bg-ink hover:text-paper-tint"
+          >
+            <span aria-hidden="true">← </span>
+            {t("backLabel")}
+          </Link>
+          <CvActions
+            label={t("download.label")}
+            hint={t("download.hint")}
+            docTitle={t("metaTitle")}
+            presetNames={presetNames}
+          />
         </div>
 
-        {/* Second still frame, flipped: the sheet's foot ran through the
-            press the other way round. */}
-        <CvSimFrame className="absolute bottom-0 left-0 z-0 h-[22%] w-full rotate-180 opacity-70" />
+        {/* The sheet. Fixed 184mm width, fixed type sizes — identical on
+            screen and in the printed PDF. */}
+        <article
+          aria-labelledby="cv-heading"
+          className="cv-sheet plate-corners relative mx-auto w-full max-w-[184mm] bg-paper-tint px-5 py-8 shadow-[10px_10px_0_color-mix(in_srgb,var(--color-ink)_18%,transparent)] print:shadow-none sm:px-[11mm] sm:py-[12mm]"
+        >
+          <PlateCornerMarks />
+          <CvDyeSync />
 
-        {/* ---- Sheet footer: provenance + the live ink stamp ---- */}
-        <footer className="relative z-10 mt-8">
-          <WobbleRule className="mb-4" />
-          <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
-            <div className="flex flex-col gap-1">
-              <p className="font-mono text-[0.62rem] text-ink-muted uppercase tracking-[0.14em]">
-                {t("footer.printedNote")}
+          {/* Per-theme wash (halftone / bands / wet pools / neon bloom).
+              Empty under Riso — see globals.css. */}
+          <div aria-hidden="true" className="cv-theme-texture" />
+
+          {/* Margin ink — registration droplets in the sheet's gutter,
+              outside every text block. */}
+          <InkBlob
+            spot={SPOT_CSS_VAR.amber}
+            variant={1}
+            className="absolute top-[36%] right-1.5 h-4 w-5 rotate-[24deg] opacity-80"
+          />
+          <span
+            aria-hidden="true"
+            className="absolute top-[38.5%] right-4 size-1.5 rounded-full opacity-70"
+            style={{ background: SPOT_CSS_VAR.violet }}
+          />
+          <InkBlob
+            spot={SPOT_CSS_VAR.mint}
+            variant={0}
+            className="absolute bottom-[22%] left-2 h-3.5 w-4 rotate-[-12deg] opacity-80"
+          />
+
+          {/* Sim still frame — the ladder terraces bled onto the sheet,
+              edge to edge (negative insets cancel the sheet padding).
+              Positioned, so the also-positioned <header> after it in DOM
+              order paints on top. */}
+          <CvSimFrame
+            id="cv-frame-head"
+            className="absolute top-0 left-0 z-0 h-[42%] w-full opacity-75"
+          />
+
+          {/* ---- Header ---- */}
+          <header className="relative z-10">
+            <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+              <p className="type-label-stamp rotate-[-1deg] bg-paper">
+                {t("sectionLabel")}
+                <span aria-hidden="true"> · </span>
+                {t("editionStamp")}
               </p>
-              <p className="font-mono text-[0.62rem] text-ink-muted uppercase tracking-[0.14em]">
-                {t("footer.publicNote")}
-              </p>
+              <CalibrationBar label={t("calibrationLabel")} />
             </div>
-            <CvInkStamp label={t("footer.inkLabel")} />
+
+            <div className="relative mt-7">
+              <InkBlob
+                spot={SPOT_CSS_VAR.rose}
+                className="absolute top-[-1.1rem] left-[-1.2rem] h-[4.6rem] w-[6.4rem] rotate-[-9deg] opacity-90"
+              />
+              {/* Misregistration lives in `.cv-name` (globals.css), not
+                  in an inline style: the per-theme blocks need to be
+                  able to replace it, and an inline text-shadow beats
+                  every stylesheet rule. */}
+              <h1
+                id="cv-heading"
+                className="cv-name relative font-display text-[2.5rem] text-ink italic leading-[0.98] tracking-[-0.02em] sm:text-[3.3rem]"
+              >
+                {t("name")}
+              </h1>
+            </div>
+            <p className="mt-3 font-mono text-[0.75rem] text-ink-soft uppercase tracking-[0.2em]">
+              {t("role")}
+              <span aria-hidden="true"> · </span>
+              {t("region")}
+            </p>
+
+            <WobbleRule className="mt-4" />
+
+            <p className="mt-4 max-w-[66ch] type-body-sm text-ink leading-relaxed">
+              {t("profile")}
+            </p>
+
+            <ul className="mt-4 flex flex-wrap gap-x-2.5 gap-y-2" aria-label={t("contactLabel")}>
+              {contacts.map((contact) => (
+                <li key={contact.label}>
+                  <a
+                    href={contact.href}
+                    {...(contact.href.startsWith("http")
+                      ? { target: "_blank", rel: "noopener noreferrer" }
+                      : {})}
+                    className="inline-block rounded-[2px] border border-ink bg-paper px-2.5 py-1 font-mono text-[0.7rem] text-ink tracking-[0.08em] transition-colors hover:bg-ink hover:text-paper-tint"
+                  >
+                    {contact.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </header>
+
+          {/* ---- Body: main flow + side rail ---- */}
+          <div className="relative z-10 mt-8 grid grid-cols-1 gap-x-8 gap-y-9 sm:grid-cols-[1.45fr_1fr]">
+            <div className="flex flex-col gap-10">
+              <CvSection index={0} label={t("experience.label")}>
+                {/* Timeline spine — registration dots and a rule segment
+                    encode real chronology, newest at the top.
+                    The spine is PER ENTRY, not one continuous border on
+                    the container: a container border runs through the
+                    inter-entry gaps too, so the PDF page boundary sliced
+                    it mid-air and the cut read as a printing error rather
+                    than a page turn. Segmented, the break always lands in
+                    a gap between two segments. */}
+                <div className="flex flex-col gap-6">
+                  {experience.map((item, i) => (
+                    <div
+                      key={`${item.period}-${item.org}`}
+                      className="relative break-inside-avoid border-ink/70 border-l-2 pl-5"
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="absolute top-[0.2rem] left-[-7px] size-3 rounded-full border-2 border-ink"
+                        style={{ background: spotAt(i) }}
+                      />
+                      <p className="font-mono text-[0.65rem] text-ink-muted uppercase tracking-[0.16em]">
+                        {item.period}
+                        <span aria-hidden="true"> · </span>
+                        {item.org}
+                      </p>
+                      <h3 className="mt-1 font-display text-[1.35rem] text-ink italic leading-snug">
+                        {item.role}
+                      </h3>
+                      <ul className="mt-2 flex list-none flex-col gap-1.5">
+                        {item.bullets.map((bullet) => (
+                          <li key={bullet} className="flex gap-2 type-body-sm text-ink">
+                            <span
+                              aria-hidden="true"
+                              className="mt-[0.5em] size-1.5 shrink-0 bg-ink/80"
+                            />
+                            {bullet}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </CvSection>
+
+              <CvSection index={1} label={t("projects.label")}>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {projects.map((project, i) => (
+                    <div
+                      key={project.title}
+                      className="relative break-inside-avoid border border-ink/40 bg-paper/60 p-3"
+                      style={{ "--card-spot": spotAt(i) } as CSSProperties}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="absolute top-0 right-0 size-2"
+                        style={{ background: "var(--card-spot)" }}
+                      />
+                      <h3 className="font-display text-[1rem] text-ink italic">{project.title}</h3>
+                      <p className="mt-0.5 font-mono text-[0.58rem] text-ink-muted uppercase tracking-[0.12em]">
+                        {project.meta}
+                      </p>
+                      <p className="mt-1.5 text-[0.72rem] text-ink-soft leading-relaxed">
+                        {project.description}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </CvSection>
+            </div>
+
+            <div className="flex flex-col gap-8">
+              <CvSection index={2} keepTogether label={t("skills.label")}>
+                <dl className="flex flex-col gap-3">
+                  {skillGroups.map((group) => (
+                    <div key={group.label} className="break-inside-avoid">
+                      <dt className="font-mono text-[0.62rem] text-ink-muted uppercase tracking-[0.14em]">
+                        {group.label}
+                      </dt>
+                      <dd className="mt-0.5 text-[0.74rem] text-ink leading-relaxed">
+                        {group.items}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </CvSection>
+
+              <CvSection index={3} keepTogether label={t("languages.label")}>
+                <dl className="flex flex-col gap-1.5">
+                  {languages.map((language) => (
+                    <div key={language.name} className="flex items-baseline justify-between gap-4">
+                      <dt className="text-[0.74rem] text-ink">{language.name}</dt>
+                      <dd className="font-mono text-[0.62rem] text-ink-muted uppercase tracking-[0.12em]">
+                        {language.level}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </CvSection>
+
+              <CvSection index={0} keepTogether label={t("engagement.label")}>
+                <div className="flex flex-col gap-3">
+                  {engagement.map((item) => (
+                    <div key={item.title} className="break-inside-avoid">
+                      <p className="font-mono text-[0.62rem] text-ink-muted uppercase tracking-[0.14em]">
+                        {item.period}
+                      </p>
+                      <h3 className="mt-0.5 font-display text-[0.95rem] text-ink italic">
+                        {item.title}
+                      </h3>
+                      <p className="mt-1 text-[0.72rem] text-ink-soft leading-relaxed">
+                        {item.description}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </CvSection>
+
+              <CvSection index={1} keepTogether label={t("strengths.label")}>
+                <ul className="flex list-none flex-col gap-1.5">
+                  {strengths.map((strength) => (
+                    <li key={strength} className="flex gap-2 text-[0.74rem] text-ink">
+                      <span aria-hidden="true" className="mt-[0.5em] size-1.5 shrink-0 bg-ink/80" />
+                      {strength}
+                    </li>
+                  ))}
+                </ul>
+              </CvSection>
+
+              <CvSection index={2} keepTogether label={t("education.label")}>
+                <dl className="flex flex-col gap-2.5">
+                  {education.map((item) => (
+                    <div key={item.title} className="break-inside-avoid">
+                      <dt className="font-mono text-[0.62rem] text-ink-muted uppercase tracking-[0.14em]">
+                        {item.period}
+                      </dt>
+                      <dd className="mt-0.5 text-[0.74rem] text-ink">
+                        {item.title}
+                        <span className="text-ink-muted"> · {item.org}</span>
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </CvSection>
+            </div>
           </div>
-        </footer>
-      </article>
+
+          {/* Second still frame, flipped: the sheet's foot ran through the
+              press the other way round. */}
+          <CvSimFrame
+            id="cv-frame-foot"
+            className="absolute bottom-0 left-0 z-0 h-[22%] w-full rotate-180 opacity-70"
+          />
+
+          {/* ---- Sheet footer: provenance + the live ink stamp ---- */}
+          <footer className="relative z-10 mt-8">
+            <WobbleRule className="mb-4" />
+            <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+              <div className="flex flex-col gap-1">
+                <p className="font-mono text-[0.62rem] text-ink-muted uppercase tracking-[0.14em]">
+                  {t("footer.printedNote")}
+                </p>
+                <p className="font-mono text-[0.62rem] text-ink-muted uppercase tracking-[0.14em]">
+                  {t("footer.publicNote")}
+                </p>
+              </div>
+              <CvInkStamp label={t("footer.inkLabel")} />
+            </div>
+          </footer>
+        </article>
+      </div>
     </div>
   );
 }
