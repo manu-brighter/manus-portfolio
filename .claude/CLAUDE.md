@@ -582,6 +582,23 @@ Source of truth: `src/app/globals.css` (`@theme` block).
       to cut through.
     - `.cv-sheet` carries `isolation: isolate`, or Nachtdruck's screen
       blend composites past the opaque paper against the live sim.
+    - **`CvSimFrame` needs an explicit `w-full` from every caller.** An
+      `<svg>` with a viewBox is a replaced element with an intrinsic
+      aspect ratio: given only `left-0 right-0` plus a percentage
+      height, the browser derives the WIDTH from that ratio instead of
+      from the offsets. At `h-[42%]` of a 2000px sheet the frame came
+      out 2240px wide against a 696px sheet and spilled ~1.5 screens
+      to the right, by a different amount per frame because their
+      heights differ. **An element screenshot of the `<article>` clips
+      to the article box and hides this entirely** — it survived two
+      rounds of print-screenshot review and only showed up in a
+      full-viewport shot. Check overflow with a page screenshot or by
+      comparing bounding boxes, never with an element shot.
+  - **The /cv desk is opaque** (`bg-paper-shade`, not `/60`). The sheet
+    now carries its own band structure, and the live sim showing
+    through around it reads as those same bands continuing — except
+    the sim can't be aligned to anything. The theme is fully expressed
+    by the sheet itself, so the sim stays off this one page.
   - **The saved PDF's filename is `document.title`.** The route sets
     `title: { absolute: ... }` (the locale layout's template would
     append the name a second time), and `CvActions` swaps in a title

@@ -183,7 +183,17 @@ function WobbleRule({
  *  Opacity lives on the group, not per band: the bands overlap by
  *  construction, so per-band alpha would accumulate towards the bottom
  *  instead of giving four even steps. `print-color-adjust: exact`
- *  carries the whole thing into the PDF. */
+ *  carries the whole thing into the PDF.
+ *
+ *  CALLERS MUST PASS AN EXPLICIT WIDTH (`w-full`). An <svg> with a
+ *  viewBox is a replaced element with an intrinsic aspect ratio, so
+ *  given only `left-0 right-0` and a percentage height the browser
+ *  sizes the WIDTH from that ratio instead of from the offsets: at
+ *  h-[42%] of a 2000px sheet the frame came out 2240px wide against a
+ *  696px sheet and spilled about 1.5 screens to the right — visibly,
+ *  and by a different amount per frame because their heights differ.
+ *  Screenshotting the <article> hides this: an element screenshot
+ *  clips to that element's box. */
 function CvSimFrame({ className }: { className?: string }) {
   return (
     <svg
@@ -341,9 +351,20 @@ export function CvDocument() {
   ];
 
   return (
+    // The desk is OPAQUE. It used to be `bg-paper-shade/60`, which let
+    // the live sim show through around the sheet. That was fine while
+    // the sheet was plain paper, but once the sheet carries its own
+    // band structure the sim's bands outside it read as the same waves
+    // continuing — except the sim can't be aligned to anything, so they
+    // ran off to one side at ragged lengths and looked like a bug
+    // (user: "die gehen aus dem PDF-Kasten raus und sind dann
+    // unterschiedlich lang"). The theme is fully expressed by the sheet
+    // itself now (paper, ink, dye ladder, halftone, glow), so nothing
+    // is lost by keeping the sim off this one page. `min-h-screen`
+    // stops it leaking through below the content on short documents.
     <div
       data-page="cv"
-      className="bg-paper-shade/60 py-10 print:bg-transparent print:py-0 md:py-16"
+      className="min-h-screen bg-paper-shade py-10 print:min-h-0 print:bg-transparent print:py-0 md:py-16"
     >
       {/* Topbar — screen chrome, never printed. Lives OUTSIDE the sheet
           so the printable geometry stays untouched. */}
@@ -398,7 +419,7 @@ export function CvDocument() {
             edge to edge (negative insets cancel the sheet padding).
             Positioned, so the also-positioned <header> after it in DOM
             order paints on top. */}
-        <CvSimFrame className="absolute top-0 right-0 left-0 z-0 h-[42%] opacity-75" />
+        <CvSimFrame className="absolute top-0 left-0 z-0 h-[42%] w-full opacity-75" />
 
         {/* ---- Header ---- */}
         <header className="relative z-10">
@@ -605,7 +626,7 @@ export function CvDocument() {
 
         {/* Second still frame, flipped: the sheet's foot ran through the
             press the other way round. */}
-        <CvSimFrame className="absolute right-0 bottom-0 left-0 z-0 h-[22%] rotate-180 opacity-70" />
+        <CvSimFrame className="absolute bottom-0 left-0 z-0 h-[22%] w-full rotate-180 opacity-70" />
 
         {/* ---- Sheet footer: provenance + the live ink stamp ---- */}
         <footer className="relative z-10 mt-8">
