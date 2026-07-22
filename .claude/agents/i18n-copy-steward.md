@@ -19,9 +19,14 @@ implement and review.
 ## Ground truth
 
 - `messages/{de,en,fr,it}/*.json` — next-intl UI strings, namespaced. There is
-  **no MDX and no `content/` directory** — plan §3's MDX content layer was never
-  built. All copy lives in `messages/**` and `src/lib/content/*.ts`. Don't go
-  looking for `.mdx`.
+  **no `content/` directory, and the site renders no MDX** — plan §3's MDX
+  content layer was never built. All copy lives in `messages/**` and
+  `src/lib/content/*.ts`. Precise version: `next.config.ts` does wire
+  `@next/mdx` with `pageExtensions: ["ts","tsx","md","mdx"]`, and a source file
+  exists at `content-input/joggediballa/joggediballa-story.mdx`, but nothing in
+  `src/` renders it. Don't go looking for site copy in `.mdx`.
+- `tests/i18n/key-parity.spec.ts` — the real guard that all four catalogs carry
+  the same key paths.
 - `src/lib/site.ts` — **technical constants** (URL, email, socials, region).
   These are NOT next-intl strings — one file beats four JSONs kept in sync. Put
   URLs/handles/emails here, not in messages.
@@ -51,7 +56,10 @@ implement and review.
   finding. `src/lib/site.ts` constants are the one sanctioned exception (not
   strings).
 - Every locale file must carry the same key set — a key present in `de` but
-  missing in `en/fr/it` is a runtime miss.
+  missing in `en/fr/it` is a runtime miss. **`pnpm typecheck` will NOT catch
+  this**: `IntlMessages` (`src/types/i18n.d.ts`) is derived from the catalog
+  shape, so a key missing only in `fr` is not a type error. The check is
+  `tests/i18n/key-parity.spec.ts` — run it.
 
 ## Translation pattern (don't over-translate, don't under-sync)
 
@@ -70,17 +78,18 @@ implement and review.
 
 - Locale switch uses the **View Transitions API directly** (`document.
   startViewTransition()`), not next-intl's experimental wrapper; falls back
-  gracefully when unavailable. The 404 (`not-found.tsx`) hardcodes
-  `<html lang="de">` and offers a locale-switch row back into home.
+  gracefully when unavailable. The 404 (`not-found.tsx`) renders
+  `<html lang={routing.defaultLocale}>` (not a hardcoded `"de"` — docs saying
+  otherwise are stale) and offers a locale-switch row back into home.
 - New routes go under `[locale]`. Metadata per locale via `src/lib/seo/
   metadata.ts`.
 
 ## Workflow & output
 
 Builder: when adding a string, add the key to **all four** locale files in the
-same edit, DE as source; verify with `pnpm typecheck` (next-intl typed keys) and
-a grep for stray em dashes / curly-brace placeholders. Never leave a key in one
-locale only. Reviewer: `[blocker]` (hard-coded string, em dash / ad-speak in
+same edit, DE as source; verify with `tests/i18n/key-parity.spec.ts` (the only
+thing that catches a missing locale key), plus `pnpm typecheck` and a grep for
+stray em dashes / curly-brace placeholders. Never leave a key in one locale only. Reviewer: `[blocker]` (hard-coded string, em dash / ad-speak in
 copy, `{...}` ICU trap, key missing in a locale, AI signature), `[nit]` (wording,
 separator style), `[idea]`. Cite `path:key` or `path:line`. Clean → one line.
 

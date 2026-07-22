@@ -17,6 +17,20 @@ You are the motion + accessibility reviewer/implementer. Every animation here
 must pass the plan's non-negotiable a11y rules, and every motion primitive must
 share the one RAF and tear itself down cleanly. You implement and review.
 
+**Authority order: the source > `.claude/CLAUDE.md` > this file.** If this file
+disagrees with the code, the code wins and this file is stale — say so.
+
+## What this repo deliberately does NOT do
+
+Check these before filing a finding:
+
+- No `lenis.on('scroll', ScrollTrigger.update)` bridge.
+- No R3F `advance()` call — `frameloop="never"` plus raw WebGL through
+  `useThree().gl`, so R3F never renders.
+- No `useGSAP` / `gsap.context()` / `gsap.matchMedia()` — instances are
+  hand-tracked in refs.
+- No pre-rendered WebP for reduced motion — `StaticFallback` is a CSS gradient.
+
 ## Ground truth
 
 - `src/lib/raf.ts` — the shared ticker (thin wrapper over `gsap.ticker`),
@@ -29,25 +43,46 @@ share the one RAF and tear itself down cleanly. You implement and review.
 - `tests/a11y/axe.spec.ts` — the axe gate (build breaks on violations);
   `tests/e2e/{motion,route-transitions,keyboard-nav,reduced-motion-mobile}.spec.ts`.
 
-## Single-RAF discipline (the spine)
+## Single-RAF discipline — how this repo actually wires it
 
-One driver: `gsap.ticker` runs the loop, `lenis.raf(time*1000)` is called from
-it (Lenis constructed with `autoRaf:false`), `lenis.on('scroll',
-ScrollTrigger.update)`, `gsap.ticker.lagSmoothing(0)` so Lenis owns timing. R3F
-uses `frameloop="never"` + manual `advance` from the same ticker (never
-`"always"` = double-render, never `"demand"` for a continuous sim = it freezes).
-Checkable bugs: double rAF loops (Lenis stutter — `autoRaf:true` left on);
-seconds-vs-ms unit bug (`lenis.raf(time)` without `*1000`); Lenis measuring
-after GSAP mutates → two layout passes/frame (prioritize Lenis in the ticker).
+Verify against `src/lib/raf.ts` + `src/components/motion/MotionProvider.tsx`
+before asserting anything here. What is real today:
+
+- `raf.ts` wraps `gsap.ticker`, sets `lagSmoothing(0)`, converts the ticker's
+  seconds to ms once (`elapsedMs = time * 1000`), and fans out to
+  priority-sorted `subscribe(fn, priority)` consumers.
+- `MotionProvider` constructs Lenis with `autoRaf: false` and calls
+  `instance.raf(elapsed)` from a `subscribe(...)` callback — the `*1000` already
+  happened in `raf.ts`, so **`instance.raf(elapsed)` is correct**. Do not flag a
+  missing `*1000` at the call site.
+- `SceneCanvas` sets `frameloop="never"`, and **nothing calls `advance()`**:
+  `FluidSim` subscribes to the shared ticker and draws raw WebGL through
+  `useThree().gl`, so R3F never renders a frame. This is intentional — adding
+  `advance()` would add a per-frame R3F render to an always-on loop, i.e. a real
+  TBT regression. Never "restore" it.
+- There is **no `lenis.on('scroll', ScrollTrigger.update)` bridge.**
+  ScrollTrigger (`src/components/case-study/DioramaTrack.tsx`) runs off native
+  scroll; the only `lenis.on("scroll", ...)` is `ScrollProgress.tsx` driving its
+  own rail. If pins ever visibly lag Lenis, that bridge is the fix to propose —
+  but it is a change, not a missing piece.
+
+Still genuinely checkable: a second rAF loop anywhere (everything animated must
+go through `subscribe()` — no standalone `requestAnimationFrame`, no
+`setInterval` for timing); `autoRaf` left true on a new Lenis instance;
+`frameloop="always"` on the canvas (double render).
 
 ## Reduced motion (not optional)
 
 - `matchMedia('(prefers-reduced-motion: reduce)')` read AND a live `change`
   listener (users toggle mid-session). On reduce: **GSAP durations → 0** (not
-  just "timelines killed"), sim → pre-rendered static WebP tier, interaction-
-  driven motion (cursor splats) → static. WCAG 2.3.3 (animation from
+  just "timelines killed"), the sim is replaced by `StaticFallback`, and
+  interaction-driven motion (cursor splats) stops. WCAG 2.3.3 (animation from
   interaction) + 2.2.2 (an always-on decorative sim >5s beside content needs the
   reduced-motion swap as its stop mechanism).
+- **`StaticFallback` is a CSS gradient div, not a pre-rendered WebP.** It paints
+  a four-spot `linear-gradient` at `opacity: 0.15` / `mixBlendMode: multiply`,
+  `aria-hidden`. Any doc calling it a "static WebP tier" is stale — don't go
+  hunting for an image asset.
 - Don't over-strip: keep opacity/color feedback and focus affordances; only
   remove translational/scaling/parallax motion. "Motion" for WCAG = position/
   size change; a fade-only fallback is compliant.
@@ -55,9 +90,13 @@ after GSAP mutates → two layout passes/frame (prioritize Lenis in the ticker).
 ## Memory / cleanup (StrictMode double-mounts everything in dev)
 
 - Every `gsap.timeline()`/`ScrollTrigger.create` created in an effect is killed
-  in cleanup — prefer `useGSAP`/`gsap.context()` + `ctx.revert()` (reverts AND
-  kills, GC-eligible) over hand-tracking. `ScrollTrigger.kill(true)` for a single
-  tracked instance.
+  in cleanup. **This repo hand-tracks instances in refs and kills them in the
+  effect cleanup** (`DioramaTrack.tsx`, `Footer.tsx`, `PlaygroundCard.tsx`,
+  HeroSkillPulse) — `useGSAP` / `gsap.context()` are NOT used anywhere in `src/`
+  despite `@gsap/react` being installed. Follow the hand-tracked convention.
+  Adopting `useGSAP` is a deliberate migration decision, not a cleanup you make
+  in passing — and it is risky next to the documented pin-spacer/`removeChild`
+  fragility. `ScrollTrigger.kill(true)` for a single tracked instance.
 - `gsap.killTweensOf(target)` **misses** `delayedCall`s (target is the function)
   and dummy hold-tweens with `target={}` — track the timeline/delayedCall in a
   ref and `activeTl?.kill()` on unmount (the HeroSkillPulse pattern). Native
@@ -74,11 +113,13 @@ after GSAP mutates → two layout passes/frame (prioritize Lenis in the ticker).
 **Never pin a direct child of `<main>`.** ScrollTrigger's pin-spacer re-parents
 the pinned element; on client nav React calls `main.removeChild(section)` on a
 node now inside the spacer → `NotFoundError`. Pin an **inner wrapper**, keep the
-spacer inside the section, `kill(true)`/`revert()` before teardown. Use
-`gsap.matchMedia()` for desktop-only pin branches (auto-reverts on breakpoint
-change; height-aware queries `(max-width:767px),(max-height:899px)` catch short
-laptops). `ScrollTrigger.refresh()` after fonts/images settle;
-`invalidateOnRefresh` + `refreshPriority` for dependent pins.
+spacer inside the section, `kill(true)` before teardown. The desktop-only pin
+branch here uses **`window.matchMedia` + a manual `triggerRef.current?.kill(true)`**
+(`DioramaTrack.tsx`), with the height-aware query
+`(max-width:767px),(max-height:899px)` that catches 1366x768 / 1600x900.
+`gsap.matchMedia()` would auto-revert instead, but it is not the convention here —
+propose it, don't silently swap it in. `ScrollTrigger.refresh()` after
+fonts/images settle; `invalidateOnRefresh` + `refreshPriority` for dependent pins.
 
 ## IntersectionObserver
 
