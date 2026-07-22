@@ -1,6 +1,6 @@
 #version 300 es
 // highp: the shared noise include overflows fp16 internally -- see
-// render-wave.frag.glsl. Sim passes stay mediump; this fullscreen
+// render-wave.frag.glsl. Every shader here is highp; this fullscreen
 // pass is cheap enough for full precision.
 precision highp float;
 

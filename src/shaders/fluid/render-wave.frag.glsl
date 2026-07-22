@@ -1,7 +1,7 @@
 #version 300 es
 // highp: the shared noise include overflows fp16 internally (permute
 // reaches ~3e6) and this pass runs once per canvas pixel -- cheap
-// enough for full precision, unlike the mediump sim passes.
+// enough for full precision. The sim passes are highp as well.
 precision highp float;
 
 // #include <noise>

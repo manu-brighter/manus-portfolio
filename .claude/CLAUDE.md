@@ -69,10 +69,17 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   `start()` (or `triggerAmbient()`, which calls `start()`) is invoked. Hero
   rig keeps the gate closed through loader + hero-reveal so the 8-pass sim
   pipeline doesn't burn GPU and stutter the OverprintReveal animation;
-  `FluidSim` opens it ~2400ms after `loader-complete`. Mini-sims and Studio
-  call `start()` directly at init (they manage ambient themselves). Don't
-  remove the gate — it's load-bearing for the hero text reveal feel.
-- 5 quality tiers: High 512² / Medium 256² / Low 128² / Minimal 96² / Static-WebP
+  the gate opens ~1800ms after a fresh load (`SceneProvider`
+  `FRESH_LOAD_DEFER = 1700` before the canvas mounts + `FluidSim`
+  `HERO_REVEAL_MS = 100`), or ~300ms on a return visit
+  (`RETURNING_DEFER = 200`, loader skipped via the sessionStorage flag).
+  Mini-sims and Studio call `start()` directly at init (they manage ambient
+  themselves). Don't remove the gate — it's load-bearing for the hero text
+  reveal feel.
+- 5 quality tiers: High 512² / Medium 256² / Low 128² / Minimal 96² / Static
+  - The "static" tier is **`StaticFallback.tsx`, a CSS gradient div** (four
+    spots, `opacity: 0.15`, `mixBlendMode: multiply`, `aria-hidden`) — there
+    is no pre-rendered WebP asset anywhere. Don't go looking for one.
   - Tier picked at startup by `lib/gpu.ts` + `useGPUCapability` (renderer
     name match + frametime probe). `useGPUCapability` lazy-inits from
     localStorage cache to avoid blank-flash mid-session reinit.
@@ -109,7 +116,8 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 
 ## Accessibility (non-negotiable)
 
-- `prefers-reduced-motion`: sim → pre-rendered WebP, GSAP durations → 0
+- `prefers-reduced-motion`: sim → `StaticFallback` (CSS gradient, not a
+  pre-rendered WebP), GSAP durations → 0
 - Keyboard nav, visible `:focus-visible` ring on `--color-spot-mint`
 - Semantic landmarks: `<main>`, `<section>`, `<article>`, `<nav>`
 - Alt text on every photo; ARIA labels on icon buttons + meaningful canvases
@@ -205,9 +213,12 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   per-photo spot maps onto the preset ladder slot (mint=0/amber=1/
   rose=2/violet=3, the legacy uniform order), read per frame, gated on
   `data-sim-theme` so the static tier stays canonical.
-- **Render shaders are `precision highp float`** — the shared noise include
+- **Every shader is `precision highp float`** — the shared noise include
   overflows fp16 internally (`permute` ~3e6) and pixel-space halftone
-  coords exceed fp16 range; sim passes stay mediump. Halftone uses
+  coords exceed fp16 range. This is required for the render/noise/halftone/
+  edge passes and load-bearing, so **never flag `highp` as a defect**. The
+  sim passes are highp too: dropping them to mediump for bandwidth is a
+  possible optimisation, not the current state. Halftone uses
   `gl_FragCoord.xy` (spec-guaranteed highp), Sobel steps in SIM texels
   (`uSimTexel`) so edge response is viewport-independent.
 - **Per-style knob reuse**: `FluidVisuals.edgeStrength` means contour-line
@@ -673,7 +684,7 @@ Source of truth: `src/app/globals.css` (`@theme` block).
     Contact direct channel. Axe scans it (tests/a11y PAGES list).
 - **404**: `src/app/not-found.tsx` owns its own `<html>`/`<body>` shell
   (root layout is pass-through). Strings come from `notFound` namespace at
-  `routing.defaultLocale`. `<html lang="de">` hardcoded; `noindex`. Footer
+  `routing.defaultLocale`, and `<html lang={routing.defaultLocale}>`; `noindex`. Footer
   has locale-switch row to hand users back into preferred locale's home.
 
 ## Launch / SEO / metadata
