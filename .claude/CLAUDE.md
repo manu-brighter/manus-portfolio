@@ -430,20 +430,36 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 - **`sceneVisibilityStore`** (zustand) — toggles `display: none` on the root
   scene without unmounting; `/playground/[slug]` flips this so the experiment
   owns the viewport while the hero state survives back-nav.
-- **`cursorHostStore`** (zustand) — element the InkCursor portals its two
+- **`cursorHostStore`** (zustand) — element the InkCursor moves its two
   layers into. `dialog.showModal()` promotes the dialog into the browser's
   TOP LAYER, which no z-index reaches, so the cursor was covered inside the
   case-study lightbox and the modal had NO cursor at all (the native one is
-  hidden site-wide). The open Lightbox registers itself; the cursor joins the
-  same layer, and multiply-blends onto the photo. Rules: register on the
-  open/closed BOOLEAN, never on the image index (prev/next would remount the
-  canvas and drop the trail every arrow press), and always clear on close —
-  the closed lightbox renders a `hidden` dialog that would take the cursor
-  down with it. A host swap remounts both layers, so the InkCursor effect
-  takes `host` as a dep and re-seeds from `lastPointerRef` (without the seed
-  the cursor blanks out until the next pointermove, i.e. right through the
-  click that opened the modal). Regression spec:
-  `tests/e2e/case-study-lightbox.spec.ts`.
+  hidden site-wide). The open Lightbox claims the slot; the cursor joins the
+  same layer and multiply-blends onto the photo. Three rules:
+  - **InkCursor portals into a stable `display: contents` container it
+    owns, and that CONTAINER is what moves** (`appendChild` into
+    `host ?? document.body`). Re-pointing `createPortal` at `host`
+    directly changes the portal container, which remounts both nodes —
+    blank canvas bitmap, empty trail array, re-subscribed RAF — i.e. the
+    trail dies on every open and close, which is the thing the feature
+    exists to preserve. `display: contents` generates no box, so the
+    fixed children keep viewport geometry and join the host's stacking
+    context. Never move a React-RENDERED node this way (removeChild
+    crash); only a container React does not own. **Create that
+    container in an effect, never in a `useState` initializer** — a
+    `typeof document === "undefined"` branch in render is the exact
+    server/client split React rejects, and it threw a whole-tree
+    hydration mismatch (only WebKit's slower hydration made the e2e
+    suite fail on it; chromium stayed green).
+  - **Claim on the open/closed BOOLEAN, never on the image index** —
+    prev/next would otherwise churn the container every arrow press.
+  - **`releaseHost(el)` is identity-checked**, and always runs on close +
+    unmount. The closed lightbox renders a `hidden` dialog that would
+    take the cursor down with it, and a bare setter would let one
+    overlay's cleanup clear another's claim.
+
+  Regression spec: `tests/e2e/case-study-lightbox.spec.ts` (asserts the
+  canvas actually PAINTS via `getImageData`, not just node parentage).
 - **`setTimeout` in components**: always track in a ref + clear on unmount.
   Bit ContactForm, PlaygroundCard, Photography. React's "state update on
   unmounted component" warning is the canary.
