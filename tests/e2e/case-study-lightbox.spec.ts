@@ -54,6 +54,53 @@ test.describe("@case-study lightbox", () => {
     await expect(page.locator("dialog[open]")).toHaveCount(0);
   });
 
+  // Regression: `dialog.showModal()` promotes the lightbox into the
+  // browser's top layer, which no z-index can reach — the ink cursor
+  // (and its trail) used to vanish the moment the lightbox opened,
+  // leaving the modal with no cursor at all because the native one is
+  // hidden site-wide. InkCursor portals its layers into the open
+  // dialog so they ride the same layer.
+  test("the ink cursor rides along into the lightbox's top layer", async ({ page, isMobile }) => {
+    // The ink cursor replaces the native one, so it only mounts on
+    // fine pointers — the Pixel-5 project renders no layers at all
+    // even with this describe's desktop viewport override.
+    test.skip(Boolean(isMobile), "ink cursor is fine-pointer only");
+    await page.goto("/de/");
+    // Move first: the cursor layers only paint once the pointer has
+    // been seen on the document.
+    await page.mouse.move(900, 600);
+    const layers = page.locator(".ink-cursor-layer");
+    await expect(layers).toHaveCount(2);
+
+    const firstClickable = page.locator("section#case-study [aria-haspopup='dialog']").first();
+    await firstClickable.scrollIntoViewIfNeeded();
+    await firstClickable.click();
+    await expect(page.locator("dialog[open]")).toBeVisible();
+
+    // Both layers now live inside the dialog — and there are still
+    // exactly two of them (portalled, not duplicated).
+    await expect(page.locator("dialog[open] > .ink-cursor-layer")).toHaveCount(2);
+    await expect(layers).toHaveCount(2);
+    // The head dot is a painted, positioned element, not a 0-opacity ghost.
+    const dot = page.locator("dialog[open] > div.ink-cursor-layer");
+    await expect(dot).toBeVisible();
+    expect(Number(await dot.evaluate((el) => getComputedStyle(el).opacity))).toBeGreaterThan(0);
+
+    // Navigation must NOT re-parent (that would remount the canvas and
+    // drop the trail on every arrow press).
+    await page.keyboard.press("ArrowRight");
+    await expect(page.locator("dialog[open] [data-testid='lightbox-counter']")).toHaveText(
+      /^\s*2\s*\/\s*6\s*$/,
+    );
+    await expect(page.locator("dialog[open] > .ink-cursor-layer")).toHaveCount(2);
+
+    // Closing hands them back to the body — a stale host would leave
+    // the cursor inside a `display: none` dialog.
+    await page.keyboard.press("Escape");
+    await expect(page.locator("dialog[open]")).toHaveCount(0);
+    await expect(page.locator("body > .ink-cursor-layer")).toHaveCount(2);
+  });
+
   test("reduced-motion: no FLIP transform applied", async ({ page, browserName }) => {
     // Skipped on WebKit: the reduced-motion code path is identical
     // across browsers (same useReducedMotion hook gates the same GSAP
