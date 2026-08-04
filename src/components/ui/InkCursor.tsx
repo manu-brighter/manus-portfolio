@@ -30,9 +30,11 @@ import { subscribe } from "@/lib/raf";
  * Color comes from the canvas' computed `color`, driven by the
  * `--color-ink-cursor` token (per-theme accent overrides in
  * globals.css) so dot + trail re-tint live with the sim theme;
- * `.ink-cursor-layer` flips multiply -> screen blending on the themes
- * whose accent is LIGHT (night, warm) — a light color would multiply
- * to black. Color and blend mode are one decision, never split.
+ * `.ink-cursor-layer` overrides the blend per theme, and color +
+ * blend are ONE decision: night's light ink would multiply to black,
+ * so it screens (dark-mode highlight); warm keeps a dark ink but goes
+ * `normal`, because multiply can only darken and its sim paints
+ * near-black right under the pointer.
  *
  * Trail sampling rides the shared RAF (`subscribe`), the head dot
  * rides gsap.quickTo on gsap.ticker — same frame, one clock.

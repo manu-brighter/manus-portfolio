@@ -140,27 +140,31 @@
   --color-ink-cursor: var(--color-ink);
 }
 [data-sim-theme="warm"] {
-  /* Canonical mint — LIGHT, and therefore screen-blended (see the blend
-   * rule below; a light ink on multiply crushes to black).
+  /* Goldenrod — the old burnt sienna (#9c3a0d) lifted clear of the
+   * sim's darkest tone and turned toward yellow, NOT turned into a
+   * light/night-mode ink.
    *
-   * Turbulenz splats a 7-droplet swarm on every pointer frame, so the
-   * cursor permanently sits inside its OWN dye pool: the rose /
-   * deep-violet top bands under near-black Sobel contour lines. The old
-   * dark burnt sienna multiplied straight into those contours and
-   * vanished exactly where you were looking (user feedback). Light +
-   * screen inverts that — the denser the pool, the brighter the stroke.
+   * The problem it solves: Turbulenz splats a 7-droplet swarm on every
+   * pointer frame, so the cursor permanently sits inside its OWN dye
+   * pool — the deep-violet top band under near-black Sobel contours,
+   * which measures around L 0.017. Sienna sat at L 0.10 and dissolved
+   * into those contours exactly where you were looking.
    *
-   * Why mint and not a light apricot: warm's OTHER surfaces are light
-   * too — the opaque /cv sheet, and the lightbox, which veils the page
-   * in `paper-tint/85` and where the cursor paints RAW (the dialog's
-   * own background is transparent, so the blend has nothing to land
-   * on). A bleached-apricot ink is invisible on both. Mint is light AND
-   * cool, so it separates by hue where it can't separate by luminance,
-   * and it is band 1 of this preset's own ladder — on-palette, not a
-   * foreign ink. Referenced as the spot token (not the literal
-   * `#7ce8c4`) precisely because that ladder tie is the point: the
-   * other cursor accents are literals because they are off-palette. */
-  --color-ink-cursor: var(--color-spot-mint);
+   * Why yellow-orange and not the rose family: that pool is violet
+   * with MAGENTA fringes, so a pink ink competes with the dye instead
+   * of separating from it — rose and magenta both rendered visibly
+   * dimmer in the pool than either gold. Gold is the one warm hue the
+   * sim does not already put there.
+   *
+   * Why this level and no lighter: warm stays a LIGHT-mode theme, so
+   * the cursor has to keep reading as dark ink on apricot paper — the
+   * page, the opaque /cv sheet, and the lightbox's `paper-tint/85`
+   * veil are all near-white. #d98209 (L 0.307) clears the pool at
+   * ~5.3:1 while holding ~2.4:1 against paper. A pastel or bleached
+   * ink wins the pool and loses all three light surfaces; a deeper
+   * terracotta holds the paper and loses the pool (all rendered
+   * against the live sim before landing here). */
+  --color-ink-cursor: #d98209;
 }
 [data-sim-theme="wash"] {
   --color-ink-cursor: #0e5c49; /* deep pine teal on mint-grey paper */
@@ -188,16 +192,27 @@
   --color-spot-amber: #7cc4e8;
 }
 
-/* The ink cursor multiplies over light papers. Wherever the ink ITSELF
- * is light — night's neon rose, warm's mint — multiply
- * crushes it to black, so those two flip to screen and glow instead.
- * PAIRED RULE: a light `--color-ink-cursor` without its entry here is
- * an invisible cursor, and the native one is hidden site-wide.
+/* The ink cursor multiplies over light papers; on the night theme a
+ * light-ink trail would multiply to black — flip to screen so it
+ * glows instead. Screen is the DARK-mode treatment: it is what turns
+ * the cursor into a highlight, so it belongs to night alone.
  * Specificity note: [attr] + .class (0,2,0) beats Tailwind's
  * `.mix-blend-multiply` (0,1,0) on the layers, no !important needed. */
-[data-sim-theme="night"] .ink-cursor-layer,
-[data-sim-theme="warm"] .ink-cursor-layer {
+[data-sim-theme="night"] .ink-cursor-layer {
   mix-blend-mode: screen;
+}
+
+/* Turbulenz is the one LIGHT theme whose sim paints near-black (the
+ * deep-violet band under its Sobel contours), and the droplet swarm
+ * parks that pool right under the pointer. Multiply can only ever
+ * darken, so a dark ink there is gone no matter which dark it is.
+ * Dropping to `normal` is what keeps the ink dark instead of paying
+ * for the pool with a light/night-mode cursor: over near-white paper
+ * multiply ≈ normal anyway (#d98209 multiplies to (209,116,7) vs its
+ * raw (226,96,28)), so the light surfaces are untouched and only the
+ * dye pool changes. */
+[data-sim-theme="warm"] .ink-cursor-layer {
+  mix-blend-mode: normal;
 }
 
 /* Turbulenz (warm) paints hard mid-tone bands directly under the
