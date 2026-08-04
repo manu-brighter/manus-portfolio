@@ -140,7 +140,27 @@
   --color-ink-cursor: var(--color-ink);
 }
 [data-sim-theme="warm"] {
-  --color-ink-cursor: #9c3a0d; /* burnt sienna on apricot paper */
+  /* Canonical mint — LIGHT, and therefore screen-blended (see the blend
+   * rule below; a light ink on multiply crushes to black).
+   *
+   * Turbulenz splats a 7-droplet swarm on every pointer frame, so the
+   * cursor permanently sits inside its OWN dye pool: the rose /
+   * deep-violet top bands under near-black Sobel contour lines. The old
+   * dark burnt sienna multiplied straight into those contours and
+   * vanished exactly where you were looking (user feedback). Light +
+   * screen inverts that — the denser the pool, the brighter the stroke.
+   *
+   * Why mint and not a light apricot: warm's OTHER surfaces are light
+   * too — the opaque /cv sheet, and the lightbox, which veils the page
+   * in `paper-tint/85` and where the cursor paints RAW (the dialog's
+   * own background is transparent, so the blend has nothing to land
+   * on). A bleached-apricot ink is invisible on both. Mint is light AND
+   * cool, so it separates by hue where it can't separate by luminance,
+   * and it is band 1 of this preset's own ladder — on-palette, not a
+   * foreign ink. Referenced as the spot token (not the literal
+   * `#7ce8c4`) precisely because that ladder tie is the point: the
+   * other cursor accents are literals because they are off-palette. */
+  --color-ink-cursor: var(--color-spot-mint);
 }
 [data-sim-theme="wash"] {
   --color-ink-cursor: #0e5c49; /* deep pine teal on mint-grey paper */
@@ -168,10 +188,15 @@
   --color-spot-amber: #7cc4e8;
 }
 
-/* The ink cursor multiplies over light papers; on the night theme a
- * light-ink trail would multiply to black — flip to screen so it
- * glows instead. */
-[data-sim-theme="night"] .ink-cursor-layer {
+/* The ink cursor multiplies over light papers. Wherever the ink ITSELF
+ * is light — night's neon rose, warm's mint — multiply
+ * crushes it to black, so those two flip to screen and glow instead.
+ * PAIRED RULE: a light `--color-ink-cursor` without its entry here is
+ * an invisible cursor, and the native one is hidden site-wide.
+ * Specificity note: [attr] + .class (0,2,0) beats Tailwind's
+ * `.mix-blend-multiply` (0,1,0) on the layers, no !important needed. */
+[data-sim-theme="night"] .ink-cursor-layer,
+[data-sim-theme="warm"] .ink-cursor-layer {
   mix-blend-mode: screen;
 }
 

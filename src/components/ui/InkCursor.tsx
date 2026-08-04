@@ -1,9 +1,11 @@
 "use client";
 
 import gsap from "gsap";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useCursorHostStore } from "@/lib/cursorHostStore";
 import { capDPR } from "@/lib/gpu";
 import { subscribe } from "@/lib/raf";
 
@@ -28,11 +30,20 @@ import { subscribe } from "@/lib/raf";
  * Color comes from the canvas' computed `color`, driven by the
  * `--color-ink-cursor` token (per-theme accent overrides in
  * globals.css) so dot + trail re-tint live with the sim theme;
- * `.ink-cursor-layer` flips multiply -> screen blending in night
- * mode (a light color would multiply to black).
+ * `.ink-cursor-layer` flips multiply -> screen blending on the themes
+ * whose accent is LIGHT (night, warm) — a light color would multiply
+ * to black. Color and blend mode are one decision, never split.
  *
  * Trail sampling rides the shared RAF (`subscribe`), the head dot
  * rides gsap.quickTo on gsap.ticker — same frame, one clock.
+ *
+ * Both layers live in one `display: contents` container that MOVES
+ * into `cursorHostStore.host` while a modal owns the browser's top
+ * layer (case-study lightbox): z-index cannot beat the top layer, so
+ * the cursor has to join it. Moving the container instead of
+ * re-pointing the portal is what keeps the canvas bitmap, the trail
+ * history and the RAF subscription alive across the move, so the
+ * stroke stays continuous through open and close.
  *
  * Not mounted on coarse pointers or under reduced motion (both also
  * skip the cursor-hiding attribute, so the native cursor stays).
@@ -62,9 +73,39 @@ type Point = { x: number; y: number };
 export function InkCursor() {
   const reducedMotion = useReducedMotion();
   const coarsePointer = useCoarsePointer();
+  const host = useCursorHostStore((s) => s.host);
   const dotRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  /** Stable portal container. Created once, then MOVED between <body>
+   *  and the top-layer host. Portalling straight into `host` would
+   *  change the portal container, which remounts both layers — a fresh
+   *  (blank) canvas bitmap, an empty trail array and a re-subscribed
+   *  RAF on every lightbox open and close. Moving one container the
+   *  layers never leave keeps all of that alive; `display: contents`
+   *  generates no box, so the fixed children resolve against the
+   *  viewport and join the host's stacking context exactly as if they
+   *  were its own children.
+   *
+   *  Created in an effect, not in a `useState` initializer: a
+   *  `typeof document === "undefined"` branch in render is exactly the
+   *  server/client split React rejects, and it threw a hydration
+   *  mismatch on the whole tree. Server and first client render both
+   *  produce null here; the portal appears on the second render. */
+  const [portalHost, setPortalHost] = useState<HTMLDivElement | null>(null);
 
+  useEffect(() => {
+    const el = document.createElement("div");
+    el.style.display = "contents";
+    setPortalHost(el);
+    return () => el.remove();
+  }, []);
+
+  useEffect(() => {
+    if (!portalHost) return;
+    (host ?? document.body).appendChild(portalHost);
+  }, [host, portalHost]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies(portalHost): deliberate re-run trigger — the layer refs are null until the portal container exists, so this effect must re-run once it does
   useEffect(() => {
     // Guard inside the effect (not only via the null render) so a
     // mid-session preference flip re-runs cleanup, detaches the
@@ -237,17 +278,26 @@ export function InkCursor() {
       document.documentElement.removeEventListener("pointerleave", onLeave);
       gsap.killTweensOf(dot);
     };
-  }, [reducedMotion, coarsePointer]);
+    // `portalHost` goes null -> element exactly once (the effect above,
+    // on mount) and the layer refs only exist after it does. It is NOT
+    // the host swap — that moves the container without remounting, so
+    // this effect and everything it owns survive an open/close.
+  }, [reducedMotion, coarsePointer, portalHost]);
 
-  if (reducedMotion || coarsePointer) return null;
+  if (reducedMotion || coarsePointer || !portalHost) return null;
 
-  return (
+  const layers = (
     <>
       {/* z-[10001]: above EVERYTHING incl. Nav (50), Loader (9999) and
           InkWipeOverlay (10000) — the native cursor is hidden, so this
-          IS the cursor and must never disappear behind chrome.
+          IS the cursor and must never disappear behind chrome. Beats
+          everything except the top layer, which is what `host` is for.
           pointer-events-none + multiply/screen blend keep it from
-          obscuring anything meaningfully. */}
+          obscuring anything meaningfully. Inside a host the blend
+          group is that element, whose background is transparent — so
+          ink multiplies onto the photo but paints at full strength
+          over the empty backdrop area. That is deliberate: this is the
+          cursor, it has to stay findable. */}
       <canvas
         ref={canvasRef}
         aria-hidden="true"
@@ -267,4 +317,6 @@ export function InkCursor() {
       />
     </>
   );
+
+  return createPortal(layers, portalHost);
 }

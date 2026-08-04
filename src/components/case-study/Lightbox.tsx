@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useCursorHostStore } from "@/lib/cursorHostStore";
 import { useLightboxStore } from "@/lib/lightboxStore";
 import { dur, ease } from "@/lib/motion/tokens";
 
@@ -117,6 +118,21 @@ export function Lightbox() {
       dialog.close();
     }
   }, [activeIndex]);
+
+  // Hand the open dialog to the ink cursor. `showModal()` puts the
+  // dialog in the browser's top layer, which no z-index can reach —
+  // so the cursor layers move INTO it and ride the same layer, keeping
+  // dot + trail inking over the photo. Released on close (the closed
+  // lightbox renders a `hidden` dialog, which would take the cursor
+  // with it) and on unmount. Keyed on the open/closed boolean, not on
+  // activeIndex: prev/next must not move the cursor around.
+  const isOpen = activeIndex !== null && images.length > 0;
+  useEffect(() => {
+    if (!isOpen) return;
+    const dialog = dialogRef.current;
+    useCursorHostStore.getState().claimHost(dialog);
+    return () => useCursorHostStore.getState().releaseHost(dialog);
+  }, [isOpen]);
 
   // Sync the native dialog's `close` event (ESC key) back to the store.
   useEffect(() => {
