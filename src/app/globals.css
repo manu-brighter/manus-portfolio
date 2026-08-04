@@ -140,8 +140,9 @@
   --color-ink-cursor: var(--color-ink);
 }
 [data-sim-theme="warm"] {
-  /* Burnt orange — the old burnt sienna (#9c3a0d) lifted just clear of
-   * the sim's darkest tone, and NOT turned into a light/night-mode ink.
+  /* Goldenrod — the old burnt sienna (#9c3a0d) lifted clear of the
+   * sim's darkest tone and turned toward yellow, NOT turned into a
+   * light/night-mode ink.
    *
    * The problem it solves: Turbulenz splats a 7-droplet swarm on every
    * pointer frame, so the cursor permanently sits inside its OWN dye
@@ -149,15 +150,21 @@
    * which measures around L 0.017. Sienna sat at L 0.10 and dissolved
    * into those contours exactly where you were looking.
    *
+   * Why yellow-orange and not the rose family: that pool is violet
+   * with MAGENTA fringes, so a pink ink competes with the dye instead
+   * of separating from it — rose and magenta both rendered visibly
+   * dimmer in the pool than either gold. Gold is the one warm hue the
+   * sim does not already put there.
+   *
    * Why this level and no lighter: warm stays a LIGHT-mode theme, so
    * the cursor has to keep reading as dark ink on apricot paper — the
    * page, the opaque /cv sheet, and the lightbox's `paper-tint/85`
-   * veil are all near-white. #e2601c (L 0.243) clears the pool at
-   * ~4.4:1 while holding ~2.9:1 against paper. A pastel or bleached
+   * veil are all near-white. #d98209 (L 0.307) clears the pool at
+   * ~5.3:1 while holding ~2.4:1 against paper. A pastel or bleached
    * ink wins the pool and loses all three light surfaces; a deeper
-   * terracotta holds the paper and loses the pool (both rendered
+   * terracotta holds the paper and loses the pool (all rendered
    * against the live sim before landing here). */
-  --color-ink-cursor: #e2601c;
+  --color-ink-cursor: #d98209;
 }
 [data-sim-theme="wash"] {
   --color-ink-cursor: #0e5c49; /* deep pine teal on mint-grey paper */
@@ -201,7 +208,7 @@
  * darken, so a dark ink there is gone no matter which dark it is.
  * Dropping to `normal` is what keeps the ink dark instead of paying
  * for the pool with a light/night-mode cursor: over near-white paper
- * multiply ≈ normal anyway (#e2601c multiplies to (218,85,22) vs its
+ * multiply ≈ normal anyway (#d98209 multiplies to (209,116,7) vs its
  * raw (226,96,28)), so the light surfaces are untouched and only the
  * dye pool changes. */
 [data-sim-theme="warm"] .ink-cursor-layer {
