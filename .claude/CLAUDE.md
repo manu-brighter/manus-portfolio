@@ -237,13 +237,17 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 - **Ink cursor follows the theme** via `--color-ink-cursor` (globals.css,
   `:root` + per-`data-sim-theme` overrides; decorative, visibility-picked,
   not AA). InkCursor reads computed color per frame — live on switch.
-  **Color and blend mode are ONE decision**: the layers multiply by
-  default, so a LIGHT accent must also be listed in the
-  `.ink-cursor-layer { mix-blend-mode: screen }` rule or it crushes to
-  black — an invisible cursor, and the native one is hidden site-wide.
-  Night (neon rose) and warm (canonical mint) are the light pair; warm
-  went light because Turbulenz's droplet swarm keeps the pointer inside
-  its own deep-violet pool, where a dark ink is gone.
+  **Color and blend mode are ONE decision** (the layers multiply by
+  default, and the native cursor is hidden site-wide, so getting this
+  wrong means NO cursor): night's light ink screens — the dark-mode
+  highlight treatment. Warm needs the other answer: its sim paints
+  near-black under the pointer (droplet swarm parks the deep-violet
+  pool there) but the theme is still LIGHT-mode, so the ink stays dark
+  and the layer goes `normal` instead. Multiply can only darken, so no
+  dark ink survives the pool under it; over near-white paper multiply ≈
+  normal, so the light surfaces don't notice. Pick the ink between the
+  sim's darkest tone and the paper — render it against the live sim,
+  the margin is narrow at both ends.
 - **FluidSim re-applies the preset after every orchestrator init** (tier
   auto-tune re-creates the orchestrator) and fires a center splat-burst on
   live switches only. `firePresetBurst` previews the preset's STEADY-STATE
