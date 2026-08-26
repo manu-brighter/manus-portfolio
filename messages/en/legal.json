@@ -72,7 +72,7 @@
           "heading": "What data is collected",
           "body": [
             "This site sets no cookies. There's no tracking, no analytics, no advertising networks, no social-media pixels. No data is shared with third parties for advertising purposes.",
-            "For purely technical reasons the browser's local storage is used: one anonymous LocalStorage entry remembers your device's GPU performance class (so the WebGL animation starts at the right detail level on your next visit), another LocalStorage entry remembers the ink character you picked for the simulation, and one SessionStorage entry remembers for the duration of the browser session that the loading screen has already played (so it doesn't replay when you switch language). These values are not personal, are not transmitted to third parties, and can be cleared at any time via your browser settings."
+            "For purely technical reasons the browser's local storage is used: one anonymous LocalStorage entry remembers your device's GPU performance class (so the WebGL animation starts at the right detail level on your next visit), another LocalStorage entry remembers the ink character you picked for the simulation, a third remembers the language you switched to (so that opening the bare address takes you straight there on your next visit), and one SessionStorage entry remembers for the duration of the browser session that the loading screen has already played (so it doesn't replay when you switch language). These values are not personal, are not transmitted to third parties, and can be cleared at any time via your browser settings."
           ]
         },
         {

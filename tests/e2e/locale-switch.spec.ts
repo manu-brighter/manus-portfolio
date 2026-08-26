@@ -1,5 +1,6 @@
 // tests/e2e/locale-switch.spec.ts
 import { expect, test } from "@playwright/test";
+import { LOCALE_STORAGE_KEY } from "@/lib/localePreference";
 
 /**
  * F-testing-coverage-3: Locale-switch View Transitions.
@@ -11,6 +12,12 @@ import { expect, test } from "@playwright/test";
  * Does NOT assert that startViewTransition() itself fired — that's
  * browser-internal and not observable. We assert the observable
  * postcondition (URL + lang attribute) which is what matters.
+ *
+ * The DE -> EN case also carries the "an explicit switch is remembered"
+ * assertion. It lives here rather than in locale-detect.spec.ts so the
+ * click sequence exists once: a second spec repeating it would double
+ * the maintenance on the switcher's markup and re-boot the heaviest
+ * page in the suite for no extra coverage.
  */
 
 test.describe("locale switch via nav switcher", () => {
@@ -30,6 +37,15 @@ test.describe("locale switch via nav switcher", () => {
 
     await page.waitForURL(/\/en\//);
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
+
+    // The switch is an explicit choice, so the bare root has to honour
+    // it on the next visit instead of re-sniffing the browser language
+    // (see src/app/page.tsx).
+    const stored = await page.evaluate((key) => localStorage.getItem(key), LOCALE_STORAGE_KEY);
+    expect(stored, "explicit locale switch must be remembered").toBe("en");
+
+    await page.goto("/");
+    await page.waitForURL(/\/en\/$/);
   });
 
   test("switching back: EN → DE restores /de/ and lang=de", async ({ page }) => {

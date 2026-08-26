@@ -10,6 +10,7 @@ import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { routing } from "@/i18n/routing";
 import { SECTIONS } from "@/lib/content/sections";
+import { rememberLocale } from "@/lib/localePreference";
 
 /**
  * Top navigation — Phase 2 (i18n wired).
@@ -281,6 +282,11 @@ export function Nav() {
                         setLocaleOpen((v) => !v);
                         return;
                       }
+                      // Persist the explicit choice so the bare-root
+                      // language sniff (src/app/page.tsx) honours it on
+                      // the next visit instead of re-picking from the
+                      // browser language.
+                      rememberLocale(locale);
                       startTransition(() => router.replace(pathname, { locale }));
                     }}
                     aria-current={isActive ? "true" : undefined}

@@ -113,6 +113,29 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   EN/FR/IT until a dedicated translation pass lands.
 - `src/lib/site.ts` holds technical constants (URL, email, socials, region).
   These are NOT next-intl strings — one file beats four JSONs in sync.
+- **Locale detection is client-side** (`src/app/page.tsx`): `output: "export"`
+  kills middleware, so the bare root ships an inline pre-hydration script.
+  Priority: remembered explicit switch (`manus-locale`, written by the Nav
+  switcher through `src/lib/localePreference.ts`) > first supported
+  `navigator.languages` entry (region subtag dropped) > `de`. An explicit
+  `/<locale>/` URL always wins because the script only ever runs on `/`,
+  and only a SWITCH writes the preference (landing on a shared `/en/` link
+  is not a choice). The storage read needs its OWN try/catch: blocked site
+  data throws, and sharing the outer one would drop every private-window
+  visitor on `de` with no language sniff at all. Regression spec:
+  `tests/e2e/locale-detect.spec.ts` (the smoke suite only asserts that
+  SOME locale is reached). The 404 page's language row is the OTHER
+  choice surface and records the preference too
+  (`not-found-locale-links.tsx`, a client island: the page itself stays
+  a server component so it can export `robots: noindex`); its copy stays
+  default-locale by design (no `[locale]` segment can run on a
+  not-found URL).
+- **A new client-side storage key is a legal change too.** The
+  `datenschutz` namespace enumerates every LocalStorage/SessionStorage
+  entry by hand, and the no-cookie-banner argument rests on that list
+  being complete. Adding a key means editing the disclosure in all four
+  locale files (properly translated there, not DE-mirrored) in the same
+  commit.
 
 ## Accessibility (non-negotiable)
 
