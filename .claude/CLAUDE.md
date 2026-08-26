@@ -113,6 +113,19 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   EN/FR/IT until a dedicated translation pass lands.
 - `src/lib/site.ts` holds technical constants (URL, email, socials, region).
   These are NOT next-intl strings — one file beats four JSONs in sync.
+- **Locale detection is client-side** (`src/app/page.tsx`): `output: "export"`
+  kills middleware, so the bare root ships an inline pre-hydration script.
+  Priority: remembered explicit switch (`manus-locale`, written by the Nav
+  switcher through `src/lib/localePreference.ts`) > first supported
+  `navigator.languages` entry (region subtag dropped) > `de`. An explicit
+  `/<locale>/` URL always wins because the script only ever runs on `/`,
+  and only a SWITCH writes the preference (landing on a shared `/en/` link
+  is not a choice). The storage read needs its OWN try/catch: blocked site
+  data throws, and sharing the outer one would drop every private-window
+  visitor on `de` with no language sniff at all. Regression spec:
+  `tests/e2e/locale-detect.spec.ts` (the smoke suite only asserts that
+  SOME locale is reached). The 404 page stays default-locale by design
+  (no `[locale]` segment can run on a not-found URL).
 
 ## Accessibility (non-negotiable)
 
