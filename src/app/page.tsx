@@ -29,7 +29,11 @@ import { escapeForScript } from "@/lib/seo/escapeForScript";
  * shell for every routed page).
  *
  * Keep the redirect script inline and pre-hydration so the user never
- * sees a flash of English content while React boots.
+ * sees a flash of English content while React boots. Two features now
+ * ride on it (the sniff and the remembered switch), so the SF-1 CSP
+ * rollout has to hand it a nonce or hash: without one the static
+ * fallbacks take over, and those can only ever point at the default
+ * locale, silently ignoring a stored choice.
  */
 
 export const metadata: Metadata = {
@@ -47,8 +51,13 @@ const REDIRECT_SCRIPT = `
       // Own try/catch: reading storage THROWS when site data is blocked.
       // Sharing the outer one would drop everyone onto the fallback and
       // silently kill browser-language detection in private windows.
-      var stored = localStorage.getItem(${escapeForScript(LOCALE_STORAGE_KEY)});
+      var key = ${escapeForScript(LOCALE_STORAGE_KEY)};
+      var stored = localStorage.getItem(key);
       if (stored && supported.indexOf(stored) !== -1) picked = stored;
+      // Validate-and-self-heal, same as getCachedTier() and
+      // readStoredPresetId(): a value that is no longer a supported
+      // locale would otherwise outlive the locale list forever.
+      else if (stored) localStorage.removeItem(key);
     } catch (_storageErr) { /* no stored choice available */ }
     if (!picked) {
       var langs = (navigator.languages && navigator.languages.length)
