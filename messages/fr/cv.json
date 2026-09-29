@@ -124,12 +124,7 @@
     },
     "strengths": {
       "label": "Centres d’intérêt",
-      "items": [
-        "Photographie animalière et automobile",
-        "Voyages",
-        "Ski et snowboard",
-        "Plongée"
-      ]
+      "items": ["Photographie animalière et automobile", "Voyages", "Ski et snowboard", "Plongée"]
     },
     "footer": {
       "inkLabel": "Encre",

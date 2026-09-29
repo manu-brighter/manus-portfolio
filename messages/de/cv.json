@@ -124,12 +124,7 @@
     },
     "strengths": {
       "label": "Interessen",
-      "items": [
-        "Wildlife- und Autofotografie",
-        "Reisen",
-        "Ski und Snowboard",
-        "Tauchen"
-      ]
+      "items": ["Wildlife- und Autofotografie", "Reisen", "Ski und Snowboard", "Tauchen"]
     },
     "footer": {
       "inkLabel": "Tinte",

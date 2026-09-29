@@ -395,13 +395,7 @@
           "title": "Shot-Counter",
           "tagline": "Party scoreboard · Desktop app",
           "description": "Live team scoreboard with QR joining over the local network and synchronised scores. Built as an Electron app for Windows and Linux.",
-          "stack": [
-            "Vue 3",
-            "Express 5",
-            "SQLite",
-            "SSE",
-            "Electron"
-          ],
+          "stack": ["Vue 3", "Express 5", "SQLite", "SSE", "Electron"],
           "ctaLabel": "Repo & download"
         },
         {
@@ -409,12 +403,7 @@
           "title": "claude-code-kit",
           "tagline": "Skills and tools for Claude Code",
           "description": "An active collection of my Claude Code skills, agents and development workflows. I also maintain the project-review workflow here after moving it from its former standalone repository.",
-          "stack": [
-            "Claude Code",
-            "Skills",
-            "Agents",
-            "MCP"
-          ],
+          "stack": ["Claude Code", "Skills", "Agents", "MCP"],
           "ctaLabel": "Repository and documentation"
         }
       ]

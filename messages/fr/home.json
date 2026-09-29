@@ -395,13 +395,7 @@
           "title": "Shot-Counter",
           "tagline": "Scoreboard de soirée · App desktop",
           "description": "Tableau de scores pour équipes avec accès par QR sur le réseau local et scores synchronisés. Application Electron pour Windows et Linux.",
-          "stack": [
-            "Vue 3",
-            "Express 5",
-            "SQLite",
-            "SSE",
-            "Electron"
-          ],
+          "stack": ["Vue 3", "Express 5", "SQLite", "SSE", "Electron"],
           "ctaLabel": "Repo & téléchargement"
         },
         {
@@ -409,12 +403,7 @@
           "title": "claude-code-kit",
           "tagline": "Skills et outils pour Claude Code",
           "description": "Collection active de mes skills, agents et workflows de développement pour Claude Code. J’y maintiens aussi le workflow de revue de projet, auparavant publié dans un dépôt séparé.",
-          "stack": [
-            "Claude Code",
-            "Skills",
-            "Agents",
-            "MCP"
-          ],
+          "stack": ["Claude Code", "Skills", "Agents", "MCP"],
           "ctaLabel": "Dépôt et documentation"
         }
       ]

@@ -395,13 +395,7 @@
           "title": "Shot-Counter",
           "tagline": "Scoreboard da festa · App desktop",
           "description": "Tabellone per squadre con accesso tramite QR sulla rete locale e punteggi sincronizzati. Realizzato come applicazione Electron per Windows e Linux.",
-          "stack": [
-            "Vue 3",
-            "Express 5",
-            "SQLite",
-            "SSE",
-            "Electron"
-          ],
+          "stack": ["Vue 3", "Express 5", "SQLite", "SSE", "Electron"],
           "ctaLabel": "Repo & download"
         },
         {
@@ -409,12 +403,7 @@
           "title": "claude-code-kit",
           "tagline": "Skills e strumenti per Claude Code",
           "description": "Raccolta attiva dei miei skill, agent e workflow di sviluppo per Claude Code. Qui mantengo anche il workflow di revisione dei progetti, prima pubblicato in un repository separato.",
-          "stack": [
-            "Claude Code",
-            "Skills",
-            "Agents",
-            "MCP"
-          ],
+          "stack": ["Claude Code", "Skills", "Agents", "MCP"],
           "ctaLabel": "Repository e documentazione"
         }
       ]
