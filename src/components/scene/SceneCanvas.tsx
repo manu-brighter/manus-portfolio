@@ -5,12 +5,14 @@ import type { ReactNode } from "react";
 
 type SceneCanvasProps = {
   children: ReactNode;
+  maxDpr: number;
 };
 
-export function SceneCanvas({ children }: SceneCanvasProps) {
+export function SceneCanvas({ children, maxDpr }: SceneCanvasProps) {
   return (
     <R3FCanvas
       frameloop="never"
+      dpr={[1, maxDpr]}
       gl={{
         antialias: false,
         // alpha: true so when iOS Safari culls this WebGL layer during

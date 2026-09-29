@@ -7,8 +7,7 @@ import { expect, test } from "@playwright/test";
  * Asserts all 4 locale message catalogs share the EXACT same key
  * structure. Catches missed/typo'd keys before next-intl throws at
  * runtime ("MISSING_TRANSLATION: …"). Only compares paths, never
- * values — the project intentionally mirrors DE content across
- * locales until the proper translation pass.
+ * values; translation quality is reviewed separately.
  *
  * Runs as a node-only Playwright test (no browser; testInfo + page
  * fixtures unused). Playwright can run pure-node assertions just
@@ -37,7 +36,7 @@ function flatten(obj: unknown, prefix = ""): string[] {
 // parity check merges every group into one tree before flattening so
 // the test still asserts "DE/EN/FR/IT share the same key set" without
 // caring about how the file split is organised.
-const NAMESPACE_GROUPS = ["common", "home", "playground", "legal", "notFound"] as const;
+const NAMESPACE_GROUPS = ["common", "home", "cv", "playground", "legal", "notFound"] as const;
 
 function loadFlatKeys(locale: string): Set<string> {
   const merged: Record<string, unknown> = {};

@@ -1,11 +1,48 @@
+# Content-Briefing · Fortschreibung September 2026
+
+Stand: 29. September 2026. Die ursprüngliche Gestaltungsidee bleibt erhalten; Positionierung und öffentliche Fakten wurden mit Manuel überarbeitet.
+
+## Aktuelle Positionierung
+
+Softwareentwickler mit Erfahrung in PHP und Vue seit November 2021. Die Gestaltung komplexer Fachoberflächen gehört ausdrücklich zur beruflichen Arbeit, ebenso Schnittstellen, Datenabgleiche und Release-Tests. AI-Werkzeuge ergänzen diese Erfahrung. Keine Selbstdarstellung als reiner „Vibecoder“, kein unbelegter Senior-, Lead- oder ML-Expertenanspruch.
+
+- Rolle: Anwendungsentwickler (Full-Stack), zvoove Switzerland AG, seit 11/2021. Fünf Jahre Erfahrung werden im November 2026 erreicht.
+- Verfügbar ab 01.12.2026 für ein 100-Prozent-Pensum. Regionen Basel, Aargau und Zürich. Gehalt und Austrittsgrund gehören nicht in öffentliche Inhalte.
+- Rund 30 umfangreiche Cypress-Release-Tests, einschliesslich Ausführung und Fehleranalyse. Playwright-Migration läuft; noch kein regulärer Release-Einsatz. Keine berufliche Pipeline-Verantwortung behaupten.
+- Berufliche Leistungen allgemein und ohne interne Belege beschreiben: Vue-Fachoberflächen, PHP-Endpunkte, Schnittstellen, Datenabgleiche, CSV-Export zur Produktmigration und API-Beiträge zu einem AI-Assistenten.
+- React/TypeScript-Erfahrung aus eigenen Projekten transparent von vertiefter beruflicher PHP-/Vue-Erfahrung unterscheiden. Eigene Projekte mit AI-Unterstützung umgesetzt; Konzeption, Gestaltung und laufender Betrieb liegen bei Manuel.
+
+## Projektauswahl und Darstellung
+
+1. **Jogge di Balla:** über Monate aufgebaute, regelmässig genutzte Vereins- und Eventplattform. Rechte, Gönnermitgliedschaften und Anwesenheiten sowie Bestell- und Kassensystem für Service, Küche und Bar, moderierte Live-Diashow und Streaming-Overlay. Das Overlay ist ein Beispiel und nicht die gesamte Plattform. Mitgründer und Vizepräsident seit August 2022. Alte Mitglieder-, Follower- und Reichweitenzahlen nicht als aktuellen Stand übernehmen.
+2. **Dieses Portfolio:** eigenständige Gestaltung, GPU-Tintensimulation, fünf visuelle Themen, vier Sprachversionen, geräteabhängige Qualitätsstufen und automatisierte Browser-Tests. Keine pauschalen Performance- oder Barrierefreiheitsgarantien.
+3. **Weitere Projekte:** Shot-Counter und claude-code-kit als kompakte GitHub-Verweise. full-project-rework ist in claude-code-kit aufgegangen. Weitere Experimente nicht in den allgemeinen CV aufnehmen.
+
+Hosting bedeutet einen gemieteten Linux-Root-Server, von Manuel selbst eingerichtet und administriert. Keine Hardware im eigenen Zuhause suggerieren.
+
+## Quellen und Pflege
+
+- `docs/cv.md` enthält die aktuelle öffentliche Faktenbasis.
+- `messages/{de,en,fr,it}/{home,cv,common}.json` enthalten die redigierten Website-Texte und Übersetzungen.
+- Der öffentliche CV bleibt Teil des Website-Designs und folgt dem gewählten Theme, einschliesslich Browser-Druckansicht. Kein separates Bewerbungs-PDF als Ersatz verlinken.
+- Keine Telefonnummer, Strassenadresse, Geburtsdaten, internen GitLab-Links oder vertraulichen Projektinformationen veröffentlichen.
+- Keine erfundenen Erfolgszahlen, keine unbestätigten Kundenergebnisse und keine pauschalen Garantien zu Tests oder Sicherheit.
+- Fotografie und persönliche Interessen bleiben Teil des Portfolios. Frühere Reiseanekdoten sind historisches Interviewmaterial, keine Grundlage für neue Ausschmückungen.
+- Natürliche, konkrete Sprache; berufliche Verantwortung zeigen, ohne Teamleistungen als alleinige Arbeit auszugeben.
+
+## Historischer Entwurf vom 24./25. April 2026
+
+Die nachfolgende Originalfassung bleibt für Gestaltungs- und Asset-Kontext erhalten. Aussagen zu Positionierung, Skills, Projekten, Domainstatus, Kennzahlen und CV werden durch den aktuellen Stand oben ersetzt. Alte technische Implementierungsideen sind keine verifizierte Beschreibung des heutigen Codes.
+
+---
+
 # Content-Briefing · Manuel Heller Portfolio
 
 > Dieses Dokument schliesst die in `docs/plan.md` §15 offenen Content-Gaps.
-> Es ist die **Single Source of Truth für alle Texte, Daten und Asset-Entscheidungen** der Portfolio-Seite.
+> Historischer Interview- und Gestaltungsstand. Für aktuelle Fakten gilt die Fortschreibung oben; für CV-Inhalte `docs/cv.md`.
 > Geschrieben am 24./25. April 2026 nach einem strukturierten Interview mit Manuel.
 >
-> **An Claude Code (oder wer auch immer das hier liest und implementiert):**
-> Lies das vollständig durch bevor du Content-Files schreibst. Wenn etwas unklar ist oder fehlt, frag nach. Nicht raten. Alle MDX-Files entstehen pro Locale (de/en/fr/it); deutsche Quelltexte sind hier definiert, Übersetzungen passieren in einer separaten Phase mit Review-Schleife.
+> Die folgenden Entwürfe, Anweisungen und offenen Punkte dokumentieren April 2026. Sie sind keine aktuellen Implementierungsaufträge. Widersprechende Aussagen werden durch die Fortschreibung ersetzt.
 
 ---
 

@@ -2,7 +2,6 @@
 
 import gsap from "gsap";
 import { useEffect, useRef } from "react";
-import { useGPUCapability } from "@/hooks/useGPUCapability";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { applySimPreset, firePresetBurst, getSimPreset } from "@/lib/content/simPresets";
 import {
@@ -10,6 +9,7 @@ import {
   type FluidOrchestrator,
   type PointerState,
 } from "@/lib/gl/fluidOrchestrator";
+import { capDPR, getTierDPR, type TierConfig } from "@/lib/gpu";
 import { subscribeToLoaderComplete } from "@/lib/loaderSession";
 import { SPOT_COLORS } from "@/lib/palette";
 import { MAX_DT_S, subscribe } from "@/lib/raf";
@@ -84,7 +84,19 @@ function isIOS(): boolean {
   );
 }
 
-export function MobileBackgroundSim() {
+type MobileBackgroundSimProps = {
+  config: TierConfig;
+  measuring: boolean;
+  onGLReady: (gl: WebGL2RenderingContext) => void;
+  onFrametime: (ms: number) => void;
+};
+
+export function MobileBackgroundSim({
+  config,
+  measuring,
+  onGLReady,
+  onFrametime,
+}: MobileBackgroundSimProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const orchestratorRef = useRef<FluidOrchestrator | null>(null);
   const pointerRef = useRef<PointerState>({
@@ -96,8 +108,10 @@ export function MobileBackgroundSim() {
     moved: false,
   });
   const rafPausedRef = useRef(false);
-  const { capability } = useGPUCapability();
-  const config = capability.config;
+  const measuringRef = useRef(measuring);
+  measuringRef.current = measuring;
+  const onFrametimeRef = useRef(onFrametime);
+  onFrametimeRef.current = onFrametime;
   const reduced = useReducedMotion();
 
   // Mount orchestrator (own WebGL2 context) + ambient start + resize.
@@ -106,7 +120,7 @@ export function MobileBackgroundSim() {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = capDPR(getTierDPR(config.tier));
     const sizeCanvas = () => {
       canvas.width = Math.max(1, Math.floor(window.innerWidth * dpr));
       canvas.height = Math.max(1, Math.floor(window.innerHeight * dpr));
@@ -123,6 +137,7 @@ export function MobileBackgroundSim() {
       premultipliedAlpha: true,
     });
     if (!gl) return;
+    onGLReady(gl);
 
     const orchestrator = createFluidOrchestrator();
     orchestrator.init(gl, config);
@@ -179,7 +194,7 @@ export function MobileBackgroundSim() {
       orchestrator.dispose();
       orchestratorRef.current = null;
     };
-  }, [config, reduced]);
+  }, [config, reduced, onGLReady]);
 
   // Tap-to-splat at the document level (the canvas is pointer-events:none).
   // Only a genuine tap pokes the sim — a drag is the user scrolling.
@@ -418,7 +433,15 @@ export function MobileBackgroundSim() {
       if (rafPausedRef.current) return;
       const dt = Math.min(deltaMs * 0.001, MAX_DT_S);
       virtualElapsedMs += Math.min(deltaMs, MAX_DT_S * 1000);
+      const startedAt = performance.now();
       orchestrator.step(dt, virtualElapsedMs, pointerRef.current);
+      if (measuringRef.current && orchestrator.isStarted()) {
+        const gl = canvasRef.current?.getContext("webgl2");
+        if (gl) {
+          gl.finish();
+          onFrametimeRef.current(performance.now() - startedAt);
+        }
+      }
     }, 15);
     return () => unsub();
   }, [reduced]);

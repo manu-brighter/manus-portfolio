@@ -65,6 +65,10 @@ export function useGPUCapability() {
   const adaptiveDoneRef = useRef(capability.renderer === "(cached)");
 
   const initProbe = useCallback((gl: WebGL2RenderingContext) => {
+    // A tier change recreates the orchestrator and calls this again. Keep
+    // the resolved capability in memory even when persistence is blocked.
+    if (adaptiveDoneRef.current) return;
+
     const { tier, renderer, fromCache, matched } = probeGPU(gl);
 
     if (tier === "static") {

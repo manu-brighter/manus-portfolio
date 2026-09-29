@@ -28,6 +28,13 @@ export function capDPR(max: number = DPR_FULL): number {
 
 export type GPUTier = "high" | "medium" | "low" | "minimal" | "static";
 
+/** Cap output pixels as well as simulation cells on constrained GPUs. */
+export function getTierDPR(tier: GPUTier): number {
+  if (tier === "high") return DPR_FULL;
+  if (tier === "medium") return 1.5;
+  return 1;
+}
+
 export type TierConfig = {
   tier: GPUTier;
   gridSize: number;

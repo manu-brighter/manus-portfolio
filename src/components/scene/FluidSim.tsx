@@ -20,6 +20,7 @@ type FluidSimProps = {
 
 export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSimProps) {
   const { gl, size } = useThree();
+  const dpr = useThree((state) => state.viewport.dpr);
 
   const orchestratorRef = useRef<FluidOrchestrator | null>(null);
   const pointerRef = useRef<PointerState>({
@@ -105,9 +106,8 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
   }, [gl, onGLReady, config, isCoarsePointer]);
 
   useEffect(() => {
-    const dpr = gl.getPixelRatio();
     orchestratorRef.current?.resize(Math.floor(size.width * dpr), Math.floor(size.height * dpr));
-  }, [size, gl]);
+  }, [size, dpr]);
 
   // RAF loop: run sim + render to screen. `measuring` triggers a
   // gl.finish() readback so SceneProvider's tier auto-tuner gets a
