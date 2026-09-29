@@ -31,12 +31,12 @@ import type { WorkProjects, WorkSideProjects } from "@/types/i18n-shapes";
 // The id union is explicit (JSON imports widen literals to string), so
 // adding a meta entry is exhaustiveness-checked; catalog ids without a
 // meta entry are dropped through the NAMED guard below, not silently.
-const SIDE_PROJECT_IDS = ["shotCounter", "fullProjectRework"] as const;
+const SIDE_PROJECT_IDS = ["shotCounter", "claudeCodeKit"] as const;
 type SideProjectId = (typeof SIDE_PROJECT_IDS)[number];
 
 const SIDE_PROJECT_META: Record<SideProjectId, { href: string; spot: SpotColor }> = {
   shotCounter: { href: SITE.repos.shotCounter, spot: "mint" },
-  fullProjectRework: { href: SITE.repos.fullProjectRework, spot: "violet" },
+  claudeCodeKit: { href: SITE.repos.claudeCodeKit, spot: "violet" },
 };
 
 function isSideProjectId(id: string): id is SideProjectId {

@@ -405,10 +405,10 @@
           "ctaLabel": "Repo & download"
         },
         {
-          "id": "fullProjectRework",
+          "id": "claudeCodeKit",
           "title": "claude-code-kit",
           "tagline": "Skills and tools for Claude Code",
-          "description": "A collection of my skills and configurations for development with Claude Code. Includes the full-project-rework workflow, originally released separately.",
+          "description": "An active collection of my Claude Code skills, agents and development workflows. I also maintain the project-review workflow here after moving it from its former standalone repository.",
           "stack": [
             "Claude Code",
             "Skills",

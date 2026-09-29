@@ -31,7 +31,7 @@ export const SITE = {
    *  live here, not in the i18n catalogs — one file beats four JSONs
    *  in sync (same rationale as the socials). */
   repos: {
-    fullProjectRework: "https://github.com/manu-brighter/claude-code-kit",
+    claudeCodeKit: "https://github.com/manu-brighter/claude-code-kit",
     shotCounter: "https://github.com/manu-brighter/shot-counter",
   },
 } as const;
