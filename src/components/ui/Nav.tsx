@@ -123,8 +123,15 @@ export function Nav() {
       }
       return;
     }
-    sessionStorage.setItem("scrollToOnLoad", target);
-    router.push("/");
+    let destination = "/";
+    try {
+      sessionStorage.setItem("scrollToOnLoad", target);
+    } catch {
+      // The URL carries the target when private-mode storage is blocked.
+      // ScrollToOnLoad corrects the early native jump after pinning settles.
+      destination = `/${hash}`;
+    }
+    router.push(destination);
   };
 
   // The wordmark is the site's "back to the top of home" control. As a

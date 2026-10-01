@@ -76,6 +76,13 @@
           ]
         },
         {
+          "id": "inkPreference",
+          "heading": "Préférence d’encre",
+          "body": [
+            "Le réglage du mouvement de l’encre est enregistré sous « manus-ink-mode » dans le LocalStorage (Auto, Encre légère ou Simulation complète). Il reste enregistré jusqu’à sa modification ou à la suppression des données du navigateur, n’est pas transmis et ne contient aucune donnée personnelle. Les liens d’aperçu temporaires n’enregistrent pas ce réglage."
+          ]
+        },
+        {
           "id": "logs",
           "heading": "Logs serveur",
           "body": [

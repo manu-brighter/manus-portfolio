@@ -20,7 +20,7 @@ test.use({
 test.describe("Mobile reduced-motion", () => {
   test("background sim canvas absent under prefers-reduced-motion", async ({ page }) => {
     await page.goto("/de/");
-    await page.waitForLoadState("networkidle");
+    await expect(page.locator("#hero-heading [data-layer]")).toHaveCount(0);
 
     const sim = page.locator('canvas[data-testid="mobile-bg-sim"]');
     await expect(sim).toHaveCount(0);
@@ -28,7 +28,7 @@ test.describe("Mobile reduced-motion", () => {
 
   test("Photography stack renders all photos without sim canvas", async ({ page }) => {
     await page.goto("/de/#photography");
-    await page.waitForLoadState("networkidle");
+    await expect(page.locator("#hero-heading [data-layer]")).toHaveCount(0);
 
     // FadeIn renders children statically under reduced motion, so all
     // 5 photos are present and visible without any animation plumbing.
@@ -38,7 +38,7 @@ test.describe("Mobile reduced-motion", () => {
 
   test("Case-Study carousel renders 6 stations without any sim canvas", async ({ page }) => {
     await page.goto("/de/#case-study");
-    await page.waitForLoadState("networkidle");
+    await expect(page.locator("#hero-heading [data-layer]")).toHaveCount(0);
 
     // 6 stations after the dense-slide split (hook · what · stack · admin ·
     // overlay · public) — see case-study-carousel-mobile.spec.ts.

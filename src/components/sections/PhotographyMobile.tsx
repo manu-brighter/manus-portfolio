@@ -105,6 +105,7 @@ export function PhotographyMobile() {
         <h2 id="photography-heading" className="type-h2 mt-2 italic text-ink">
           {t("headline")}
         </h2>
+        <p className="type-body mt-5 max-w-prose text-ink-soft">{t("lede")}</p>
       </header>
 
       <div className="container-page flex flex-col gap-14">
@@ -140,6 +141,17 @@ export function PhotographyMobile() {
             </figure>
           </FadeIn>
         ))}
+      </div>
+      <div className="container-page mt-14">
+        <a
+          href={t("ctaHref")}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex min-h-11 items-center gap-3 bg-spot-amber px-4 py-3 font-display text-lg italic text-ink-print shadow-[3px_3px_0_var(--color-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-4 focus-visible:ring-offset-paper"
+        >
+          <span>{t("ctaLabel")}</span>
+          <span aria-hidden="true">↗</span>
+        </a>
       </div>
     </section>
   );

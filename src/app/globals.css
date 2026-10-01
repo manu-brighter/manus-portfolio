@@ -1,5 +1,25 @@
 @import "tailwindcss";
 
+/* Animate the separate print plates only during their one-shot reveal.
+ * Settled glyphs keep the same offsets as painted shadows, avoiding hundreds
+ * of persistent blended/promoted layers over the moving ink background. */
+[data-overprint="pending"] [data-layer="rose"],
+[data-overprint="pending"] [data-layer="mint"] {
+  visibility: hidden;
+}
+[data-overprint="settled"] [data-layer="rose"],
+[data-overprint="settled"] [data-layer="mint"] {
+  display: none;
+}
+[data-overprint="settled"] [data-layer="ink"] {
+  text-shadow:
+    var(--overprint-rose-x) var(--overprint-rose-y) 0
+    color-mix(in srgb, var(--color-spot-rose) 85%, transparent),
+    var(--overprint-mint-x) var(--overprint-mint-y) 0
+    color-mix(in srgb, var(--color-spot-mint) 85%, transparent),
+    var(--overprint-contrast, 0 0 0 transparent);
+}
+
 /* ---------------------------------------------------------------
  * Design tokens — "Riso Ink" palette (see docs/plan.md §4.1)
  *
@@ -227,13 +247,10 @@
   /* Doubled tight layers build an opaque core so SMALL mono labels
    * survive the dark contour band too (screenshot-verified — 3 layers
    * were enough for the display serif but not for 12px badges). */
-  text-shadow:
-    0 0 2px var(--color-paper),
-    0 0 2px var(--color-paper),
-    0 0 4px var(--color-paper),
-    0 0 8px var(--color-paper),
-    0 0 14px var(--color-paper),
-    0 0 22px var(--color-paper);
+  --overprint-contrast:
+    0 0 2px var(--color-paper), 0 0 2px var(--color-paper), 0 0 4px var(--color-paper),
+    0 0 8px var(--color-paper), 0 0 14px var(--color-paper), 0 0 22px var(--color-paper);
+  text-shadow: var(--overprint-contrast);
 }
 
 /* 11px stamp badges lose against a NEAR-BLACK contour pool even with

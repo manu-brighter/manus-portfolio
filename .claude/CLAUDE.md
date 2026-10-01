@@ -61,18 +61,23 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 
 ## Performance rules
 
-- Single persistent R3F `<Canvas>` — never remount per section
+- One active background renderer; never mount competing canvases per section.
+  Auto/Light uses `LiteInkScene`; explicit Full uses the existing physics renderer.
 - All animations share one RAF ticker (GSAP + Lenis + R3F coordinated in `raf.ts`)
-- Hero FluidSim runs everywhere (no IO-pause, no runtime watchdog) — pointer
-  drives ink across all sections including Photography ambient splats
+- **Production Ink Studio:** Auto starts with the single-pass analytical
+  `LiteInkScene` on both desktop and touch devices. It never promotes itself
+  to Full. After startup, two consecutive slow frame windows can lower Lite's
+  pixel budget and cadence. Explicit Light and Full choices win over automatic
+  adaptation. Reduced motion and renderer failure use `StaticFallback`.
+- Lite follows the active home section and interpolates palettes in its existing
+  render pass. Work and photography receive quieter ink around their content.
+  `useScene().effectsReduced` suppresses secondary effects in Light/fallback.
 - **Startup warmup gate**: `FluidOrchestrator.step()` short-circuits until
   `start()` (or `triggerAmbient()`, which calls `start()`) is invoked. Hero
-  rig keeps the gate closed through loader + hero-reveal so the 8-pass sim
-  pipeline doesn't burn GPU and stutter the OverprintReveal animation;
-  the gate opens ~1800ms after a fresh load (`SceneProvider`
-  `FRESH_LOAD_DEFER = 1700` before the canvas mounts + `FluidSim`
-  `HERO_REVEAL_MS = 100`), or ~300ms on a return visit
-  (`RETURNING_DEFER = 200`, loader skipped via the sessionStorage flag).
+  rig keeps the gate closed through hero-reveal so the 8-pass sim
+  pipeline doesn't burn GPU and stutter the OverprintReveal animation.
+  SceneProvider defers Light mounting by 250ms and Full by 1700ms after
+  loader completion; Full keeps its own short hero-reveal warmup.
   Mini-sims and Studio call `start()` directly at init (they manage ambient
   themselves). Don't remove the gate — it's load-bearing for the hero text
   reveal feel.
@@ -83,16 +88,22 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   - Tier picked at startup by `lib/gpu.ts` + `useGPUCapability` (renderer
     name match + frametime probe). `useGPUCapability` lazy-inits from
     localStorage cache to avoid blank-flash mid-session reinit.
-  - **Don't add a runtime watchdog to `FluidSim.tsx`** — if a tier proves
-    too heavy in the wild, drop its config in `lib/gpu.ts` instead.
+  - These tiers govern explicit Full physics. Auto's sustained-window
+    adaptation lives in `useInkPreview`, outside `FluidSim.tsx`, and only
+    reduces Lite's rendering budget. Do not silently downgrade explicit Full.
 - **Iris Xe is a supported target** (Manuel's work laptop) — no regression
   that drops Low tier below 40fps
 - Plan §8 budget: Lighthouse perf ≥ 95, a11y 100, LCP < 1.8s, CLS < 0.05,
   initial JS (gz) < 130kB
 - **CI-asserted reality** (`.lighthouserc.json`): perf ≥ 0.55 (warn),
   a11y ≥ 0.95 (error), CLS ≤ 0.1 (error), LCP/TBT/script-size warn relaxed.
-  Continuous FluidSim caps perf around 0.6 (TBT artefact of always-on RAF).
-  Don't retighten until perf-optimisation sprint lands.
+  These thresholds predate default Light. Reassess against measured production
+  results before changing them; do not infer a new score from the architecture.
+- **Entry is nonblocking:** Loader marks the completion bus immediately.
+  An optional 650ms decorative corner mark ignores pointer events; the existing
+  `manuelheller:loader-shown` sessionStorage flag skips it on reload and later
+  visits in the tab. Reduced motion skips it immediately. Storage failures
+  must never hold the completion signal or hide hero content.
 
 ## i18n rules
 
@@ -136,6 +147,10 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   being complete. Adding a key means editing the disclosure in all four
   locale files (properly translated there, not DE-mirrored) in the same
   commit.
+- Ink Studio stores explicit mode choices under `manus-ink-mode` in
+  localStorage, with guarded reads/writes and disclosure in all legal locales.
+  `?ink-preview=auto|light|full` remains a temporary QA override; choices made
+  while a valid override is active must not overwrite the saved preference.
 
 ## Accessibility (non-negotiable)
 
@@ -372,24 +387,20 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 
 ## Mobile architecture (post mobile-wow-pass)
 
-- **All coarse-pointer devices (phone + tablet) run the live
-  `MobileBackgroundSim`** — one fixed full-viewport WebGL2 canvas behind all
-  content, own orchestrator. The `AmbientVideo` tablet fallback (8MB mp4) is
-  retired; SceneProvider routes coarse → MobileBackgroundSim, fine-pointer →
-  SceneCanvas+FluidSim.
+- **Auto/Light uses LiteInkScene on phone, tablet and desktop.** Explicit
+  Full routes coarse pointers to `MobileBackgroundSim`, fine pointers to
+  SceneCanvas+FluidSim. The `AmbientVideo` tablet fallback remains retired.
 - **Scroll behavior is platform-split** in MobileBackgroundSim: the
   fade-out/in scroll-drain runs on iOS/iPadOS ONLY (masks the fixed-WebGL
   momentum-scroll cull — a real iOS Safari bug). Everywhere else the sim
   stays visible while scrolling and scroll velocity injects an invisible
   force splat (zero-dye) so ink drifts with the page. Don't reintroduce a
   blanket drain — the blank-on-scroll flicker was explicit user feedback.
-- **Presets + themes are pointer-agnostic**: MobileBackgroundSim applies the
-  persisted preset on init + live on store change (same wiring as FluidSim);
-  SimThemeSync and SimPresetSwitcher gate only on `config && !reducedMotion`.
-  Switcher renders as a horizontal bottom-left row with 44px touch targets
-  below `md`; from `md` up a vertical pill that rests as the active dot
-  and expands on :hover OR :focus-within (focus keeps the native-radio
-  arrow-key pattern working — collapsed dots are h-0, not display:none).
+- **Presets + themes are pointer-agnostic:** both renderers use the same
+  persisted preset. SimPresetSwitcher is the compact Ink Studio disclosure
+  for theme and Auto/Light/Full controls, with native radio navigation,
+  Escape/outside dismissal and focus restoration. It reports reduced-motion
+  and graphics-unavailable states without claiming that a live renderer runs.
 - **Tap-to-splat** reads touch at document level; taps on interactive UI
   (`a/button/input/label/[data-no-splat]`) are ignored; color is a random
   spot per tap.
@@ -836,7 +847,7 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   `CLAUDE.md`. `.claude/settings.json` enforces this by omitting
   `Edit/Write(docs/**)`. The permission prompt is the right friction.
 - Apply duotone/posterise shaders to pro photos or UI screenshots
-- Reintroduce a runtime watchdog in `FluidSim.tsx` — tier in `lib/gpu.ts`
+- Silently override an explicit Full preference with Auto's Lite adaptation
 - Use `text-ink-faint` for text content
 - Use spot colors as text on paper without checking AA contrast
 - Interpolate Tailwind class names (`bg-spot-${x}`) — use static maps

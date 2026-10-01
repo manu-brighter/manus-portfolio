@@ -81,6 +81,7 @@ export function Work() {
               role={portfolio.role}
               stack={portfolio.stack}
               description={portfolio.description}
+              summary={portfolio.summary}
               metaNote={portfolio.metaNote}
               ctaLabel={portfolio.ctaLabel}
               splatColor="rose"
@@ -133,6 +134,7 @@ export function Work() {
               role={joggediballa.role}
               stack={joggediballa.stack}
               description={joggediballa.description}
+              summary={joggediballa.summary}
               ctaLabel={joggediballa.ctaLabel}
               splatColor="amber"
               vibecoded

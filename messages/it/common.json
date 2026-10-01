@@ -85,5 +85,35 @@
   "easterEgg": {
     "jamStamp": "FEHLDRUCK · REGISTRATION ERROR",
     "calibratedStamp": "NEU KALIBRIERT · RE-CALIBRATED"
+  },
+  "inkStudio": {
+    "label": "Studio d’inchiostro",
+    "intro": "Carta, colore e un po’ di movimento. Crea la tua atmosfera.",
+    "theme": "Palette",
+    "motion": "Movimento",
+    "auto": "Auto",
+    "light": "Inchiostro leggero",
+    "full": "Simulazione completa",
+    "autoBody": "Inchiostro leggero e interattivo. Riduce automaticamente i dettagli quando serve.",
+    "lightBody": "Movimento delicato con pochi calcoli. Il livello di dettaglio resta fisso.",
+    "fullBody": "Vortici fisici che seguono il puntatore. Richiede più potenza grafica.",
+    "reducedNotice": "L’inchiostro usa meno dettagli per mantenere fluida la pagina.",
+    "reducedMotion": "La riduzione del movimento del sistema è attiva. Puoi comunque scegliere i colori.",
+    "unavailable": "Questa vista dell’inchiostro non è al momento disponibile sul tuo dispositivo. Colori e contenuti restano accessibili."
+  },
+  "inkPreview": {
+    "label": "Laboratorio d’inchiostro · anteprima locale",
+    "autoTitle": "Meno vortici, più fluidità.",
+    "autoBody": "Abbiamo ridotto gli effetti automaticamente. Puoi comunque attivare la simulazione completa, ma potrebbe andare a scatti.",
+    "lightTitle": "Inchiostro leggero. Sempre in movimento.",
+    "lightBody": "L’inchiostro si muove e reagisce ai tuoi gesti con meno calcoli. Prova entrambe le versioni qui.",
+    "fullTitle": "Tutti i vortici, al completo.",
+    "fullBody": "La simulazione completa è attiva. Se va a scatti, puoi passare alla versione leggera in qualsiasi momento.",
+    "unavailableTitle": "L’inchiostro si prende una pausa.",
+    "unavailableBody": "La riduzione delle animazioni o il supporto grafico non disponibile hanno la precedenza. Tutti i contenuti restano accessibili.",
+    "switch": "Simulazione completa dell’inchiostro",
+    "automatic": "Scelta automatica",
+    "manual": "La tua scelta",
+    "reset": "Prova la modalità automatica"
   }
 }

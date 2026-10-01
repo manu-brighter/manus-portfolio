@@ -65,7 +65,7 @@ test.describe("@case-study lightbox", () => {
     // fine pointers — the Pixel-5 project renders no layers at all
     // even with this describe's desktop viewport override.
     test.skip(Boolean(isMobile), "ink cursor is fine-pointer only");
-    await page.goto("/de/");
+    await page.goto("/de/?ink-preview=full");
     const layers = page.locator(".ink-cursor-layer");
     // Doubles as the hydration gate: the layers are client-only.
     await expect(layers).toHaveCount(2);

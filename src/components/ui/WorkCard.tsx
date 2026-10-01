@@ -9,6 +9,7 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { dispatchSplat } from "@/lib/fluidBus";
 import { dur, ease } from "@/lib/motion/tokens";
 import type { SpotColor } from "@/lib/palette";
+import type { WorkProjects } from "@/types/i18n-shapes";
 
 /**
  * WorkCard — the editorial flex unit of Section 03.
@@ -50,6 +51,8 @@ export type WorkCardProps = {
   stack: string[];
   /** 1-sentence body copy under the title block. */
   description: string;
+  /** Factual task, contribution and outcome, readable without hover. */
+  summary?: WorkProjects[number]["summary"];
   /** Extra meta line (Portfolio's "Du surfst gerade auf …"). */
   metaNote?: string;
   /** CTA stamp text. */
@@ -120,6 +123,7 @@ export function WorkCard(props: WorkCardProps) {
     role,
     stack,
     description,
+    summary,
     metaNote,
     ctaLabel,
     splatColor,
@@ -453,7 +457,18 @@ export function WorkCard(props: WorkCardProps) {
               ) : null}
             </h3>
 
-            <p className="mt-4 max-w-prose type-body text-ink-soft">{description}</p>
+            {summary ? (
+              <dl className="mt-6 grid gap-4 border-t border-ink/20 pt-5">
+                {summary.map((item) => (
+                  <div key={item.label} className="grid gap-1 sm:grid-cols-[7.5rem_1fr] sm:gap-4">
+                    <dt className="type-label pt-1 text-ink-muted">{item.label}</dt>
+                    <dd className="type-body-sm text-ink-soft">{item.body}</dd>
+                  </div>
+                ))}
+              </dl>
+            ) : (
+              <p className="mt-4 max-w-prose type-body text-ink-soft">{description}</p>
+            )}
             {metaNote ? (
               <p className="mt-3 max-w-prose type-body-sm text-ink-muted italic">{metaNote}</p>
             ) : null}

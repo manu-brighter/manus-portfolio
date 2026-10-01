@@ -36,7 +36,19 @@ let timer: number | null = null;
 
 export function ScrollToOnLoad() {
   useEffect(() => {
-    const target = sessionStorage.getItem("scrollToOnLoad");
+    let target = window.location.hash.slice(1);
+    try {
+      target = decodeURIComponent(target);
+    } catch {
+      // A malformed incoming fragment should not prevent page hydration.
+    }
+    if (!target) {
+      try {
+        target = sessionStorage.getItem("scrollToOnLoad") ?? "";
+      } catch {
+        // No stored target is available when site storage is blocked.
+      }
+    }
     if (!target) return;
 
     // sessionStorage entry is consumed by the TIMER firing, not by the
@@ -50,7 +62,11 @@ export function ScrollToOnLoad() {
     // home page doesn't re-trigger a stale scroll.
     timer = window.setTimeout(() => {
       timer = null;
-      sessionStorage.removeItem("scrollToOnLoad");
+      try {
+        sessionStorage.removeItem("scrollToOnLoad");
+      } catch {
+        // The URL fallback still scrolls successfully without storage.
+      }
       document.getElementById(target)?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, POST_MOUNT_DELAY_MS);
 

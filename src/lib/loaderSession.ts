@@ -13,8 +13,8 @@
  *
  * Module-level state survives React re-mounts inside the same JS realm
  * (locale switches re-mount the layout subtree, but the module instance
- * is preserved). Full page reload resets it — which is what we want,
- * because reload IS the user asking for the loader to play again.
+ * is preserved). Full page reload resets this bus; Loader marks it
+ * complete immediately and uses sessionStorage to skip the decoration.
  *
  * The `isLoaderComplete()` accessor is the synchronous read path used
  * by consumers that need to choose between "subscribe and wait" or "go

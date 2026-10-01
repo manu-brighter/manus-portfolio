@@ -85,5 +85,35 @@
   "easterEgg": {
     "jamStamp": "FEHLDRUCK · REGISTRATION ERROR",
     "calibratedStamp": "NEU KALIBRIERT · RE-CALIBRATED"
+  },
+  "inkStudio": {
+    "label": "Ink studio",
+    "intro": "Paper, colour and a little motion. Make this view your own.",
+    "theme": "Colour palette",
+    "motion": "Motion",
+    "auto": "Auto",
+    "light": "Light ink",
+    "full": "Full simulation",
+    "autoBody": "Light, interactive ink. Automatically lowers detail when needed.",
+    "lightBody": "Gentle motion with less processing. The detail level stays fixed.",
+    "fullBody": "Physical swirls that follow your pointer. Uses more graphics power.",
+    "reducedNotice": "The ink now uses fewer details to keep the page running smoothly.",
+    "reducedMotion": "Your system's reduced motion setting is active. You can still choose colours.",
+    "unavailable": "This ink view is currently unavailable on your device. Colours and content remain accessible."
+  },
+  "inkPreview": {
+    "label": "Ink lab · local preview",
+    "autoTitle": "Fewer swirls. A smoother ride.",
+    "autoBody": "We reduced the effects automatically. You can still turn on the full ink simulation, though it may stutter.",
+    "lightTitle": "Light ink. Always moving.",
+    "lightBody": "The ink moves and responds to you with less processing. Try both versions here.",
+    "fullTitle": "Every swirl, in full.",
+    "fullBody": "The full ink simulation is running. If it stutters, you can switch to the lighter version at any time.",
+    "unavailableTitle": "The ink is taking a break.",
+    "unavailableBody": "Reduced motion or unavailable graphics support takes priority. All content remains available.",
+    "switch": "Full ink simulation",
+    "automatic": "Automatic selection",
+    "manual": "Your selection",
+    "reset": "Try automatic mode"
   }
 }

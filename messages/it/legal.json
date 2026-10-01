@@ -76,6 +76,13 @@
           ]
         },
         {
+          "id": "inkPreference",
+          "heading": "Preferenza dell’inchiostro",
+          "body": [
+            "L’impostazione del movimento dell’inchiostro viene salvata come «manus-ink-mode» nel LocalStorage (Auto, Inchiostro leggero o Simulazione completa). Rimane fino alla modifica o alla cancellazione dei dati del browser, non viene trasmessa e non contiene dati personali. I link di anteprima temporanei non salvano questa impostazione."
+          ]
+        },
+        {
           "id": "logs",
           "heading": "Log del server",
           "body": [

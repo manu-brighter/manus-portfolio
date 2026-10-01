@@ -16,9 +16,8 @@
 // Once the reveal duration has elapsed the mask locks, opacity snaps
 // to 0 and RAF unsubscribes. No GPU work after that.
 //
-// Idle until reveal: the RAF callback early-returns (no GPU work)
-// until the parent flips `reveal` to true. A single initial mask draw
-// covers the photo in paper-color while we wait.
+// No GL resources are allocated until the parent requests the reveal.
+// Completion unmounts the canvas and releases all resources permanently.
 //
 // Reduced motion: the mask canvas is not mounted at all — the photo
 // is rendered directly.
@@ -27,7 +26,8 @@
 // the Phase 9 PhotoDuotone iteration — a lost context returned by a
 // second-mount getContext() silently fails every shader compile).
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useScene } from "@/components/scene/SceneProvider";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { getSimPreset } from "@/lib/content/simPresets";
 import { compileShader } from "@/lib/gl/compileShader";
@@ -170,7 +170,9 @@ function outwardSpeedAt(progress: number): number {
 
 export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps) {
   const reducedMotion = useReducedMotion();
+  const { effectsReduced } = useScene();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [settled, setSettled] = useState(false);
   const revealRef = useRef(reveal);
   revealRef.current = reveal;
   // spotColor flows through a ref so changing it doesn't tear down the
@@ -181,20 +183,36 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
   spotColorRef.current = spotColor;
 
   useEffect(() => {
-    if (reducedMotion) return;
+    if (reducedMotion || effectsReduced || !reveal || settled) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const gl = canvas.getContext("webgl2", {
-      antialias: false,
-      alpha: true,
-      premultipliedAlpha: false,
-      preserveDrawingBuffer: false,
-      // Match the hero R3F Canvas's "high-performance" hint so we don't
-      // ping-pong between integrated/discrete GPUs on hybrid laptops.
-      powerPreference: "high-performance",
-    }) as WebGL2RenderingContext | null;
-    if (!gl) return;
+    let context: WebGL2RenderingContext | null;
+    try {
+      context = canvas.getContext("webgl2", {
+        antialias: false,
+        alpha: true,
+        premultipliedAlpha: false,
+        preserveDrawingBuffer: false,
+        // Match the hero R3F Canvas's GPU preference on hybrid laptops.
+        powerPreference: "high-performance",
+      });
+    } catch {
+      setSettled(true);
+      return;
+    }
+    const gl = context;
+    if (!gl) {
+      setSettled(true);
+      return;
+    }
+    const onContextLost = (event: Event) => {
+      event.preventDefault();
+      canvas.style.backgroundColor = "transparent";
+      canvas.style.opacity = "0";
+      setSettled(true);
+    };
+    canvas.addEventListener("webglcontextlost", onContextLost);
 
     // Resource tracking — every GL handle allocated below registers
     // here so the catch block can release them on partial-init failure.
@@ -265,6 +283,8 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
       for (const fb of framebuffers) gl.deleteFramebuffer(fb);
       for (const tex of textures) gl.deleteTexture(tex);
       for (const v of vaos) gl.deleteVertexArray(v);
+      canvas.removeEventListener("webglcontextlost", onContextLost);
+      setSettled(true);
       return;
     }
     // Initialise both to zero (the FBO factory leaves them undefined)
@@ -450,15 +470,30 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
     // for the IO-driven `reveal` flip. Density is zero everywhere →
     // mask alpha is 1.0 → fully opaque paper.
     runMask(0);
+    // Replace the cheap pre-reveal paper cover only after GL has painted
+    // the same paper. Transparent mask pixels can now reveal the photograph.
+    canvas.style.backgroundColor = "transparent";
 
     const unsub = subscribe((deltaMs, elapsedMs) => {
-      if (locked) return;
+      if (locked || document.hidden) return;
+      const now = performance.now();
+      // The reveal is a wall-clock deadline, independent of ticker lag
+      // smoothing and the capped simulation dt. On a slow GPU or after a
+      // background-tab pause, reveal the photo before submitting more work.
+      if (burstStart !== null && now - burstStart >= REVEAL_DURATION_MS) {
+        locked = true;
+        canvas.style.opacity = "0";
+        setSettled(true);
+        document.removeEventListener("pointermove", onPointer);
+        visIO.disconnect();
+        ambientQueue.length = 0;
+        unsub();
+        return;
+      }
 
-      // Sim runs whenever the photo is visible (ambient cursor flow
-      // pre-reveal) OR the burst is in flight (reveal animation).
-      // Outside both branches the mask is just a static paper rectangle
-      // and we save GPU cycles.
-      if (!inViewport && burstStart === null) return;
+      // Simulation pauses offscreen; an already-started reveal can still
+      // reach its deadline above and release its resources.
+      if (!inViewport) return;
 
       // First reveal-true frame: anchor the clock. NO instant splat —
       // the FADE_IN_SPLATS phase below builds the centre density
@@ -466,13 +501,13 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
       // single-frame strength:0.85 splat that felt like an instant
       // pop.
       if (revealRef.current && burstStart === null) {
-        burstStart = elapsedMs;
+        burstStart = now;
         lastReinjectAt = elapsedMs;
         fadeInSplatsFired = 0;
       }
 
       // Reveal progress 0..1 (0 while we're in pre-reveal ambient).
-      const t = burstStart === null ? 0 : elapsedMs - burstStart;
+      const t = burstStart === null ? 0 : now - burstStart;
       const progress = Math.min(t / REVEAL_DURATION_MS, 1.0);
 
       // Advect with current outward-velocity ramp. Outside the reveal
@@ -524,28 +559,10 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
       if (ambientQueue.length > AMBIENT_DRAIN_PER_FRAME * 2) ambientQueue.length = 0;
 
       runMask(elapsedMs * 0.001);
-
-      // Reveal complete: snap to opacity 0 (the mask shader output is
-      // already ~98% transparent everywhere by this point — the snap
-      // is imperceptible and guards against compositor edge-cases).
-      if (burstStart !== null && progress >= 1.0) {
-        locked = true;
-        canvas.style.opacity = "0";
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-        gl.clearColor(0, 0, 0, 0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
-        // Detach the document pointermove listener now that we're done
-        // — fast cursor sweeps after multiple photo reveals would
-        // otherwise pay 5+ getBoundingClientRect()s per pointermove
-        // for the rest of the session. Same reason for the IO.
-        document.removeEventListener("pointermove", onPointer);
-        visIO.disconnect();
-        ambientQueue.length = 0;
-        unsub();
-      }
     }, 70);
 
     return () => {
+      canvas.removeEventListener("webglcontextlost", onContextLost);
       unsub();
       ro.disconnect();
       visIO.disconnect();
@@ -572,9 +589,9 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
     // spotColor intentionally NOT a dep — it flows through spotColorRef
     // so changes don't tear down the WebGL context. See ref declaration
     // at the top of the component.
-  }, [reducedMotion]);
+  }, [reducedMotion, effectsReduced, reveal, settled]);
 
-  if (reducedMotion) return null;
+  if (reducedMotion || effectsReduced || settled) return null;
 
   return (
     <canvas
@@ -588,6 +605,7 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
         width: "100%",
         height: "100%",
         pointerEvents: "none",
+        backgroundColor: "var(--color-paper)",
       }}
     />
   );

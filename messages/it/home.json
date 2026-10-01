@@ -50,7 +50,7 @@
       "name": "PHP · Vue · SQL",
       "description": "Progettare interfacce gestionali, sviluppare integrazioni e supportare i rilasci con test automatizzati."
     },
-    "vibecodedMarker": "con IA",
+    "vibecodedMarker": "AI-supported",
     "tiers": [
       {
         "id": "daily-driver",
@@ -351,6 +351,20 @@
           "zustand · state"
         ],
         "description": "Proprio questo sito. Inchiostro interattivo calcolato sulla GPU, cinque temi visivi, quattro lingue e le mie foto nel mezzo. Uno spazio per tutto ciò che mi diverte nel codice e nel design, con test automatici del browser sotto il cofano.",
+        "summary": [
+          {
+            "label": "Obiettivo",
+            "body": "Riunire codice, design e fotografia in un portfolio personale."
+          },
+          {
+            "label": "Il mio contributo",
+            "body": "Ideazione, design, sviluppo e hosting con il supporto dell’IA."
+          },
+          {
+            "label": "Risultato",
+            "body": "Inchiostro interattivo sulla GPU, cinque temi, quattro lingue e test automatici nel browser."
+          }
+        ],
         "metaNote": "L’inchiostro viene calcolato in modo interattivo sulla GPU. I livelli di qualità adattano il carico al dispositivo.",
         "ctaLabel": "Sei già qui",
         "screenshot": {
@@ -380,6 +394,20 @@
           "shadcn/ui"
         ],
         "description": "Piattaforma associativa e per eventi sviluppata nell’arco di diversi mesi: permessi, soci sostenitori e statistiche di presenza, più un sistema di ordinazioni e cassa per servizio, cucina e bar. Usata regolarmente e ampliata nel tempo.",
+        "summary": [
+          {
+            "label": "Obiettivo",
+            "body": "Riunire sito pubblico, gestione del club e attività durante gli eventi."
+          },
+          {
+            "label": "Il mio contributo",
+            "body": "Ideazione, design, sviluppo full-stack e gestione continua con il supporto dell’IA."
+          },
+          {
+            "label": "Risultato",
+            "body": "Usata regolarmente per gestire soci e sostenitori, analizzare le presenze e inviare ordini alla cucina e al bar."
+          }
+        ],
         "screenshot": {
           "alt": "Screenshot della homepage pubblica di joggediballa.ch",
           "caption": "joggediballa.ch · home"

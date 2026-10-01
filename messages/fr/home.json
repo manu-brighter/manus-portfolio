@@ -50,7 +50,7 @@
       "name": "PHP · Vue · SQL",
       "description": "Concevoir des interfaces métier, développer des intégrations et accompagner les versions avec des tests automatisés."
     },
-    "vibecodedMarker": "avec l’IA",
+    "vibecodedMarker": "AI-supported",
     "tiers": [
       {
         "id": "daily-driver",
@@ -351,6 +351,20 @@
           "zustand · state"
         ],
         "description": "Ce site, tout simplement. De l’encre interactive calculée sur GPU, cinq thèmes visuels, quatre langues et mes photos au milieu. Un terrain de jeu pour tout ce qui me plaît dans le code et le design, avec des tests de navigateur automatisés sous le capot.",
+        "summary": [
+          {
+            "label": "Enjeu",
+            "body": "Réunir le code, le design et la photographie dans un portfolio personnel."
+          },
+          {
+            "label": "Ma contribution",
+            "body": "Conception, design, développement et hébergement avec le soutien de l’IA."
+          },
+          {
+            "label": "Résultat",
+            "body": "Encre interactive sur GPU, cinq thèmes, quatre langues et tests automatisés dans le navigateur."
+          }
+        ],
         "metaNote": "L’encre est calculée de manière interactive sur le GPU. Des niveaux de qualité adaptent la charge à l’appareil.",
         "ctaLabel": "Tu y es déjà",
         "screenshot": {
@@ -380,6 +394,20 @@
           "shadcn/ui"
         ],
         "description": "Plateforme associative et événementielle développée sur plusieurs mois : permissions, membres de soutien et suivi des présences, avec un système de commandes et de caisse pour le service, la cuisine et le bar. Utilisée régulièrement et enrichie en continu.",
+        "summary": [
+          {
+            "label": "Enjeu",
+            "body": "Réunir le site public, la gestion du club et l’organisation des événements."
+          },
+          {
+            "label": "Ma contribution",
+            "body": "Conception, design, développement full-stack et exploitation continue avec le soutien de l’IA."
+          },
+          {
+            "label": "Résultat",
+            "body": "Utilisée régulièrement pour gérer les membres et les donateurs, suivre les présences et envoyer les commandes à la cuisine et au bar."
+          }
+        ],
         "screenshot": {
           "alt": "Capture de la page d'accueil publique de joggediballa.ch",
           "caption": "joggediballa.ch · home"

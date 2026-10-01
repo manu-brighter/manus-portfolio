@@ -16,8 +16,7 @@ test.use({ ...devices["Pixel 5"] });
 
 test.describe("Mobile background sim", () => {
   test("full-page background canvas mounts", async ({ page }) => {
-    await page.goto("/de/");
-    await page.waitForLoadState("networkidle");
+    await page.goto("/de/?ink-preview=full");
 
     const sim = page.locator('canvas[data-testid="mobile-bg-sim"]');
     // Gated behind the loader + canvasMounted defer, so allow generous time.
@@ -25,8 +24,8 @@ test.describe("Mobile background sim", () => {
   });
 
   test("no <video> background fallback mounts (AmbientVideo retired)", async ({ page }) => {
-    await page.goto("/de/");
-    await page.waitForLoadState("networkidle");
+    await page.goto("/de/?ink-preview=full");
+    await expect(page.getByTestId("mobile-bg-sim")).toBeVisible({ timeout: 12000 });
 
     // All coarse-pointer devices run the live MobileBackgroundSim; the
     // pre-recorded <video> loop was deleted in the mobile wow-pass.
@@ -37,8 +36,7 @@ test.describe("Mobile background sim", () => {
     const errors: string[] = [];
     page.on("pageerror", (err) => errors.push(err.message));
 
-    await page.goto("/de/");
-    await page.waitForLoadState("networkidle");
+    await page.goto("/de/?ink-preview=full");
 
     await expect(page.locator('canvas[data-testid="mobile-bg-sim"]')).toBeVisible({
       timeout: 12000,

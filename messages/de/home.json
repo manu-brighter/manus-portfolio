@@ -50,7 +50,7 @@
       "name": "PHP · Vue · SQL",
       "description": "Fachoberflächen gestalten, Schnittstellen entwickeln und Releases mit automatisierten Tests absichern."
     },
-    "vibecodedMarker": "mit AI",
+    "vibecodedMarker": "AI-supported",
     "tiers": [
       {
         "id": "daily-driver",
@@ -351,6 +351,20 @@
           "zustand · State"
         ],
         "description": "Diese Seite hier. Interaktive GPU-Tinte, fünf visuelle Themen, vier Sprachen und meine Fotos mittendrin. Eine Spielwiese für alles, was mir an Code und Gestaltung Spass macht, mit automatisierten Browser-Tests unter der Haube.",
+        "summary": [
+          {
+            "label": "Aufgabe",
+            "body": "Code, Gestaltung und Fotografie in einem eigenen Portfolio verbinden."
+          },
+          {
+            "label": "Mein Beitrag",
+            "body": "Konzept, Design, Entwicklung und Hosting mit AI-Unterstützung."
+          },
+          {
+            "label": "Ergebnis",
+            "body": "Interaktive GPU-Tinte, fünf Themen, vier Sprachen und automatisierte Browser-Tests."
+          }
+        ],
         "metaNote": "Die Tinte wird interaktiv auf der GPU berechnet. Qualitätsstufen passen den Rechenaufwand an das Gerät an.",
         "ctaLabel": "Du bist schon hier",
         "screenshot": {
@@ -380,6 +394,20 @@
           "shadcn/ui"
         ],
         "description": "Über Monate entwickelte Vereins- und Eventplattform: Berechtigungen, Gönnerverwaltung und Anwesenheitsauswertungen sowie ein Bestell- und Kassensystem für Service, Küche und Bar. Regelmässig genutzt und laufend erweitert.",
+        "summary": [
+          {
+            "label": "Aufgabe",
+            "body": "Webauftritt, Vereinsverwaltung und Eventbetrieb zusammenbringen."
+          },
+          {
+            "label": "Mein Beitrag",
+            "body": "Konzept, Design, Fullstack-Entwicklung und laufender Betrieb mit AI-Unterstützung."
+          },
+          {
+            "label": "Ergebnis",
+            "body": "Regelmässig im Einsatz: Mitglieder und Gönner verwalten, Anwesenheiten auswerten, Bestellungen an Küche und Bar senden."
+          }
+        ],
         "screenshot": {
           "alt": "Screenshot der öffentlichen Startseite von joggediballa.ch",
           "caption": "joggediballa.ch · home"
