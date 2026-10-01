@@ -39,7 +39,7 @@ test.describe("motion — default (Lenis active)", () => {
     // Wait for the browser to scroll at least one pixel. Using
     // waitForFunction instead of a fixed RAF count makes the assertion
     // resilient on slow CI runners.
-    await page.waitForFunction(() => window.scrollY > 0, { timeout: 3000 });
+    await page.waitForFunction(() => window.scrollY > 0, undefined, { timeout: 3000 });
   });
 });
 

@@ -37,3 +37,12 @@ cross-browser rerun finished with 38 passed and two intentional skips.
 
 Hosted CI remains the release gate. These are interaction and visual
 corrections, not evidence of a new universal FPS gain.
+
+Linux WebKit CI exposed a native-wheel regression from the previous global
+`overscroll-behavior: none`. An isolated Linux reproduction confirmed that
+vertical `none` and `contain` both block wheel scrolling; `auto` restores it.
+Keep only horizontal gesture suppression and preserve the original wheel
+behavior assertions. The motion test now passes its timeout as Playwright's
+options argument.
+The corrected production build passes all six targeted Linux WebKit tests and
+all eighteen Windows Chromium/WebKit/Mobile Chrome motion and rail tests.

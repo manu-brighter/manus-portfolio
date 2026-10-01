@@ -22,6 +22,9 @@ test("wheel input stays native while the motion provider is active", async ({ pa
   await page.mouse.wheel(0, 600);
   await expect(page.locator("html")).toHaveAttribute("data-wheel-handled", "false");
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(before);
+  const afterDown = await page.evaluate(() => window.scrollY);
+  await page.mouse.wheel(0, -600);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThan(afterDown);
 });
 
 test("rail fill follows its active section through unequal sections and the pin span", async ({
