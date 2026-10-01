@@ -142,34 +142,47 @@ test("Auto reduces the light budget after sustained stalls and respects a manual
 }) => {
   test.setTimeout(90000);
   await page.setViewportSize({ width: 1280, height: 900 });
+  await page.clock.install();
   await page.addInitScript(() => {
+    // Drive the real GSAP ticker through clock-controlled frame deliveries.
+    // Native RAF can stop on Windows WebKit even without shader work; each
+    // timer delivers a deliberately late frame without burning CPU or waiting
+    // for the browser compositor. Keep context creation and canvas allocation.
+    window.requestAnimationFrame = (callback) =>
+      window.setTimeout(() => callback(performance.now()), 34);
+    window.cancelAnimationFrame = (id) => window.clearTimeout(id);
+    WebGL2RenderingContext.prototype.drawArrays = () => {};
     localStorage.setItem("manus-gpu-tier", JSON.stringify({ tier: "minimal", ts: Date.now() }));
   });
   await page.goto("/de/");
   const canvas = page.getByTestId("lite-ink-canvas");
   await expect(canvas).toBeVisible({ timeout: 15000 });
+  const panel = await openStudio(page);
+  const light = panel.getByRole("radio", { name: "Leichte Tinte", exact: true });
+  await light.focus();
+  await light.press("Space");
+  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 100));
+  // Re-enter Auto with the clock paused so startup and action timing cannot
+  // contribute samples. Keyboard activation needs no compositor-stability wait.
+  const auto = panel.getByRole("radio", { name: "Auto", exact: true });
+  await auto.focus();
+  await auto.press("Space");
+  await expect(auto).toBeChecked();
+  await auto.press("Escape");
   const initialPixels = await canvas.evaluate(
     (element) => (element as HTMLCanvasElement).width * (element as HTMLCanvasElement).height,
   );
-  await page.waitForTimeout(6500);
-  const sustainedLoad = () =>
-    page.evaluate(async () => {
-      await new Promise<void>((resolve) => {
-        let frames = 0;
-        const blockFrame = () => {
-          const start = performance.now();
-          while (performance.now() - start < 28) {
-            /* Deliberate sustained workload. */
-          }
-          frames++;
-          if (frames < 210) requestAnimationFrame(blockFrame);
-          else resolve();
-        };
-        requestAnimationFrame(blockFrame);
-      });
-    });
-  await sustainedLoad();
+  expect(initialPixels).toBeGreaterThan(450000);
+  await page.clock.runFor(6000); // Observer warmup.
+  await page.clock.runFor(90 * 34); // One complete slow window must not reduce.
+  expect(
+    await canvas.evaluate(
+      (element) => (element as HTMLCanvasElement).width * (element as HTMLCanvasElement).height,
+    ),
+  ).toBe(initialPixels);
+  await page.clock.runFor(91 * 34); // Second window plus the renderer's resize tick.
   await expect(page.getByTestId("ink-studio").getByRole("status")).toContainText("weniger Details");
+  await page.clock.runFor(34); // Let the committed React quality change reach the renderer.
   await expect(canvas).toBeVisible();
   await expect
     .poll(() =>
@@ -177,12 +190,18 @@ test("Auto reduces the light budget after sustained stalls and respects a manual
         (element) => (element as HTMLCanvasElement).width * (element as HTMLCanvasElement).height,
       ),
     )
-    .toBeLessThan(initialPixels);
-  const panel = await openStudio(page);
+    .toBeLessThanOrEqual(450000);
+  expect(
+    await canvas.evaluate(
+      (element) => (element as HTMLCanvasElement).width * (element as HTMLCanvasElement).height,
+    ),
+  ).toBeGreaterThan(0);
+  await page.getByRole("button", { name: "Tintenstudio", exact: true }).press("Enter");
   await expect(panel.getByRole("radio", { name: "Auto", exact: true })).toBeChecked();
   const full = panel.getByRole("radio", { name: "Volle Simulation", exact: true });
-  await full.check();
-  await sustainedLoad();
+  await full.focus();
+  await full.press("Space");
+  await page.clock.runFor(6000 + 181 * 34);
   await expect(full).toBeChecked();
   await expect(canvas).toHaveCount(0);
   await expect(page.locator(fullCanvas)).toBeVisible();

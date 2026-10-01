@@ -35,13 +35,9 @@ test.describe("@legal nav from / to /impressum + /datenschutz", () => {
       });
 
       await page.goto("/de/");
-      // Wait for the loader overlay to disappear — deterministic signal
-      // that the epic ~2.2s animation finished and ScrollTrigger has had
-      // time to initialise the diorama pin spacer. Replaces the brittle
-      // waitForTimeout(3500) (F-testing-coverage-8).
-      await page
-        .locator('[data-testid="loader-overlay"]')
-        .waitFor({ state: "hidden", timeout: 8000 });
+      // The intro no longer blocks startup. Wait for the actual pin whose
+      // removal this regression test exercises.
+      await expect(page.locator("#case-study .pin-spacer")).toHaveCount(1);
 
       // Scroll to bring the footer into view, then click the link.
       await page.evaluate(() =>
@@ -56,11 +52,12 @@ test.describe("@legal nav from / to /impressum + /datenschutz", () => {
       await expect(link).toBeVisible();
       await link.click();
 
-      // Wait for the new page's heading to confirm navigation completed.
-      await expect(page.locator("h1")).toBeVisible();
-      // Replace waitForTimeout(500) with networkidle — pages with no
-      // pending requests have settled (F-testing-coverage-8).
-      await page.waitForLoadState("networkidle");
+      // Verify the destination commit itself. Unrelated lazy image requests
+      // from the former page must not decide whether navigation succeeded.
+      await page.waitForURL(new RegExp(`/de/${target}/?$`));
+      await expect(page.locator("h1")).toHaveText(
+        target === "impressum" ? "Impressum" : "Datenschutzerklärung",
+      );
 
       expect(errors, `console errors during nav to /${target}`).toEqual([]);
     });

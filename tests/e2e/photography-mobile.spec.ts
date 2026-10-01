@@ -16,7 +16,7 @@ test.use({ ...devices["Pixel 5"] });
 test.describe("Photography mobile stack", () => {
   test("renders 5 vertical photo figures with alt text", async ({ page }) => {
     await page.goto("/de/#photography");
-    await page.waitForLoadState("networkidle");
+    await expect(page.getByTestId("photo-slide")).toHaveCount(5);
 
     const slides = page.locator('[data-testid="photo-slide"]');
     await expect(slides).toHaveCount(5);
@@ -31,7 +31,7 @@ test.describe("Photography mobile stack", () => {
 
   test("photos stack vertically (each figure below the previous)", async ({ page }) => {
     await page.goto("/de/#photography");
-    await page.waitForLoadState("networkidle");
+    await expect(page.getByTestId("photo-slide")).toHaveCount(5);
 
     const slides = page.locator('[data-testid="photo-slide"]');
     // PhotographyMobile is a dynamic ssr:false chunk — `.all()` doesn't
@@ -53,7 +53,7 @@ test.describe("Photography mobile stack", () => {
 
   test("no carousel machinery remains", async ({ page }) => {
     await page.goto("/de/#photography");
-    await page.waitForLoadState("networkidle");
+    await expect(page.getByTestId("photo-slide")).toHaveCount(5);
 
     await expect(page.locator('[data-testid="photo-dot"]')).toHaveCount(0);
     await expect(page.locator('[data-testid="photo-prev"]')).toHaveCount(0);

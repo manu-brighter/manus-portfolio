@@ -48,11 +48,12 @@ Files: Loader, Work/WorkCard and home translations, photography sections if usef
 
 ## 4. Integration, review and release
 
-Implementation tasks above are complete. Added tests still require the integrated
-production run; checked implementation boxes do not claim QA or release success.
+Implementation and local production verification are complete. Browser coverage
+includes Chromium, WebKit and mobile Chrome; failed cases were corrected and
+rerun. Hosted CI and deployment remain the release gates below.
 
 - [x] Update legacy tests that intentionally exercise Full mode to request that mode explicitly; retain separate default-Light tests.
-- [ ] Run repository lint, TypeScript/build and required local test suite against the production export.
+- [x] Run repository lint, TypeScript/build and required local test suite against the production export.
 - [x] Inspect desktop/mobile/theme screenshots and sequential real-GPU frame traces. Use measurements, not an assumed FPS guarantee.
 - [x] Obtain independent review, fix verified issues, update outdated project guidance and documentation.
 - [ ] Commit with the repository convention, push the named feature branch, create/attach a PR via gh.

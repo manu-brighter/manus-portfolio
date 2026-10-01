@@ -53,9 +53,18 @@ test.describe("entry and project navigation", () => {
     await expect(page.locator("html")).not.toHaveAttribute("data-intro-seen", "true");
   });
 
-  test("project summaries and case study remain accessible without hover", async ({ page }) => {
+  test("project summaries and case study remain accessible without hover", async ({
+    page,
+    isMobile,
+  }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/de/");
+    // The mobile destination replaces the server-rendered desktop section
+    // after hydration, then loads its carousel chunk. SSR project copy is
+    // already visible during that gap and does not prove navigation is ready.
+    if (isMobile) {
+      await expect(page.getByTestId("cs-carousel-track")).toBeAttached();
+    }
     const project = page.locator("#joggediballa");
     await project.scrollIntoViewIfNeeded();
     await expect(project.locator("dt")).toHaveText(["Aufgabe", "Mein Beitrag", "Ergebnis"]);

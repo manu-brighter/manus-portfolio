@@ -18,7 +18,7 @@ test.use({ ...devices["Pixel 5"] });
 test.describe("Case Study mobile carousel", () => {
   test("renders 6 station slides + 6 pagination dots", async ({ page }) => {
     await page.goto("/de/#case-study");
-    await page.waitForLoadState("networkidle");
+    await expect(page.getByTestId("cs-carousel-track")).toBeAttached();
 
     // 6 slides: the dense stations were split so each fits one screen —
     // hook, context (what), stack, admin-highlight, overlay-highlight, public.
@@ -28,7 +28,7 @@ test.describe("Case Study mobile carousel", () => {
 
   test("prev/next exist; start state has prev disabled, next enabled", async ({ page }) => {
     await page.goto("/de/#case-study");
-    await page.waitForLoadState("networkidle");
+    await expect(page.getByTestId("cs-carousel-track")).toBeAttached();
 
     const prev = page.locator('[data-testid="cs-carousel-prev"]');
     const next = page.locator('[data-testid="cs-carousel-next"]');
@@ -41,7 +41,7 @@ test.describe("Case Study mobile carousel", () => {
 
   test("pagination dot click advances index + aria-current updates", async ({ page }) => {
     await page.goto("/de/#case-study");
-    await page.waitForLoadState("networkidle");
+    await expect(page.getByTestId("cs-carousel-track")).toBeAttached();
 
     const dots = page.locator('[data-testid="cs-carousel-dot"]');
 
@@ -55,7 +55,7 @@ test.describe("Case Study mobile carousel", () => {
 
   test("aria-live region announces the active station", async ({ page }) => {
     await page.goto("/de/#case-study");
-    await page.waitForLoadState("networkidle");
+    await expect(page.getByTestId("cs-carousel-track")).toBeAttached();
 
     const live = page.locator('[data-testid="cs-carousel-live"]');
     await page.locator('[data-testid="cs-carousel-next"]').click();
@@ -66,14 +66,14 @@ test.describe("Case Study mobile carousel", () => {
 
   test("no fluid-sim canvas mounts in the carousel", async ({ page }) => {
     await page.goto("/de/#case-study");
-    await page.waitForLoadState("networkidle");
+    await expect(page.getByTestId("cs-carousel-track")).toBeAttached();
 
     await expect(page.locator("#case-study canvas")).toHaveCount(0);
   });
 
   test("does NOT mount the Desktop DioramaTrack on Mobile", async ({ page }) => {
     await page.goto("/de/#case-study");
-    await page.waitForLoadState("networkidle");
+    await expect(page.getByTestId("cs-carousel-track")).toBeAttached();
 
     // DioramaTrack is the horizontal-pin wrapper; on Mobile it must not
     // mount because Mobile takes the early-return branch in CaseStudy.tsx.
@@ -84,7 +84,7 @@ test.describe("Case Study mobile carousel", () => {
     page,
   }) => {
     await page.goto("/de/#case-study");
-    await page.waitForLoadState("networkidle");
+    await expect(page.getByTestId("cs-carousel-track")).toBeAttached();
 
     const track = page.locator('[data-testid="cs-carousel-track"]');
     const dots = page.locator('[data-testid="cs-carousel-dot"]');

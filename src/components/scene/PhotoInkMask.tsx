@@ -476,11 +476,23 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
 
     const unsub = subscribe((deltaMs, elapsedMs) => {
       if (locked || document.hidden) return;
+      const now = performance.now();
+      // The reveal is a wall-clock deadline, independent of ticker lag
+      // smoothing and the capped simulation dt. On a slow GPU or after a
+      // background-tab pause, reveal the photo before submitting more work.
+      if (burstStart !== null && now - burstStart >= REVEAL_DURATION_MS) {
+        locked = true;
+        canvas.style.opacity = "0";
+        setSettled(true);
+        document.removeEventListener("pointermove", onPointer);
+        visIO.disconnect();
+        ambientQueue.length = 0;
+        unsub();
+        return;
+      }
 
-      // Sim runs whenever the photo is visible (ambient cursor flow
-      // pre-reveal) OR the burst is in flight (reveal animation).
-      // Outside both branches the mask is just a static paper rectangle
-      // and we save GPU cycles.
+      // Simulation pauses offscreen; an already-started reveal can still
+      // reach its deadline above and release its resources.
       if (!inViewport) return;
 
       // First reveal-true frame: anchor the clock. NO instant splat —
@@ -489,13 +501,13 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
       // single-frame strength:0.85 splat that felt like an instant
       // pop.
       if (revealRef.current && burstStart === null) {
-        burstStart = elapsedMs;
+        burstStart = now;
         lastReinjectAt = elapsedMs;
         fadeInSplatsFired = 0;
       }
 
       // Reveal progress 0..1 (0 while we're in pre-reveal ambient).
-      const t = burstStart === null ? 0 : elapsedMs - burstStart;
+      const t = burstStart === null ? 0 : now - burstStart;
       const progress = Math.min(t / REVEAL_DURATION_MS, 1.0);
 
       // Advect with current outward-velocity ramp. Outside the reveal
@@ -547,26 +559,6 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
       if (ambientQueue.length > AMBIENT_DRAIN_PER_FRAME * 2) ambientQueue.length = 0;
 
       runMask(elapsedMs * 0.001);
-
-      // Reveal complete: snap to opacity 0 (the mask shader output is
-      // already ~98% transparent everywhere by this point — the snap
-      // is imperceptible and guards against compositor edge-cases).
-      if (burstStart !== null && progress >= 1.0) {
-        locked = true;
-        setSettled(true);
-        canvas.style.opacity = "0";
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-        gl.clearColor(0, 0, 0, 0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
-        // Detach the document pointermove listener now that we're done
-        // — fast cursor sweeps after multiple photo reveals would
-        // otherwise pay 5+ getBoundingClientRect()s per pointermove
-        // for the rest of the session. Same reason for the IO.
-        document.removeEventListener("pointermove", onPointer);
-        visIO.disconnect();
-        ambientQueue.length = 0;
-        unsub();
-      }
     }, 70);
 
     return () => {

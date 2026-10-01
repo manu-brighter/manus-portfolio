@@ -117,6 +117,9 @@ test.describe("photography section", () => {
     const targetSlide = section.locator("[data-photo-slide]").nth(1);
     const canvas = targetSlide.locator("canvas");
     await expect(canvas).toHaveCount(1, { timeout: 15000 });
+    // The desktop case study inserts scroll space on its second animation
+    // frame. Wait for that layout before calculating a photo scroll target.
+    await expect(page.locator("#case-study .pin-spacer")).toHaveCount(1);
 
     // Scroll the second photo slide so its centre sits at the viewport
     // centre (block: "center") — the reveal now fires when the photo's
@@ -125,6 +128,10 @@ test.describe("photography section", () => {
     await targetSlide.evaluate((el) => {
       el.scrollIntoView({ behavior: "instant", block: "center" });
     });
+    await expect(targetSlide).toBeInViewport();
+    // Only a successful first mask draw clears the pre-reveal CSS paper.
+    // A GL failure also unmounts the canvas, so removal alone is insufficient.
+    await expect(canvas).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
     await expect(canvas).toHaveCount(0, { timeout: 10000 });
     await expect(targetSlide.locator("picture img")).toBeVisible();
     await page.locator("#hero").scrollIntoViewIfNeeded();

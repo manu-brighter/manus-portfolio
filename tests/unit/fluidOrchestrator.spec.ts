@@ -150,13 +150,14 @@ test.describe("FluidOrchestrator — live multi-instance smoke", () => {
       }
     });
 
-    await page.goto("/de/");
-    await page.waitForLoadState("networkidle");
+    await page.addInitScript(() => {
+      localStorage.setItem("manus-gpu-tier", JSON.stringify({ tier: "minimal", ts: Date.now() }));
+    });
+    await page.goto("/de/?ink-preview=full");
 
-    // Hero FluidSim mounts via SceneProvider — its canvas should be in
-    // the DOM after networkidle. Single-canvas baseline.
-    const heroOnly = await page.locator("canvas").count();
-    expect(heroOnly, "hero FluidSim canvas should be mounted").toBeGreaterThanOrEqual(1);
+    // Wait for the actual full renderer, independently of lazy image traffic.
+    const background = page.locator('[data-scene="root"] canvas, [data-testid="mobile-bg-sim"]');
+    await expect(background).toBeVisible({ timeout: 15000 });
 
     // Scroll Playground into view, then focus a card to activate its
     // InkDropMiniSim. Per CLAUDE.md "Mini-sims on cards stay paused
@@ -180,11 +181,8 @@ test.describe("FluidOrchestrator — live multi-instance smoke", () => {
     // If the FluidOrchestrator factory regressed multi-instance support
     // (e.g. module-level state collision), the mini-sim either fails to
     // mount or throws, taking the canvas count back below 2.
-    const coexisting = await page.locator("canvas").count();
-    expect(
-      coexisting,
-      `after Playground card focus, expected ≥2 canvases (hero + mini-sim), got ${coexisting}`,
-    ).toBeGreaterThanOrEqual(2);
+    await expect(background).toBeVisible();
+    await expect(playgroundCard.locator("canvas")).toHaveCount(1);
 
     // Steady-state — RAF runs for both orchestrators, any deferred
     // cross-talk would surface as a GL error in console.
