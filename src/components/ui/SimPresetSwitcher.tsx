@@ -8,6 +8,7 @@ import { getSimPreset, SIM_PRESETS, type SimPreset } from "@/lib/content/simPres
 import { SPOT_HEX } from "@/lib/palette";
 import { useSimPresetStore } from "@/lib/simPresetStore";
 import { InkPreviewPanel } from "./InkPreviewPanel";
+import styles from "./SimPresetSwitcher.module.css";
 
 /** Also used by the experiments' inline theme controls. */
 export function swatchGradient(preset: SimPreset): string {
@@ -87,7 +88,7 @@ export function SimPresetSwitcher() {
           setExpanded((value) => !value);
           setNotice(false);
         }}
-        className="order-last flex min-h-11 items-center gap-2.5 rounded-full border border-ink/30 bg-paper px-4 py-2 font-mono text-xs shadow-[3px_3px_0_var(--color-paper-shade)]"
+        className="order-last flex min-h-11 items-center gap-2.5 rounded-full border border-ink/30 bg-paper px-4 py-2 font-mono text-xs shadow-[3px_3px_0_var(--color-paper-shade)] transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none"
       >
         <span
           aria-hidden="true"
@@ -95,49 +96,54 @@ export function SimPresetSwitcher() {
           style={{ background: swatchGradient(getSimPreset(presetId)) }}
         />
         {studio("label")}
-        <span aria-hidden="true" className="ml-1">
-          {expanded ? "−" : "+"}
+        <span
+          aria-hidden="true"
+          className="ml-1 transition-transform duration-200 motion-reduce:transition-none"
+          style={{ transform: expanded ? "rotate(45deg)" : "rotate(0deg)" }}
+        >
+          +
         </span>
       </button>
-      {expanded && (
-        <div
-          id={panelId}
-          data-testid="ink-studio-panel"
-          className="max-h-[calc(100dvh-7rem)] w-[min(21rem,calc(100vw-2rem))] overflow-y-auto border border-ink/30 bg-paper p-5 shadow-[5px_5px_0_var(--color-paper-shade)]"
-        >
-          <p className="mb-1 font-display text-2xl">{studio("label")}</p>
-          <p className="mb-4 text-xs leading-relaxed text-ink-muted">{studio("intro")}</p>
-          <fieldset className="mb-4">
-            <legend className="mb-2 font-mono text-[0.65rem] uppercase tracking-widest">
-              {studio("theme")}
-            </legend>
-            <div className="grid grid-cols-2 gap-1">
-              {SIM_PRESETS.map((preset) => (
-                <label
-                  key={preset.id}
-                  className="flex min-h-11 cursor-pointer items-center gap-2 rounded-sm px-2 has-checked:bg-paper-shade"
-                >
-                  <input
-                    type="radio"
-                    name="sim-preset"
-                    value={preset.id}
-                    checked={presetId === preset.id}
-                    onChange={() => setPreset(preset.id)}
-                    className="peer sr-only"
-                  />
-                  <span
-                    aria-hidden="true"
-                    className="size-5 shrink-0 rounded-full border border-ink/30 peer-checked:ring-1 peer-checked:ring-ink peer-checked:ring-offset-2 peer-checked:ring-offset-paper peer-focus-visible:outline-2 peer-focus-visible:outline-offset-4 peer-focus-visible:outline-(--focus-ring)"
-                    style={{ background: swatchGradient(preset) }}
-                  />
-                  <span className="text-xs">{t(preset.i18nKey)}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
-          <InkPreviewPanel />
-        </div>
-      )}
+      <div
+        id={panelId}
+        data-testid="ink-studio-panel"
+        data-open={expanded}
+        aria-hidden={!expanded}
+        inert={!expanded}
+        className={`${styles.panel} max-h-[calc(100dvh-7rem)] w-[min(21rem,calc(100vw-2rem))] overflow-y-auto rounded-sm border border-ink/30 bg-paper p-5 shadow-[5px_5px_0_var(--color-paper-shade)]`}
+      >
+        <p className="mb-1 font-display text-2xl">{studio("label")}</p>
+        <p className="mb-4 text-xs leading-relaxed text-ink-muted">{studio("intro")}</p>
+        <fieldset className="mb-4">
+          <legend className="mb-2 font-mono text-[0.65rem] uppercase tracking-widest">
+            {studio("theme")}
+          </legend>
+          <div className="grid grid-cols-2 gap-1">
+            {SIM_PRESETS.map((preset) => (
+              <label
+                key={preset.id}
+                className="flex min-h-11 cursor-pointer items-center gap-2 rounded-sm px-2 has-checked:bg-paper-shade"
+              >
+                <input
+                  type="radio"
+                  name="sim-preset"
+                  value={preset.id}
+                  checked={presetId === preset.id}
+                  onChange={() => setPreset(preset.id)}
+                  className="peer sr-only"
+                />
+                <span
+                  aria-hidden="true"
+                  className="size-5 shrink-0 rounded-full border border-ink/30 peer-checked:ring-1 peer-checked:ring-ink peer-checked:ring-offset-2 peer-checked:ring-offset-paper peer-focus-visible:outline-2 peer-focus-visible:outline-offset-4 peer-focus-visible:outline-(--focus-ring)"
+                  style={{ background: swatchGradient(preset) }}
+                />
+                <span className="text-xs">{t(preset.i18nKey)}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+        <InkPreviewPanel />
+      </div>
     </div>
   );
 }

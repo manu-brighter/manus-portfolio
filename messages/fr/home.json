@@ -50,7 +50,7 @@
       "name": "PHP · Vue · SQL",
       "description": "Concevoir des interfaces métier, développer des intégrations et accompagner les versions avec des tests automatisés."
     },
-    "vibecodedMarker": "AI-supported",
+    "vibecodedMarker": "AI × Me",
     "tiers": [
       {
         "id": "daily-driver",
@@ -417,7 +417,7 @@
     ],
     "sideProjects": {
       "label": "Autres projets sur GitHub",
-      "lede": "Des outils plus modestes et mon environnement de travail avec l’IA.",
+      "lede": "Outils, projets de recherche et mon environnement de travail avec l’IA.",
       "items": [
         {
           "id": "shotCounter",
@@ -426,6 +426,22 @@
           "description": "Tableau de scores pour équipes avec accès par QR sur le réseau local et scores synchronisés. Application Electron pour Windows et Linux.",
           "stack": ["Vue 3", "Express 5", "SQLite", "SSE", "Electron"],
           "ctaLabel": "Repo & téléchargement"
+        },
+        {
+          "id": "flyConnectomeSim",
+          "title": "Fly Connectome Sim",
+          "tagline": "Simulation de connectome · En développement",
+          "description": "Une expérience utilisant le réseau neuronal publié d’une drosophile. Python et un noyau de calcul natif associent des expériences contrôlées à des enregistrements vérifiables.",
+          "stack": ["Python", "C++", "MaleCNS"],
+          "ctaLabel": "Code et documentation"
+        },
+        {
+          "id": "mercurius",
+          "title": "Mercurius",
+          "tagline": "Recherche quantitative · Terminée",
+          "description": "Projet de recherche Python sur des stratégies de trading, avec backtests reproductibles et critères de validation fixes. Trois hypothèses rejetées, sans engager de capital réel.",
+          "stack": ["Python", "Alpaca", "SQLite", "Backtesting"],
+          "ctaLabel": "Code et documentation"
         },
         {
           "id": "claudeCodeKit",

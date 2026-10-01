@@ -1,6 +1,7 @@
 "use client";
 
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLenis } from "@/hooks/useLenis";
@@ -32,13 +33,8 @@ type SectionDef = {
 };
 
 // Section order MUST match the actual page flow (see [locale]/page.tsx).
-// IntersectionObserver-driven activeIndex relies on this ordering: when
-// the user scrolls down the IO entries fire in DOM-position order, and
-// the topmost-intersecting entry wins via the sort step in the IO
-// callback below. If you put dots out-of-order, the active state will
-// flicker between non-adjacent indices and the connecting line will
-// run backwards. The list is derived from the shared `SECTIONS` source
-// of truth so reorders only happen in one place.
+// The active dot and connecting line share the same measured section
+// boundaries, including the Case Study pin's extra document height.
 const SECTION_DEFS: SectionDef[] = SECTIONS.filter((s) => s.showInScrollProgress).map((s) => ({
   id: s.id,
   labelKey: s.navLabelKey,
@@ -68,7 +64,7 @@ export function ScrollProgress() {
   // biome-ignore lint/correctness/useExhaustiveDependencies(pathname): deliberate re-run trigger — home sections unmount/remount across client navigation
   useEffect(() => {
     // Component renders null on Mobile-phone layouts (see below) —
-    // empty the section list too so the IO effect stays dormant
+    // empty the section list too so the measurement effect stays dormant
     // instead of churning setActiveIndex on a null-rendering component.
     if (isMobile) {
       setSections([]);
@@ -82,53 +78,52 @@ export function ScrollProgress() {
     setSections(found);
   }, [pathname, isMobile]);
 
-  // IntersectionObserver for active section detection
+  // Cache layout only when it changes. Scroll frames read the scroll offset
+  // and write the line transform; React updates only at section boundaries.
   useEffect(() => {
-    if (sections.length === 0) return;
-
-    // Pick the most-visible intersecting section (matches Nav.tsx
-    // scroll-spy). Sort key 1: highest `intersectionRatio` wins, so the
-    // section actually filling the 20-30% viewport strip is preferred
-    // over a neighbouring section that has only just clipped in by a
-    // pixel. Sort key 2 (tiebreaker): topmost in viewport — keeps the
-    // active state stable when two adjacent sections have identical
-    // ratios. rootMargin "-20% 0px -70%" matches Nav for handoff
-    // consistency.
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const [topmost] = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => {
-            if (b.intersectionRatio !== a.intersectionRatio) {
-              return b.intersectionRatio - a.intersectionRatio;
-            }
-            return a.boundingClientRect.top - b.boundingClientRect.top;
-          });
-        if (!topmost) return;
-        const idx = sections.findIndex((s) => s.el === topmost.target);
-        if (idx >= 0) setActiveIndex(idx);
-      },
-      { rootMargin: "-20% 0px -70% 0px", threshold: 0 },
-    );
-
-    for (const s of sections) observer.observe(s.el);
-    return () => observer.disconnect();
-  }, [sections]);
-
-  // Scroll progress tracking via Lenis. Mobile-gated like discovery —
-  // no point re-rendering a null component on every scroll event.
-  useEffect(() => {
-    if (!lenis || isMobile || sections.length < 2) return;
-
-    const onScroll = () => {
-      // This decorative line changes on every scroll frame. Updating its
-      // transform directly avoids re-rendering the entire navigation rail.
-      if (lineRef.current) lineRef.current.style.transform = `scaleY(${lenis.progress})`;
+    if (isMobile || reducedMotion || sections.length === 0) return;
+    let starts: number[] = [];
+    let lastActive = -1;
+    const update = () => {
+      if (starts.length === 0) return;
+      const y = Math.max(0, window.scrollY);
+      let index = 0;
+      while (index + 1 < starts.length && y >= (starts[index + 1] ?? Infinity)) index++;
+      const start = starts[index] ?? 0;
+      const next = starts[index + 1];
+      const fraction =
+        next === undefined ? 0 : Math.min(1, (y - start) / Math.max(1, next - start));
+      const progress = sections.length < 2 ? 0 : (index + fraction) / (sections.length - 1);
+      if (lineRef.current) lineRef.current.style.transform = `scaleY(${progress})`;
+      if (lastActive !== index) {
+        lastActive = index;
+        setActiveIndex(index);
+      }
     };
-    onScroll();
-    lenis.on("scroll", onScroll);
-    return () => lenis.off("scroll", onScroll);
-  }, [lenis, isMobile, sections.length]);
+    const measure = () => {
+      const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      const readingLine = window.innerHeight * 0.25;
+      starts = sections.map(({ el }) =>
+        Math.max(
+          0,
+          Math.min(maxScroll, el.getBoundingClientRect().top + window.scrollY - readingLine),
+        ),
+      );
+      update();
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    for (const { el } of sections) observer.observe(el);
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", measure);
+    ScrollTrigger.addEventListener("refresh", measure);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", measure);
+      ScrollTrigger.removeEventListener("refresh", measure);
+    };
+  }, [sections, isMobile, reducedMotion]);
 
   // Animate active dot — GSAP durations set to 0 under reduced-motion
   // (component is hidden, but guard defensively).
@@ -205,7 +200,7 @@ export function ScrollProgress() {
           containing block and the absolute geometry is unchanged. */}
       {sections.length > 1 && (
         <div
-          className="absolute top-2 bottom-2 left-1/2 w-px -translate-x-1/2"
+          className="absolute top-[22px] bottom-[22px] left-1/2 w-px -translate-x-1/2"
           style={{ backgroundColor: "var(--color-paper-line)" }}
         >
           <div

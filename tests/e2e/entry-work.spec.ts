@@ -1,6 +1,17 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("entry and project navigation", () => {
+  test("CV is directly reachable from the visible header", async ({ page }) => {
+    await page.goto("/de/");
+    const cv = page
+      .getByRole("navigation", { name: "Hauptnavigation", exact: true })
+      .getByRole("link", { name: "CV", exact: true });
+    await expect(cv).toBeInViewport();
+    await cv.click();
+    await expect(page).toHaveURL(/\/de\/cv\/?$/);
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Manuel Heller");
+  });
+
   test.beforeEach(async ({ page }) => {
     // Observe the whole startup, so a short-lived blocking overlay cannot
     // disappear before the assertion and give us a false pass.

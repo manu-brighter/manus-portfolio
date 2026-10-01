@@ -1,86 +1,57 @@
 #version 300 es
-// highp: the noise include exceeds fp16 range -- see
-// render-riso.frag.glsl.
 precision highp float;
 
 // #include <noise>
 
 in vec2 vUv;
-
 uniform sampler2D uDye;
 uniform float uGrainStrength;
 uniform float uEdgeStrength;
 uniform float uTime;
-
 uniform vec3 uPaperColor;
 uniform vec3 uSpotRose;
 uniform vec3 uSpotAmber;
 uniform vec3 uSpotMint;
 uniform vec3 uSpotViolet;
-
 out vec4 fragColor;
 
-// Neon print: hard posterized bands ascending out of near-black paper,
-// an additive glow halo around dense ink (phosphor bloom, uEdgeStrength
-// = gain), and chromatic misregistration fringes at the rims -- the
-// site's ghost-layer motif rendered as light instead of ink. Crisp
-// core plus glow; deliberately the only additive style of the four.
-
-const float FRINGE_UV = 0.004;
-const float GLOW_UV = 0.02;
-// 4 ink bands over paper -- matches the 4-slot ladder exactly.
-const float BANDS = 4.0;
-
+// Physical dye still advects and curls, but prints as hollow luminous
+// contours like Light Night. No extra pass or bloom buffer: three dye
+// samples replace the old eleven-sample filled-band and wide-bloom look.
 float densityAt(vec2 uv) {
-  vec3 dye = clamp(texture(uDye, uv).rgb, vec3(0.0), vec3(1.0));
-  return min(length(dye), 1.0);
+  return min(length(clamp(texture(uDye, uv).rgb, vec3(0.0), vec3(1.0))), 1.0);
 }
 
-vec3 bandColor(float idx) {
-  // idx 0 = paper, 1..4 = ladder low -> high (slot names are legacy;
-  // nachtdruck fills them with an ascending-brightness ladder).
-  if (idx < 0.5) return uPaperColor;
-  if (idx < 1.5) return uSpotMint;
-  if (idx < 2.5) return uSpotAmber;
-  if (idx < 3.5) return uSpotRose;
+vec3 plateColor(int index) {
+  if (index == 0) return uSpotMint;
+  if (index == 1) return uSpotAmber;
+  if (index == 2) return uSpotRose;
   return uSpotViolet;
 }
 
 void main() {
   float density = densityAt(vUv);
-
-  // Hard quantized bands -- no soft ladder anywhere. Rounds (+0.5)
-  // instead of flooring like turbulenz: neon should IGNITE at low
-  // density (first band at d >= 0.125), not wait for a full band.
-  vec3 color = bandColor(floor(density * BANDS + 0.5));
-
-  // Glow halo: wide 8-tap ring bloom OUTSIDE the ink (max(halo -
-  // density) keeps dense pools from brightening further -- the light
-  // hero text must keep reading over saturated areas). A 4-tap cross
-  // read faintly cross-shaped on small blobs.
-  float diag = GLOW_UV * 0.7071;
-  float halo = (
-    densityAt(vUv + vec2( GLOW_UV, 0.0)) +
-    densityAt(vUv + vec2(-GLOW_UV, 0.0)) +
-    densityAt(vUv + vec2(0.0,  GLOW_UV)) +
-    densityAt(vUv + vec2(0.0, -GLOW_UV)) +
-    densityAt(vUv + vec2( diag,  diag)) +
-    densityAt(vUv + vec2( diag, -diag)) +
-    densityAt(vUv + vec2(-diag,  diag)) +
-    densityAt(vUv + vec2(-diag, -diag))
-  ) * 0.125;
-  color += uSpotViolet * max(0.0, halo - density) * uEdgeStrength;
-
-  // Chromatic misregistration: offset samples split into a rose fringe
-  // on one side and a violet fringe on the other, additive = glowing.
-  float dA = densityAt(vUv + vec2(FRINGE_UV, FRINGE_UV * 0.4));
-  float dB = densityAt(vUv - vec2(FRINGE_UV, FRINGE_UV * 0.4));
-  color += uSpotRose * max(0.0, dA - density) * 0.8;
-  color += uSpotViolet * max(0.0, dB - density) * 0.8;
-
-  // Grain shimmers slightly faster here -- phosphor noise, not stock.
-  float grain = snoise(vUv * 340.0 + uTime * 0.4);
+  vec2 fringe = vec2(0.002, 0.0008);
+  float densityA = densityAt(vUv + fringe);
+  float densityB = densityAt(vUv - fringe);
+  // Derivatives keep fine contours legible as the output resolution changes.
+  float width = max(0.003, min(fwidth(density) * 1.2, 0.022));
+  vec3 color = uPaperColor;
+  for (int i = 0; i < 4; i++) {
+    float threshold = 0.12 + float(i) * 0.22;
+    float edge = abs(density - threshold);
+    float filament = 1.0 - smoothstep(width, width * 2.2, edge);
+    float halo = 1.0 - smoothstep(width * 2.0, width * 2.0 + 0.045, edge);
+    vec3 ink = plateColor(i);
+    color = mix(color, ink, filament * 0.78 + halo * 0.10);
+    // Restrict registration colour to the same contour, leaving interiors dark.
+    float fringeA = 1.0 - smoothstep(width, width * 2.2, abs(densityA - threshold));
+    float fringeB = 1.0 - smoothstep(width, width * 2.2, abs(densityB - threshold));
+    color += (uSpotRose * max(0.0, fringeA - filament)
+      + uSpotViolet * max(0.0, fringeB - filament)) * uEdgeStrength * 0.16;
+  }
+  // Stationary stock grain avoids shimmer in the slender lines.
+  float grain = snoise(vUv * 340.0);
   color *= 1.0 + grain * uGrainStrength;
-
   fragColor = vec4(clamp(color, vec3(0.0), vec3(1.0)), 1.0);
 }

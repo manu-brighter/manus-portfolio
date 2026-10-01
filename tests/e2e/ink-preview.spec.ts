@@ -17,7 +17,7 @@ test("ordinary home starts with light ink and a closed studio, even with a cache
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await expect(page.getByTestId("lite-ink-canvas")).toBeVisible({ timeout: 15000 });
   await expect(page.locator(fullCanvas)).toHaveCount(0);
-  await expect(page.getByTestId("ink-studio-panel")).toHaveCount(0);
+  await expect(page.getByTestId("ink-studio-panel")).toBeHidden();
   const panel = await openStudio(page);
   await expect(panel.getByRole("radio", { name: "Auto", exact: true })).toBeChecked();
   await expect(panel.getByRole("radio", { name: "Volle Simulation", exact: true })).toBeDisabled();
@@ -40,7 +40,7 @@ test("manual mode persists and native keyboard controls can return to light ink"
   await expect(page.locator(fullCanvas)).toBeVisible({ timeout: 15000 });
   panel = await openStudio(page);
   await expect(panel.getByRole("radio", { name: "Volle Simulation", exact: true })).toBeChecked();
-  await panel.getByRole("radio", { name: "Leichte Tinte", exact: true }).check();
+  await panel.getByRole("radio", { name: "Flow", exact: true }).check();
   await expect(page.getByTestId("lite-ink-canvas")).toBeVisible();
   expect(await page.evaluate((key) => localStorage.getItem(key), KEY)).toBe("light");
 });
@@ -69,9 +69,9 @@ test("blocked storage preserves functional studio controls", async ({ page }) =>
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/de/");
   const panel = await openStudio(page);
-  await panel.getByRole("radio", { name: "Leichte Tinte", exact: true }).check();
+  await panel.getByRole("radio", { name: "Flow", exact: true }).check();
   await expect(page.getByTestId("lite-ink-canvas")).toBeVisible({ timeout: 15000 });
-  await expect(panel.getByRole("radio", { name: "Leichte Tinte", exact: true })).toBeChecked();
+  await expect(panel.getByRole("radio", { name: "Flow", exact: true })).toBeChecked();
   expect(errors).toEqual([]);
 });
 
@@ -86,7 +86,7 @@ test("studio supports theme keyboard selection, Escape and outside dismissal on 
   await night.press("Space");
   await expect(page.locator("html")).toHaveAttribute("data-sim-theme", "night");
   await night.press("Escape");
-  await expect(panel).toHaveCount(0);
+  await expect(panel).toBeHidden();
   const toggle = page.getByRole("button", { name: "Tintenstudio", exact: true });
   await expect(toggle).toBeFocused();
   await toggle.press("Enter");
@@ -94,7 +94,7 @@ test("studio supports theme keyboard selection, Escape and outside dismissal on 
   const bounds = await panel.boundingBox();
   if (!bounds) throw new Error("Expected open studio bounds");
   await page.mouse.click(bounds.x / 2, bounds.y + bounds.height / 2);
-  await expect(panel).toHaveCount(0);
+  await expect(panel).toBeHidden();
 });
 
 test("light renderer failure is reported honestly", async ({ page }) => {
@@ -158,7 +158,7 @@ test("Auto reduces the light budget after sustained stalls and respects a manual
   const canvas = page.getByTestId("lite-ink-canvas");
   await expect(canvas).toBeVisible({ timeout: 15000 });
   const panel = await openStudio(page);
-  const light = panel.getByRole("radio", { name: "Leichte Tinte", exact: true });
+  const light = panel.getByRole("radio", { name: "Flow", exact: true });
   await light.focus();
   await light.press("Space");
   await page.clock.pauseAt(await page.evaluate(() => Date.now() + 100));

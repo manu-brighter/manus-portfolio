@@ -5,11 +5,12 @@ import { type MouseEvent, useCallback, useEffect, useRef, useState } from "react
 
 /**
  * Mobile hamburger menu — only mounts the dropdown subtree on mobile
- * viewports (<md). Animated slide-down via CSS transform/opacity, no
+ * viewports (<lg), leaving room for CV and translated labels on tablets.
+ * Animated slide-down via CSS transform/opacity, no
  * GSAP required for a simple one-shot reveal.
  *
  * Uses `useState` for open/close + matchMedia listener that auto-closes
- * on viewport-resize past md breakpoint (avoids stuck-open on device
+ * on viewport-resize past lg breakpoint (avoids stuck-open on device
  * rotate from portrait → landscape). Esc closes via document keydown.
  *
  * A11y when open:
@@ -53,9 +54,9 @@ export function NavMobileMenu({ items, activeSection, buildHref, onAnchorClick }
     triggerRef.current?.focus();
   }, []);
 
-  // Close on viewport-resize past md breakpoint.
+  // Keep the close threshold aligned with the navigation's lg breakpoint.
   useEffect(() => {
-    const mq = window.matchMedia("(min-width: 768px)");
+    const mq = window.matchMedia("(min-width: 1024px)");
     const onChange = (e: MediaQueryListEvent) => {
       if (e.matches) setOpen(false);
     };
@@ -104,7 +105,7 @@ export function NavMobileMenu({ items, activeSection, buildHref, onAnchorClick }
   };
 
   return (
-    <div className="md:hidden">
+    <div className="lg:hidden">
       <button
         ref={triggerRef}
         type="button"

@@ -50,7 +50,7 @@
       "name": "PHP · Vue · SQL",
       "description": "Fachoberflächen gestalten, Schnittstellen entwickeln und Releases mit automatisierten Tests absichern."
     },
-    "vibecodedMarker": "AI-supported",
+    "vibecodedMarker": "AI × Me",
     "tiers": [
       {
         "id": "daily-driver",
@@ -417,7 +417,7 @@
     ],
     "sideProjects": {
       "label": "Weitere Projekte auf GitHub",
-      "lede": "Kleinere Werkzeuge und mein Setup für die Arbeit mit AI.",
+      "lede": "Werkzeuge, Forschungsprojekte und mein Setup für die Arbeit mit AI.",
       "items": [
         {
           "id": "shotCounter",
@@ -426,6 +426,22 @@
           "description": "Live-Scoreboard für Teams mit QR-Beitritt über das lokale Netzwerk und synchronisierten Spielständen. Als Electron-App für Windows und Linux umgesetzt.",
           "stack": ["Vue 3", "Express 5", "SQLite", "SSE", "Electron"],
           "ctaLabel": "Repo & Download"
+        },
+        {
+          "id": "flyConnectomeSim",
+          "title": "Fly Connectome Sim",
+          "tagline": "Connectome-Simulation · In Entwicklung",
+          "description": "Experiment mit dem veröffentlichten Nervenzell-Netz einer Fruchtfliege. Python und ein nativer Rechenkern verbinden kontrollierte Versuche mit überprüfbaren Aufzeichnungen.",
+          "stack": ["Python", "C++", "MaleCNS"],
+          "ctaLabel": "Code und Dokumentation"
+        },
+        {
+          "id": "mercurius",
+          "title": "Mercurius",
+          "tagline": "Quant Research · Abgeschlossen",
+          "description": "Python-Forschungsprojekt für Handelsstrategien mit reproduzierbaren Backtests und festen Prüfkriterien. Drei Hypothesen verworfen, ohne echtes Kapital einzusetzen.",
+          "stack": ["Python", "Alpaca", "SQLite", "Backtesting"],
+          "ctaLabel": "Code und Dokumentation"
         },
         {
           "id": "claudeCodeKit",

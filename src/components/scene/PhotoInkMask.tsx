@@ -16,7 +16,8 @@
 // Once the reveal duration has elapsed the mask locks, opacity snaps
 // to 0 and RAF unsubscribes. No GPU work after that.
 //
-// No GL resources are allocated until the parent requests the reveal.
+// Full mode allocates only when visible, allowing a brief cursor wake before
+// the centre-triggered reveal. Pre-reveal work sleeps after pointer inactivity.
 // Completion unmounts the canvas and releases all resources permanently.
 //
 // Reduced motion: the mask canvas is not mounted at all — the photo
@@ -32,7 +33,6 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { getSimPreset } from "@/lib/content/simPresets";
 import { compileShader } from "@/lib/gl/compileShader";
 import { DEFAULT_FLUID_VISUALS, type RGB } from "@/lib/gl/fluidOrchestrator";
-import { capDPR, DPR_FULL } from "@/lib/gpu";
 import { PAPER_COLOR, SPOT_RGB, type SpotColor } from "@/lib/palette";
 import { MAX_DT_S, subscribe } from "@/lib/raf";
 import { useSimPresetStore } from "@/lib/simPresetStore";
@@ -80,8 +80,8 @@ const REVEAL_DURATION_MS = 3000;
 const REINJECT_INTERVAL_MS = 120;
 // Centre fade-in: spreads the initial density build-up across
 // multiple frames so the ink swells in instead of popping in.
-// 25 frames at ~60fps ≈ 400ms.
-const FADE_IN_SPLATS = 25;
+// 12 frames at the mask's 30Hz budget take approximately 400ms.
+const FADE_IN_SPLATS = 12;
 const FADE_IN_PEAK_STRENGTH = 0.07;
 // Outward radial-velocity peak (texture units / sec). Tuned against
 // REVEAL_DURATION_MS so the wavefront just reaches the corners with
@@ -90,7 +90,10 @@ const OUTWARD_SPEED_PEAK = 0.45;
 // Cap ambient pointer splats drained per frame — a fast cursor sweep
 // can emit 50+ pointermoves between RAF ticks, and draining all of
 // them in one tick spikes the frame.
-const AMBIENT_DRAIN_PER_FRAME = 4;
+const AMBIENT_DRAIN_PER_FRAME = 2;
+const MASK_FRAME_MS = 1000 / 30;
+const AMBIENT_SETTLE_MS = 750;
+const MASK_PIXEL_BUDGET = 450000;
 
 type PhotoInkMaskProps = {
   spotColor: SpotColor;
@@ -173,6 +176,7 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
   const { effectsReduced } = useScene();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [settled, setSettled] = useState(false);
+  const [activated, setActivated] = useState(false);
   const revealRef = useRef(reveal);
   revealRef.current = reveal;
   // spotColor flows through a ref so changing it doesn't tear down the
@@ -183,7 +187,24 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
   spotColorRef.current = spotColor;
 
   useEffect(() => {
-    if (reducedMotion || effectsReduced || !reveal || settled) return;
+    if (reducedMotion || effectsReduced) {
+      if (activated) setActivated(false);
+      return;
+    }
+    if (settled || activated) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      setActivated(true);
+      observer.disconnect();
+    });
+    observer.observe(canvas);
+    return () => observer.disconnect();
+  }, [reducedMotion, effectsReduced, settled, activated]);
+
+  useEffect(() => {
+    if (reducedMotion || effectsReduced || !activated || settled) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -295,14 +316,19 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
-    // Resize canvas backing store to its CSS size x DPR (capped at 2)
+    let needsMaskPaint = false;
+    // The mask is transient decoration. Bound output pixels independently of
+    // DPR so a large photograph cannot allocate a full Retina-sized canvas.
     const resize = () => {
-      const dpr = capDPR(DPR_FULL);
-      const w = Math.floor(canvas.clientWidth * dpr);
-      const h = Math.floor(canvas.clientHeight * dpr);
+      const width = Math.max(1, canvas.clientWidth);
+      const height = Math.max(1, canvas.clientHeight);
+      const scale = Math.min(1, Math.sqrt(MASK_PIXEL_BUDGET / (width * height)));
+      const w = Math.max(1, Math.floor(width * scale));
+      const h = Math.max(1, Math.floor(height * scale));
       if (canvas.width !== w || canvas.height !== h) {
         canvas.width = w;
         canvas.height = h;
+        needsMaskPaint = true;
       }
     };
     resize();
@@ -330,6 +356,11 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
 
     // Ambient splat queue (driven by global pointer-velocity)
     const ambientQueue: Splat[] = [];
+    let lastAmbientAt = Number.NEGATIVE_INFINITY;
+    let accumulatedMs = 0;
+    const unsubscribePreset = useSimPresetStore.subscribe(() => {
+      needsMaskPaint = true;
+    });
 
     // ---------- uniform locations ----------
     const advectU = {
@@ -364,7 +395,8 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
     // running into a near-transparent mask so they read as ambient
     // residue. Stops at `locked = true`.
     const onPointer = (e: PointerEvent) => {
-      if (locked || !inViewport) return;
+      if (locked || !inViewport || document.hidden) return;
+      if (e.target instanceof Element && e.target.closest("[data-no-splat]")) return;
       const rect = canvas.getBoundingClientRect();
       if (
         e.clientX < rect.left ||
@@ -376,7 +408,9 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
       const x = (e.clientX - rect.left) / rect.width;
       // Flip Y: canvas client coords go top→bottom, GL/UV is bottom→top.
       const y = 1.0 - (e.clientY - rect.top) / rect.height;
+      if (ambientQueue.length >= AMBIENT_DRAIN_PER_FRAME) ambientQueue.shift();
       ambientQueue.push({ x, y, radius: 0.06, strength: 0.18 });
+      lastAmbientAt = performance.now();
     };
     document.addEventListener("pointermove", onPointer, { passive: true });
 
@@ -470,6 +504,7 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
     // for the IO-driven `reveal` flip. Density is zero everywhere →
     // mask alpha is 1.0 → fully opaque paper.
     runMask(0);
+    needsMaskPaint = false;
     // Replace the cheap pre-reveal paper cover only after GL has painted
     // the same paper. Transparent mask pixels can now reveal the photograph.
     canvas.style.backgroundColor = "transparent";
@@ -495,6 +530,21 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
       // reach its deadline above and release its resources.
       if (!inViewport) return;
 
+      // Before the one-shot reveal, only actual pointer work wakes the mask.
+      // Theme changes need one repaint; idle/offscreen photos submit no draws.
+      if (!revealRef.current && now - lastAmbientAt > AMBIENT_SETTLE_MS) {
+        accumulatedMs = 0;
+        if (needsMaskPaint) {
+          runMask(elapsedMs * 0.001);
+          needsMaskPaint = false;
+        }
+        return;
+      }
+      accumulatedMs += Math.min(deltaMs, 50);
+      if (accumulatedMs < MASK_FRAME_MS) return;
+      const frameDelta = accumulatedMs;
+      accumulatedMs %= MASK_FRAME_MS;
+
       // First reveal-true frame: anchor the clock. NO instant splat —
       // the FADE_IN_SPLATS phase below builds the centre density
       // gradually over the first ~400ms, replacing the previous
@@ -514,7 +564,7 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
       // burst the speed is 0 — the curl-noise term in the shader still
       // swirls density gently, so cursor wakes drift instead of staying
       // pinned in place.
-      const dt = Math.min(deltaMs * 0.001, MAX_DT_S);
+      const dt = Math.min(frameDelta * 0.001, MAX_DT_S);
       runAdvect(dt, elapsedMs * 0.001, outwardSpeedAt(progress));
 
       // Fade-in phase: tiny per-frame splats with linearly-growing
@@ -559,11 +609,13 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
       if (ambientQueue.length > AMBIENT_DRAIN_PER_FRAME * 2) ambientQueue.length = 0;
 
       runMask(elapsedMs * 0.001);
+      needsMaskPaint = false;
     }, 70);
 
     return () => {
       canvas.removeEventListener("webglcontextlost", onContextLost);
       unsub();
+      unsubscribePreset();
       ro.disconnect();
       visIO.disconnect();
       document.removeEventListener("pointermove", onPointer);
@@ -589,7 +641,7 @@ export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps
     // spotColor intentionally NOT a dep — it flows through spotColorRef
     // so changes don't tear down the WebGL context. See ref declaration
     // at the top of the component.
-  }, [reducedMotion, effectsReduced, reveal, settled]);
+  }, [reducedMotion, effectsReduced, activated, settled]);
 
   if (reducedMotion || effectsReduced || settled) return null;
 

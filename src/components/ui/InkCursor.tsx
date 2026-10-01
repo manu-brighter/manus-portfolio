@@ -19,7 +19,7 @@ import { subscribe } from "@/lib/raf";
  * head dot that hugs the pointer tightly plus a continuous tapering
  * trail.
  *
- * Trail rendering: a single FILLED variable-width polygon around the
+ * Trail rendering: a single FILLED variable-width curved ribbon around the
  * smoothed pointer history — per-point normals offset by half the
  * tapered width, one `fill()` per frame. One fill means no
  * overlapping segment caps, which is what made the v2 stroke-per-
@@ -57,11 +57,12 @@ const DOWN_SCALE = 1.6;
 /** Over interactive elements the head swells and thins — ink
  *  spreading toward the thing you can press. */
 const HOVER_SCALE = 2.4;
-const HOVER_OPACITY = 0.35;
+const HOVER_OPACITY = 0.8;
 const INTERACTIVE_SELECTOR = "a, button, label, input, textarea, select, [role='button']";
 
 /** Trail history length (samples at ~60Hz ≈ 400ms of movement). */
 const TRAIL_SAMPLES = 26;
+const TRAIL_LIFETIME_MS = 320;
 /** Stroke width at the head end (tapers to 0 at the tail). */
 const TRAIL_WIDTH_PX = 8;
 /** Fill alpha — single fill, so this is the exact on-screen alpha. */
@@ -72,6 +73,18 @@ const CHASE = 0.35;
 const HEAD_LAG_S = 0.08;
 
 type Point = { x: number; y: number };
+type Sample = Point & { time: number };
+
+/** Quadratic midpoints keep the ribbon tangent continuous at sparse samples. */
+function curveThrough(ctx: CanvasRenderingContext2D, points: Point[]) {
+  for (let i = 1; i < points.length - 1; i++) {
+    const point = points[i] as Point;
+    const next = points[i + 1] as Point;
+    ctx.quadraticCurveTo(point.x, point.y, (point.x + next.x) / 2, (point.y + next.y) / 2);
+  }
+  const last = points[points.length - 1] as Point;
+  ctx.quadraticCurveTo(last.x, last.y, last.x, last.y);
+}
 
 export function InkCursor() {
   const reducedMotion = useReducedMotion();
@@ -79,6 +92,7 @@ export function InkCursor() {
   const coarsePointer = useCoarsePointer();
   const host = useCursorHostStore((s) => s.host);
   const dotRef = useRef<HTMLDivElement>(null);
+  const nibRef = useRef<HTMLSpanElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   /** Stable portal container. Created once, then MOVED between <body>
    *  and the top-layer host. Portalling straight into `host` would
@@ -117,7 +131,8 @@ export function InkCursor() {
     if (reducedMotion || effectsReduced || coarsePointer) return;
     const dot = dotRef.current;
     const canvas = canvasRef.current;
-    if (!dot || !canvas) return;
+    const nib = nibRef.current;
+    if (!dot || !canvas || !nib) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
@@ -158,7 +173,17 @@ export function InkCursor() {
     // --- trail state ---------------------------------------------------
     const target: Point = { x: -100, y: -100 };
     const smooth: Point = { x: -100, y: -100 };
-    const trail: Point[] = [];
+    const trail: Sample[] = [];
+    let stretch = 1;
+    let angle = 0;
+    let color = getComputedStyle(canvas).color;
+    const themeObserver = new MutationObserver(() => {
+      color = getComputedStyle(canvas).color;
+    });
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-sim-theme"],
+    });
 
     const onMove = (event: PointerEvent) => {
       // Rect-relative coordinates: immune to any offset between the
@@ -187,6 +212,8 @@ export function InkCursor() {
       const next = Boolean(el?.closest(INTERACTIVE_SELECTOR));
       if (next === overInteractive) return;
       overInteractive = next;
+      nib.style.background = next ? "transparent" : "var(--color-ink-cursor)";
+      nib.style.boxShadow = next ? "inset 0 0 0 1px var(--color-ink-cursor)" : "none";
       gsap.to(dot, {
         scale: restScale(),
         opacity: shown ? restOpacity() : 0,
@@ -208,22 +235,43 @@ export function InkCursor() {
 
     // --- trail render (shared RAF) --------------------------------------
     const unsubscribe = subscribe((deltaMs) => {
+      if (document.hidden) return;
       ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
       if (!shown) return;
 
       // Frame-rate-independent chase toward the pointer.
-      const k = 1 - (1 - CHASE) ** (deltaMs / 16.67);
-      smooth.x += (target.x - smooth.x) * k;
-      smooth.y += (target.y - smooth.y) * k;
-      trail.push({ x: smooth.x, y: smooth.y });
+      const dt = Math.min(deltaMs, 50);
+      const k = 1 - (1 - CHASE) ** (dt / 16.67);
+      const dx = (target.x - smooth.x) * k;
+      const dy = (target.y - smooth.y) * k;
+      smooth.x += dx;
+      smooth.y += dy;
+      const distance = Math.hypot(dx, dy);
+      const now = performance.now();
+      if (distance > 0.15) trail.push({ x: smooth.x, y: smooth.y, time: now });
+      // Keep enough geometry for a curve even when slow frames are farther
+      // apart than its fade time. Old anchors have zero width below; they
+      // cannot keep a stationary trail alive after its last sample expires.
+      if (trail.length && now - (trail[trail.length - 1] as Sample).time > TRAIL_LIFETIME_MS) {
+        trail.length = 0;
+      }
+      while (trail.length > 3 && now - (trail[0] as Sample).time > TRAIL_LIFETIME_MS) trail.shift();
       if (trail.length > TRAIL_SAMPLES) trail.shift();
+
+      // A small liquid nib stretches into a stroke, returning to a precise
+      // ring over controls. It shares the existing clock and needs no GL pass.
+      const targetStretch = overInteractive
+        ? 1
+        : 1 + Math.min(distance / Math.max(dt, 1), 2) * 0.32;
+      stretch += (targetStretch - stretch) * k;
+      if (distance > 0.3) angle = Math.atan2(dy, dx);
+      nib.style.transform = `rotate(${angle}rad) scale(${stretch}, ${1 / stretch})`;
 
       const n = trail.length;
       if (n < 3) return;
 
-      // Variable-width ribbon: offset each point along its local
-      // normal by half the tapered width, walk the left edge tail ->
-      // head, then the right edge head -> tail, single fill.
+      // Offset both sides along local normals, then curve through them.
+      // Age-based fading avoids the last samples bunching into visible beads.
       const left: Point[] = [];
       const right: Point[] = [];
       for (let i = 0; i < n; i++) {
@@ -242,24 +290,22 @@ export function InkCursor() {
           dy /= len;
         }
         const t = i / (n - 1);
-        const half = (TRAIL_WIDTH_PX * t * t) / 2 + 0.2;
+        const age = Math.max(0, 1 - (now - (point as Sample).time) / TRAIL_LIFETIME_MS);
+        const half = (TRAIL_WIDTH_PX * t * t * age) / 2;
         left.push({ x: point.x - dy * half, y: point.y + dx * half });
         right.push({ x: point.x + dy * half, y: point.y - dx * half });
       }
 
-      ctx.fillStyle = getComputedStyle(canvas).color;
+      ctx.fillStyle = color;
       ctx.globalAlpha = TRAIL_ALPHA;
       ctx.beginPath();
       const start = left[0] as Point;
       ctx.moveTo(start.x, start.y);
-      for (let i = 1; i < n; i++) {
-        const p = left[i] as Point;
-        ctx.lineTo(p.x, p.y);
-      }
-      for (let i = n - 1; i >= 0; i--) {
-        const p = right[i] as Point;
-        ctx.lineTo(p.x, p.y);
-      }
+      curveThrough(ctx, left);
+      const head = trail[n - 1] as Point;
+      const opposite = right[n - 1] as Point;
+      ctx.quadraticCurveTo(head.x + dx * 0.2, head.y + dy * 0.2, opposite.x, opposite.y);
+      curveThrough(ctx, right.reverse());
       ctx.closePath();
       ctx.fill();
       ctx.globalAlpha = 1;
@@ -274,6 +320,7 @@ export function InkCursor() {
     return () => {
       document.documentElement.removeAttribute("data-ink-cursor");
       unsubscribe();
+      themeObserver.disconnect();
       window.removeEventListener("resize", resize);
       document.removeEventListener("pointermove", onMove);
       document.removeEventListener("pointerover", onOver);
@@ -316,9 +363,14 @@ export function InkCursor() {
         style={{
           width: DOT_SIZE_PX,
           height: DOT_SIZE_PX,
-          background: "var(--color-ink-cursor)",
         }}
-      />
+      >
+        <span
+          ref={nibRef}
+          className="block size-full rounded-full"
+          style={{ background: "var(--color-ink-cursor)" }}
+        />
+      </div>
     </>
   );
 

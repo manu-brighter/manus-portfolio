@@ -2,7 +2,8 @@
 
 The default experience uses a single-pass analytical ink renderer. Full fluid
 simulation remains an explicit visitor choice in the Ink Studio. Both renderers
-share the five colour themes. Auto starts with Light and reduces its pixel budget
+share the five colour themes. Auto starts with Flow (the analytical renderer)
+and reduces its pixel budget
 and update cadence after two sustained slow sampling windows. A manual choice is
 not silently replaced. Reduced motion and failed graphics initialization take
 precedence over animated modes.
@@ -13,8 +14,11 @@ Settled OverprintReveal headings previously retained separate colour layers for
 every character. They now retain the printed accents with text shadows and
 release their animation layers after the reveal. Scroll progress updates its
 transform directly instead of triggering a React render on each scroll frame.
-Photo masks allocate only for their one-shot reveal and release resources on
-completion. Experiment previews require intentional mouse or keyboard interaction
+In Full mode, photo masks allocate when visible, wake briefly on cursor movement
+before their one-shot reveal, then release resources on completion. Ambient work
+sleeps after 750 ms without input; mask rendering is capped at 30 Hz and 450,000
+output pixels. Flow keeps clean photographs without mask simulations.
+Experiment previews require intentional mouse or keyboard interaction
 and pause outside the viewport or while the document is hidden.
 
 ## Measurements on 1 October 2026
@@ -38,6 +42,24 @@ pipeline reports, not a validated global displayed-frame drop percentage.
 The traces do not establish universally smooth delivery or an improvement in
 compositor drops. Background applications, refresh cadence and trace overhead
 affect these short measurements.
+
+## Interaction follow-up
+
+Wheel and trackpad input now use native browser scrolling. Lenis remains for
+explicit anchor navigation. A headed-browser baseline on the preceding release
+intercepted all 13 sampled wheel events and continued one scroll impulse for
+about 874 ms. This change removes that additional interpolation, not every
+possible source of dropped frames. The regression test asserts actual wheel
+events remain uncancelled and scroll the document; no new FPS gain is claimed.
+
+The section rail now derives its active dot and fill from the same cached
+section boundaries, including the case-study pin span. Flow pointer energy
+depends on travelled distance and smoothed velocity, rather than resetting to
+full strength for every event. Pointer response uses real visible elapsed time,
+so slow frames cannot stretch its decay across many seconds. Ambient animation
+steps retain their cap. Studio controls do not inject pointer energy.
+Full Nachtdruck uses hollow, antialiased density contours with three dye samples
+in its existing render pass. Neither visual correction adds a render pass.
 
 ## Reproduce a hardware trace
 
