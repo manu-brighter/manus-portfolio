@@ -50,7 +50,7 @@
       "name": "PHP · Vue · SQL",
       "description": "Designing business interfaces, developing integrations and supporting releases with automated tests."
     },
-    "vibecodedMarker": "AI-supported",
+    "vibecodedMarker": "AI × Me",
     "tiers": [
       {
         "id": "daily-driver",
@@ -417,7 +417,7 @@
     ],
     "sideProjects": {
       "label": "More projects on GitHub",
-      "lede": "Smaller tools and my setup for working with AI.",
+      "lede": "Tools, research projects and my setup for working with AI.",
       "items": [
         {
           "id": "shotCounter",
@@ -426,6 +426,22 @@
           "description": "Live team scoreboard with QR joining over the local network and synchronised scores. Built as an Electron app for Windows and Linux.",
           "stack": ["Vue 3", "Express 5", "SQLite", "SSE", "Electron"],
           "ctaLabel": "Repo & download"
+        },
+        {
+          "id": "flyConnectomeSim",
+          "title": "Fly Connectome Sim",
+          "tagline": "Connectome simulation · In development",
+          "description": "An experiment using the published neural wiring graph of a fruit fly. Python and a native numerical core combine controlled experiments with verifiable records.",
+          "stack": ["Python", "C++", "MaleCNS"],
+          "ctaLabel": "Code and documentation"
+        },
+        {
+          "id": "mercurius",
+          "title": "Mercurius",
+          "tagline": "Quant research · Completed",
+          "description": "A Python research project for trading strategies with reproducible backtests and fixed validation criteria. Three hypotheses rejected, with no real capital deployed.",
+          "stack": ["Python", "Alpaca", "SQLite", "Backtesting"],
+          "ctaLabel": "Code and documentation"
         },
         {
           "id": "claudeCodeKit",

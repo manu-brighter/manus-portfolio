@@ -207,7 +207,7 @@ export function Nav() {
       aria-label={t("nav.ariaLabel")}
       className="sticky top-0 z-50 border-paper-line border-b bg-paper/90 backdrop-blur-sm"
     >
-      <div className="container-page flex items-center justify-between gap-6 py-4">
+      <div className="container-page flex items-center justify-between gap-4 py-4">
         <Link
           href="/"
           onClick={handleBrand}
@@ -217,14 +217,14 @@ export function Nav() {
           {t("brand.label")}
         </Link>
 
-        <div className="flex items-center gap-6 md:gap-10">
+        <div className="flex items-center gap-3 md:gap-5 lg:gap-8">
           <NavMobileMenu
             items={NAV_ITEMS_MOBILE}
             activeSection={activeSection}
             buildHref={buildHref}
             onAnchorClick={handleAnchor}
           />
-          <ul className="hidden items-center gap-5 md:flex md:gap-7">
+          <ul className="hidden items-center gap-6 lg:flex">
             {NAV_ITEMS_DESKTOP.map((item) => {
               const sectionId = item.href.replace("#", "");
               const isActive = activeSection === sectionId;
@@ -246,6 +246,14 @@ export function Nav() {
               );
             })}
           </ul>
+
+          <Link
+            href="/cv"
+            aria-current={pathname === "/cv" ? "page" : undefined}
+            className="shrink-0 rounded-sm border border-ink/30 px-2.5 py-2 font-mono text-xs tracking-wider text-ink transition-colors hover:bg-ink hover:text-paper"
+          >
+            {t("nav.items.cv")}
+          </Link>
 
           {/* Locale switcher — unified mobile + desktop UX.
               Closed state: only the current locale is visible (single

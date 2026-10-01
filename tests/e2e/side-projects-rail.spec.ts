@@ -77,9 +77,12 @@ test.describe("Work side-projects rail", () => {
     await page.goto("/de/");
 
     const links = page.getByTestId("side-rail").locator("a[href]");
-    await expect(links).toHaveCount(2);
-    for (const href of await links.evaluateAll((els) => els.map((el) => el.getAttribute("href")))) {
-      expect(href).toMatch(/^https:\/\/github\.com\//);
-    }
+    await expect(links).toHaveCount(4);
+    expect(await links.evaluateAll((els) => els.map((el) => el.getAttribute("href")))).toEqual([
+      "https://github.com/manu-brighter/shot-counter",
+      "https://github.com/manu-brighter/fly-connectome-sim",
+      "https://github.com/manu-brighter/mercurius-quant-bot",
+      "https://github.com/manu-brighter/claude-code-kit",
+    ]);
   });
 });

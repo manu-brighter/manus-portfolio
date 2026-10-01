@@ -74,8 +74,10 @@ void main() {
   density -= smoothstep(0.45, 1.0, vUv.x) * 0.12;
   if (uStyle == 1) density = field * 0.39 + 0.08 + wake;
   if (uStyle == 2) density = field * 0.52 + 0.05 + wake;
-  if (uStyle == 3) density = field * 0.35 + 0.08 + wake;
-  float softness = uStyle == 3 ? 0.13 : (uStyle == 0 ? 0.016 : (uStyle == 2 ? 0.014 : 0.045));
+  // More pigment reaches the violet/rose plates; the original pale mint
+  // plus low opacity disappeared into wash paper before these could print.
+  if (uStyle == 3) density = field * 0.40 + 0.13 + wake;
+  float softness = uStyle == 3 ? 0.095 : (uStyle == 0 ? 0.016 : (uStyle == 2 ? 0.014 : 0.045));
   vec3 color = uPaper;
   for (int i = 0; i < 4; i++) {
     float threshold = 0.12 + float(i) * 0.15;
@@ -83,7 +85,7 @@ void main() {
     float plate = density + sin(q.y * 7.0 + float(i) * 1.7) * 0.025;
     if (uStyle == 3) plate += sin(q.x * 17.0 + q.y * 11.0 + float(i)) * 0.012;
     float coverage = smoothstep(threshold - softness, threshold + softness, plate);
-    float opacity = uStyle == 4 ? 0.66 : (uStyle == 3 ? 0.42 : 0.55);
+    float opacity = uStyle == 4 ? 0.66 : (uStyle == 3 ? 0.66 : 0.55);
     if (uStyle == 4) {
       float distanceToEdge = abs(plate - threshold);
       float filament = 1.0 - smoothstep(0.003, 0.012, distanceToEdge);
@@ -95,7 +97,7 @@ void main() {
     float rim = 1.0 - smoothstep(0.005, 0.023, abs(plate - threshold));
     if (uStyle == 0) color *= 1.0 - rim * coverage * 0.045;
     if (uStyle == 2) color *= 1.0 - rim * coverage * uEdge * 0.10;
-    if (uStyle == 3) color = mix(color, uLadder[i], rim * uEdge * 0.25);
+    if (uStyle == 3) color = mix(color, uLadder[i], rim * uEdge * 0.40);
     if (uStyle == 4) color += uLadder[i] * rim * uEdge * 0.055;
   }
   // Stationary paper grain does not shimmer between frames.

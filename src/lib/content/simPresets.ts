@@ -204,7 +204,7 @@ export const SIM_PRESETS: readonly SimPreset[] = [
   {
     // Neon print (render-nachtdruck.frag.glsl): the page flips to the
     // dark token set (theme: "night" -> SimThemeSync), the sim paints
-    // near-black paper with hard ascending-brightness bands, additive
+    // near-black paper with hollow luminous contours, restrained
     // glow halos and chromatic misreg fringes. Dark dye under dark
     // text was unreadable (screenshot-verified), hence the full theme
     // flip instead of a dark-ink-on-light-paper compromise.

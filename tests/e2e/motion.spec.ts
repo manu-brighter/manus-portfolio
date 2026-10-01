@@ -2,8 +2,8 @@
  * Phase 3 — motion behavior tests.
  *
  * Two contexts:
- *   1. default          → Lenis mounts, programmatic scroll is smoothed
- *                         over multiple RAF ticks.
+ *   1. default          → Lenis mounts for anchor navigation; wheel input
+ *                         stays native.
  *   2. reducedMotion:'reduce' → Lenis is NOT instantiated, programmatic
  *                         scroll is instant, no Lenis CSS class on <html>.
  *
@@ -28,18 +28,18 @@ test.describe("motion — default (Lenis active)", () => {
     await expect(page.locator("html")).toHaveClass(/\blenis\b/, { timeout: 5000 });
   });
 
-  test("wheel scroll is smoothed (Lenis intercepts)", async ({ page }) => {
+  test("wheel input scrolls the document while Lenis is mounted", async ({ page }) => {
     await page.goto("/de/");
     await expect(page.locator("html")).toHaveClass(/\blenis\b/);
     await addScrollableFiller(page);
 
-    // Dispatch a wheel event — Lenis intercepts these and smooths them.
+    // Wheel input remains native; explicit anchors still use Lenis.
     await page.mouse.wheel(0, 600);
 
-    // Wait for Lenis to interpolate at least one pixel. Using
+    // Wait for the browser to scroll at least one pixel. Using
     // waitForFunction instead of a fixed RAF count makes the assertion
     // resilient on slow CI runners.
-    await page.waitForFunction(() => window.scrollY > 0, { timeout: 3000 });
+    await page.waitForFunction(() => window.scrollY > 0, undefined, { timeout: 3000 });
   });
 });
 

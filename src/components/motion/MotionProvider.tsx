@@ -14,10 +14,9 @@
  *   - Re-runs the Lenis lifecycle when the user toggles reduced-motion
  *     at runtime (destroy → null | recreate).
  *
- * syncTouch:false — touch scroll stays native. Plan §1 "touch first-class"
- * refers to fluid-force injection + pinch; native momentum is the better
- * scroll feel on mid-range devices (including the Iris-Xe-adjacent
- * target profile).
+ * Wheel, trackpad and touch input stay native. Lenis still animates explicit
+ * anchor navigation, but continuous input does not wait for the JS ticker
+ * or add a second easing curve to the operating system's momentum.
  */
 
 import Lenis from "lenis";
@@ -50,6 +49,7 @@ export function MotionProvider({ children }: MotionProviderProps) {
     const instance = new Lenis({
       autoRaf: false,
       syncTouch: false,
+      smoothWheel: false,
     });
 
     const unsubscribe = subscribe((_delta, elapsed) => {

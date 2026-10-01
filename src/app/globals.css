@@ -749,10 +749,10 @@
     /* Hide native scrollbar — replaced by ScrollProgress dots.
        Restored under reduced-motion (ScrollProgress is hidden). */
     scrollbar-width: none; /* Firefox */
-    /* Suppress iOS Safari pull-to-refresh and horizontal back-swipe
-       on the fluid sim canvas. Lenis handles smooth scroll; the browser's
-       overscroll gestures would fight the fluid pointer input. */
-    overscroll-behavior: none;
+    /* Keep vertical wheel/trackpad scrolling native. Suppressing vertical
+       overscroll also blocks ordinary wheel input in Linux WebKit.
+       Only suppress horizontal navigation gestures over the fluid canvas. */
+    overscroll-behavior-x: none;
     /* Clip stray horizontal overflow without creating a scroll container.
        The case-study diorama track (420vh wide) lives inside an
        overflow-hidden section, but other absolutely-positioned ink-splat

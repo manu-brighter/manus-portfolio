@@ -72,6 +72,11 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 - Lite follows the active home section and interpolates palettes in its existing
   render pass. Work and photography receive quieter ink around their content.
   `useScene().effectsReduced` suppresses secondary effects in Light/fallback.
+- The visible Light-mode name is **Flow**; storage/query values remain `light`.
+  Native wheel/trackpad input is not smoothed by Lenis; explicit anchors are.
+  Full photo masks initialize when visible, allow cursor input before reveal,
+  and sleep after 750ms of pointer inactivity. Their budget is 30Hz/450k pixels;
+  the one-shot reveal still releases resources permanently after completion.
 - **Startup warmup gate**: `FluidOrchestrator.step()` short-circuits until
   `start()` (or `triggerAmbient()`, which calls `start()`) is invoked. Hero
   rig keeps the gate closed through hero-reveal so the 8-pass sim

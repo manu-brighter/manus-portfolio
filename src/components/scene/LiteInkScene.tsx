@@ -164,6 +164,10 @@ export function LiteInkScene({
     let pointerX = 0.5;
     let pointerY = 0.5;
     let energy = 0;
+    let pointerKnown = false;
+    let lastClientX = 0;
+    let lastClientY = 0;
+    let movedDistance = 0;
     for (let i = 0; i < 6; i++) {
       trail[i * 3] = pointerX;
       trail[i * 3 + 1] = pointerY;
@@ -174,17 +178,32 @@ export function LiteInkScene({
     gl.uniform1f(uniforms.section, quiet);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     const pointerMove = (event: PointerEvent) => {
+      const distance = pointerKnown
+        ? Math.hypot(event.clientX - lastClientX, event.clientY - lastClientY)
+        : 0;
+      lastClientX = event.clientX;
+      lastClientY = event.clientY;
+      pointerKnown = true;
+      // Controls do not stir the background. Keep the last input coordinate
+      // current so leaving their edge cannot inject the whole skipped path.
+      if (event.target instanceof Element && event.target.closest("[data-no-splat]")) return;
       pointerX = event.clientX / Math.max(1, window.innerWidth);
       pointerY = 1 - event.clientY / Math.max(1, window.innerHeight);
-      energy = 1;
+      // Integrate distance, not event count: a 1000Hz mouse must impart the
+      // same motion as a 60Hz mouse travelling along the same path.
+      movedDistance += distance / Math.max(1, Math.min(window.innerWidth, window.innerHeight));
     };
     let accumulated = FRAME_MS;
     let sinceDraw = 0;
+    let lastDrawAt = performance.now();
     let time = 0;
     let scroll = window.scrollY / Math.max(1, window.innerHeight);
     const visibility = () => {
       accumulated = 0;
       sinceDraw = 0;
+      lastDrawAt = performance.now();
+      movedDistance = 0;
+      pointerKnown = false;
     };
     const contextLost = (event: Event) => {
       event.preventDefault();
@@ -208,6 +227,12 @@ export function LiteInkScene({
       sinceDraw += elapsed;
       if (accumulated + 0.1 < frameMs) return;
       const dt = Math.min(sinceDraw / 1000, 0.05);
+      const now = performance.now();
+      // Pointer response follows visible wall time, not the capped ambient
+      // animation step. At low FPS a 50ms cap otherwise holds a wake alive
+      // for many real seconds and exaggerates velocity from the same path.
+      const responseDt = Math.max(0, (now - lastDrawAt) / 1000);
+      lastDrawAt = now;
       sinceDraw = 0;
       accumulated %= frameMs;
       quiet += (targetQuiet - quiet) * (1 - Math.exp(-dt * 2.4));
@@ -216,12 +241,16 @@ export function LiteInkScene({
         ladder[i] = color + ((targetLadder[i] ?? color) - color) * (1 - Math.exp(-dt * 5));
       }
       time += dt * speed;
-      energy *= Math.exp(-dt * 1.8);
+      const velocity = movedDistance / Math.max(responseDt, 0.001);
+      const targetEnergy = 1 - Math.exp(-velocity * 3.5);
+      energy +=
+        (targetEnergy - energy) * (1 - Math.exp(-responseDt * (targetEnergy > energy ? 9 : 2.4)));
+      movedDistance = 0;
       for (let i = 0; i < 6; i++) {
         const offset = i * 3;
         const targetX = i === 0 ? pointerX : (trail[offset - 3] ?? pointerX);
         const targetY = i === 0 ? pointerY : (trail[offset - 2] ?? pointerY);
-        const follow = 1 - Math.exp(-dt * (i === 0 ? 16 : 8));
+        const follow = 1 - Math.exp(-responseDt * (i === 0 ? 16 : 8));
         const x = trail[offset] ?? pointerX;
         const y = trail[offset + 1] ?? pointerY;
         trail[offset] = x + (targetX - x) * follow;

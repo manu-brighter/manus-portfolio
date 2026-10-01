@@ -33,5 +33,7 @@ export const SITE = {
   repos: {
     claudeCodeKit: "https://github.com/manu-brighter/claude-code-kit",
     shotCounter: "https://github.com/manu-brighter/shot-counter",
+    flyConnectomeSim: "https://github.com/manu-brighter/fly-connectome-sim",
+    mercurius: "https://github.com/manu-brighter/mercurius-quant-bot",
   },
 } as const;
