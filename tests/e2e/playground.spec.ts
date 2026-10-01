@@ -20,8 +20,8 @@ test.describe("home playground section", () => {
     await expect(typeAsFluidLink).toHaveAttribute("href", /\/de\/playground\/type-as-fluid\/?$/);
   });
 
-  test("ink-wipe transition overlay is mounted in locale layout", async ({ page }) => {
-    await page.goto("/de/");
+  test("full ink mode mounts the transition overlay in locale layout", async ({ page }) => {
+    await page.goto("/de/?ink-preview=full");
     await expect(page.locator('canvas[data-scene="ink-wipe"]')).toHaveCount(1);
   });
 

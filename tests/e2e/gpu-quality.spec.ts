@@ -20,7 +20,7 @@ for (const mobile of [false, true]) {
     });
     const page = await context.newPage();
     try {
-      await page.goto("/de/");
+      await page.goto("/de/?ink-preview=full");
       await expect
         .poll(
           () =>
@@ -85,7 +85,7 @@ test("touch retains measured quality when tier cache cannot be written", async (
   });
   const page = await context.newPage();
   try {
-    await page.goto("/de/");
+    await page.goto("/de/?ink-preview=full");
     const canvas = page.getByTestId("mobile-bg-sim");
     await expect(canvas).toBeVisible({ timeout: 20000 });
     const finishCalls = () => page.evaluate(() => Reflect.get(window, "gpuProbeFinishCalls"));

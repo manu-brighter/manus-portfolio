@@ -85,5 +85,35 @@
   "easterEgg": {
     "jamStamp": "FEHLDRUCK · REGISTRATION ERROR",
     "calibratedStamp": "NEU KALIBRIERT · RE-CALIBRATED"
+  },
+  "inkStudio": {
+    "label": "Atelier d’encre",
+    "intro": "Du papier, de la couleur et un peu de mouvement. Composez votre ambiance.",
+    "theme": "Palette",
+    "motion": "Mouvement",
+    "auto": "Auto",
+    "light": "Encre légère",
+    "full": "Simulation complète",
+    "autoBody": "Une encre légère et interactive. Réduit automatiquement les détails si nécessaire.",
+    "lightBody": "Un mouvement doux qui demande peu de calcul. Le niveau de détail reste fixe.",
+    "fullBody": "Des tourbillons physiques qui suivent le pointeur. Demande plus de puissance graphique.",
+    "reducedNotice": "L’encre utilise moins de détails pour préserver la fluidité de la page.",
+    "reducedMotion": "La réduction des animations de votre système est active. Vous pouvez toujours choisir les couleurs.",
+    "unavailable": "Cette vue d’encre est actuellement indisponible sur votre appareil. Les couleurs et le contenu restent accessibles."
+  },
+  "inkPreview": {
+    "label": "Atelier d’encre · aperçu local",
+    "autoTitle": "Moins de tourbillons, plus de fluidité.",
+    "autoBody": "Nous avons réduit les effets automatiquement. Tu peux quand même activer la simulation complète, mais elle pourrait saccader.",
+    "lightTitle": "Une encre légère. Toujours en mouvement.",
+    "lightBody": "L’encre bouge et réagit à tes gestes en demandant moins de calculs. Compare les deux versions ici.",
+    "fullTitle": "Tous les tourbillons sont là.",
+    "fullBody": "La simulation complète est active. En cas de saccades, tu peux revenir à la version légère à tout moment.",
+    "unavailableTitle": "L’encre fait une pause.",
+    "unavailableBody": "La réduction des animations ou l’absence de prise en charge graphique a priorité. Tous les contenus restent accessibles.",
+    "switch": "Simulation complète de l’encre",
+    "automatic": "Choix automatique",
+    "manual": "Ton choix",
+    "reset": "Tester le mode automatique"
   }
 }

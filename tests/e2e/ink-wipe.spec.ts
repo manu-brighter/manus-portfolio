@@ -20,9 +20,9 @@ import { expect, test } from "@playwright/test";
  * snapshots — that's the visual baseline's job.
  */
 
-test.describe("ink-wipe transition — default motion", () => {
+test.describe("ink-wipe transition — full ink mode", () => {
   test("PlaygroundCard click → overlay canvas → route navigation", async ({ page }) => {
-    await page.goto("/de/");
+    await page.goto("/de/?ink-preview=full");
 
     const section = page.locator("#playground");
     await section.scrollIntoViewIfNeeded();

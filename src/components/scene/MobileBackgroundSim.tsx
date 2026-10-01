@@ -89,6 +89,7 @@ type MobileBackgroundSimProps = {
   measuring: boolean;
   onGLReady: (gl: WebGL2RenderingContext) => void;
   onFrametime: (ms: number) => void;
+  onUnavailable?: () => void;
 };
 
 export function MobileBackgroundSim({
@@ -96,6 +97,7 @@ export function MobileBackgroundSim({
   measuring,
   onGLReady,
   onFrametime,
+  onUnavailable,
 }: MobileBackgroundSimProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const orchestratorRef = useRef<FluidOrchestrator | null>(null);
@@ -112,6 +114,8 @@ export function MobileBackgroundSim({
   measuringRef.current = measuring;
   const onFrametimeRef = useRef(onFrametime);
   onFrametimeRef.current = onFrametime;
+  const onUnavailableRef = useRef(onUnavailable);
+  onUnavailableRef.current = onUnavailable;
   const reduced = useReducedMotion();
 
   // Mount orchestrator (own WebGL2 context) + ambient start + resize.
@@ -127,27 +131,51 @@ export function MobileBackgroundSim({
     };
     sizeCanvas();
 
-    const gl = canvas.getContext("webgl2", {
-      alpha: true,
-      antialias: false,
-      depth: false,
-      // Keep the last frame visible through iOS Safari's momentum-scroll
-      // repaint pauses (same reasoning as SceneCanvas).
-      preserveDrawingBuffer: true,
-      premultipliedAlpha: true,
-    });
-    if (!gl) return;
-    onGLReady(gl);
+    let context: WebGL2RenderingContext | null;
+    try {
+      context = canvas.getContext("webgl2", {
+        alpha: true,
+        antialias: false,
+        depth: false,
+        // Keep the last frame visible through iOS Safari's momentum-scroll
+        // repaint pauses (same reasoning as SceneCanvas).
+        preserveDrawingBuffer: true,
+        premultipliedAlpha: true,
+      });
+    } catch {
+      onUnavailableRef.current?.();
+      return;
+    }
+    const gl = context;
+    if (!gl) {
+      onUnavailableRef.current?.();
+      return;
+    }
 
     const orchestrator = createFluidOrchestrator();
-    orchestrator.init(gl, config);
+    try {
+      orchestrator.init(gl, config);
+      applySimPreset(orchestrator, getSimPreset(useSimPresetStore.getState().presetId), config);
+      // Compile the first splat before declaring the renderer available.
+      orchestrator.injectSplat(-1, -1, [0, 0, 0], 0, 0);
+    } catch {
+      orchestrator.dispose();
+      onUnavailableRef.current?.();
+      return;
+    }
     orchestratorRef.current = orchestrator;
+    const onContextLost = (event: Event) => {
+      event.preventDefault();
+      orchestratorRef.current = null;
+      onUnavailableRef.current?.();
+    };
+    canvas.addEventListener("webglcontextlost", onContextLost);
+    onGLReady(gl);
 
     // Preset: mirror the Desktop FluidSim wiring — apply the persisted
     // selection on every fresh init and re-apply live on store change
     // (the switcher is available on Mobile-phone layouts too). Only
     // live changes fire the celebration burst.
-    applySimPreset(orchestrator, getSimPreset(useSimPresetStore.getState().presetId), config);
     const unsubPreset = useSimPresetStore.subscribe((current, previous) => {
       if (current.presetId === previous.presetId) return;
       const preset = getSimPreset(current.presetId);
@@ -159,10 +187,6 @@ export function MobileBackgroundSim({
         firePresetBurst(orchestrator, preset, config.splatRadius);
       }
     });
-
-    // Warmup splat off-screen — compiles shaders silently so the first
-    // visible frame doesn't trigger an iOS Safari compile freeze.
-    orchestrator.injectSplat(-1, -1, [0, 0, 0], 0, 0);
 
     // Ambient opens the warmup gate after the loader + hero reveal settle.
     const AMBIENT_DELAY_MS = 100;
@@ -186,6 +210,7 @@ export function MobileBackgroundSim({
     window.addEventListener("resize", onResize);
 
     return () => {
+      canvas.removeEventListener("webglcontextlost", onContextLost);
       window.removeEventListener("resize", onResize);
       if (ambientTimer !== null) window.clearTimeout(ambientTimer);
       if (resizeRaf !== null) cancelAnimationFrame(resizeRaf);

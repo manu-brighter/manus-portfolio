@@ -3,6 +3,7 @@
 import gsap from "gsap";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useScene } from "@/components/scene/SceneProvider";
 import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useCursorHostStore } from "@/lib/cursorHostStore";
@@ -74,6 +75,7 @@ type Point = { x: number; y: number };
 
 export function InkCursor() {
   const reducedMotion = useReducedMotion();
+  const { effectsReduced } = useScene();
   const coarsePointer = useCoarsePointer();
   const host = useCursorHostStore((s) => s.host);
   const dotRef = useRef<HTMLDivElement>(null);
@@ -112,7 +114,7 @@ export function InkCursor() {
     // Guard inside the effect (not only via the null render) so a
     // mid-session preference flip re-runs cleanup, detaches the
     // document listeners and restores the native cursor.
-    if (reducedMotion || coarsePointer) return;
+    if (reducedMotion || effectsReduced || coarsePointer) return;
     const dot = dotRef.current;
     const canvas = canvasRef.current;
     if (!dot || !canvas) return;
@@ -284,9 +286,9 @@ export function InkCursor() {
     // on mount) and the layer refs only exist after it does. It is NOT
     // the host swap — that moves the container without remounting, so
     // this effect and everything it owns survive an open/close.
-  }, [reducedMotion, coarsePointer, portalHost]);
+  }, [reducedMotion, effectsReduced, coarsePointer, portalHost]);
 
-  if (reducedMotion || coarsePointer || !portalHost) return null;
+  if (reducedMotion || effectsReduced || coarsePointer || !portalHost) return null;
 
   const layers = (
     <>

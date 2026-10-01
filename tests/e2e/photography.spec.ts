@@ -87,56 +87,48 @@ test.describe("photography section", () => {
     await context.close();
   });
 
-  // F-testing-coverage-6: assert 5 canvases mount and the IO-triggered
-  // ink-reveal fires when a photo enters the central viewport band.
-  // Pattern: expect.poll on getComputedStyle(canvas).opacity — same
-  // pattern as overprint.spec.ts. Skip under reduced-motion (no canvases
-  // mount there; existing test above covers that branch).
-  test("default motion: 5 ink-mask canvases are mounted", async ({ page }) => {
+  test("default Light shows clean photographs without mask canvases", async ({ page }) => {
     await page.goto("/de/");
     const section = page.locator("#photography");
-    // Scroll photography section into the viewport so IntersectionObserver
-    // can detect it; canvases mount after the section enters the DOM.
-    await section.scrollIntoViewIfNeeded();
-    await expect(section.locator("canvas")).toHaveCount(5, { timeout: 5000 });
+    await expect(page.getByTestId("lite-ink-canvas")).toBeVisible({ timeout: 15000 });
+    const photo = section.locator("[data-photo-slide] picture img").first();
+    await photo.scrollIntoViewIfNeeded();
+    await expect(photo).toBeVisible();
+    await expect
+      .poll(() => photo.evaluate((img) => (img as HTMLImageElement).naturalWidth))
+      .toBeGreaterThan(0);
+    await expect(section.locator("canvas")).toHaveCount(0);
   });
 
-  test("default motion: scrolling a photo into central band triggers ink reveal", async ({
-    page,
-  }) => {
-    await page.goto("/de/");
-    const section = page.locator("#photography");
-    await section.scrollIntoViewIfNeeded();
+  test("Full mode mounts five paper masks before photography is reached", async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem("manus-gpu-tier", JSON.stringify({ tier: "minimal", ts: Date.now() }));
+    });
+    await page.goto("/de/?ink-preview=full");
+    await expect(page.locator("#photography canvas")).toHaveCount(5, { timeout: 15000 });
+  });
 
-    // Confirm 5 canvases mount first.
-    await expect(section.locator("canvas")).toHaveCount(5, { timeout: 5000 });
+  test("Full mode settles a photo reveal once and releases its mask canvas", async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem("manus-gpu-tier", JSON.stringify({ tier: "minimal", ts: Date.now() }));
+    });
+    await page.goto("/de/?ink-preview=full");
+    const section = page.locator("#photography");
+    const targetSlide = section.locator("[data-photo-slide]").nth(1);
+    const canvas = targetSlide.locator("canvas");
+    await expect(canvas).toHaveCount(1, { timeout: 15000 });
 
     // Scroll the second photo slide so its centre sits at the viewport
     // centre (block: "center") — the reveal now fires when the photo's
     // middle crosses the viewport middle (centre sentinel + rootMargin
     // "-49.5% 0px -49.5% 0px"), which block:"center" lands exactly on.
-    const targetSlide = section.locator("[data-photo-slide]").nth(1);
-    const handle = await targetSlide.elementHandle();
-    if (handle) {
-      await page.evaluate((el) => {
-        el.scrollIntoView({ behavior: "instant", block: "center" });
-      }, handle);
-    } else {
-      await targetSlide.scrollIntoViewIfNeeded();
-    }
-
-    // The corresponding canvas (nth(1) — same order as slides) should
-    // transition from opacity 0 to > 0 as the ink mask reveals.
-    const canvas = section.locator("canvas").nth(1);
-    await expect
-      .poll(
-        () =>
-          canvas.evaluate((c) => {
-            const style = getComputedStyle(c);
-            return Number.parseFloat(style.opacity ?? "0");
-          }),
-        { timeout: 5000, intervals: [100, 200, 500] },
-      )
-      .toBeGreaterThan(0);
+    await targetSlide.evaluate((el) => {
+      el.scrollIntoView({ behavior: "instant", block: "center" });
+    });
+    await expect(canvas).toHaveCount(0, { timeout: 10000 });
+    await expect(targetSlide.locator("picture img")).toBeVisible();
+    await page.locator("#hero").scrollIntoViewIfNeeded();
+    await targetSlide.scrollIntoViewIfNeeded();
+    await expect(canvas).toHaveCount(0);
   });
 });

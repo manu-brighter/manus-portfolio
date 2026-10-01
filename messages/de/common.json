@@ -85,5 +85,35 @@
   "easterEgg": {
     "jamStamp": "FEHLDRUCK · REGISTRATION ERROR",
     "calibratedStamp": "NEU KALIBRIERT · RE-CALIBRATED"
+  },
+  "inkStudio": {
+    "label": "Tintenstudio",
+    "intro": "Papier, Farbe und ein wenig Bewegung. Stell dir deine Ansicht zusammen.",
+    "theme": "Farbwelt",
+    "motion": "Bewegung",
+    "auto": "Auto",
+    "light": "Leichte Tinte",
+    "full": "Volle Simulation",
+    "autoBody": "Leichte, interaktive Tinte. Passt die Detailstufe bei Bedarf automatisch an.",
+    "lightBody": "Sanfte Bewegung mit wenig Rechenaufwand. Die Detailstufe bleibt gleich.",
+    "fullBody": "Physikalische Wirbel, die deinem Zeiger folgen. Braucht mehr Grafikleistung.",
+    "reducedNotice": "Die Tinte läuft jetzt mit weniger Details, damit die Seite flüssig bleibt.",
+    "reducedMotion": "Deine Systemeinstellung für reduzierte Bewegung ist aktiv. Farben kannst du weiterhin wählen.",
+    "unavailable": "Diese Tintenansicht ist auf deinem Gerät gerade nicht verfügbar. Farben und Inhalte bleiben zugänglich."
+  },
+  "inkPreview": {
+    "label": "Tintenlabor · lokale Vorschau",
+    "autoTitle": "Etwas weniger Wirbel, damit alles flüssig bleibt.",
+    "autoBody": "Wir haben die Effekte automatisch reduziert. Du kannst die volle Tintensimulation trotzdem einschalten. Dabei kann es ruckeln.",
+    "lightTitle": "Leichte Tinte. Immer in Bewegung.",
+    "lightBody": "Die Tinte bewegt sich und reagiert auf dich, mit weniger Rechenaufwand. Probiere beide Varianten direkt aus.",
+    "fullTitle": "Alle Wirbel auf deiner Seite.",
+    "fullBody": "Die volle Tintensimulation ist aktiv. Falls es ruckelt, kannst du jederzeit zur leichteren Variante wechseln.",
+    "unavailableTitle": "Die Tinte macht eine Pause.",
+    "unavailableBody": "Reduzierte Bewegung oder fehlende Grafikunterstützung hat Vorrang. Alle Inhalte bleiben verfügbar.",
+    "switch": "Volle Tintensimulation",
+    "automatic": "Automatische Auswahl",
+    "manual": "Deine Auswahl",
+    "reset": "Automatik testen"
   }
 }

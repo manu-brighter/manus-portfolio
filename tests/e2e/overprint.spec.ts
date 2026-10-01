@@ -2,8 +2,8 @@
  * Phase 5 — OverprintReveal behaviour tests.
  *
  * Two contexts:
- *   1. default          → three layers per char (ink + rose + mint),
- *                         ghosts reach opacity > 0 after IO fires.
+ *   1. default          → three layers animate per char (ink + rose + mint),
+ *                         then settled ink retains the accents as shadows.
  *   2. reducedMotion    → no ghost layers in the DOM, ink chars are
  *                         fully opaque on first paint.
  *
@@ -62,21 +62,36 @@ test.describe("overprint — default (ghosts rendered)", () => {
     expect(snapshot).not.toMatch(/HHH|MMM/);
   });
 
-  test("ghost opacity becomes > 0 after intersection trigger fires", async ({ page }) => {
+  test("finished reveal retains printed accents without permanent animation layers", async ({
+    page,
+  }) => {
     await page.goto("/de/");
-    const rose = page.locator("#hero-heading [data-layer='rose']").first();
-    await expect(rose).toBeVisible();
-    // IO fires near-immediately on mount because the hero is in view.
-    // The hero has waitForLoader=true, so the timeline is gated on
-    // loader-complete + 350ms settle + ~560ms GSAP medium duration.
-    // CI cold-start (1 worker, no cache) needs a generous timeout.
-    await expect
-      .poll(
-        async () =>
-          Number(await rose.evaluate((el) => getComputedStyle(el as HTMLElement).opacity)),
-        { timeout: 8000 },
-      )
-      .toBeGreaterThan(0.1);
+    const heading = page.locator("#hero-heading");
+    await expect(heading.locator('[data-overprint="settled"]')).toHaveCount(2, {
+      timeout: 10000,
+    });
+    const ink = heading.locator('[data-layer="ink"]').first();
+    await expect(ink).toBeVisible();
+    await expect(ink).toHaveCSS("opacity", "1");
+    await expect(ink).not.toHaveCSS("text-shadow", "none");
+    await expect(heading.locator('[data-layer="rose"]').first()).toBeHidden();
+    await expect(heading.locator('[data-layer="mint"]').first()).toBeHidden();
+    expect(
+      await heading
+        .locator("[data-layer]")
+        .evaluateAll((layers) =>
+          layers.every((layer) => getComputedStyle(layer).willChange === "auto"),
+        ),
+    ).toBe(true);
+
+    // The print accents must compose with the warm theme's readability halo,
+    // including when the theme changes after the reveal has already settled.
+    await page.getByRole("button", { name: "Tintenstudio", exact: true }).click();
+    const turbulence = page.getByRole("radio", { name: "Turbulenz", exact: true });
+    await turbulence.focus();
+    await turbulence.press("Space");
+    await expect(page.locator("html")).toHaveAttribute("data-sim-theme", "warm");
+    await expect(ink).toHaveCSS("text-shadow", /rgb\(246, 227, 204\).*22px/);
   });
 });
 

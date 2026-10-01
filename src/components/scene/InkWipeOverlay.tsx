@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useScene } from "@/components/scene/SceneProvider";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { compileShader } from "@/lib/gl/compileShader";
 import { capDPR, DPR_FULL } from "@/lib/gpu";
@@ -46,6 +47,7 @@ function link(gl: WebGL2RenderingContext, vert: WebGLShader, frag: WebGLShader):
 
 export function InkWipeOverlay() {
   const reducedMotion = useReducedMotion();
+  const { effectsReduced } = useScene();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   // Local fail state — if shader compile or program link throws, the
   // overlay cannot ever render and would otherwise leave the inkWipe
@@ -55,7 +57,19 @@ export function InkWipeOverlay() {
   const [initFailed, setInitFailed] = useState(false);
 
   useEffect(() => {
-    if (reducedMotion) return;
+    if (!effectsReduced) return;
+    // No RAF runs in light mode, so finish both pending and newly
+    // requested transitions synchronously instead of leaving a stale phase.
+    const finishTransition = () => {
+      const state = useInkWipeStore.getState();
+      if (state.phase !== "idle") state.reset();
+    };
+    finishTransition();
+    return useInkWipeStore.subscribe(finishTransition);
+  }, [effectsReduced]);
+
+  useEffect(() => {
+    if (reducedMotion || effectsReduced) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -218,9 +232,9 @@ export function InkWipeOverlay() {
       // the next mount stuck observing a stale phase.
       useInkWipeStore.getState().reset();
     };
-  }, [reducedMotion]);
+  }, [reducedMotion, effectsReduced]);
 
-  if (reducedMotion || initFailed) return null;
+  if (reducedMotion || effectsReduced || initFailed) return null;
 
   return (
     <canvas

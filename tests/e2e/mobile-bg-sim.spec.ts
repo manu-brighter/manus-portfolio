@@ -16,7 +16,7 @@ test.use({ ...devices["Pixel 5"] });
 
 test.describe("Mobile background sim", () => {
   test("full-page background canvas mounts", async ({ page }) => {
-    await page.goto("/de/");
+    await page.goto("/de/?ink-preview=full");
     await page.waitForLoadState("networkidle");
 
     const sim = page.locator('canvas[data-testid="mobile-bg-sim"]');
@@ -25,7 +25,7 @@ test.describe("Mobile background sim", () => {
   });
 
   test("no <video> background fallback mounts (AmbientVideo retired)", async ({ page }) => {
-    await page.goto("/de/");
+    await page.goto("/de/?ink-preview=full");
     await page.waitForLoadState("networkidle");
 
     // All coarse-pointer devices run the live MobileBackgroundSim; the
@@ -37,7 +37,7 @@ test.describe("Mobile background sim", () => {
     const errors: string[] = [];
     page.on("pageerror", (err) => errors.push(err.message));
 
-    await page.goto("/de/");
+    await page.goto("/de/?ink-preview=full");
     await page.waitForLoadState("networkidle");
 
     await expect(page.locator('canvas[data-testid="mobile-bg-sim"]')).toBeVisible({

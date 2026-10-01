@@ -11,7 +11,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { useCoarsePointer } from "@/hooks/useCoarsePointer";
+import { useScene } from "@/components/scene/SceneProvider";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { Link, useRouter } from "@/i18n/navigation";
 import type { ExperimentSlug } from "@/lib/content/playground";
@@ -59,41 +59,40 @@ export function PlaygroundCard({ slug, i18nKey, cardSpot, visual, LiveSim }: Pla
   const t = useTranslations(`playground.experiments.${i18nKey}`);
   const tCommon = useTranslations("playground");
   const reducedMotion = useReducedMotion();
+  const { effectsReduced } = useScene();
   const router = useRouter();
   const startGrow = useInkWipeStore((s) => s.startGrow);
 
   const [hovered, setHovered] = useState(false);
   const [activated, setActivated] = useState(false);
+  const [inViewport, setInViewport] = useState(false);
+  const [pageVisible, setPageVisible] = useState(true);
   const navTimerRef = useRef<number | null>(null);
   const linkRef = useRef<HTMLAnchorElement>(null);
 
-  // Coarse-pointer: hover state is driven by viewport visibility instead
-  // of mouseenter/leave. Card entering viewport activates + unpauses the
-  // mini-sim; leaving pauses it (orchestrator state preserved).
-  const isCoarse = useCoarsePointer();
-
+  // Visibility only pauses an intentionally activated preview. Scrolling
+  // through cards never allocates a secondary WebGL context.
   useEffect(() => {
-    if (!isCoarse || reducedMotion) return;
+    if (reducedMotion) return;
     const root = linkRef.current;
     if (!root) return;
-    // Middle-35% band: mini-sim wakes when the card is genuinely
-    // mid-screen, not just past the upper third. Pauses on exit.
     const obs = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
         if (!entry) return;
-        if (entry.isIntersecting) {
-          setActivated(true);
-          setHovered(true);
-        } else {
-          setHovered(false);
-        }
+        setInViewport(entry.isIntersecting);
       },
-      { threshold: 0, rootMargin: "-32.5% 0px -32.5% 0px" },
+      { threshold: 0 },
     );
     obs.observe(root);
-    return () => obs.disconnect();
-  }, [isCoarse, reducedMotion]);
+    const onVisibility = () => setPageVisible(!document.hidden);
+    onVisibility();
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      obs.disconnect();
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [reducedMotion]);
 
   // Cancel a pending router.push if the card unmounts before the wipe
   // completes (e.g. user navigates via the locale switcher mid-grow).
@@ -117,48 +116,33 @@ export function PlaygroundCard({ slug, i18nKey, cardSpot, visual, LiveSim }: Pla
   };
   const onLeave = () => setHovered(false);
 
-  /**
-   * Click handler for the Fluid-Ink-Wipe transition. Intercepts the
-   * Link's default navigation IF this is a plain primary-button click;
-   * for cmd/ctrl/middle-click (open-in-new-tab intents), keyboard
-   * Enter via the Link, or reduced-motion users we let the browser /
-   * default behavior handle the navigation as-is.
-   *
-   * On a normal click:
-   *   1. Read the click coordinates (so the wipe grows from where the
-   *      user actually clicked, not card centre — feels causal).
-   *   2. Fire startGrow on the inkWipe store; the overlay component
-   *      mounted in the locale layout picks this up and starts
-   *      animating.
-   *   3. Schedule router.push 60ms before grow completes so the route
-   *      swap finishes during the `covered` window, hiding the
-   *      destination's loading state behind ink.
-   */
+  // Every same-tab navigation must restore pinned DOM before React unmounts it.
+  // Only Full-mode pointer clicks wait for the ink overlay to cover the route.
   const onLinkClick = (e: ReactMouseEvent<HTMLAnchorElement>) => {
-    if (reducedMotion) return; // browser navigates normally
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
     e.preventDefault();
+    if (navTimerRef.current !== null) {
+      window.clearTimeout(navTimerRef.current);
+      navTimerRef.current = null;
+    }
+    const navigate = () => {
+      // Pin spacers change the DOM hierarchy. kill(true) restores it before
+      // route unmount, avoiding React removeChild errors. Preserve non-pin
+      // triggers, including GSAP's internal bookkeeping.
+      for (const trigger of ScrollTrigger.getAll()) {
+        if (trigger.vars.pin === true) trigger.kill(true);
+      }
+      navTimerRef.current = null;
+      router.push(`/playground/${slug}`);
+    };
+    if (reducedMotion || effectsReduced || e.detail === 0) {
+      navigate();
+      return;
+    }
     const x = e.clientX / window.innerWidth;
     const y = e.clientY / window.innerHeight;
     startGrow({ x, y, color: cardSpot });
-    navTimerRef.current = window.setTimeout(
-      () => {
-        // Revert ScrollTrigger pin spacers BEFORE the route change
-        // unmounts the home page. Otherwise React's removeChild fails
-        // because pin-spacer divs are now between <main> and the pinned
-        // <section>, so the section is no longer a direct child of main.
-        // kill(true) restores the original DOM hierarchy. Filter to
-        // pin-only triggers — the previous unscoped kill also tore
-        // down GSAP's hidden internal triggers that have nothing to do
-        // with the unmount race.
-        for (const t of ScrollTrigger.getAll()) {
-          if (t.vars.pin === true) t.kill(true);
-        }
-        router.push(`/playground/${slug}`);
-        navTimerRef.current = null;
-      },
-      Math.max(GROW_MS - 60, 0),
-    );
+    navTimerRef.current = window.setTimeout(navigate, Math.max(GROW_MS - 60, 0));
   };
 
   return (
@@ -168,9 +152,14 @@ export function PlaygroundCard({ slug, i18nKey, cardSpot, visual, LiveSim }: Pla
       className="group block focus:outline-none focus-visible:outline-none"
       style={cssVars}
       aria-label={`${t("cardTitle")}: ${tCommon("openLabel")}`}
-      onMouseEnter={onEnter}
-      onMouseLeave={onLeave}
-      onFocus={onEnter}
+      onPointerEnter={(event) => {
+        if (event.pointerType === "mouse") onEnter();
+      }}
+      onPointerLeave={onLeave}
+      onPointerCancel={onLeave}
+      onFocus={(event) => {
+        if (event.currentTarget.matches(":focus-visible")) onEnter();
+      }}
       onBlur={onLeave}
       onClick={onLinkClick}
     >
@@ -185,23 +174,17 @@ export function PlaygroundCard({ slug, i18nKey, cardSpot, visual, LiveSim }: Pla
           "transition-[transform,box-shadow] duration-[280ms] ease-out",
         ].join(" ")}
       >
-        {/* Static SVG layer — always rendered. Fades out when LiveSim
-            is showing to avoid double-stacked visuals. */}
-        <div
-          className="absolute inset-0 transition-opacity duration-[320ms] ease-out"
-          style={{ opacity: showLive && hovered ? 0 : 1 }}
-        >
-          {visual}
-        </div>
+        {/* Keep the SVG underneath: failed GL initialization stays useful. */}
+        <div className="absolute inset-0">{visual}</div>
 
         {/* Live sim layer — lazy-mounted on first hover, then sticks
             around in paused state for instant re-hovers. */}
         {showLive && activated ? (
           <div
             className="absolute inset-0 transition-opacity duration-[320ms] ease-out"
-            style={{ opacity: hovered ? 1 : 0 }}
+            style={{ opacity: hovered && inViewport ? 1 : 0 }}
           >
-            <LiveSim paused={!hovered} />
+            <LiveSim paused={!hovered || !inViewport || !pageVisible} />
           </div>
         ) : null}
       </div>

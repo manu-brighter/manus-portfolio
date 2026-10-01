@@ -31,6 +31,9 @@
  *     source. The H1 / landmark that wraps us picks that up unchanged.
  *   - `aria-label` on the root span is intentionally NOT used: ARIA
  *     prohibits `aria-label` on `role="generic"` and axe flags it.
+ *   - After the reveal, the resting offsets become two text shadows.
+ *     Ghosts and promotion hints are only active during the animation,
+ *     avoiding persistent per-character compositing work while scrolling.
  *   - `prefers-reduced-motion`: ghost layers are omitted entirely
  *     (less DOM, less paint) and the text renders as a single inline
  *     string — no animation, no per-char split.
@@ -114,8 +117,10 @@ export function OverprintReveal({
     const roseLayer = root.querySelectorAll<HTMLSpanElement>("[data-layer='rose']");
     const mintLayer = root.querySelectorAll<HTMLSpanElement>("[data-layer='mint']");
     const inkLayer = root.querySelectorAll<HTMLSpanElement>("[data-layer='ink']");
+    const layers = [...roseLayer, ...mintLayer, ...inkLayer];
 
     if (roseLayer.length === 0) return;
+    root.dataset.overprint = "pending";
 
     const resolvedStagger = stagger ?? dur.micro / 5;
     const easeCurve = `cubic-bezier(${ease.riso.join(",")})`;
@@ -133,7 +138,18 @@ export function OverprintReveal({
     let unsubLoader: (() => void) | null = null;
 
     const startTimeline = () => {
-      timeline = gsap.timeline({ delay });
+      timeline = gsap.timeline({
+        delay,
+        onStart: () => {
+          root.dataset.overprint = "active";
+          gsap.set([...roseLayer, ...mintLayer], { willChange: "transform, opacity" });
+          gsap.set(inkLayer, { willChange: "opacity" });
+        },
+        onComplete: () => {
+          root.dataset.overprint = "settled";
+          gsap.set(layers, { clearProps: "willChange" });
+        },
+      });
 
       // Ghosts fly in toward their resting misregistration with a
       // per-char stagger. Each ghost gets its own deterministic
@@ -228,6 +244,8 @@ export function OverprintReveal({
     return () => {
       observer.disconnect();
       timeline?.kill();
+      gsap.set(layers, { clearProps: "willChange" });
+      root.dataset.overprint = "pending";
       if (settleTimer !== null) window.clearTimeout(settleTimer);
       unsubLoader?.();
     };
@@ -285,7 +303,7 @@ export function OverprintReveal({
   }
 
   return (
-    <span ref={rootRef} className={className} style={style}>
+    <span ref={rootRef} className={className} style={style} data-overprint="pending">
       <span className="sr-only">{text}</span>
       <span aria-hidden="true" className="inline">
         {items.map((item) => {
@@ -298,7 +316,15 @@ export function OverprintReveal({
                 <span
                   key={`${uid}-${r.index}`}
                   className="relative inline-block"
-                  style={{ overflow: "visible" }}
+                  style={
+                    {
+                      overflow: "visible",
+                      "--overprint-rose-x": `${RESTING_OFFSET_PX + jitterFor(r.char, r.index)}px`,
+                      "--overprint-rose-y": `${-RESTING_OFFSET_PX + jitterFor(r.char, r.index + 7)}px`,
+                      "--overprint-mint-x": `${-RESTING_OFFSET_PX + jitterFor(r.char, r.index + 13)}px`,
+                      "--overprint-mint-y": `${RESTING_OFFSET_PX + jitterFor(r.char, r.index + 19)}px`,
+                    } as CSSProperties
+                  }
                 >
                   {/* Ink layer — in document flow, carries accessible name. */}
                   <span
@@ -306,7 +332,6 @@ export function OverprintReveal({
                     data-char={r.char}
                     data-index={r.index}
                     className="relative z-10 block text-ink"
-                    style={{ willChange: "opacity" }}
                   >
                     {r.char}
                   </span>
@@ -321,7 +346,6 @@ export function OverprintReveal({
                       color: "var(--color-spot-rose)",
                       mixBlendMode: "multiply",
                       pointerEvents: "none",
-                      willChange: "transform, opacity",
                     }}
                   >
                     {r.char}
@@ -337,7 +361,6 @@ export function OverprintReveal({
                       color: "var(--color-spot-mint)",
                       mixBlendMode: "multiply",
                       pointerEvents: "none",
-                      willChange: "transform, opacity",
                     }}
                   >
                     {r.char}

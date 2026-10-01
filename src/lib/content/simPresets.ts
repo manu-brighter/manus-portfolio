@@ -93,15 +93,22 @@ const WAVE_ULTRA: RGB = [0.3, 0.45, 0.9]; // ultramarine
 
 export const SIM_PRESETS: readonly SimPreset[] = [
   {
-    // The original shipped look (render-riso.frag.glsl): soft
-    // overlapping ladder + Sobel ink pooling. Deliberately the
-    // quietest of the five — it's the default under the hero text.
-    // The louder overprint rework moved to Wave.
+    // Clear translucent plates over real folded currents, matching the
+    // lighter Riso palette. Existing three ambient sources retain the same
+    // pass budget; smaller deposits stretch further before fading.
     id: "riso",
     i18nKey: "riso",
     swatch: ["mint", "rose"],
-    physics: {},
-    visuals: {},
+    physics: {
+      velocityDissipation: 0.98,
+      dyeDissipation: 0.965,
+      confinement: 20,
+      splatRadiusScale: 0.7,
+    },
+    visuals: {
+      ambientChurn: 0.65,
+      ambientForceScale: 1.3,
+    },
   },
   {
     // Overprint-plate print (render-wave.frag.glsl): four

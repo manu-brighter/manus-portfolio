@@ -60,7 +60,6 @@ export function ScrollProgress() {
 
   const [sections, setSections] = useState<ActiveSection[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [fillProgress, setFillProgress] = useState(0);
 
   // Discover which sections exist in the DOM. Re-runs on route change:
   // the component lives in the locale layout and survives client
@@ -119,14 +118,17 @@ export function ScrollProgress() {
   // Scroll progress tracking via Lenis. Mobile-gated like discovery —
   // no point re-rendering a null component on every scroll event.
   useEffect(() => {
-    if (!lenis || isMobile) return;
+    if (!lenis || isMobile || sections.length < 2) return;
 
     const onScroll = () => {
-      setFillProgress(lenis.progress);
+      // This decorative line changes on every scroll frame. Updating its
+      // transform directly avoids re-rendering the entire navigation rail.
+      if (lineRef.current) lineRef.current.style.transform = `scaleY(${lenis.progress})`;
     };
+    onScroll();
     lenis.on("scroll", onScroll);
     return () => lenis.off("scroll", onScroll);
-  }, [lenis, isMobile]);
+  }, [lenis, isMobile, sections.length]);
 
   // Animate active dot — GSAP durations set to 0 under reduced-motion
   // (component is hidden, but guard defensively).
@@ -208,11 +210,11 @@ export function ScrollProgress() {
         >
           <div
             ref={lineRef}
-            className="w-full origin-top transition-transform duration-150"
+            className="w-full origin-top"
             style={{
               backgroundColor: sections[activeIndex]?.color ?? "var(--color-ink-faint)",
               height: "100%",
-              transform: `scaleY(${fillProgress})`,
+              transform: "scaleY(0)",
             }}
           />
         </div>

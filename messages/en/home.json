@@ -50,7 +50,7 @@
       "name": "PHP · Vue · SQL",
       "description": "Designing business interfaces, developing integrations and supporting releases with automated tests."
     },
-    "vibecodedMarker": "AI-assisted",
+    "vibecodedMarker": "AI-supported",
     "tiers": [
       {
         "id": "daily-driver",
@@ -351,6 +351,20 @@
           "zustand · state"
         ],
         "description": "This very site. Interactive GPU ink, five visual themes, four languages and my photos in the middle of it all. A playground for everything I enjoy about code and design, with automated browser tests under the hood.",
+        "summary": [
+          {
+            "label": "Challenge",
+            "body": "Bring code, design and photography together in a personal portfolio."
+          },
+          {
+            "label": "My contribution",
+            "body": "Concept, design, development and hosting with AI support."
+          },
+          {
+            "label": "Result",
+            "body": "Interactive GPU ink, five themes, four languages and automated browser tests."
+          }
+        ],
         "metaNote": "The ink is computed interactively on the GPU. Quality levels adjust the workload to the device.",
         "ctaLabel": "You're already here",
         "screenshot": {
@@ -380,6 +394,20 @@
           "shadcn/ui"
         ],
         "description": "A club and event platform developed over several months: permissions, supporting memberships and attendance reporting, plus an order and point-of-sale system for service, kitchen and bar. Used regularly and continuously expanded.",
+        "summary": [
+          {
+            "label": "Challenge",
+            "body": "Bring the public website, club administration and event operations together."
+          },
+          {
+            "label": "My contribution",
+            "body": "Concept, design, full-stack development and ongoing operation with AI support."
+          },
+          {
+            "label": "Result",
+            "body": "Used regularly to manage members and sponsors, track attendance and send orders to the kitchen and bar."
+          }
+        ],
         "screenshot": {
           "alt": "Screenshot of the public homepage of joggediballa.ch",
           "caption": "joggediballa.ch · home"
