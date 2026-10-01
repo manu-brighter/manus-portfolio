@@ -13,31 +13,31 @@
       "family": "Heller,",
       "given": "Manuel."
     },
-    "tagline": "PHP · Vue · Design",
+    "tagline": "Developer · Photographer · Visual Tinkerer",
     "taglineSuffix": "Verfügbar ab 01.12.2026"
   },
   "currently": {
     "label": "Currently",
     "items": [
       {
-        "verb": "entwickle",
-        "value": "Fachoberflächen und Schnittstellen"
+        "verb": "baue",
+        "value": "an dieser Seite und der Vereinsplattform"
       },
       {
-        "verb": "migriere",
-        "value": "Cypress-Tests zu Playwright"
-      },
-      {
-        "verb": "betreibe",
-        "value": "die Jogge-di-Balla-Plattform"
-      },
-      {
-        "verb": "arbeite mit",
+        "verb": "experimentiere mit",
         "value": "Codex · Claude Code"
       },
       {
         "verb": "fotografiere",
         "value": "Wildlife und Autos"
+      },
+      {
+        "verb": "fahre",
+        "value": "Audi S5 B8.5 (Tuning-Projekt)"
+      },
+      {
+        "verb": "jage",
+        "value": "den zvoove Ping-Pong-Champion-Titel"
       }
     ]
   },
@@ -170,14 +170,15 @@
   },
   "about": {
     "sectionLabel": "Section 01 · About",
-    "headline": "Entwicklung mit Sinn für Gestaltung.",
-    "subhead": "Beruflich PHP und Vue. Privat eigene Produkte, Fotografie und Design.",
+    "headline": "Full-Stack Developer mit künstlerischem Auge.",
+    "subhead": "Code, Foto, Design: alles dasselbe Handwerk in unterschiedlicher Form.",
     "parts": [
       {
         "id": "wer-ich-bin",
         "heading": "Wer ich bin",
         "body": [
-          "Ich bin Manuel, Softwareentwickler aus der Basel-Region. Seit November 2021 arbeite ich bei zvoove Switzerland AG an Fachanwendungen für Personaldienstleister. Ich gestalte und entwickle Vue-Oberflächen für komplexe Abläufe, baue PHP-Endpunkte und betreue Schnittstellen und Datenabgleiche.",
+          "Ich bin Manuel aus der Basel-Region. Beruflich tief drin in PHP und Vue, privat mit Kameras, Photoshop und allem beschäftigt, was zwischen Code und Bild Spass macht. Genau dazwischen entstehen für mich die spannendsten Ideen.",
+          "Seit November 2021 arbeite ich bei zvoove Switzerland AG an Fachanwendungen für Personaldienstleister. Ich gestalte und entwickle Vue-Oberflächen für komplexe Abläufe, baue PHP-Endpunkte und betreue Schnittstellen und Datenabgleiche.",
           "Daneben verantworte ich eine Cypress-Suite mit rund 30 umfangreichen Release-Tests: von den Tests selbst über die Ausführung bis zur Fehleranalyse. Die Migration zu Playwright läuft."
         ]
       },
@@ -185,7 +186,7 @@
         "id": "wie-angefangen",
         "heading": "Wie ich angefangen habe",
         "body": [
-          "Über Gaming bin ich zum Programmieren gekommen: ein eigener Minecraft-Modpack-Server und Mining-Turtles in Lua waren meine ersten Projekte.",
+          "Programmieren kam bei mir über Gaming. Ich habe einen eigenen Minecraft-Modpack-Server aufgesetzt und Mining-Turtles in Lua programmiert. Da wollte ich wissen, wie das alles unter der Haube läuft.",
           "Von 2016 bis 2020 habe ich bei Novartis die Lehre als Betriebsinformatiker EFZ gemacht. Server, Netzwerke und Support haben mir eine breite Grundlage gegeben. Nach dem Zivildienst bin ich in die Anwendungsentwicklung gewechselt."
         ]
       },
@@ -193,7 +194,7 @@
         "id": "ai-workflow",
         "heading": "Wie ich mit AI arbeite",
         "body": [
-          "Mit Codex und Claude Code setze ich auch grössere eigene Projekte um. Dazu gehören eigene Skills, Agents und MCP-Anbindungen. Ich verbinde die Werkzeuge mit klaren Anforderungen, schrittweiser Umsetzung und Tests.",
+          "Eine AI ist für mich wie ein Pinsel. Ich bringe die Idee, den Geschmack und die Richtung mit. Mit Codex und Claude Code, eigenen Skills, Agents und MCP-Anbindungen wird daraus Schritt für Schritt ein Projekt. Ausprobieren, hinschauen, nachbessern und testen gehören dazu.",
           "Die Vereinsplattform und dieses Portfolio habe ich mit AI-Unterstützung entwickelt. React und TypeScript kenne ich aus diesen Projekten; meine vertiefte berufliche Erfahrung liegt in PHP und Vue. Gestaltung, Funktionsumfang und der laufende Betrieb liegen bei mir."
         ]
       },
@@ -201,14 +202,14 @@
         "id": "antrieb",
         "heading": "Was mich antreibt",
         "body": [
-          "Ich arbeite gern an Dingen, die tatsächlich genutzt werden. Im Verein sehe ich direkt, ob eine Oberfläche verständlich ist und ein Ablauf funktioniert. Neue Technologien interessieren mich besonders dann, wenn ich damit eine konkrete Idee umsetzen kann."
+          "Was mich antreibt? Neugier, ehrlich gesagt. Ich probiere gern neue Werkzeuge aus, feile an kleinen visuellen Details und will verstehen, wie etwas funktioniert. Wenn daraus etwas wird, das im Verein wirklich genutzt wird, umso besser."
         ]
       },
       {
         "id": "off-screen",
         "heading": "Ausserhalb vom Bildschirm",
         "body": [
-          "Wildlife- und Autofotografie, Reisen, Ski und Snowboard sowie Tauchen gehören genauso zu mir wie Entwicklung. Bei Jogge di Balla bin ich Mitgründer und Vizepräsident und kümmere mich neben der Plattform auch um Events, Fotos und Videos."
+          "Wildlife-Fotografie ist meine grösste Leidenschaft. Dafür bin ich auch solo in Costa Rica oder Thailand unterwegs, mit der Kamera auf der Suche nach Tieren in freier Wildbahn. Dazu kommen mein Audi-S5-Tuning-Projekt, Ski, Snowboard und Tauchen. Bei Jogge di Balla bin ich Mitgründer und Vizepräsident und kümmere mich auch um Events, Fotos und Videos. Und bei zvoove wartet noch der Ping-Pong-Champion-Titel."
         ]
       }
     ],
@@ -233,10 +234,10 @@
       ]
     },
     "pullQuotes": {
-      "werIchBin": "Komplexe Abläufe brauchen [[verständliche Oberflächen]].",
-      "anfangen": "Angefangen hat es mit [[Minecraft und Lua]].",
-      "aiWorkflow": "Eigene Ideen umsetzen, [[mit AI als Werkzeug]].",
-      "antrieb": "Am liebsten baue ich Dinge, die [[genutzt werden]]."
+      "werIchBin": "Die spannenden Ideen entstehen genau [[dazwischen]].",
+      "anfangen": "Ich will verstehen, [[wie das alles unter der Haube]] läuft.",
+      "aiWorkflow": "AI ist mein Pinsel. [[Die Richtung]] bringe ich mit.",
+      "antrieb": "Was mich antreibt? [[Neugier]], ehrlich gesagt."
     },
     "marginalia": {
       "werIchBin": {
@@ -273,7 +274,7 @@
     "objectGrid": {
       "sectionLabel": "Off the screen",
       "headline": "Wenn der Bildschirm aus ist.",
-      "currentlyBand": "Fotografie · Vereinsleben · Wintersport · Tauchen",
+      "currentlyBand": "Wildlife · Audi S5 · Vereinsleben · Paddle griffbereit",
       "currentlyBandShort": "Snapshot 2026",
       "revealCta": "Bild ansehen",
       "revealClose": "Schliessen",
@@ -327,8 +328,8 @@
   },
   "work": {
     "sectionLabel": "Section 03 · Work",
-    "headline": "Eigene Projekte im Einsatz.",
-    "subhead": "Von einer Vereinsplattform für den Alltag bis zu diesem interaktiven Portfolio. Mit AI-Unterstützung entwickelt, selbst gestaltet und betrieben.",
+    "headline": "Zwei Ideen. Zwei eigene Welten.",
+    "subhead": "Eine Spielwiese für Code und Gestaltung, eine Plattform für unseren Verein. Mit AI-Unterstützung gebaut, selbst gestaltet und betrieben.",
     "vibecodedStamp": "AI-unterstützt",
     "projects": [
       {
@@ -349,7 +350,7 @@
           "next-intl",
           "zustand · State"
         ],
-        "description": "Diese Seite verbindet meine Entwicklung mit Fotografie und Gestaltung: interaktive GPU-Tinte, fünf visuelle Themen, vier Sprachen und automatisierte Browser-Tests.",
+        "description": "Diese Seite hier. Interaktive GPU-Tinte, fünf visuelle Themen, vier Sprachen und meine Fotos mittendrin. Eine Spielwiese für alles, was mir an Code und Gestaltung Spass macht, mit automatisierten Browser-Tests unter der Haube.",
         "metaNote": "Die Tinte wird interaktiv auf der GPU berechnet. Qualitätsstufen passen den Rechenaufwand an das Gerät an.",
         "ctaLabel": "Du bist schon hier",
         "screenshot": {
@@ -428,7 +429,7 @@
       ]
     },
     "sectionLabel": "Section 04 · Case Study",
-    "headline": "Eine Plattform für unseren Vereinsalltag.",
+    "headline": "Aus einer Vereinsidee wurde eine Plattform.",
     "hook": "Für Jogge di Balla habe ich über mehrere Monate eine eigene Vereins- und Eventplattform aufgebaut. Sie verbindet den Webauftritt mit interner Verwaltung und Werkzeugen für Veranstaltungen. Ich entwickle sie weiter und betreibe sie selbst.",
     "context": {
       "label": "Mein Beitrag",
@@ -451,8 +452,8 @@
         }
       ],
       "story": [
-        "Mitgründer und Vizepräsident seit August 2022. Neben Events und Medienproduktion verantworte ich Konzept, Gestaltung, Entwicklung und Betrieb der Plattform.",
-        "Mitglieder und Gönner verwalten, Anwesenheiten auswerten, Bestellungen an Küche und Bar weitergeben: Die Funktionen werden regelmässig im Verein genutzt."
+        "Die Idee entstand zur Coronazeit: vier Freunde, wenig los, also haben wir eigene ausgefallene Events gemacht. Daraus wurde im August 2022 Jogge di Balla, mit Veranstaltungen wie Schlag den Kassier, Silvester 2.0, Harassenlauf und Lotto-Party.",
+        "Als Mitgründer und Vizepräsident kümmere ich mich um Events, Fotos und Videos. Und weil ich gern selbst baue, bekam der Verein seine eigene Plattform: von Gestaltung und Entwicklung bis zum Betrieb liegt sie bei mir. Mitglieder und Gönner verwalten, Anwesenheiten auswerten, Bestellungen an Küche und Bar schicken: Das nutzen wir regelmässig im Vereinsalltag."
       ]
     },
     "platform": {
@@ -617,7 +618,7 @@
   "contact": {
     "sectionLabel": "Section 07 · Contact",
     "headline": "Lass uns reden.",
-    "subhead": "Ab Dezember 2026 offen für eine neue Entwicklungsstelle.",
+    "subhead": "Idee, Frage, Fototipp oder einfach Hallo: die Inbox ist offen.",
     "intro": {
       "label": "Ein paar Worte vorab",
       "body": "Ich suche eine Vollzeitstelle in der Region Basel, im Aargau oder in Zürich. Besonders interessieren mich Aufgaben, bei denen ich Entwicklung und Gestaltung verbinden und meine Erfahrung mit AI einbringen kann."

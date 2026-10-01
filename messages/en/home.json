@@ -13,31 +13,31 @@
       "family": "Heller,",
       "given": "Manuel."
     },
-    "tagline": "PHP · Vue · Design",
+    "tagline": "Developer · Photographer · Visual Tinkerer",
     "taglineSuffix": "Available from 01.12.2026"
   },
   "currently": {
     "label": "Currently",
     "items": [
       {
-        "verb": "developing",
-        "value": "business interfaces and integrations"
+        "verb": "building",
+        "value": "this site and our club platform"
       },
       {
-        "verb": "migrating",
-        "value": "Cypress tests to Playwright"
-      },
-      {
-        "verb": "running",
-        "value": "the Jogge di Balla platform"
-      },
-      {
-        "verb": "working with",
+        "verb": "experimenting with",
         "value": "Codex · Claude Code"
       },
       {
         "verb": "photographing",
         "value": "wildlife and cars"
+      },
+      {
+        "verb": "driving",
+        "value": "Audi S5 B8.5 (tuning project)"
+      },
+      {
+        "verb": "chasing",
+        "value": "the zvoove ping-pong champion title"
       }
     ]
   },
@@ -170,14 +170,15 @@
   },
   "about": {
     "sectionLabel": "Section 01 · About",
-    "headline": "Development with an eye for design.",
-    "subhead": "PHP and Vue at work. My own products, photography and design outside it.",
+    "headline": "Full-stack developer with an artistic eye.",
+    "subhead": "Code, photography, design: the same craft in different forms.",
     "parts": [
       {
         "id": "wer-ich-bin",
         "heading": "Who I am",
         "body": [
-          "I’m Manuel, a software developer from the Basel region. Since November 2021, I’ve worked at zvoove Switzerland AG on business software for staffing companies. I design and build Vue interfaces for complex workflows, develop PHP endpoints and help maintain integrations and data synchronisation.",
+          "I’m Manuel, from the Basel region. At work I’m deep in PHP and Vue; outside it, cameras, Photoshop and anything that mixes code and images keep me busy. That overlap is where my favourite ideas happen.",
+          "Since November 2021, I’ve worked at zvoove Switzerland AG on business software for staffing companies. I design and build Vue interfaces for complex workflows, develop PHP endpoints and help maintain integrations and data synchronisation.",
           "I also take responsibility for a Cypress suite of around 30 extensive release tests, from writing and running tests to analysing failures. Migration to Playwright is in progress."
         ]
       },
@@ -185,7 +186,7 @@
         "id": "wie-angefangen",
         "heading": "How I started",
         "body": [
-          "Gaming got me into programming: my own Minecraft modpack server and mining turtles in Lua were my first projects.",
+          "Gaming got me into programming. I set up my own Minecraft modpack server and programmed mining turtles in Lua. That made me want to understand what was happening under the hood.",
           "From 2016 to 2020, I completed an IT apprenticeship at Novartis. Servers, networks and support gave me a broad foundation. After civilian service, I moved into application development."
         ]
       },
@@ -193,7 +194,7 @@
         "id": "ai-workflow",
         "heading": "How I work with AI",
         "body": [
-          "I use Codex and Claude Code to build substantial projects of my own, with custom skills, agents and MCP integrations. I combine these tools with clear requirements, incremental implementation and tests.",
+          "To me, AI is like a paintbrush. I bring the idea, the taste and the direction. With Codex and Claude Code, custom skills, agents and MCP integrations, it becomes a project step by step. Experimenting, looking closely, refining and testing are all part of it.",
           "I developed the club platform and this portfolio with AI assistance. My React and TypeScript experience comes from these projects; PHP and Vue are where I have deeper professional experience. I take care of the design, scope and ongoing operation."
         ]
       },
@@ -201,14 +202,14 @@
         "id": "antrieb",
         "heading": "What motivates me",
         "body": [
-          "I enjoy working on things people actually use. At the club, I see first-hand whether an interface makes sense and a workflow works. New technologies interest me most when they help me put a specific idea into practice."
+          "What motivates me? Curiosity, honestly. I enjoy trying new tools, refining small visual details and figuring out how things work. If the result is something our club actually uses, even better."
         ]
       },
       {
         "id": "off-screen",
         "heading": "Away from the screen",
         "body": [
-          "Wildlife and automotive photography, travel, skiing, snowboarding and diving are as much part of my life as development. At Jogge di Balla, I’m a co-founder and vice president and help with events, photography and video alongside the platform."
+          "Wildlife photography is my biggest passion. It takes me on solo trips to Costa Rica or Thailand, camera in hand, looking for animals in the wild. There’s also my Audi S5 tuning project, skiing, snowboarding and diving. At Jogge di Balla, I’m a co-founder and vice president and help with events, photos and videos. And there’s still that zvoove ping-pong champion title to chase."
         ]
       }
     ],
@@ -233,10 +234,10 @@
       ]
     },
     "pullQuotes": {
-      "werIchBin": "Complex workflows need [[clear interfaces]].",
-      "anfangen": "It started with [[Minecraft and Lua]].",
-      "aiWorkflow": "Building my own ideas, [[with AI as a tool]].",
-      "antrieb": "I like building things that [[get used]]."
+      "werIchBin": "My favourite ideas happen [[in between]].",
+      "anfangen": "I want to understand [[what happens under the hood]].",
+      "aiWorkflow": "AI is my paintbrush. I bring [[the direction]].",
+      "antrieb": "What motivates me? [[Curiosity]], honestly."
     },
     "marginalia": {
       "werIchBin": {
@@ -273,7 +274,7 @@
     "objectGrid": {
       "sectionLabel": "Off the screen",
       "headline": "When the screen is off.",
-      "currentlyBand": "Photography · club life · winter sports · diving",
+      "currentlyBand": "Wildlife · Audi S5 · club life · paddle ready",
       "currentlyBandShort": "Snapshot 2026",
       "revealCta": "View the picture",
       "revealClose": "Close",
@@ -327,8 +328,8 @@
   },
   "work": {
     "sectionLabel": "Section 03 · Work",
-    "headline": "My own projects in use.",
-    "subhead": "From a platform for everyday club activities to this interactive portfolio. Developed with AI assistance, designed and operated by me.",
+    "headline": "Two ideas. Two worlds of my own.",
+    "subhead": "A playground for code and design, a platform for our club. Built with AI assistance, designed and run by me.",
     "vibecodedStamp": "AI-assisted",
     "projects": [
       {
@@ -349,7 +350,7 @@
           "next-intl",
           "zustand · state"
         ],
-        "description": "This site brings together development, photography and design: interactive GPU ink, five visual themes, four languages and automated browser tests.",
+        "description": "This very site. Interactive GPU ink, five visual themes, four languages and my photos in the middle of it all. A playground for everything I enjoy about code and design, with automated browser tests under the hood.",
         "metaNote": "The ink is computed interactively on the GPU. Quality levels adjust the workload to the device.",
         "ctaLabel": "You're already here",
         "screenshot": {
@@ -428,7 +429,7 @@
       ]
     },
     "sectionLabel": "Section 04 · Case Study",
-    "headline": "A platform for our club’s daily work.",
+    "headline": "A club idea grew into a platform.",
     "hook": "I built a dedicated club and event platform for Jogge di Balla over several months. It combines the public website, internal administration and tools for events. I continue to develop and operate it.",
     "context": {
       "label": "My contribution",
@@ -451,8 +452,8 @@
         }
       ],
       "story": [
-        "Co-founder and vice president since August 2022. Alongside events and media production, I take responsibility for the platform’s concept, design, development and operation.",
-        "Managing members and supporters, reporting attendance and sending orders to the kitchen and bar: the club uses these features regularly."
+        "The idea started during the pandemic: four friends, little going on, so we put on unusual events of our own. That became Jogge di Balla in August 2022, with events such as Schlag den Kassier, Silvester 2.0, Harassenlauf and Lotto-Party.",
+        "As co-founder and vice president, I help with events, photography and video. And because I like building things myself, the club got its own platform: I take care of design, development and operation. Managing members and supporters, reviewing attendance, sending orders to the kitchen and bar: we use it regularly in club life."
       ]
     },
     "platform": {
@@ -617,7 +618,7 @@
   "contact": {
     "sectionLabel": "Section 07 · Contact",
     "headline": "Let's talk.",
-    "subhead": "Open to a new development role from December 2026.",
+    "subhead": "An idea, a question, a photography tip or just hello: my inbox is open.",
     "intro": {
       "label": "A few words upfront",
       "body": "I’m looking for a full-time role in the Basel region, Aargau or Zurich. I’m especially interested in work that combines development and design and lets me apply my experience with AI."

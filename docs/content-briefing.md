@@ -1,10 +1,12 @@
 # Content-Briefing · Fortschreibung September 2026
 
-Stand: 29. September 2026. Die ursprüngliche Gestaltungsidee bleibt erhalten; Positionierung und öffentliche Fakten wurden mit Manuel überarbeitet.
+Stand: 1. Oktober 2026. Die ursprüngliche Gestaltungsidee und persönliche Sprache bleiben erhalten; öffentliche Fakten wurden mit Manuel überarbeitet.
 
 ## Aktuelle Positionierung
 
 Softwareentwickler mit Erfahrung in PHP und Vue seit November 2021. Die Gestaltung komplexer Fachoberflächen gehört ausdrücklich zur beruflichen Arbeit, ebenso Schnittstellen, Datenabgleiche und Release-Tests. AI-Werkzeuge ergänzen diese Erfahrung. Keine Selbstdarstellung als reiner „Vibecoder“, kein unbelegter Senior-, Lead- oder ML-Expertenanspruch.
+
+Das Portfolio bleibt eine persönliche Spielwiese für Code, Fotografie und Gestaltung. „Visual Tinkerer“, Auto, Ping-Pong, Neugier und die Vereinsgründung gehören zu dieser Identität. Berufsleistungen ergänzen diese Geschichten; die Website wird nicht auf ein Bewerbungsdossier reduziert. Der öffentliche CV bündelt die beruflichen Fakten, der Kontakt bleibt auch für Ideen und allgemeine Nachrichten offen.
 
 - Rolle: Anwendungsentwickler (Full-Stack), zvoove Switzerland AG, seit 11/2021. Fünf Jahre Erfahrung werden im November 2026 erreicht.
 - Verfügbar ab 01.12.2026 für ein 100-Prozent-Pensum. Regionen Basel, Aargau und Zürich. Gehalt und Austrittsgrund gehören nicht in öffentliche Inhalte.

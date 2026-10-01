@@ -88,12 +88,14 @@ test("touch retains measured quality when tier cache cannot be written", async (
     await page.goto("/de/");
     const canvas = page.getByTestId("mobile-bg-sim");
     await expect(canvas).toBeVisible({ timeout: 20000 });
+    const finishCalls = () => page.evaluate(() => Reflect.get(window, "gpuProbeFinishCalls"));
+    // The fresh-load reveal and software WebGL can take longer than the
+    // default assertion timeout. Wait for calibration before checking DPR.
+    await expect.poll(finishCalls, { timeout: 30000 }).toBe(30);
     await expect
       .poll(() => canvas.evaluate((el) => (el as HTMLCanvasElement).width / el.clientWidth))
       .toBe(1);
     expect(await page.evaluate(() => localStorage.getItem("manus-gpu-tier"))).toBeNull();
-    const finishCalls = () => page.evaluate(() => Reflect.get(window, "gpuProbeFinishCalls"));
-    await expect.poll(finishCalls).toBe(30);
     // Observe subsequent frames: a restarted probe would call finish forever.
     await page.waitForTimeout(500);
     expect(await finishCalls()).toBe(30);
