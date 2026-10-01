@@ -13,27 +13,23 @@
       "family": "Heller,",
       "given": "Manuel."
     },
-    "tagline": "Awwwards-inspired craft portfolio",
-    "taglineSuffix": "booting …"
+    "tagline": "Developer · Photographer · Visual Tinkerer",
+    "taglineSuffix": "Verfügbar ab 01.12.2026"
   },
   "currently": {
     "label": "Currently",
     "items": [
       {
-        "verb": "arbeite an",
-        "value": "diese Seite hier"
+        "verb": "baue",
+        "value": "an dieser Seite und der Vereinsplattform"
       },
       {
-        "verb": "lerne",
-        "value": "React 19 · R3F 9 · WebGPU-Shader"
+        "verb": "experimentiere mit",
+        "value": "Codex · Claude Code"
       },
       {
-        "verb": "shippe",
-        "value": "Claude-Code-Skills · eine Electron-App"
-      },
-      {
-        "verb": "schieße",
-        "value": "Wildlife in Costa Rica & Thailand"
+        "verb": "fotografiere",
+        "value": "Wildlife und Autos"
       },
       {
         "verb": "fahre",
@@ -47,74 +43,64 @@
   },
   "skills": {
     "sectionLabel": "Section 02 · Skills",
-    "headline": "Was ich mitbringe.",
-    "subhead": "Grösse transportiert Gewicht. Keine Jahre, keine Labels.",
+    "headline": "Meine Schwerpunkte.",
+    "subhead": "Berufliche Erfahrung und Werkzeuge aus eigenen Projekten.",
     "heroSkill": {
-      "eyebrow": "Hero-Skill",
-      "name": "AI-Workflow & Vibecoding",
-      "description": "Custom Agents, Hooks, Skills, mehrstufige Prompts. AI ist nicht das Tool, das ich nutze, sondern das Werkzeug, mit dem ich Tools baue."
+      "eyebrow": "Beruflicher Schwerpunkt",
+      "name": "PHP · Vue · SQL",
+      "description": "Fachoberflächen gestalten, Schnittstellen entwickeln und Releases mit automatisierten Tests absichern."
     },
-    "vibecodedMarker": "vibecoded",
+    "vibecodedMarker": "mit AI",
     "tiers": [
       {
         "id": "daily-driver",
-        "label": "Daily Driver · Production",
+        "label": "Beruflich im Einsatz",
         "weight": "xl",
         "items": [
           {
-            "name": "PHP"
+            "name": "PHP · Yii"
           },
           {
-            "name": "Vue"
+            "name": "Vue.js"
           },
           {
             "name": "MariaDB · MySQL"
           },
           {
-            "name": "HTML · CSS · Webdesign-Eye"
+            "name": "JavaScript · HTML · CSS"
           }
         ]
       },
       {
         "id": "production",
-        "label": "Production · Operations",
+        "label": "Schnittstellen und Qualität",
         "weight": "l",
         "items": [
           {
-            "name": "Yii"
-          },
-          {
-            "name": "Docker"
-          },
-          {
-            "name": "Vite"
-          },
-          {
-            "name": "GitLab"
+            "name": "REST · OpenAPI"
           },
           {
             "name": "Cypress"
           },
           {
-            "name": "OpenAPI · Swagger"
+            "name": "Playwright"
           },
           {
-            "name": "nginx · Linux-Server-Admin"
+            "name": "SQL"
+          },
+          {
+            "name": "Code-Reviews"
           }
         ]
       },
       {
         "id": "vibecoded",
-        "label": "Vibecoded Stack",
-        "description": "Was ich mit AI-Workflow baue, nicht spontan ohne.",
+        "label": "Eigene Projekte",
+        "description": "Mit AI-Unterstützung eingesetzt. Hier baue ich Erfahrung auf; mein beruflicher Schwerpunkt bleibt PHP und Vue.",
         "weight": "l",
         "items": [
           {
-            "name": "TypeScript",
-            "vibecoded": true
-          },
-          {
-            "name": "React",
+            "name": "TypeScript · React",
             "vibecoded": true
           },
           {
@@ -122,113 +108,61 @@
             "vibecoded": true
           },
           {
-            "name": "Electron",
+            "name": "tRPC · Drizzle",
             "vibecoded": true
           },
           {
-            "name": "tRPC",
+            "name": "WebGL · GLSL",
             "vibecoded": true
           },
           {
-            "name": "Drizzle ORM",
-            "vibecoded": true
-          },
-          {
-            "name": "shadcn/ui",
-            "vibecoded": true
-          },
-          {
-            "name": "GSAP",
-            "vibecoded": true
-          },
-          {
-            "name": "Three.js · R3F · Drei · Postprocessing",
-            "vibecoded": true
-          },
-          {
-            "name": "Lenis",
-            "vibecoded": true
-          },
-          {
-            "name": "next-intl",
-            "vibecoded": true
-          },
-          {
-            "name": "zustand · State",
-            "vibecoded": true
-          },
-          {
-            "name": "GLSL · WebGL Shader",
-            "vibecoded": true
-          },
-          {
-            "name": "Biome · Lint & Format",
-            "vibecoded": true
-          },
-          {
-            "name": "Playwright · E2E + Axe + Visual",
-            "vibecoded": true
-          },
-          {
-            "name": "Sharp · Asset Pipeline",
+            "name": "GSAP · Three.js",
             "vibecoded": true
           }
         ]
       },
       {
         "id": "occasional",
-        "label": "Im Werkzeugkasten",
-        "description": "Kenne ich, nutze ich nicht täglich.",
+        "label": "Werkzeuge und Betrieb",
+        "description": "Codex und Claude Code mit eigenen Skills, Agents und MCP-Anbindungen; Linux und nginx für selbst betriebene Projekte.",
         "weight": "m",
         "items": [
           {
-            "name": "Java"
+            "name": "Git · GitLab"
           },
           {
-            "name": "Python"
+            "name": "Docker"
           },
           {
-            "name": "PowerShell"
+            "name": "Linux · nginx"
           },
           {
-            "name": "Bash"
+            "name": "Codex · Claude Code"
           },
           {
-            "name": "Git"
-          },
-          {
-            "name": "Tailwind CSS"
-          },
-          {
-            "name": "Lightroom"
-          },
-          {
-            "name": "Photoshop"
-          },
-          {
-            "name": "DaVinci Resolve"
+            "name": "Skills · Agents · MCP"
           }
         ]
       },
       {
         "id": "craft",
-        "label": "Craft · Eye",
+        "label": "Gestaltung und Medien",
         "weight": "m",
         "items": [
           {
             "name": "Fotografie"
           },
           {
+            "name": "Webdesign"
+          },
+          {
             "name": "Videoschnitt"
           },
           {
-            "name": "Grafikdesign"
+            "name": "Lightroom · Photoshop"
           },
           {
-            "name": "Live Web Fluid Simulations"
-          },
-          {
-            "name": "Shader-Spielereien"
+            "name": "DaVinci Resolve"
           }
         ]
       }
@@ -243,37 +177,39 @@
         "id": "wer-ich-bin",
         "heading": "Wer ich bin",
         "body": [
-          "Ich bin Manuel, Full-Stack Developer bei zvoove Switzerland AG, seit November 2021. Beruflich tief drin in PHP und Vue, privat eingehend mit Kameras, Photoshop und allem was zwischen Code und Bild Spass macht. Ich glaube nicht an die Trennung von 'technisch' und 'kreativ'; die spannenden Sachen passieren genau dazwischen."
+          "Ich bin Manuel aus der Basel-Region. Beruflich tief drin in PHP und Vue, privat mit Kameras, Photoshop und allem beschäftigt, was zwischen Code und Bild Spass macht. Genau dazwischen entstehen für mich die spannendsten Ideen.",
+          "Seit November 2021 arbeite ich bei zvoove Switzerland AG an Fachanwendungen für Personaldienstleister. Ich gestalte und entwickle Vue-Oberflächen für komplexe Abläufe, baue PHP-Endpunkte und betreue Schnittstellen und Datenabgleiche.",
+          "Daneben verantworte ich eine Cypress-Suite mit rund 30 umfangreichen Release-Tests: von den Tests selbst über die Ausführung bis zur Fehleranalyse. Die Migration zu Playwright läuft."
         ]
       },
       {
         "id": "wie-angefangen",
         "heading": "Wie ich angefangen habe",
         "body": [
-          "Programmieren kam bei mir über Gaming. Ich habe einen eigenen Minecraft-Modpack-Server aufgesetzt und angefangen, Mining-Turtles in Lua zu programmieren. Das war der Moment in dem ich gemerkt habe: ich will verstehen, wie das alles unter der Haube läuft.",
-          "Die Berufslehre habe ich dann als Betriebsinformatiker EFZ bei Novartis gemacht. Eigentlich wollte ich Entwickler werden, aber Novartis bot nur den Betriebsinformatiker-Track, und so einen Ausbildungsplatz lässt man sich nicht entgehen. Vier Jahre Server, Netzwerk, Support: solide Grundlage, aber spätestens am Ende der Lehre war klar, ich bewerbe mich als Developer. Seit 2021 bin ich bei zvoove und arbeite am Hauptprodukt zvoove Core, an diversen Schnittstellen-Tools und an Cypress-E2E-Tests."
+          "Programmieren kam bei mir über Gaming. Ich habe einen eigenen Minecraft-Modpack-Server aufgesetzt und Mining-Turtles in Lua programmiert. Da wollte ich wissen, wie das alles unter der Haube läuft.",
+          "Von 2016 bis 2020 habe ich bei Novartis die Lehre als Betriebsinformatiker EFZ gemacht. Server, Netzwerke und Support haben mir eine breite Grundlage gegeben. Nach dem Zivildienst bin ich in die Anwendungsentwicklung gewechselt."
         ]
       },
       {
         "id": "ai-workflow",
         "heading": "Wie ich mit AI arbeite",
         "body": [
-          "Eine AI ist wie ein Pinsel: ein Werkzeug, das die Kunst nicht alleine macht. Sie ist nur so gut wie der Plan und der Prompt, den man ihr gibt, und sie braucht jemanden mit Geschmack, Kreativität und einem klaren Bild davon, wo es hingehen soll. AI-generierte Websites sehen heute alle gleich aus, weil die meisten Leute der AI die Kreativität überlassen.",
-          "Ich nutze einen tief eingerichteten AI-Workflow: Custom Agents, Hooks, Skills, mehrstufige Prompts, klare Konventions-Dateien. Ich habe bisher zwei komplexe Webapps damit von Null auf produktionsreif gebracht (eine davon ist die Jogge di Balla-Plattform, die andere ist genau diese Seite hier). Die Kombination aus dieser Workflow-Tiefe und meinem visuellen Sinn aus Foto und Grafik ist das, was am Ende den Unterschied macht zwischen noch einer generischen Landing-Page und etwas, das man sich merkt."
+          "Eine AI ist für mich wie ein Pinsel. Ich bringe die Idee, den Geschmack und die Richtung mit. Mit Codex und Claude Code, eigenen Skills, Agents und MCP-Anbindungen wird daraus Schritt für Schritt ein Projekt. Ausprobieren, hinschauen, nachbessern und testen gehören dazu.",
+          "Die Vereinsplattform und dieses Portfolio habe ich mit AI-Unterstützung entwickelt. React und TypeScript kenne ich aus diesen Projekten; meine vertiefte berufliche Erfahrung liegt in PHP und Vue. Gestaltung, Funktionsumfang und der laufende Betrieb liegen bei mir."
         ]
       },
       {
         "id": "antrieb",
         "heading": "Was mich antreibt",
         "body": [
-          "Ich bin für fast alles zu begeistern und überzeugt: Gerade jetzt im KI-Zeitalter muss man mehr denn je dranbleiben. Wer aufhört zu lernen, ist innerhalb von 12 Monaten abgehängt. Mir macht das Aneignen neuer Skills aber einfach Spass, für mich ist das kein Druck, sondern der Default-Modus."
+          "Was mich antreibt? Neugier, ehrlich gesagt. Ich probiere gern neue Werkzeuge aus, feile an kleinen visuellen Details und will verstehen, wie etwas funktioniert. Wenn daraus etwas wird, das im Verein wirklich genutzt wird, umso besser."
         ]
       },
       {
         "id": "off-screen",
         "heading": "Ausserhalb vom Bildschirm",
         "body": [
-          "Wildlife-Fotografie ist meine grösste Leidenschaft. Ich reise solo nach Costa Rica oder Thailand und stapfe selbst in den Dschungel um Tiere in freier Wildbahn vor die Linse zu bekommen. Daneben Autos (siehe mein Audi-S5-Tuning-Projekt), Ski/Snowboard, Tauchen, und der Verein Jogge di Balla, in dem ich Vize-Präsident, Web-Entwickler, Vereinsfotograf, Kameramann und Social-Media-Manager bin."
+          "Wildlife-Fotografie ist meine grösste Leidenschaft. Dafür bin ich auch solo in Costa Rica oder Thailand unterwegs, mit der Kamera auf der Suche nach Tieren in freier Wildbahn. Dazu kommen mein Audi-S5-Tuning-Projekt, Ski, Snowboard und Tauchen. Bei Jogge di Balla bin ich Mitgründer und Vizepräsident und kümmere mich auch um Events, Fotos und Videos. Und bei zvoove wartet noch der Ping-Pong-Champion-Titel."
         ]
       }
     ],
@@ -298,9 +234,9 @@
       ]
     },
     "pullQuotes": {
-      "werIchBin": "Die spannenden Sachen passieren genau [[dazwischen]].",
+      "werIchBin": "Die spannenden Ideen entstehen genau [[dazwischen]].",
       "anfangen": "Ich will verstehen, [[wie das alles unter der Haube]] läuft.",
-      "aiWorkflow": "AI-generierte Websites sehen heute alle gleich aus, weil die meisten Leute der AI die [[Kreativität]] überlassen.",
+      "aiWorkflow": "AI ist mein Pinsel. [[Die Richtung]] bringe ich mit.",
       "antrieb": "Was mich antreibt? [[Neugier]], ehrlich gesagt."
     },
     "marginalia": {
@@ -318,7 +254,7 @@
           },
           {
             "label": "Novartis EFZ",
-            "year": "2017–2021"
+            "year": "2016–2020"
           },
           {
             "label": "zvoove",
@@ -328,7 +264,7 @@
       },
       "aiWorkflow": {
         "counter": "03 / 04",
-        "label": "Vibecoded"
+        "label": "AI-Workflow"
       },
       "antrieb": {
         "counter": "04 / 04",
@@ -338,7 +274,7 @@
     "objectGrid": {
       "sectionLabel": "Off the screen",
       "headline": "Wenn der Bildschirm aus ist.",
-      "currentlyBand": "Snapshot 2026 · Wildlife-Reise in Planung · Wintersaison · Paddle griffbereit",
+      "currentlyBand": "Wildlife · Audi S5 · Vereinsleben · Paddle griffbereit",
       "currentlyBandShort": "Snapshot 2026",
       "revealCta": "Bild ansehen",
       "revealClose": "Schliessen",
@@ -392,9 +328,9 @@
   },
   "work": {
     "sectionLabel": "Section 03 · Work",
-    "headline": "Zwei Projekte. Beide vibecoded.",
-    "subhead": "Keine Werkschau, kein Stack-Buffet. Zwei ernsthafte Webapps von Null auf Live.",
-    "vibecodedStamp": "vibecoded",
+    "headline": "Zwei Ideen. Zwei eigene Welten.",
+    "subhead": "Eine Spielwiese für Code und Gestaltung, eine Plattform für unseren Verein. Mit AI-Unterstützung gebaut, selbst gestaltet und betrieben.",
+    "vibecodedStamp": "AI-unterstützt",
     "projects": [
       {
         "id": "portfolio",
@@ -414,8 +350,8 @@
           "next-intl",
           "zustand · State"
         ],
-        "description": "Diese Seite. Fullscreen GPU-Fluid-Simulation als Hero, Risograph-inspirierte Editorial-Ästhetik, vibecoded in mehrwöchigen Sessions mit Claude Code.",
-        "metaNote": "Du surfst gerade auf einer GPU-Fluid-Simulation. Kein Iframe, kein Video-Loop, keine Lottie-Datei. Echte Frames.",
+        "description": "Diese Seite hier. Interaktive GPU-Tinte, fünf visuelle Themen, vier Sprachen und meine Fotos mittendrin. Eine Spielwiese für alles, was mir an Code und Gestaltung Spass macht, mit automatisierten Browser-Tests unter der Haube.",
+        "metaNote": "Die Tinte wird interaktiv auf der GPU berechnet. Qualitätsstufen passen den Rechenaufwand an das Gerät an.",
         "ctaLabel": "Du bist schon hier",
         "screenshot": {
           "alt": "Die Hero-Section von manuelheller.dev in fünf Streifen, je einer pro Tinten-Charakter",
@@ -443,7 +379,7 @@
           "Tailwind",
           "shadcn/ui"
         ],
-        "description": "Eine massgeschneiderte All-in-One-Vereinsplattform: von der Mitgliederverwaltung bis zum Live-Twitch-Overlay, vibecoded mit modernem TypeScript-Stack.",
+        "description": "Über Monate entwickelte Vereins- und Eventplattform: Berechtigungen, Gönnerverwaltung und Anwesenheitsauswertungen sowie ein Bestell- und Kassensystem für Service, Küche und Bar. Regelmässig genutzt und laufend erweitert.",
         "screenshot": {
           "alt": "Screenshot der öffentlichen Startseite von joggediballa.ch",
           "caption": "joggediballa.ch · home"
@@ -452,24 +388,24 @@
       }
     ],
     "sideProjects": {
-      "label": "Weitere Projekte · Public auf GitHub",
-      "lede": "Zwei kleinere Projekte, beide regelmässig im Einsatz.",
+      "label": "Weitere Projekte auf GitHub",
+      "lede": "Kleinere Werkzeuge und mein Setup für die Arbeit mit AI.",
       "items": [
         {
           "id": "shotCounter",
           "title": "Shot-Counter",
           "tagline": "Party-Scoreboard · Desktop-App",
-          "description": "Live-Scoreboard für beliebig viele Teams: QR-Code-Join übers LAN, jeder Tap landet per Server-Sent Events sofort auf allen Geräten, ein atomarer SQLite-Zähler verliert keinen Shot. Gebaut als Electron-App für Windows & Linux.",
+          "description": "Live-Scoreboard für Teams mit QR-Beitritt über das lokale Netzwerk und synchronisierten Spielständen. Als Electron-App für Windows und Linux umgesetzt.",
           "stack": ["Vue 3", "Express 5", "SQLite", "SSE", "Electron"],
           "ctaLabel": "Repo & Download"
         },
         {
-          "id": "fullProjectRework",
-          "title": "full-project-rework",
-          "tagline": "Claude-Code-Skill · Multi-Agent",
-          "description": "Ein Befehl, kompletter Codebase-Overhaul: parallele Analyzer über 20 Kategorien, Senior-Reviewer-Triage, Implementer mit atomaren Commits und Abschluss-Report. Mein AI-Workflow, destilliert in ein installierbares Skill.",
-          "stack": ["Claude Code", "Subagents", "Skill", "MIT"],
-          "ctaLabel": "Repo & Doku"
+          "id": "claudeCodeKit",
+          "title": "claude-code-kit",
+          "tagline": "Skills und Werkzeuge für Claude Code",
+          "description": "Aktive Sammlung meiner Skills, Agents und Entwicklungs-Workflows für Claude Code. Hier entwickle und pflege ich auch den früher separat veröffentlichten Projekt-Review-Workflow weiter.",
+          "stack": ["Claude Code", "Skills", "Agents", "MCP"],
+          "ctaLabel": "Repository und Dokumentation"
         }
       ]
     }
@@ -493,35 +429,31 @@
       ]
     },
     "sectionLabel": "Section 04 · Case Study",
-    "headline": "Vom Vereins-Chaos zur eigenen Plattform.",
-    "hook": "Alle Vereine kämpfen alle mit demselben Mist: Excel-Listen, statische Websites, File-/Information-Sharing, isolierte Tools. Für Jogge di Balla habe ich das aufgeräumt: eine massgeschneiderte Plattform, die von Mitgliederverwaltung bis Twitch-Overlay alles abdeckt. Vibecoded, selbst gehostet, übertrieben.",
+    "headline": "Aus einer Vereinsidee wurde eine Plattform.",
+    "hook": "Für Jogge di Balla habe ich über mehrere Monate eine eigene Vereins- und Eventplattform aufgebaut. Sie verbindet den Webauftritt mit interner Verwaltung und Werkzeugen für Veranstaltungen. Ich entwickle sie weiter und betreibe sie selbst.",
     "context": {
-      "label": "Was ist Jogge di Balla?",
+      "label": "Mein Beitrag",
       "facts": [
         {
-          "key": "Gegründet",
-          "value": "05.08.2022 in Brislach"
+          "key": "Verein",
+          "value": "Jogge di Balla"
         },
         {
-          "key": "Aktive Mitglieder",
-          "value": "9"
+          "key": "Meine Rolle",
+          "value": "Mitgründer · Vizepräsident"
         },
         {
-          "key": "Gönner verwaltet",
-          "value": "68+"
+          "key": "Entwicklung",
+          "value": "Konzept bis Betrieb"
         },
         {
-          "key": "Events / Jahr",
-          "value": "4–8"
-        },
-        {
-          "key": "Instagram-Reichweite",
-          "value": "1067+ Follower · ~100k Views / 30 Tage"
+          "key": "Nutzung",
+          "value": "Vereinsalltag und Events"
         }
       ],
       "story": [
-        "Idee zur Coronazeit: vier Freunde, nichts ging, also haben wir ausgefallene Events unter Freunden gemacht. Aus dem wurde dann ein Verein mit öffentlichen Event-Klassikern wie Schlag den Kassier, Silvester 2.0, Harassenlauf oder der beliebten Lotto-Party.",
-        "Meine Rolle: Vize-Präsident, Web-Entwickler, Vereinsfotograf, Kameramann, Social-Media-Manager. Weil ich das Skillset hatte und Perfektionist genug bin, um dem Verein nicht nur ein Gesicht, sondern eine eigene, selbst gehostete Webapp zu verpassen."
+        "Die Idee entstand zur Coronazeit: vier Freunde, wenig los, also haben wir eigene ausgefallene Events gemacht. Daraus wurde im August 2022 Jogge di Balla, mit Veranstaltungen wie Schlag den Kassier, Silvester 2.0, Harassenlauf und Lotto-Party.",
+        "Als Mitgründer und Vizepräsident kümmere ich mich um Events, Fotos und Videos. Und weil ich gern selbst baue, bekam der Verein seine eigene Plattform: von Gestaltung und Entwicklung bis zum Betrieb liegt sie bei mir. Mitglieder und Gönner verwalten, Anwesenheiten auswerten, Bestellungen an Küche und Bar schicken: Das nutzen wir regelmässig im Vereinsalltag."
       ]
     },
     "platform": {
@@ -552,45 +484,45 @@
       "items": [
         {
           "id": "admin",
-          "kicker": "Highlight 01 · Tech-Substanz",
-          "title": "Das Admin-Dashboard",
-          "lede": "Für Besucher unsichtbar, für die Website das Herzstück. Hier laufen alle Fäden zusammen.",
+          "kicker": "Highlight 01 · Verwaltung und Events",
+          "title": "Mehr als eine Vereinswebsite",
+          "lede": "Verwaltung und Eventbetrieb greifen in derselben Plattform ineinander.",
           "screenshot": "admin-dashboard",
           "screenshotAlt": "Admin-Dashboard mit Berechtigungs-Card und Mitgliederliste",
           "features": [
             {
-              "title": "Dynamisches Berechtigungssystem",
-              "body": "Granulare Rechte (edit_events, manage_sponsors, edit_shotcounter, …) per Card pro Rolle zuweisbar, ohne Code-Änderung. Backend prüft jeden tRPC-Call durch eine eigene requirePermission()-Middleware."
+              "title": "Berechtigungen und Mitglieder",
+              "body": "Dynamische Rollenrechte, Gönnermitgliedschaften mit Zahlungsstatus und Anwesenheitsauswertungen bilden den Vereinsalltag ab."
             },
             {
-              "title": "Anwesenheitsverwaltung mit Statistik",
-              "body": "Pro Event generierbare Anwesenheitsliste, Daten fliessen direkt in eine grafische Statistik. Fördert Übersicht und ein bisschen internen Wettbewerb."
+              "title": "Bestell- und Kassensystem",
+              "body": "Bestellungen für Service, Küche und Bar mit getrennten Ansichten und Statusabläufen. Preise werden serverseitig ermittelt; Bestellungen behalten ihre Artikeldaten."
             },
             {
-              "title": "Gönner-Lifecycle",
-              "body": "Sponsoren über das System. Status (aktiv / abgelaufen / neu) automatisch berechnet mit Finanz- und Adressmanagement für unseren Kassier."
+              "title": "Medien und Veranstaltungen",
+              "body": "Bildverarbeitung und eine moderierte Live-Diashow ergänzen Eventverwaltung, Statistiken und Streaming-Werkzeuge."
             }
           ]
         },
         {
           "id": "overlay",
-          "kicker": "Highlight 02 · Sichtbarstes Feature",
-          "title": "«Schlag den Kassier» Live-Overlay",
-          "lede": "Custom Twitch-Overlay direkt in die Plattform integriert. Statt teurer externer Dienste: einfach selbst gebaut.",
+          "kicker": "Highlight 02 · Live-Veranstaltung",
+          "title": "«Schlag den Kassier» im Stream",
+          "lede": "Ein Beispiel aus den Eventwerkzeugen: Das Overlay bringt Spielstände und Vereinsdesign in den Live-Stream.",
           "screenshot": "overlay-stream",
           "screenshotAlt": "Twitch-Overlay im Stream mit Live-Score und Vereinsdesign",
           "features": [
             {
-              "title": "Versteckte URL als Browser-Source",
-              "body": "OBS bindet /overlay/sdk ein, ein Control-Panel auf /overlay/sdk/control steuert den Spielstand live."
+              "title": "Steuerung im Browser",
+              "body": "Ein separates Control-Panel steuert die Anzeige, die als Browser-Quelle in OBS eingebunden wird."
             },
             {
-              "title": "Echtzeit ohne Page-Reload",
-              "body": "tRPC-Polling synchronisiert das Overlay im Stream sofort. Goldener Shimmer-Effekt für Sieger, automatische Berechnung «mathematisch nicht mehr einholbar»."
+              "title": "Synchronisierte Spielstände",
+              "body": "Das Overlay ruft die aktuellen Spielstände regelmässig ab und aktualisiert die Anzeige ohne Neuladen."
             },
             {
-              "title": "Reichweite ehrlich klein",
-              "body": "~15–20 concurrent Viewer, ~100 total. Das Tooling ist trotzdem solide gebaut und übertragbar."
+              "title": "Spielabläufe abbilden",
+              "body": "Siegeranzeigen und die Berechnung, wann ein Vorsprung nicht mehr einholbar ist, unterstützen die Moderation."
             }
           ]
         }
@@ -601,7 +533,7 @@
     },
     "reflection": {
       "label": "Erkenntnisse",
-      "body": "Manuelles Testing hat mich damals viel Zeit gekostet. Heute würde ich das Setup von Anfang an mit automatisierten Tests und KI-Tools aufsetzen, um Fehler direkt im Keim zu ersticken und den Fokus voll aufs Deployment zu legen."
+      "body": "Die Plattform ist über Monate gewachsen und wird im Vereinsalltag weiterentwickelt. Zum Projekt gehören automatisierte Tests sowie ein gemieteter Linux-Root-Server, den ich selbst eingerichtet habe und administriere."
     },
     "footerLink": {
       "label": "Live im Einsatz",
@@ -686,10 +618,10 @@
   "contact": {
     "sectionLabel": "Section 07 · Contact",
     "headline": "Lass uns reden.",
-    "subhead": "Auftrag, Frage, Tipp oder einfach Hallo: die Inbox ist offen.",
+    "subhead": "Idee, Frage, Fototipp oder einfach Hallo: die Inbox ist offen.",
     "intro": {
       "label": "Ein paar Worte vorab",
-      "body": "Ich antworte üblicherweise innerhalb von ein bis zwei Tagen. Für Recruiter und Anfragen aus der Vereinswelt: bitte kurz schreiben woher du kommst, das spart die zweite Mail."
+      "body": "Ich suche eine Vollzeitstelle in der Region Basel, im Aargau oder in Zürich. Besonders interessieren mich Aufgaben, bei denen ich Entwicklung und Gestaltung verbinden und meine Erfahrung mit AI einbringen kann."
     },
     "channels": {
       "label": "Direkt-Kanäle",

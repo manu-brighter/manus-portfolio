@@ -11,9 +11,9 @@
 
 <br>
 
-> **Full-Stack Developer · Visual Tinkerer.** Code, Foto, Design — alles dasselbe Handwerk in unterschiedlicher Form.
+> **Full-Stack Developer · PHP & Vue.** Professional experience in business applications, APIs and release testing, alongside personal web projects and photography.
 
-A production-grade personal portfolio built with AI-augmented workflows. The design direction is **Toon Fluid**: a fullscreen GPU Navier-Stokes fluid simulation, cel-shaded in Risograph aesthetic. The cursor is the force source — ink reacts to every pointer event.
+A personal portfolio developed with AI-assisted workflows. The design direction is **Toon Fluid**: a fullscreen GPU Navier-Stokes fluid simulation, cel-shaded in Risograph aesthetic. The cursor is the force source — ink reacts to every pointer event.
 
 **[→ See it live at manuelheller.dev](https://manuelheller.dev)**
 
@@ -28,7 +28,7 @@ A production-grade personal portfolio built with AI-augmented workflows. The des
 <td width="50%" valign="top">
 
 **WebGL Fluid Simulation**
-One persistent Three.js canvas runs a GPU Navier-Stokes simulation at up to 512² resolution. Five GPU quality tiers (High → Static WebP) are chosen at startup based on renderer detection + frametime probe. The cursor drives ink across every section, including ambient splats for the Photography gallery.
+One persistent Three.js canvas runs a GPU Navier-Stokes simulation at up to 512² resolution. Five GPU quality tiers (High → Static CSS) are chosen at startup based on renderer detection + frametime probe. The cursor drives ink across every section, including ambient splats for the Photography gallery.
 
 **Risograph Aesthetic**
 Four spot colors — Rose `#ff6ba0`, Amber `#ffc474`, Mint `#7ce8c4`, Violet `#b89aff` — on a warm paper base `#f0e8dc`. Cel-shaded fluid, OverprintReveal misregistration animations, and Polaroid framing keep the aesthetic consistent end-to-end.
@@ -43,7 +43,7 @@ Riso · Wave · Turbulenz · Aquarell · Nachtdruck. Each ships its own render s
 <td width="50%" valign="top">
 
 **Case Study Diorama**
-A 4200×1000px SVG illustration pinned horizontally via GSAP ScrollTrigger creates a 420vh scroll track. Absolute-positioned HTML cards animate in sync. Falls back to a mobile carousel at `<768px` or `<900px` height (catches 1366×768 laptops).
+A 4200×1000px SVG illustration pinned horizontally via GSAP ScrollTrigger creates a 420vh scroll track. Absolute-positioned HTML cards animate in sync. Falls back to a mobile carousel at `<768px` or `<700px` height (catches 1366×768 laptops).
 
 **Per-Photo Ink Reveal**
 Each photography section image has its own isolated WebGL2 fluid context — a simplified three-program sim (advect + splat + mask) that dissolves a paper overlay to reveal the photograph as it enters the viewport.
@@ -55,7 +55,7 @@ GSAP, Lenis smooth-scroll, and React Three Fiber share one `requestAnimationFram
 Coarse-pointer devices get `MobileBackgroundSim`, a fixed full-viewport WebGL2 canvas with its own orchestrator. Taps inject splats, scroll velocity injects an invisible force so ink drifts with the page. Presets and themes are pointer-agnostic.
 
 **4 Locales**
-DE (default) / EN / FR / IT via next-intl. Routes always include the `[locale]` segment. Zero hard-coded strings in components.
+DE (default) / EN / FR / IT via next-intl. Routes always include the `[locale]` segment. Homepage and CV content are translated into all four locales; other route catalogs retain their existing translation coverage.
 
 </td>
 </tr>
@@ -122,15 +122,17 @@ DE (default) / EN / FR / IT via next-intl. Routes always include the `[locale]` 
 
 ## ✦ GPU Quality Tiers
 
-| Tier | Resolution | Target |
-|---|---|---|
-| High | 512² | Discrete GPU |
-| Medium | 256² | Integrated GPU (mid) |
-| Low | 128² | Integrated GPU (Iris Xe, ≥40fps) |
-| Minimal | 96² | Very low-end / mobile |
-| Static WebP | — | No WebGL / reduced-motion |
+| Tier | Simulation grid | Maximum output DPR | Typical target |
+|---|---|---|---|
+| High | 512² | 2 | Discrete GPU / Apple Silicon |
+| Medium | 256² | 1.5 | Unclassified devices / mobile flagship |
+| Low | 128² | 1 | Integrated GPU, including Iris Xe |
+| Minimal | 96² | 1 | Older mobile GPU |
+| Static CSS | None | None | No WebGL / reduced motion |
 
-Tier selection runs at startup via renderer name match + frametime probe, cached to `localStorage` to avoid blank-flash on re-visits.
+Desktop and mobile share the same capability state and startup probe. Renderer matches and cached tiers skip the initial frametime measurement; unknown renderers are measured after simulation warmup. The result is cached in `localStorage`. This is startup selection, not continuous load adaptation.
+
+On a DPR2 screen, Low/Minimal now shade one quarter of the previous fullscreen output pixels. This is a rendering-budget reduction, not a measured FPS guarantee. Actual laptop performance still needs a production-build check on the target hardware.
 
 <br>
 

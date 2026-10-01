@@ -13,9 +13,9 @@ export const SITE = {
   alias: "https://manuelheller.ch",
   name: "Manuel Heller · Craft Portfolio",
   shortName: "Manuel Heller",
-  tagline: "Full-Stack Developer · Visual Tinkerer",
+  tagline: "Full-Stack Developer · PHP & Vue",
   description:
-    "Full-Stack Developer mit künstlerischem Auge. Code, Foto, Design: alles dasselbe Handwerk in unterschiedlicher Form.",
+    "Softwareentwicklung mit PHP und Vue, Schnittstellen und Testautomatisierung. Eigene Webprojekte, AI-gestützte Entwicklung und Fotografie.",
   author: {
     name: "Manuel Heller",
     region: "Basel-Region, Schweiz",
@@ -31,7 +31,7 @@ export const SITE = {
    *  live here, not in the i18n catalogs — one file beats four JSONs
    *  in sync (same rationale as the socials). */
   repos: {
-    fullProjectRework: "https://github.com/manu-brighter/full-project-rework",
+    claudeCodeKit: "https://github.com/manu-brighter/claude-code-kit",
     shotCounter: "https://github.com/manu-brighter/shot-counter",
   },
 } as const;

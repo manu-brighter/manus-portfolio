@@ -33,12 +33,16 @@ test.describe("@print CV pagination", () => {
   const PAGE_CONTENT_H = (297 - 22) * MM;
 
   for (const locale of ["de", "en", "fr", "it"]) {
-    test(`/${locale}/cv prints as exactly 2 pages with clean breaks`, async ({ page }) => {
+    test(`/${locale}/cv prints as exactly 2 pages with clean breaks`, async ({
+      page,
+    }, testInfo) => {
       await page.goto(`/${locale}/cv/`);
       await expect(page.locator('[data-page="cv"]')).toBeVisible();
       await page.emulateMedia({ media: "print" });
+      await page.evaluate(() => document.fonts.ready);
 
       const pdf = await page.pdf({
+        path: testInfo.outputPath("cv.pdf"),
         format: "A4",
         printBackground: true,
         margin: { top: "11mm", bottom: "11mm", left: "11mm", right: "11mm" },

@@ -1,14 +1,14 @@
 {
   "cv": {
     "metaTitle": "CV · Manuel Heller",
-    "metaDescription": "Curriculum Vitae von Manuel Heller, Full-Stack Developer aus der Basel-Region. Als PDF speicherbar, gedruckt im aktiven Tinten-Charakter.",
-    "sectionLabel": "Curriculum Vitae",
-    "editionStamp": "Edition MMXXVI",
+    "metaDescription": "Manuel Heller, Softwareentwickler aus der Basel-Region. PHP, Vue, Schnittstellen und Testautomatisierung. Verfügbar ab Dezember 2026.",
+    "sectionLabel": "Lebenslauf",
+    "editionStamp": "Ausgabe MMXXVI",
     "calibrationLabel": "Druckprobe",
     "name": "Manuel Heller",
-    "role": "Full-Stack Developer",
+    "role": "Softwareentwickler · PHP & Vue",
     "region": "Basel-Region, Schweiz",
-    "profile": "Full-Stack Developer mit fünf Jahren Production-Erfahrung in PHP und Vue, einem Hintergrund als Betriebsinformatiker EFZ und einem ausgeprägten Auge für Webdesign aus Fotografie und Grafikdesign. Tief eingearbeitet in AI-gestützte Workflows (Custom Agents, Hooks, Skills, Multi-Step-Prompting) und überzeugt, dass kontinuierliches Lernen im aktuellen Tech-Klima nicht optional ist. Teamplayer mit guter Auffassungsgabe und der Geduld, ein Problem so lange zu drehen, bis die Lösung sauber ist.",
+    "profile": "Ich gestalte Benutzeroberflächen für komplexe Fachprozesse, entwickle Anwendungen und Schnittstellen und verantworte automatisierte Release-Tests. Privat verbinde ich Entwicklung und Design in umfangreichen Webanwendungen, die ich selbst betreibe. Verfügbar ab 1. Dezember 2026, Pensum 100 %.",
     "contactLabel": "Kontakt",
     "download": {
       "label": "Als PDF speichern",
@@ -20,83 +20,68 @@
       "items": [
         {
           "period": "seit 11/2021",
-          "role": "Full-Stack Developer",
+          "role": "Anwendungsentwickler (Full-Stack)",
           "org": "zvoove Switzerland AG",
           "bullets": [
-            "Entwicklung an zvoove Core, einem Enterprise-SaaS im Personaldienstleistungs-Sektor: gewachsene PHP-Codebase, modernes Vue-Frontend, BFF-API als Bindeglied",
-            "Schnittstellen- und API-Tools (PHP, OpenAPI, Yii)",
-            "E2E-Test-Coverage mit Cypress",
-            "Code-Reviews und Architektur-Diskussionen im ~14-köpfigen Dev-Team",
-            "GitLab-Workflows, internes Release-Management, Docker/Traefik-Entwicklungsumgebung"
+            "Vue-Oberflächen für komplexe Fachprozesse gestaltet und umgesetzt; zugehörige PHP-Endpunkte entwickelt, etwa für digitale Dokumenten- und Signaturabläufe.",
+            "Schnittstellen und Datenabgleiche mitverantwortet und weiterentwickelt: neue Anforderungen in PHP und SQL umgesetzt, Fehlerursachen analysiert und Störungen behoben.",
+            "Im Team einen CSV-Export zur Produktmigration entwickelt: Daten aus mehreren Datenbanken auf das Zielformat abgebildet, Validierungen implementiert und Exportabbrüche bei grossen oder unvollständigen Datenbeständen behoben.",
+            "Eine Cypress-Suite mit rund 30 umfangreichen Release-Tests massgeblich entwickelt und gepflegt. Testläufe durchgeführt, Fehler ausgewertet und deren Behebung übernommen oder koordiniert.",
+            "API-Endpunkte für einen AI-gestützten Assistenten erweitert und technische Reviews zu API-Verträgen, Tests und Fehlerbehandlung durchgeführt.",
+            "Laufende Migration der Cypress-Tests zu Playwright: parallele Testsuite aufgebaut und Tests portiert; Einführung in den regulären Release-Prozess in Vorbereitung."
           ]
         },
         {
-          "period": "2020–2021",
+          "period": "11/2020–10/2021",
           "role": "Zivildienst",
           "org": "Primarschule Grellingen · Altersheim Rosengarten",
           "bullets": [
-            "Lehrassistenz im Schulalltag; Aktivierungsprogramm und Betreuung im Pflegeheim"
-          ]
-        },
-        {
-          "period": "2016–2020",
-          "role": "Lehre Betriebsinformatiker EFZ",
-          "org": "Novartis Pharma AG · GIBM Muttenz",
-          "bullets": [
-            "Server- und Netzwerk-Administration, Endgeräte-Management, IT-Service-Management nach ITIL",
-            "Eigenständige Entwicklung eines integrierten Anzeige- und Infosystems mit Scala Digital Designer",
-            "Abschluss: Eidgenössisches Fähigkeitszeugnis"
+            "Lehrassistenz und Betreuung an der Primarschule Grellingen und im Altersheim Rosengarten."
           ]
         }
       ]
     },
     "projects": {
-      "label": "Eigene Projekte",
+      "label": "Eigene Projekte · mit AI-Unterstützung",
       "items": [
         {
           "title": "joggediballa.ch",
-          "meta": "React 19 · tRPC · Drizzle · MySQL",
-          "description": "All-in-One-Vereinsplattform: dynamisches Berechtigungssystem, Mitglieder- und Gönner-Verwaltung (68+ Sponsoren), Live-Twitch-Overlay. Vibecoded, selbst gehostet."
+          "meta": "React · TypeScript · Node.js · tRPC · MySQL",
+          "description": "Über mehrere Monate konzipierte und entwickelte Vereins- und Eventplattform; regelmässig genutzt, selbst betrieben und laufend weiterentwickelt. Berechtigungen, Gönnermitgliedschaften und Anwesenheitsauswertungen; Bestell- und Kassensystem für Service, Küche und Bar, moderierte Live-Diashow und Streaming-Overlay."
         },
         {
           "title": "manuelheller.dev",
-          "meta": "Next.js 16 · R3F · WebGL",
-          "description": "Diese Seite: GPU-Fluid-Simulation als Hero, Risograph-Ästhetik, vier Sprachen, statisch exportiert auf den eigenen Server."
-        },
-        {
-          "title": "Shot-Counter",
-          "meta": "Vue 3 · Express · SQLite · Electron",
-          "description": "Party-Scoreboard als Desktop-App: QR-Join übers LAN, Echtzeit via Server-Sent Events, atomarer Zähler."
-        },
-        {
-          "title": "full-project-rework",
-          "meta": "Claude-Code-Skill",
-          "description": "Autonomer Multi-Agent-Codebase-Overhaul mit Analyzern, Reviewern und Implementern. Public auf GitHub."
+          "meta": "Next.js · TypeScript · WebGL/GLSL",
+          "description": "Individuell gestaltetes und entwickeltes Portfolio mit interaktiver GPU-Tintensimulation, vier Sprachversionen, geräteabhängigen Qualitätsstufen und automatisierten Browser-Tests."
         }
       ]
     },
     "skills": {
-      "label": "Kerntechnologien",
+      "label": "Fachkenntnisse",
       "groups": [
         {
-          "label": "AI-Workflow · zentrale Kompetenz",
-          "items": "Claude Code · Cursor · Custom Agents, Hooks, Skills · MCP · Multi-Step-Prompting"
+          "label": "Backend und Daten",
+          "items": "PHP · Yii · REST · OpenAPI · SQL · MySQL · MariaDB"
         },
         {
-          "label": "Daily Driver",
-          "items": "PHP · Yii · Vue · MariaDB/MySQL · OpenAPI/Swagger · Cypress · HTML/CSS/JS"
+          "label": "Frontend",
+          "items": "Vue.js · JavaScript · HTML · CSS"
         },
         {
-          "label": "Ops & Tooling",
-          "items": "Docker · Git/GitLab · nginx · Linux-Server · Bash · PowerShell"
+          "label": "Qualitätssicherung",
+          "items": "Cypress · Playwright · E2E · Code-Reviews"
         },
         {
-          "label": "Vibecoded",
-          "items": "TypeScript · React · Next.js · tRPC · Drizzle · Electron · GSAP · Three.js/R3F · WebGL-Shader"
+          "label": "Entwicklungsumgebung",
+          "items": "Git · GitLab · Docker · Linux und nginx für eigene Projekte"
         },
         {
-          "label": "Kreativ",
-          "items": "Lightroom · Photoshop · DaVinci Resolve · Foto- und Videoproduktion auf semi-professionellem Niveau"
+          "label": "Eigene Projekte",
+          "items": "TypeScript · React · Next.js · tRPC"
+        },
+        {
+          "label": "AI-Werkzeuge",
+          "items": "Codex · Claude Code · eigene Skills, Agents und MCP-Anbindungen"
         }
       ]
     },
@@ -107,16 +92,6 @@
           "period": "2016–2020",
           "title": "Betriebsinformatiker EFZ",
           "org": "Novartis Pharma AG · GIBM Muttenz"
-        },
-        {
-          "period": "2014–2016",
-          "title": "Sekundarschule Niveau E",
-          "org": "Sekundarschule Zwingen"
-        },
-        {
-          "period": "2012–2014",
-          "title": "Gymnasium, 1.–2. Klasse",
-          "org": "Gymnasium Laufen"
         }
       ]
     },
@@ -129,7 +104,7 @@
         },
         {
           "name": "Englisch",
-          "level": "fliessend, auch technisch"
+          "level": "fliessend"
         },
         {
           "name": "Französisch",
@@ -141,25 +116,20 @@
       "label": "Engagement",
       "items": [
         {
-          "period": "seit 2022",
-          "title": "Vize-Präsident · Verein Jogge di Balla",
-          "description": "Mitgründer des 9-köpfigen Eventvereins: Web-Plattform, Social-Media-Lead (~100k Views / 30 Tage), Vereinsfotograf und Videograf."
+          "period": "seit 08/2022",
+          "title": "Mitgründer und Vizepräsident · Jogge di Balla",
+          "description": "Konzeption, Entwicklung und Betrieb der Vereinsplattform; zusätzlich Eventorganisation und Medienproduktion."
         }
       ]
     },
     "strengths": {
-      "label": "Stärken",
-      "items": [
-        "Kontaktfreudig, extrovertiert, Teamplayer",
-        "Schnelle Auffassungsgabe, lernfreudig",
-        "Perfektionist mit Tendenz zum produktiven Übertreiben",
-        "Kreatives Auge aus Foto und Grafikdesign"
-      ]
+      "label": "Interessen",
+      "items": ["Wildlife- und Autofotografie", "Reisen", "Ski und Snowboard", "Tauchen"]
     },
     "footer": {
       "inkLabel": "Tinte",
-      "printedNote": "Gedruckt ab manuelheller.dev/cv. Der Bogen folgt dem gewählten Tinten-Charakter.",
-      "publicNote": "Öffentliche Version, vollständige Kontaktdaten auf Anfrage."
+      "printedNote": "Gedruckt ab manuelheller.dev/cv. Die Darstellung folgt dem gewählten Tinten-Charakter.",
+      "publicNote": "Öffentliche Version. Vollständige Kontaktdaten auf Anfrage."
     }
   }
 }

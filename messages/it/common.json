@@ -1,18 +1,18 @@
 {
   "meta": {
-    "title": "Manuel Heller · Portfolio",
+    "title": "Manuel Heller · Sviluppo & Design",
     "titleTemplate": "%s · Manuel Heller",
-    "description": "Sviluppatore full-stack con un occhio da artista. Codice, foto, design: stesso mestiere, superficie diversa. Manuel Heller, sviluppatore full-stack da Basilea.",
+    "description": "Sviluppatore software nella regione di Basilea. PHP, Vue, interfacce gestionali, integrazioni e test automatizzati. Progetti web personali, strumenti IA e fotografia.",
     "keywords": [
       "Manuel Heller",
-      "Portfolio",
-      "Full-Stack Developer",
+      "PHP",
+      "Vue.js",
+      "Full-Stack",
+      "AI",
       "WebGL",
-      "Shader",
-      "Vibecoding",
-      "Riso Design",
-      "Svizzera",
-      "Basilea"
+      "Portfolio",
+      "Basel",
+      "Schweiz"
     ]
   },
   "skipLink": {

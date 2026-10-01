@@ -5,7 +5,7 @@ import { Component, createContext, type ReactNode, useContext, useEffect, useSta
 import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useGPUCapability } from "@/hooks/useGPUCapability";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import type { GPUTier, TierConfig } from "@/lib/gpu";
+import { type GPUTier, getTierDPR, type TierConfig } from "@/lib/gpu";
 import { isLoaderComplete, subscribeToLoaderComplete } from "@/lib/loaderSession";
 import { useSceneVisibilityStore } from "@/lib/sceneVisibilityStore";
 import { FluidSim } from "./FluidSim";
@@ -175,11 +175,16 @@ export function SceneProvider({ children }: SceneProviderProps) {
         // older mobile GPUs are the most likely cohort to hit exactly
         // that — degrade to StaticFallback, not a route-level crash.
         <SceneErrorBoundary fallback={<StaticFallback />}>
-          <MobileBackgroundSim />
+          <MobileBackgroundSim
+            config={config}
+            measuring={capability.measuring}
+            onGLReady={initProbe}
+            onFrametime={recordFrametime}
+          />
         </SceneErrorBoundary>
       ) : (
         <SceneErrorBoundary fallback={<StaticFallback />}>
-          <SceneCanvas>
+          <SceneCanvas maxDpr={getTierDPR(capability.tier)}>
             <FluidSim
               config={config}
               measuring={capability.measuring}

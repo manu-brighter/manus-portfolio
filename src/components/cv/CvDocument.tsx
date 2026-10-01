@@ -316,8 +316,8 @@ function CvSection({
    * against a 1039px page). A page-sized section with an avoid gets
    * shoved wholesale to the next page and strands a third page — the
    * original 3-page bug. Berufserfahrung and Eigene Projekte
-   * deliberately stay breakable and rely on item-level avoids so the
-   * cut always lands between entries.
+   * deliberately stay breakable; experience bullets and project cards
+   * stay together at page boundaries.
    */
   keepTogether?: boolean;
 }) {
@@ -511,36 +511,34 @@ export function CvDocument() {
           <div className="relative z-10 mt-8 grid grid-cols-1 gap-x-8 gap-y-9 sm:grid-cols-[1.45fr_1fr]">
             <div className="flex flex-col gap-10">
               <CvSection index={0} label={t("experience.label")}>
-                {/* Timeline spine — registration dots and a rule segment
-                    encode real chronology, newest at the top.
-                    The spine is PER ENTRY, not one continuous border on
-                    the container: a container border runs through the
-                    inter-entry gaps too, so the PDF page boundary sliced
-                    it mid-air and the cut read as a printing error rather
-                    than a page turn. Segmented, the break always lands in
-                    a gap between two segments. */}
+                {/* Long roles may flow across pages, but individual bullets
+                    stay together. Keeping an entire role unbreakable pushes
+                    the expanded experience onto a third printed page. */}
                 <div className="flex flex-col gap-6">
                   {experience.map((item, i) => (
                     <div
                       key={`${item.period}-${item.org}`}
-                      className="relative break-inside-avoid border-ink/70 border-l-2 pl-5"
+                      className="relative border-ink/70 border-l-2 pl-5"
                     >
                       <span
                         aria-hidden="true"
                         className="absolute top-[0.2rem] left-[-7px] size-3 rounded-full border-2 border-ink"
                         style={{ background: spotAt(i) }}
                       />
-                      <p className="font-mono text-[0.65rem] text-ink-muted uppercase tracking-[0.16em]">
+                      <p className="break-after-avoid font-mono text-[0.65rem] text-ink-muted uppercase tracking-[0.16em]">
                         {item.period}
                         <span aria-hidden="true"> · </span>
                         {item.org}
                       </p>
-                      <h3 className="mt-1 font-display text-[1.35rem] text-ink italic leading-snug">
+                      <h3 className="mt-1 break-after-avoid font-display text-[1.35rem] text-ink italic leading-snug">
                         {item.role}
                       </h3>
                       <ul className="mt-2 flex list-none flex-col gap-1.5">
                         {item.bullets.map((bullet) => (
-                          <li key={bullet} className="flex gap-2 type-body-sm text-ink">
+                          <li
+                            key={bullet}
+                            className="flex break-inside-avoid gap-2 type-body-sm text-ink"
+                          >
                             <span
                               aria-hidden="true"
                               className="mt-[0.5em] size-1.5 shrink-0 bg-ink/80"

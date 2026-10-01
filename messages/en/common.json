@@ -1,18 +1,18 @@
 {
   "meta": {
-    "title": "Manuel Heller · Craft Portfolio",
+    "title": "Manuel Heller · Software Development & Design",
     "titleTemplate": "%s · Manuel Heller",
-    "description": "Full-stack developer with an artist's eye. Code, photo, design: same craft, different surface. Manuel Heller, full-stack developer from Basel.",
+    "description": "Software developer in the Basel region. PHP, Vue, business interfaces, integrations and test automation. Own web projects, AI tools and photography.",
     "keywords": [
       "Manuel Heller",
-      "Portfolio",
-      "Full-Stack Developer",
+      "PHP",
+      "Vue.js",
+      "Full-Stack",
+      "AI",
       "WebGL",
-      "Shader",
-      "Vibecoding",
-      "Riso Design",
-      "Switzerland",
-      "Basel"
+      "Portfolio",
+      "Basel",
+      "Schweiz"
     ]
   },
   "skipLink": {
