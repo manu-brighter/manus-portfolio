@@ -395,13 +395,18 @@ export function CvDocument() {
       <div className="cv-zoom">
         {/* Topbar — screen chrome, never printed. Lives OUTSIDE the sheet
             so the printable geometry stays untouched. */}
-        <div className="mx-auto mb-8 flex w-full max-w-[184mm] flex-wrap items-start justify-between gap-4 px-4 print:hidden sm:px-0">
+        <div
+          data-cv-toolbar
+          className="mx-auto mb-6 grid w-full max-w-[184mm] grid-cols-[minmax(0,1fr)_auto] items-start gap-3 px-4 print:hidden sm:mb-8 sm:flex sm:justify-between sm:gap-4 sm:px-0"
+        >
           <Link
             href="/"
-            className="type-label-stamp bg-paper transition-colors hover:bg-ink hover:text-paper-tint"
+            className="inline-flex min-h-11 min-w-0 items-center gap-2 self-start text-xs text-ink-muted transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--focus-ring) sm:min-h-0 sm:rounded-[2px] sm:border sm:border-ink sm:bg-paper sm:px-3 sm:py-1 sm:font-mono sm:text-[0.65rem] sm:text-ink sm:uppercase sm:tracking-[0.18em] sm:hover:bg-ink sm:hover:text-paper-tint"
           >
-            <span aria-hidden="true">← </span>
-            {t("backLabel")}
+            <span aria-hidden="true" className="shrink-0">
+              ←
+            </span>
+            <span>{t("backLabel")}</span>
           </Link>
           <CvActions
             label={t("download.label")}

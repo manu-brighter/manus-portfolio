@@ -27,7 +27,7 @@
 // the Phase 9 PhotoDuotone iteration — a lost context returned by a
 // second-mount getContext() silently fails every shader compile).
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useScene } from "@/components/scene/SceneProvider";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { getSimPreset } from "@/lib/content/simPresets";
@@ -40,6 +40,7 @@ import quadVertSrc from "@/shaders/common/quad.vert.glsl";
 import advectFragSrc from "@/shaders/ink-mask/advect.frag.glsl";
 import maskFragSrc from "@/shaders/ink-mask/mask.frag.glsl";
 import splatFragSrc from "@/shaders/ink-mask/splat.frag.glsl";
+import { PhotoInkAnimation } from "./PhotoInkAnimation";
 
 // Re-export so `Photography.tsx`'s `import { type SpotColor } from
 // "@/components/scene/PhotoInkMask"` keeps working — the canonical
@@ -171,11 +172,32 @@ function outwardSpeedAt(progress: number): number {
   return 0;
 }
 
-export function PhotoInkMask({ spotColor, className, reveal }: PhotoInkMaskProps) {
+export function PhotoInkMask(props: PhotoInkMaskProps) {
+  const reducedMotion = useReducedMotion();
+  const { effectsReduced, inkUnavailable } = useScene();
+  const [finished, setFinished] = useState(false);
+  const onComplete = useCallback(() => setFinished(true), []);
+  if (reducedMotion || inkUnavailable || finished) return null;
+  return effectsReduced ? (
+    <PhotoInkAnimation {...props} onComplete={onComplete} />
+  ) : (
+    <FullPhotoInkMask {...props} onComplete={onComplete} />
+  );
+}
+
+function FullPhotoInkMask({
+  spotColor,
+  className,
+  reveal,
+  onComplete,
+}: PhotoInkMaskProps & { onComplete: () => void }) {
   const reducedMotion = useReducedMotion();
   const { effectsReduced } = useScene();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [settled, setSettled] = useState(false);
+  useEffect(() => {
+    if (settled) onComplete();
+  }, [settled, onComplete]);
   const [activated, setActivated] = useState(false);
   const revealRef = useRef(reveal);
   revealRef.current = reveal;

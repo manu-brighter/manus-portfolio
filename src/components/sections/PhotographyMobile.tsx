@@ -1,7 +1,10 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { FadeIn } from "@/components/motion/FadeIn";
+import { PhotoInkAnimation } from "@/components/scene/PhotoInkAnimation";
+import { useScene } from "@/components/scene/SceneProvider";
 import type { SpotColor } from "@/lib/palette";
 
 /**
@@ -95,6 +98,44 @@ const LAYOUT_CLASS: Record<MobileSlide["layout"], string> = {
   "inset-right": "w-[88%] self-end",
 };
 
+function MobilePhotoFrame({ spotColor, children }: { spotColor: SpotColor; children: ReactNode }) {
+  const { effectsReduced, inkUnavailable, reducedMotion } = useScene();
+  const animated = effectsReduced && !inkUnavailable && !reducedMotion;
+  const ref = useRef<HTMLDivElement>(null);
+  const [reveal, setReveal] = useState(false);
+  const [finished, setFinished] = useState(false);
+  const complete = useCallback(() => setFinished(true), []);
+
+  useEffect(() => {
+    if (!animated || reveal || !ref.current) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting && entry.intersectionRatio >= 0.25))
+          return;
+        setReveal(true);
+        observer.disconnect();
+      },
+      { threshold: 0.25 },
+    );
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [animated, reveal]);
+
+  return (
+    <div ref={ref} className="relative">
+      {children}
+      {animated && !finished && (
+        <PhotoInkAnimation
+          spotColor={spotColor}
+          reveal={reveal}
+          className="z-10"
+          onComplete={complete}
+        />
+      )}
+    </div>
+  );
+}
+
 export function PhotographyMobile() {
   const t = useTranslations("photography");
 
@@ -112,29 +153,31 @@ export function PhotographyMobile() {
         {SLIDES.map((slide, i) => (
           <FadeIn key={slide.baseName} as="div" y={24} className={LAYOUT_CLASS[slide.layout]}>
             <figure data-testid="photo-slide">
-              <picture className="block">
-                <source
-                  type="image/avif"
-                  srcSet={slide.widths
-                    .map((w) => `/photography/${slide.baseName}-${w}w.avif ${w}w`)
-                    .join(", ")}
-                />
-                <source
-                  type="image/webp"
-                  srcSet={slide.widths
-                    .map((w) => `/photography/${slide.baseName}-${w}w.webp ${w}w`)
-                    .join(", ")}
-                />
-                <img
-                  src={`/photography/${slide.baseName}-1200w.jpg`}
-                  alt={t(`slides.${slide.stampKey}.alt`)}
-                  width={slide.widths[1] ?? 1200}
-                  height={Math.round((slide.widths[1] ?? 1200) / slide.aspect)}
-                  loading={i === 0 ? "eager" : "lazy"}
-                  decoding="async"
-                  className={`block h-auto w-full outline outline-[1.5px] outline-ink ${SPOT_SHADOW_CLASS[slide.spot]}`}
-                />
-              </picture>
+              <MobilePhotoFrame spotColor={slide.spot}>
+                <picture className="block">
+                  <source
+                    type="image/avif"
+                    srcSet={slide.widths
+                      .map((w) => `/photography/${slide.baseName}-${w}w.avif ${w}w`)
+                      .join(", ")}
+                  />
+                  <source
+                    type="image/webp"
+                    srcSet={slide.widths
+                      .map((w) => `/photography/${slide.baseName}-${w}w.webp ${w}w`)
+                      .join(", ")}
+                  />
+                  <img
+                    src={`/photography/${slide.baseName}-1200w.jpg`}
+                    alt={t(`slides.${slide.stampKey}.alt`)}
+                    width={slide.widths[1] ?? 1200}
+                    height={Math.round((slide.widths[1] ?? 1200) / slide.aspect)}
+                    loading={i === 0 ? "eager" : "lazy"}
+                    decoding="async"
+                    className={`block h-auto w-full outline outline-[1.5px] outline-ink ${SPOT_SHADOW_CLASS[slide.spot]}`}
+                  />
+                </picture>
+              </MobilePhotoFrame>
               <figcaption className="mt-4 flex justify-end">
                 <span className="type-label-stamp">{t(`slides.${slide.stampKey}.stamp`)}</span>
               </figcaption>

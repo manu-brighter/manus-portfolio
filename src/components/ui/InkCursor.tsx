@@ -88,7 +88,7 @@ function curveThrough(ctx: CanvasRenderingContext2D, points: Point[]) {
 
 export function InkCursor() {
   const reducedMotion = useReducedMotion();
-  const { effectsReduced } = useScene();
+  const { inkUnavailable } = useScene();
   const coarsePointer = useCoarsePointer();
   const host = useCursorHostStore((s) => s.host);
   const dotRef = useRef<HTMLDivElement>(null);
@@ -128,7 +128,7 @@ export function InkCursor() {
     // Guard inside the effect (not only via the null render) so a
     // mid-session preference flip re-runs cleanup, detaches the
     // document listeners and restores the native cursor.
-    if (reducedMotion || effectsReduced || coarsePointer) return;
+    if (reducedMotion || inkUnavailable || coarsePointer) return;
     const dot = dotRef.current;
     const canvas = canvasRef.current;
     const nib = nibRef.current;
@@ -176,6 +176,7 @@ export function InkCursor() {
     const trail: Sample[] = [];
     let stretch = 1;
     let angle = 0;
+    let trailPainted = false;
     let color = getComputedStyle(canvas).color;
     const themeObserver = new MutationObserver(() => {
       color = getComputedStyle(canvas).color;
@@ -230,14 +231,14 @@ export function InkCursor() {
     const onLeave = () => {
       shown = false;
       trail.length = 0;
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      trailPainted = false;
       gsap.to(dot, { opacity: 0, duration: 0.2, ease: "power2.out" });
     };
 
     // --- trail render (shared RAF) --------------------------------------
     const unsubscribe = subscribe((deltaMs) => {
-      if (document.hidden) return;
-      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-      if (!shown) return;
+      if (document.hidden || !shown) return;
 
       // Frame-rate-independent chase toward the pointer.
       const dt = Math.min(deltaMs, 50);
@@ -268,7 +269,13 @@ export function InkCursor() {
       nib.style.transform = `rotate(${angle}rad) scale(${stretch}, ${1 / stretch})`;
 
       const n = trail.length;
-      if (n < 3) return;
+      // After the tail fades, an idle cursor needs no full-canvas clearing.
+      if (n < 3) {
+        if (trailPainted) ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        trailPainted = false;
+        return;
+      }
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
       // Offset both sides along local normals, then curve through them.
       // Age-based fading avoids the last samples bunching into visible beads.
@@ -308,6 +315,7 @@ export function InkCursor() {
       curveThrough(ctx, right.reverse());
       ctx.closePath();
       ctx.fill();
+      trailPainted = true;
       ctx.globalAlpha = 1;
     }, 40);
 
@@ -333,9 +341,9 @@ export function InkCursor() {
     // on mount) and the layer refs only exist after it does. It is NOT
     // the host swap — that moves the container without remounting, so
     // this effect and everything it owns survive an open/close.
-  }, [reducedMotion, effectsReduced, coarsePointer, portalHost]);
+  }, [reducedMotion, inkUnavailable, coarsePointer, portalHost]);
 
-  if (reducedMotion || effectsReduced || coarsePointer || !portalHost) return null;
+  if (reducedMotion || inkUnavailable || coarsePointer || !portalHost) return null;
 
   const layers = (
     <>

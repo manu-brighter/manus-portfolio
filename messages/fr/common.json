@@ -92,14 +92,16 @@
     "theme": "Palette",
     "motion": "Mouvement",
     "auto": "Auto",
-    "light": "Flow",
-    "full": "Simulation complète",
-    "autoBody": "Flow, ajusté automatiquement. Réduit les détails si nécessaire pour garder le mouvement fluide.",
+    "light": "Animation",
+    "full": "Simulation",
+    "autoBody": "Animation, ajustée automatiquement. Réduit les détails si nécessaire pour garder le mouvement fluide.",
     "lightBody": "Des formes fluides qui réagissent à tes gestes. Peu de calcul, un niveau de détail fixe.",
     "fullBody": "Des tourbillons physiques qui suivent le pointeur. Demande plus de puissance graphique.",
     "reducedNotice": "L’encre utilise moins de détails pour préserver la fluidité de la page.",
     "reducedMotion": "La réduction des animations de votre système est active. Vous pouvez toujours choisir les couleurs.",
-    "unavailable": "Cette vue d’encre est actuellement indisponible sur votre appareil. Les couleurs et le contenu restent accessibles."
+    "unavailable": "Cette vue d’encre est actuellement indisponible sur votre appareil. Les couleurs et le contenu restent accessibles.",
+    "lightShort": "Encre interactive, peu de calculs",
+    "fullShort": "Simulation réelle de fluides, plus de calculs"
   },
   "inkPreview": {
     "label": "Atelier d’encre · aperçu local",

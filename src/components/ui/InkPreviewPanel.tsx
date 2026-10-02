@@ -31,12 +31,22 @@ export function InkPreviewPanel() {
               type="radio"
               name="ink-mode"
               value={mode}
+              aria-labelledby={`${descriptionId}-${mode}`}
               checked={inkPreference === mode}
               disabled={reducedMotion || (mode === "full" && fullUnavailable)}
               onChange={() => selectInk(mode)}
               className="size-4 accent-[var(--color-ink)]"
             />
-            <span className="text-sm">{t(mode)}</span>
+            <span className="py-1.5">
+              <span id={`${descriptionId}-${mode}`} className="block text-sm">
+                {t(mode)}
+              </span>
+              {mode !== "auto" && (
+                <span className="block text-[0.65rem] leading-relaxed text-ink-muted">
+                  {t(`${mode}Short`)}
+                </span>
+              )}
+            </span>
           </label>
         ))}
       </div>

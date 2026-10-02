@@ -3,8 +3,12 @@ export type InkPreference = "auto" | "light" | "full";
 export const INK_PREFERENCE_KEY = "manus-ink-mode";
 
 /** A QA URL is temporary and takes precedence over a saved visitor choice. */
-export function resolveInkPreference(query: string | null, stored: string | null): InkPreference {
-  return parseInkPreference(query) ?? parseInkPreference(stored) ?? "auto";
+export function resolveInkPreference(
+  query: string | null,
+  stored: string | null,
+  defaultPreference: InkPreference = "auto",
+): InkPreference {
+  return parseInkPreference(query) ?? parseInkPreference(stored) ?? defaultPreference;
 }
 
 export function parseInkPreference(value: string | null): InkPreference | null {

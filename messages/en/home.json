@@ -14,7 +14,7 @@
       "given": "Manuel."
     },
     "tagline": "Developer · Photographer · Visual Tinkerer",
-    "taglineSuffix": "Available from 01.12.2026"
+    "taglineSuffix": "Open to a new role from 01.12.2026"
   },
   "currently": {
     "label": "Currently",
@@ -50,7 +50,7 @@
       "name": "PHP · Vue · SQL",
       "description": "Designing business interfaces, developing integrations and supporting releases with automated tests."
     },
-    "vibecodedMarker": "AI × Me",
+    "vibecodedMarker": "AI-assisted",
     "tiers": [
       {
         "id": "daily-driver",

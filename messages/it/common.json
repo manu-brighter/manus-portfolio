@@ -92,14 +92,16 @@
     "theme": "Palette",
     "motion": "Movimento",
     "auto": "Auto",
-    "light": "Flow",
-    "full": "Simulazione completa",
-    "autoBody": "Flow, regolato automaticamente. Riduce i dettagli quando serve per mantenere il movimento fluido.",
+    "light": "Animazione",
+    "full": "Simulazione",
+    "autoBody": "Animazione, regolata automaticamente. Riduce i dettagli quando serve per mantenere il movimento fluido.",
     "lightBody": "Forme fluide che reagiscono ai tuoi gesti. Pochi calcoli, un livello di dettaglio fisso.",
     "fullBody": "Vortici fisici che seguono il puntatore. Richiede più potenza grafica.",
     "reducedNotice": "L’inchiostro usa meno dettagli per mantenere fluida la pagina.",
     "reducedMotion": "La riduzione del movimento del sistema è attiva. Puoi comunque scegliere i colori.",
-    "unavailable": "Questa vista dell’inchiostro non è al momento disponibile sul tuo dispositivo. Colori e contenuti restano accessibili."
+    "unavailable": "Questa vista dell’inchiostro non è al momento disponibile sul tuo dispositivo. Colori e contenuti restano accessibili.",
+    "lightShort": "Inchiostro interattivo, meno calcoli",
+    "fullShort": "Vera simulazione di fluidi, più calcoli"
   },
   "inkPreview": {
     "label": "Laboratorio d’inchiostro · anteprima locale",

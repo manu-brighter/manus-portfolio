@@ -14,7 +14,7 @@
       "given": "Manuel."
     },
     "tagline": "Developer · Photographer · Visual Tinkerer",
-    "taglineSuffix": "Verfügbar ab 01.12.2026"
+    "taglineSuffix": "Offen für eine neue Rolle ab 01.12.2026"
   },
   "currently": {
     "label": "Currently",
@@ -50,7 +50,7 @@
       "name": "PHP · Vue · SQL",
       "description": "Fachoberflächen gestalten, Schnittstellen entwickeln und Releases mit automatisierten Tests absichern."
     },
-    "vibecodedMarker": "AI × Me",
+    "vibecodedMarker": "AI-assisted",
     "tiers": [
       {
         "id": "daily-driver",

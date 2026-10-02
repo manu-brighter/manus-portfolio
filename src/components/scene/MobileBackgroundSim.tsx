@@ -1,6 +1,5 @@
 "use client";
 
-import gsap from "gsap";
 import { useEffect, useRef } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { applySimPreset, firePresetBurst, getSimPreset } from "@/lib/content/simPresets";
@@ -15,53 +14,13 @@ import { SPOT_COLORS } from "@/lib/palette";
 import { MAX_DT_S, subscribe } from "@/lib/raf";
 import { useSimPresetStore } from "@/lib/simPresetStore";
 
-/**
- * Mobile full-page background fluid sim.
- *
- * Replaces the per-section HeroMobileSim with a single fixed, full-viewport
- * canvas behind ALL content on Mobile-phone layouts (coarse + < 768) — the
- * same "the sim IS the background" model the Desktop uses, brought back to
- * Mobile now that the scroll-drain choreography is clean.
- *
- * Scroll behavior is platform-split:
- *   - iOS/iPadOS ONLY: the scroll-drain choreography (fade to 0 while
- *     scrolling, fade back after stillness). It masks a real platform
- *     bug — iOS Safari drops `position:fixed` WebGL layers during
- *     momentum scroll (the documented blink that pushed the first
- *     rework to per-section canvases / a <video> on tablets). The
- *     canvas is already transparent when the cull lands, so it's
- *     invisible. Combined with the same layer-promotion stack
- *     SceneCanvas uses (translateZ / will-change / contain:paint /
- *     isolation / preserveDrawingBuffer / alpha).
- *   - Everywhere else (Android Chrome etc.): NO drain — the compositor
- *     handles fixed WebGL layers fine, and blanking the background on
- *     every scroll read as a bumpy flicker (Manuel's feedback). The
- *     sim keeps running and instead couples to the scroll: velocity
- *     injects an invisible whole-canvas force splat (color [0,0,0] =
- *     zero dye) so the ink drifts with the page, mirroring the
- *     Desktop ScrollInkCoupling feel. Tier configs already right-size
- *     the GPU cost, so scrolling with a live sim stays in budget.
- *
- * `pointer-events: none` so the canvas never eats taps/scrolls; touch input
- * is read at the document level — a genuine tap (no drag) pokes one splat,
- * scroll gestures are ignored.
- *
- * Reduced-motion: renders nothing (SceneProvider routes reduced/static to
- * StaticFallback before this ever mounts; the internal guards are belt-and-
- * suspenders).
- */
+/** A single fixed background simulation, visible throughout native scrolling.
+ * Touch input only injects genuine taps; scroll velocity gently moves the ink. */
 
-// NOTE: the drain/reveal timings below are iOS-cull-masking values, not
-// design-cadence tokens — deliberately NOT in lib/motion/tokens.ts.
-const SCROLL_DISTANCE_THRESHOLD = 24; // px of travel before draining (ignore jitter)
-const DRAIN_MS = 240; // fade-out on scroll-start (fast enough to beat the cull)
-const REVEAL_SETTLE_MS = 360; // hold at 0 after resume so the orchestrator re-settles unseen
-const REVEAL_MS = 560; // smooth fade-in once scrolling has stopped
-const SCROLL_IDLE_COOLDOWN_MS = 1000; // stillness required before revealing
 const TAP_MOVE_TOLERANCE_PX = 12; // beyond this a touch is a scroll, not a tap
 const TAP_MAX_MS = 400; // longer than this is a long-press, not a tap
 
-// Scroll → ink coupling (non-iOS path). Mirrors the Desktop
+// Scroll → ink coupling. Mirrors the Desktop
 // ScrollInkCoupling constants, adjusted for native-scroll velocity
 // (px per event batch) instead of Lenis's smoothed px/frame.
 const COUPLE_VELOCITY_THRESHOLD = 10; // |px/16ms| below this never fires
@@ -70,19 +29,6 @@ const COUPLE_VELOCITY_TO_FORCE = 0.008;
 const COUPLE_MAX_FORCE = 0.5;
 const COUPLE_FORCE_RADIUS = 1.2; // whole-canvas soft force field
 const NO_DYE: readonly [number, number, number] = [0, 0, 0]; // pure velocity, zero dye
-
-/**
- * iOS/iPadOS detection — the drain choreography masks an iOS-Safari-
- * specific compositor bug, so it must not punish other platforms.
- * iPadOS 13+ masquerades as MacIntel, hence the maxTouchPoints probe.
- */
-function isIOS(): boolean {
-  if (typeof navigator === "undefined") return false;
-  return (
-    /iP(hone|ad|od)/.test(navigator.userAgent) ||
-    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
-  );
-}
 
 type MobileBackgroundSimProps = {
   config: TierConfig;
@@ -109,7 +55,6 @@ export function MobileBackgroundSim({
     down: false,
     moved: false,
   });
-  const rafPausedRef = useRef(false);
   const measuringRef = useRef(measuring);
   measuringRef.current = measuring;
   const onFrametimeRef = useRef(onFrametime);
@@ -180,12 +125,7 @@ export function MobileBackgroundSim({
       if (current.presetId === previous.presetId) return;
       const preset = getSimPreset(current.presetId);
       applySimPreset(orchestrator, preset, config);
-      // Same drained-guard as tap-to-splat: during the iOS drain window
-      // compute is gated via rafPausedRef, so a burst queued now would
-      // batch-release on reveal. The preset itself still applies.
-      if (!rafPausedRef.current) {
-        firePresetBurst(orchestrator, preset, config.splatRadius);
-      }
+      firePresetBurst(orchestrator, preset, config.splatRadius);
     });
 
     // Ambient opens the warmup gate after the loader + hero reveal settle.
@@ -255,11 +195,6 @@ export function MobileBackgroundSim({
     };
     const onEnd = () => {
       if (onChrome || moved || performance.now() - startT > TAP_MAX_MS) return;
-      // iOS drain window: compute is gated via rafPausedRef (not
-      // orchestrator.pause(), so its paused-queue-drop never engages) —
-      // a splat queued now would batch-release on reveal as a visible
-      // artifact. Drop the tap instead; the canvas is invisible anyway.
-      if (rafPausedRef.current) return;
       const orchestrator = orchestratorRef.current;
       if (!orchestrator) return;
       const u = startX / window.innerWidth;
@@ -282,13 +217,9 @@ export function MobileBackgroundSim({
     };
   }, [reduced]);
 
-  // Non-iOS scroll → ink coupling: the sim stays visible and running
-  // while scrolling; velocity injects an invisible force splat so the
-  // ink drifts with the page (see header comment). iOS gets the drain
-  // choreography below instead — injecting into a paused orchestrator
-  // would batch-release queued force on reveal.
+  // Keep the ink moving with native scrolling on every mobile platform.
   useEffect(() => {
-    if (reduced || isIOS()) return;
+    if (reduced) return;
 
     let lastY = window.scrollY;
     let lastT = performance.now();
@@ -325,137 +256,13 @@ export function MobileBackgroundSim({
     return () => window.removeEventListener("scroll", onScroll);
   }, [reduced]);
 
-  // iOS-ONLY scroll-drain / reveal choreography. Direct style manipulation
-  // (no React state) — this is a per-frame animation, not a render concern.
-  useEffect(() => {
-    if (reduced || !isIOS()) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    canvas.style.opacity = "1";
-
-    let opacityTween: gsap.core.Tween | null = null;
-    let idleTimerId: number | null = null;
-    let settleTimerId: number | null = null;
-    let drained = false;
-    let scrollAccumulator = 0;
-    let lastScrollY = window.scrollY;
-    // Horizontal-gesture guard: a side-swipe on the Case-Study / Photography
-    // carousels can drag `window.scrollY` a few px diagonally, which would
-    // otherwise trip drain() — fading the background AND doing GSAP+GL work
-    // right in the middle of the carousel's first swipe (a second stall source
-    // on top of the React re-render the carousel already debounced away). We
-    // only drain on a vertical-dominant gesture, so horizontal swipes leave
-    // the sim alone and the iOS cull-mask still kicks in for real page scroll.
-    let horizontalGesture = false;
-    let gestureStartX = 0;
-    let gestureStartY = 0;
-
-    // Opacity fade rides the shared gsap.ticker (raf.ts wraps it) rather than
-    // a standalone requestAnimationFrame loop — keeps the "one RAF ticker"
-    // invariant. `power2.out` matches the prior easeOutCubic (1-(1-t)^3); the
-    // DRAIN_MS/REVEAL_MS timings are unchanged so the iOS cull-masking is too.
-    const tweenOpacity = (to: number, durationMs: number, onComplete?: () => void) => {
-      opacityTween?.kill();
-      opacityTween = gsap.to(canvas, {
-        opacity: to,
-        duration: durationMs / 1000,
-        ease: "power2.out",
-        overwrite: "auto",
-        onComplete: () => {
-          opacityTween = null;
-          onComplete?.();
-        },
-      });
-    };
-
-    const clearSettle = () => {
-      if (settleTimerId !== null) {
-        window.clearTimeout(settleTimerId);
-        settleTimerId = null;
-      }
-    };
-
-    const drain = () => {
-      if (drained) return;
-      drained = true;
-      clearSettle();
-      tweenOpacity(0, DRAIN_MS, () => {
-        rafPausedRef.current = true;
-      });
-    };
-
-    const reveal = () => {
-      if (!drained) return;
-      drained = false;
-      // Resume compute first, but stay at opacity 0 through the settle window
-      // so the orchestrator's wall-clock reset-blink is never seen, then fade.
-      rafPausedRef.current = false;
-      clearSettle();
-      settleTimerId = window.setTimeout(() => {
-        settleTimerId = null;
-        tweenOpacity(1, REVEAL_MS);
-      }, REVEAL_SETTLE_MS);
-    };
-
-    const onScroll = () => {
-      const y = window.scrollY;
-      scrollAccumulator += Math.abs(y - lastScrollY);
-      lastScrollY = y;
-      if (!horizontalGesture && scrollAccumulator > SCROLL_DISTANCE_THRESHOLD) drain();
-
-      // Reveal only after a full SCROLL_IDLE_COOLDOWN_MS of stillness — the
-      // timer is reset on every scroll event, so slow/stop-start scrolling
-      // keeps the sim drained instead of flickering it back in.
-      if (idleTimerId !== null) window.clearTimeout(idleTimerId);
-      idleTimerId = window.setTimeout(() => {
-        idleTimerId = null;
-        scrollAccumulator = 0;
-        reveal();
-      }, SCROLL_IDLE_COOLDOWN_MS);
-    };
-
-    // Classify each touch gesture by dominant axis; a clearly-horizontal drag
-    // (carousel swipe) is flagged so onScroll skips drain() for its duration.
-    const onTouchStart = (e: TouchEvent) => {
-      const t = e.touches[0];
-      if (!t) return;
-      gestureStartX = t.clientX;
-      gestureStartY = t.clientY;
-      horizontalGesture = false;
-    };
-    const onTouchMove = (e: TouchEvent) => {
-      const t = e.touches[0];
-      if (!t) return;
-      const dx = Math.abs(t.clientX - gestureStartX);
-      const dy = Math.abs(t.clientY - gestureStartY);
-      if (dx > dy && dx > 10) horizontalGesture = true;
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    document.addEventListener("touchstart", onTouchStart, { passive: true });
-    document.addEventListener("touchmove", onTouchMove, { passive: true });
-
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      document.removeEventListener("touchstart", onTouchStart);
-      document.removeEventListener("touchmove", onTouchMove);
-      opacityTween?.kill();
-      if (idleTimerId !== null) window.clearTimeout(idleTimerId);
-      clearSettle();
-      rafPausedRef.current = false;
-      canvas.style.opacity = "1";
-    };
-  }, [reduced]);
-
-  // RAF loop — gated by rafPausedRef so the scroll-drain can pause compute
-  // while the canvas is faded out.
+  // Shared RAF continues during scrolling; no opacity fade or compute drain.
   useEffect(() => {
     if (reduced) return;
     let virtualElapsedMs = 0;
     const unsub = subscribe((deltaMs) => {
       const orchestrator = orchestratorRef.current;
       if (!orchestrator) return;
-      if (rafPausedRef.current) return;
       const dt = Math.min(deltaMs * 0.001, MAX_DT_S);
       virtualElapsedMs += Math.min(deltaMs, MAX_DT_S * 1000);
       const startedAt = performance.now();
@@ -486,12 +293,10 @@ export function MobileBackgroundSim({
         height: "100%",
         zIndex: 0,
         pointerEvents: "none",
-        // Same iOS-cull layer-promotion stack as SceneCanvas. Together with
-        // the scroll-drain (opacity 0 while scrolling) the momentum-scroll
-        // cull lands on an already-transparent layer -> no visible blink.
+        // Promote the fixed layer and retain the last frame during Safari repaint pauses.
         transform: "translateZ(0)",
         backfaceVisibility: "hidden",
-        willChange: "transform, opacity",
+        willChange: "transform",
         contain: "paint",
         isolation: "isolate",
       }}

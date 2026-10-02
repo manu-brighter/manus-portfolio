@@ -92,14 +92,16 @@
     "theme": "Farbwelt",
     "motion": "Bewegung",
     "auto": "Auto",
-    "light": "Flow",
-    "full": "Volle Simulation",
-    "autoBody": "Flow, automatisch abgestimmt. Reduziert bei Bedarf Details, damit alles in Bewegung bleibt.",
+    "light": "Animation",
+    "full": "Simulation",
+    "autoBody": "Animation, automatisch abgestimmt. Reduziert bei Bedarf Details, damit alles in Bewegung bleibt.",
     "lightBody": "Fliessende Formen, die auf dich reagieren. Wenig Rechenaufwand, feste Detailstufe.",
     "fullBody": "Physikalische Wirbel, die deinem Zeiger folgen. Braucht mehr Grafikleistung.",
     "reducedNotice": "Die Tinte läuft jetzt mit weniger Details, damit die Seite flüssig bleibt.",
     "reducedMotion": "Deine Systemeinstellung für reduzierte Bewegung ist aktiv. Farben kannst du weiterhin wählen.",
-    "unavailable": "Diese Tintenansicht ist auf deinem Gerät gerade nicht verfügbar. Farben und Inhalte bleiben zugänglich."
+    "unavailable": "Diese Tintenansicht ist auf deinem Gerät gerade nicht verfügbar. Farben und Inhalte bleiben zugänglich.",
+    "lightShort": "Interaktive Tinte, sparsam berechnet",
+    "fullShort": "Echte Flüssigkeitssimulation, mehr Rechenaufwand"
   },
   "inkPreview": {
     "label": "Tintenlabor · lokale Vorschau",

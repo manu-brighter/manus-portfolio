@@ -9,6 +9,7 @@ async function openStudio(page: Page) {
 
 test("ordinary home starts with light ink and a closed studio, even with a cached static physics tier", async ({
   page,
+  isMobile,
 }) => {
   await page.addInitScript(() => {
     localStorage.setItem("manus-gpu-tier", JSON.stringify({ tier: "static", ts: Date.now() }));
@@ -19,8 +20,10 @@ test("ordinary home starts with light ink and a closed studio, even with a cache
   await expect(page.locator(fullCanvas)).toHaveCount(0);
   await expect(page.getByTestId("ink-studio-panel")).toBeHidden();
   const panel = await openStudio(page);
-  await expect(panel.getByRole("radio", { name: "Auto", exact: true })).toBeChecked();
-  await expect(panel.getByRole("radio", { name: "Volle Simulation", exact: true })).toBeDisabled();
+  await expect(
+    panel.getByRole("radio", { name: isMobile ? "Animation" : "Auto", exact: true }),
+  ).toBeChecked();
+  await expect(panel.getByRole("radio", { name: "Simulation", exact: true })).toBeDisabled();
 });
 
 test("manual mode persists and native keyboard controls can return to light ink", async ({
@@ -31,7 +34,7 @@ test("manual mode persists and native keyboard controls can return to light ink"
   });
   await page.goto("/de/");
   let panel = await openStudio(page);
-  const full = panel.getByRole("radio", { name: "Volle Simulation", exact: true });
+  const full = panel.getByRole("radio", { name: "Simulation", exact: true });
   await full.focus();
   await full.press("Space");
   await expect(page.locator(fullCanvas)).toBeVisible({ timeout: 15000 });
@@ -39,8 +42,8 @@ test("manual mode persists and native keyboard controls can return to light ink"
   await page.reload();
   await expect(page.locator(fullCanvas)).toBeVisible({ timeout: 15000 });
   panel = await openStudio(page);
-  await expect(panel.getByRole("radio", { name: "Volle Simulation", exact: true })).toBeChecked();
-  await panel.getByRole("radio", { name: "Flow", exact: true }).check();
+  await expect(panel.getByRole("radio", { name: "Simulation", exact: true })).toBeChecked();
+  await panel.getByRole("radio", { name: "Animation", exact: true }).check();
   await expect(page.getByTestId("lite-ink-canvas")).toBeVisible();
   expect(await page.evaluate((key) => localStorage.getItem(key), KEY)).toBe("light");
 });
@@ -69,9 +72,9 @@ test("blocked storage preserves functional studio controls", async ({ page }) =>
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/de/");
   const panel = await openStudio(page);
-  await panel.getByRole("radio", { name: "Flow", exact: true }).check();
+  await panel.getByRole("radio", { name: "Animation", exact: true }).check();
   await expect(page.getByTestId("lite-ink-canvas")).toBeVisible({ timeout: 15000 });
-  await expect(panel.getByRole("radio", { name: "Flow", exact: true })).toBeChecked();
+  await expect(panel.getByRole("radio", { name: "Animation", exact: true })).toBeChecked();
   expect(errors).toEqual([]);
 });
 
@@ -130,7 +133,7 @@ test("no WebGL still exposes theme settings and an honest status", async ({ page
   await page.goto("/de/");
   const panel = await openStudio(page);
   await expect(panel.getByText(/Diese Tintenansicht ist auf deinem Gerät/)).toBeVisible();
-  await expect(panel.getByRole("radio", { name: "Volle Simulation", exact: true })).toBeDisabled();
+  await expect(panel.getByRole("radio", { name: "Simulation", exact: true })).toBeDisabled();
   const night = panel.getByRole("radio", { name: "Nachtdruck", exact: true });
   await night.focus();
   await night.press("Space");
@@ -158,7 +161,7 @@ test("Auto reduces the light budget after sustained stalls and respects a manual
   const canvas = page.getByTestId("lite-ink-canvas");
   await expect(canvas).toBeVisible({ timeout: 15000 });
   const panel = await openStudio(page);
-  const light = panel.getByRole("radio", { name: "Flow", exact: true });
+  const light = panel.getByRole("radio", { name: "Animation", exact: true });
   await light.focus();
   await light.press("Space");
   await page.clock.pauseAt(await page.evaluate(() => Date.now() + 100));
@@ -198,7 +201,7 @@ test("Auto reduces the light budget after sustained stalls and respects a manual
   ).toBeGreaterThan(0);
   await page.getByRole("button", { name: "Tintenstudio", exact: true }).press("Enter");
   await expect(panel.getByRole("radio", { name: "Auto", exact: true })).toBeChecked();
-  const full = panel.getByRole("radio", { name: "Volle Simulation", exact: true });
+  const full = panel.getByRole("radio", { name: "Simulation", exact: true });
   await full.focus();
   await full.press("Space");
   await page.clock.runFor(6000 + 181 * 34);
@@ -212,7 +215,7 @@ test("reduced motion wins over full mode while themes remain usable", async ({ p
   await page.goto("/de/?ink-preview=full");
   const panel = await openStudio(page);
   await expect(panel.getByText(/Deine Systemeinstellung für reduzierte Bewegung/)).toBeVisible();
-  await expect(panel.getByRole("radio", { name: "Volle Simulation", exact: true })).toBeDisabled();
+  await expect(panel.getByRole("radio", { name: "Simulation", exact: true })).toBeDisabled();
   const night = panel.getByRole("radio", { name: "Nachtdruck", exact: true });
   await night.focus();
   await night.press("Space");

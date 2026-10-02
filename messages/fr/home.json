@@ -14,7 +14,7 @@
       "given": "Manuel."
     },
     "tagline": "Developer · Photographer · Visual Tinkerer",
-    "taglineSuffix": "Disponible dès le 01.12.2026"
+    "taglineSuffix": "Ouvert à un nouveau poste dès le 01.12.2026"
   },
   "currently": {
     "label": "Currently",
@@ -50,7 +50,7 @@
       "name": "PHP · Vue · SQL",
       "description": "Concevoir des interfaces métier, développer des intégrations et accompagner les versions avec des tests automatisés."
     },
-    "vibecodedMarker": "AI × Me",
+    "vibecodedMarker": "AI-assisted",
     "tiers": [
       {
         "id": "daily-driver",

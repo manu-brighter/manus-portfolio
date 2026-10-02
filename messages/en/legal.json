@@ -79,7 +79,7 @@
           "id": "inkPreference",
           "heading": "Ink preference",
           "body": [
-            "The ink motion setting is saved as “manus-ink-mode” in LocalStorage (Auto, Light ink or Full simulation). It remains until changed or browser data is cleared, is not transmitted and contains no personal data. Temporary preview links do not save this setting."
+            "The ink motion setting is saved as “manus-ink-mode” in LocalStorage (Auto, Animation or Simulation). It remains until changed or browser data is cleared, is not transmitted and contains no personal data. Temporary preview links do not save this setting."
           ]
         },
         {

@@ -55,16 +55,18 @@ export function CvActions({ label, hint, docTitle, presetNames }: CvActionsProps
   }, [docTitle, presetNames]);
 
   return (
-    <div className="flex flex-col items-start gap-2 print:hidden md:items-end">
+    <div className="flex min-w-0 flex-col items-end gap-1.5 print:hidden sm:gap-2">
       <button
         type="button"
         onClick={handlePrint}
-        className="inline-flex cursor-pointer items-center gap-2 rounded-[2px] border-[1.5px] border-ink bg-paper px-4 py-2 font-mono text-ink text-xs uppercase tracking-[0.18em] shadow-[3px_3px_0_var(--color-ink)] transition-[transform,box-shadow] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[1px_1px_0_var(--color-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper motion-reduce:transition-none"
+        className="inline-flex min-h-11 cursor-pointer items-center gap-2 whitespace-nowrap rounded-full border border-ink bg-ink px-3.5 py-2 text-xs text-paper transition-transform active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper motion-reduce:transition-none sm:min-h-0 sm:rounded-[2px] sm:border-[1.5px] sm:bg-paper sm:px-4 sm:font-mono sm:text-ink sm:uppercase sm:tracking-[0.18em] sm:shadow-[3px_3px_0_var(--color-ink)] sm:transition-[transform,box-shadow] sm:hover:translate-x-[2px] sm:hover:translate-y-[2px] sm:hover:shadow-[1px_1px_0_var(--color-ink)]"
       >
         {label}
         <span aria-hidden="true">↓</span>
       </button>
-      <p className="max-w-56 text-left type-body-sm text-ink-muted md:text-right">{hint}</p>
+      <p className="max-w-56 text-right text-[0.65rem] leading-relaxed text-ink-muted sm:text-sm">
+        {hint}
+      </p>
     </div>
   );
 }
