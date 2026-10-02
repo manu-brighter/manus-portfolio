@@ -143,14 +143,14 @@ test("Auto falls back from simulation after sustained stalls and honors manual S
   await expect(full).toBeVisible({ timeout: 15000 });
   await page.getByRole("button", { name: "Visuals", exact: true }).click();
   await page.getByRole("radio", { name: "Animation", exact: true }).check();
-  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 100));
+  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1000));
   const auto = page.getByRole("radio", { name: "Auto", exact: true });
   await auto.focus();
   await auto.press("Space");
   await auto.press("Escape");
   await page.clock.runFor(6000 + 90 * 34);
   await expect(full).toBeVisible();
-  await page.clock.runFor(91 * 34);
+  await page.clock.runFor(91 * 34 + 1000);
   await expect(page.getByTestId("lite-ink-canvas")).toBeVisible();
   await expect(full).toHaveCount(0);
   await page.getByRole("button", { name: "Visuals", exact: true }).press("Enter");
@@ -161,4 +161,119 @@ test("Auto falls back from simulation after sustained stalls and honors manual S
   await expect(manual).toBeChecked();
   await expect(full).toBeVisible();
   await expect(page.getByTestId("lite-ink-canvas")).toHaveCount(0);
+  await auto.focus();
+  await auto.press("Space");
+  await expect(auto).toBeChecked();
+  await expect(page.getByTestId("lite-ink-canvas")).toBeVisible();
+  await expect(full).toHaveCount(0);
+});
+
+for (const renderer of ["Unknown desktop GPU", "Intel(R) Iris(R) Xe Graphics"]) {
+  test(`desktop Auto measures real simulation instead of excluding ${renderer}`, async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(isMobile, "Touch devices always start with Animation");
+    await page.addInitScript((name) => {
+      localStorage.setItem("manus-gpu-tier", JSON.stringify({ tier: "low", ts: Date.now() }));
+      const original = WebGL2RenderingContext.prototype.getParameter;
+      WebGL2RenderingContext.prototype.getParameter = function (parameter) {
+        return parameter === 37446 ? name : original.call(this, parameter);
+      };
+      WebGL2RenderingContext.prototype.drawArrays = () => {};
+    }, renderer);
+    await page.goto("/de/");
+    await expect(page.locator('[data-scene="root"] canvas')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByTestId("lite-ink-canvas")).toHaveCount(0);
+  });
+}
+
+test("an uncached GPU is sampled only after the real simulation has warmed up", async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(isMobile, "Touch defaults stay Animation");
+  test.setTimeout(90000);
+  await page.clock.install();
+  await page.addInitScript(() => {
+    localStorage.removeItem("manus-gpu-tier");
+    window.requestAnimationFrame = (callback) =>
+      window.setTimeout(() => callback(performance.now()), 16);
+    window.cancelAnimationFrame = (id) => window.clearTimeout(id);
+    const original = WebGL2RenderingContext.prototype.getParameter;
+    WebGL2RenderingContext.prototype.getParameter = function (parameter) {
+      return parameter === 37446 ? "Unknown desktop GPU" : original.call(this, parameter);
+    };
+    // Controlled timings test when sampling occurs, not the host GPU's speed.
+    WebGL2RenderingContext.prototype.drawArrays = () => {};
+    new MutationObserver(() => {
+      const root = document.documentElement;
+      if (root.dataset.simMountedAt || !document.querySelector('[data-scene="root"] canvas'))
+        return;
+      root.dataset.simMountedAt = String(performance.now());
+    }).observe(document, { childList: true, subtree: true });
+    WebGL2RenderingContext.prototype.finish = () => {
+      const root = document.documentElement;
+      root.dataset.firstGpuSampleAt ??= String(performance.now());
+      root.dataset.gpuSamples = String(Number(root.dataset.gpuSamples ?? 0) + 1);
+    };
+  });
+  await page.goto("/de/");
+  const full = page.locator('[data-scene="root"] canvas');
+  await expect(full).toBeVisible({ timeout: 15000 });
+  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1000));
+  await page.clock.runFor(15000);
+  const sampleCount = await page.locator("html").getAttribute("data-gpu-samples");
+  expect(Number(sampleCount)).toBeGreaterThanOrEqual(30);
+  // A frame can already be queued before React commits the resolved tier.
+  expect(Number(sampleCount)).toBeLessThanOrEqual(40);
+  await page.clock.runFor(5000);
+  await expect(page.locator("html")).toHaveAttribute("data-gpu-samples", String(sampleCount));
+  const firstSampleDelay = await page.evaluate(() => {
+    const { firstGpuSampleAt, simMountedAt } = document.documentElement.dataset;
+    return Number(firstGpuSampleAt) - Number(simMountedAt);
+  });
+  expect(firstSampleDelay).toBeGreaterThanOrEqual(6000);
+  await expect(full).toBeVisible();
+  await expect(page.getByTestId("lite-ink-canvas")).toHaveCount(0);
+});
+
+test("Auto ignores cold-start stalls but still reduces sustained simulation load", async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(isMobile, "Touch defaults stay Animation");
+  test.setTimeout(90000);
+  await page.clock.install();
+  await page.addInitScript(() => {
+    window.requestAnimationFrame = (callback) =>
+      window.setTimeout(
+        () => callback(performance.now()),
+        Number(document.documentElement?.dataset.frameInterval ?? 34),
+      );
+    window.cancelAnimationFrame = (id) => window.clearTimeout(id);
+    localStorage.setItem("manus-gpu-tier", JSON.stringify({ tier: "minimal", ts: Date.now() }));
+    const original = WebGL2RenderingContext.prototype.getParameter;
+    WebGL2RenderingContext.prototype.getParameter = function (parameter) {
+      return parameter === 37446 ? "NVIDIA GeForce RTX 3080" : original.call(this, parameter);
+    };
+    WebGL2RenderingContext.prototype.drawArrays = () => {};
+  });
+  await page.goto("/de/");
+  const full = page.locator('[data-scene="root"] canvas');
+  await expect(full).toBeVisible({ timeout: 15000 });
+  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1000));
+  await page.clock.runFor(5000);
+  await page.evaluate(() => {
+    document.documentElement.dataset.frameInterval = "16";
+  });
+  await page.clock.runFor(12000);
+  await expect(full).toBeVisible();
+  await expect(page.getByTestId("lite-ink-canvas")).toHaveCount(0);
+  await page.evaluate(() => {
+    document.documentElement.dataset.frameInterval = "34";
+  });
+  await page.clock.runFor(14000);
+  await expect(page.getByTestId("lite-ink-canvas")).toBeVisible();
+  await expect(full).toHaveCount(0);
 });

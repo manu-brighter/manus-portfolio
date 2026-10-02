@@ -2,6 +2,20 @@ export type InkPreference = "auto" | "light" | "full";
 
 export const INK_PREFERENCE_KEY = "manus-ink-mode";
 
+/** Ignore compilation/reveal work and allow page assets to settle, with a
+ * bounded wait so a stalled download cannot disable adaptation forever. */
+export function createInkWarmup(startedAt: number, minimumMs = 6000) {
+  let settledAt: number | null = null;
+  return (now: number, pageSettled: boolean): boolean => {
+    if (!pageSettled) settledAt = null;
+    if (settledAt === null && pageSettled) settledAt = now;
+    return (
+      now - startedAt >= minimumMs &&
+      ((settledAt !== null && now - settledAt >= 2000) || now - startedAt >= 15000)
+    );
+  };
+}
+
 /** A QA URL is temporary and takes precedence over a saved visitor choice. */
 export function resolveInkPreference(
   query: string | null,

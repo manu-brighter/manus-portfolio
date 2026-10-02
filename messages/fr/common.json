@@ -94,7 +94,7 @@
     "auto": "Auto",
     "light": "Animation",
     "full": "Simulation",
-    "autoBody": "Auto utilise la simulation sur les ordinateurs puissants, sinon l’animation. Des ralentissements prolongés simplifient le rendu.",
+    "autoBody": "Auto démarre avec la simulation sur ordinateur et évalue les performances après le démarrage. Des ralentissements prolongés déclenchent l’animation. Sur mobile, l’animation est activée dès le départ.",
     "lightBody": "Des formes fluides qui réagissent à tes gestes. Peu de calcul, un niveau de détail fixe.",
     "fullBody": "Des tourbillons physiques qui suivent le pointeur. Demande plus de puissance graphique.",
     "reducedNotice": "Auto utilise maintenant Animation avec moins de détails pour garder la page fluide.",

@@ -111,7 +111,7 @@ test("light renderer failure is reported honestly", async ({ page }) => {
       return original.apply(this, args as Parameters<typeof original>);
     } as typeof original;
   });
-  await page.goto("/de/");
+  await page.goto("/de/?ink-preview=light");
   const panel = await openStudio(page);
   await expect(page.locator("html")).toHaveAttribute("data-lite-attempted", "true", {
     timeout: 15000,
@@ -142,7 +142,12 @@ test("no WebGL still exposes theme settings and an honest status", async ({ page
 
 test("Auto reduces the light budget after sustained stalls and respects a manual full override", async ({
   page,
+  isMobile,
 }) => {
+  test.skip(
+    !isMobile,
+    "Desktop Auto starts with simulation; its fallback has a separate regression",
+  );
   test.setTimeout(90000);
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.clock.install();
@@ -164,7 +169,7 @@ test("Auto reduces the light budget after sustained stalls and respects a manual
   const light = panel.getByRole("radio", { name: "Animation", exact: true });
   await light.focus();
   await light.press("Space");
-  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 100));
+  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1000));
   // Re-enter Auto with the clock paused so startup and action timing cannot
   // contribute samples. Keyboard activation needs no compositor-stability wait.
   const auto = panel.getByRole("radio", { name: "Auto", exact: true });
@@ -208,6 +213,16 @@ test("Auto reduces the light budget after sustained stalls and respects a manual
   await expect(full).toBeChecked();
   await expect(canvas).toHaveCount(0);
   await expect(page.locator(fullCanvas)).toBeVisible();
+  await expect(page.getByText(/Auto nutzt jetzt Animation mit weniger Details/)).toHaveCount(0);
+  await auto.focus();
+  await auto.press("Space");
+  await page.clock.runFor(34);
+  await expect(canvas).toBeVisible();
+  expect(
+    await canvas.evaluate(
+      (element) => (element as HTMLCanvasElement).width * (element as HTMLCanvasElement).height,
+    ),
+  ).toBeLessThanOrEqual(450000);
 });
 
 test("reduced motion wins over full mode while themes remain usable", async ({ page }) => {

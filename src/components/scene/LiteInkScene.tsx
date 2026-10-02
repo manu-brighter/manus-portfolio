@@ -21,9 +21,11 @@ const SECTION_SELECTOR = SECTIONS.map(({ id }) => `#${id}`).join(", ");
 /** Single-pass analytic ink with section choreography and bounded resolution. */
 export function LiteInkScene({
   onUnavailable,
+  onReady,
   reducedQuality = false,
 }: {
   onUnavailable: () => void;
+  onReady: (ready: boolean) => void;
   reducedQuality?: boolean;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -31,6 +33,8 @@ export function LiteInkScene({
   const [failed, setFailed] = useState(false);
   const qualityRef = useRef(reducedQuality);
   qualityRef.current = reducedQuality;
+  const onReadyRef = useRef(onReady);
+  onReadyRef.current = onReady;
   const pathname = usePathname();
   const refreshSectionsRef = useRef<(() => void) | null>(null);
 
@@ -177,6 +181,7 @@ export function LiteInkScene({
     gl.uniform3fv(uniforms.trail, trail);
     gl.uniform1f(uniforms.section, quiet);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
+    onReadyRef.current(true);
     const pointerMove = (event: PointerEvent) => {
       const distance = pointerKnown
         ? Math.hypot(event.clientX - lastClientX, event.clientY - lastClientY)
@@ -281,6 +286,7 @@ export function LiteInkScene({
       canvas.removeEventListener("webglcontextlost", contextLost);
       gl.deleteVertexArray(vao);
       gl.deleteProgram(activeProgram);
+      onReadyRef.current(false);
     };
   }, [reducedMotion, failed]);
 

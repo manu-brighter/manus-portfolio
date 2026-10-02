@@ -94,7 +94,7 @@
     "auto": "Auto",
     "light": "Animation",
     "full": "Simulation",
-    "autoBody": "Auto nutzt Simulation auf leistungsfähigen Desktop-Geräten, sonst Animation. Bei anhaltendem Ruckeln wird die Darstellung vereinfacht.",
+    "autoBody": "Auto startet am Desktop mit Simulation und prüft nach dem Anlaufen die Leistung. Bei anhaltendem Ruckeln wechselt es zu Animation. Auf Mobile startet Animation.",
     "lightBody": "Fliessende Formen, die auf dich reagieren. Wenig Rechenaufwand, feste Detailstufe.",
     "fullBody": "Physikalische Wirbel, die deinem Zeiger folgen. Braucht mehr Grafikleistung.",
     "reducedNotice": "Auto nutzt jetzt Animation mit weniger Details, damit die Seite flüssig bleibt.",

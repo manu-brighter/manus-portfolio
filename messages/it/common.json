@@ -94,7 +94,7 @@
     "auto": "Auto",
     "light": "Animazione",
     "full": "Simulazione",
-    "autoBody": "Auto usa la simulazione sui desktop potenti e l’animazione sugli altri dispositivi. Rallentamenti prolungati semplificano la resa.",
+    "autoBody": "Auto avvia la simulazione su desktop e valuta le prestazioni dopo l’avvio. Rallentamenti prolungati attivano l’animazione. Su mobile si parte con l’animazione.",
     "lightBody": "Forme fluide che reagiscono ai tuoi gesti. Pochi calcoli, un livello di dettaglio fisso.",
     "fullBody": "Vortici fisici che seguono il puntatore. Richiede più potenza grafica.",
     "reducedNotice": "Auto ora usa Animazione con meno dettagli per mantenere la pagina fluida.",

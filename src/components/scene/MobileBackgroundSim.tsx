@@ -9,6 +9,7 @@ import {
   type PointerState,
 } from "@/lib/gl/fluidOrchestrator";
 import { capDPR, getTierDPR, type TierConfig } from "@/lib/gpu";
+import { createInkWarmup } from "@/lib/inkPreview";
 import { subscribeToLoaderComplete } from "@/lib/loaderSession";
 import { SPOT_COLORS } from "@/lib/palette";
 import { MAX_DT_S, subscribe } from "@/lib/raf";
@@ -35,6 +36,7 @@ type MobileBackgroundSimProps = {
   measuring: boolean;
   onGLReady: (gl: WebGL2RenderingContext) => void;
   onFrametime: (ms: number) => void;
+  onSimulationReady: (ready: boolean) => void;
   onUnavailable?: () => void;
 };
 
@@ -43,6 +45,7 @@ export function MobileBackgroundSim({
   measuring,
   onGLReady,
   onFrametime,
+  onSimulationReady,
   onUnavailable,
 }: MobileBackgroundSimProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -59,6 +62,9 @@ export function MobileBackgroundSim({
   measuringRef.current = measuring;
   const onFrametimeRef = useRef(onFrametime);
   onFrametimeRef.current = onFrametime;
+  const onSimulationReadyRef = useRef(onSimulationReady);
+  onSimulationReadyRef.current = onSimulationReady;
+  const warmupRef = useRef<ReturnType<typeof createInkWarmup> | null>(null);
   const onUnavailableRef = useRef(onUnavailable);
   onUnavailableRef.current = onUnavailable;
   const reduced = useReducedMotion();
@@ -109,9 +115,11 @@ export function MobileBackgroundSim({
       return;
     }
     orchestratorRef.current = orchestrator;
+    warmupRef.current = null;
     const onContextLost = (event: Event) => {
       event.preventDefault();
       orchestratorRef.current = null;
+      onSimulationReadyRef.current(false);
       onUnavailableRef.current?.();
     };
     canvas.addEventListener("webglcontextlost", onContextLost);
@@ -158,6 +166,8 @@ export function MobileBackgroundSim({
       unsubPreset();
       orchestrator.dispose();
       orchestratorRef.current = null;
+      warmupRef.current = null;
+      onSimulationReadyRef.current(false);
     };
   }, [config, reduced, onGLReady]);
 
@@ -267,7 +277,17 @@ export function MobileBackgroundSim({
       virtualElapsedMs += Math.min(deltaMs, MAX_DT_S * 1000);
       const startedAt = performance.now();
       orchestrator.step(dt, virtualElapsedMs, pointerRef.current);
-      if (measuringRef.current && orchestrator.isStarted()) {
+      if (orchestrator.isStarted() && warmupRef.current === null) {
+        warmupRef.current = createInkWarmup(performance.now());
+        onSimulationReadyRef.current(true);
+      }
+      if (
+        measuringRef.current &&
+        warmupRef.current?.(
+          performance.now(),
+          document.readyState === "complete" && document.fonts.status !== "loading",
+        )
+      ) {
         const gl = canvasRef.current?.getContext("webgl2");
         if (gl) {
           gl.finish();

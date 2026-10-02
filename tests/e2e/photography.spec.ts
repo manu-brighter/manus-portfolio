@@ -87,8 +87,8 @@ test.describe("photography section", () => {
     await context.close();
   });
 
-  test("default Light shows clean photographs without mask canvases", async ({ page }) => {
-    await page.goto("/de/");
+  test("Animation shows clean photographs without simulation mask canvases", async ({ page }) => {
+    await page.goto("/de/?ink-preview=light");
     const section = page.locator("#photography");
     await expect(page.getByTestId("lite-ink-canvas")).toBeVisible({ timeout: 15000 });
     const photo = section.locator("[data-photo-slide] picture img").first();

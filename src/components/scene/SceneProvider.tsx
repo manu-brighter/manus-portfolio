@@ -14,7 +14,7 @@ import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useGPUCapability } from "@/hooks/useGPUCapability";
 import { useInkPreview } from "@/hooks/useInkPreview";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { type GPUTier, getTierDPR, matchRenderer, type TierConfig } from "@/lib/gpu";
+import { type GPUTier, getTierDPR, type TierConfig } from "@/lib/gpu";
 import type { InkPreference } from "@/lib/inkPreview";
 import { subscribeToLoaderComplete } from "@/lib/loaderSession";
 import { useSceneVisibilityStore } from "@/lib/sceneVisibilityStore";
@@ -59,29 +59,20 @@ export function useScene() {
 }
 
 function useWebGL2(onReady: (gl: WebGL2RenderingContext) => void) {
-  const [support, setSupport] = useState<{ supported: boolean; hardwareTier: GPUTier | null }>({
-    supported: false,
-    hardwareTier: null,
-  });
+  const [supported, setSupported] = useState(false);
   useEffect(() => {
     try {
       // A detached probe is collected naturally. Never poison contexts with loseContext.
       const gl = document.createElement("canvas").getContext("webgl2");
-      let hardwareTier: GPUTier | null = null;
       if (gl) {
-        const extension = gl.getExtension("WEBGL_debug_renderer_info");
-        const renderer = extension ? gl.getParameter(extension.UNMASKED_RENDERER_WEBGL) : null;
-        hardwareTier = typeof renderer === "string" ? matchRenderer(renderer) : null;
         onReady(gl);
       }
-      // Current hardware chooses the mode; cached quality still limits the
-      // physics budget. An old low tier must not hide a newly detected RTX.
-      setSupport({ supported: gl !== null, hardwareTier });
+      setSupported(gl !== null);
     } catch {
-      setSupport({ supported: false, hardwareTier: null });
+      setSupported(false);
     }
   }, [onReady]);
-  return support;
+  return supported;
 }
 
 type EBProps = { fallback: ReactNode; children: ReactNode; onUnavailable: () => void };
@@ -103,16 +94,22 @@ class SceneErrorBoundary extends Component<EBProps, { hasError: boolean }> {
 export function SceneProvider({ children }: { children: ReactNode }) {
   const reducedMotion = useReducedMotion();
   const { capability, initProbe, recordFrametime } = useGPUCapability();
-  const { supported: webgl2, hardwareTier } = useWebGL2(initProbe);
+  const webgl2 = useWebGL2(initProbe);
   const rawCoarsePointer = useCoarsePointer();
   const sceneHidden = useSceneVisibilityStore((s) => s.hidden);
   const [canvasMounted, setCanvasMounted] = useState(false);
   const [liteUnavailable, setLiteUnavailable] = useState(false);
   const [fullFailed, setFullFailed] = useState(false);
+  const [simulationReady, setSimulationReady] = useState(false);
+  const [liteReady, setLiteReady] = useState(false);
   const fullUnavailable = reducedMotion || !webgl2 || !capability.config || fullFailed;
+  const autoFull = !rawCoarsePointer && !fullUnavailable;
   const preview = useInkPreview(
-    reducedMotion || sceneHidden || !webgl2 || !canvasMounted || liteUnavailable,
-    !rawCoarsePointer && (hardwareTier ?? capability.tier) === "high" && !fullUnavailable,
+    reducedMotion || sceneHidden || !webgl2 || !canvasMounted || (autoFull && capability.measuring),
+    // Test the actual desktop workload at its existing quality budget.
+    // Renderer names alone cannot decide whether that workload is smooth.
+    autoFull,
+    autoFull ? simulationReady : liteReady,
   );
   const handleLiteUnavailable = useCallback(() => setLiteUnavailable(true), []);
   const handleFullUnavailable = useCallback(() => setFullFailed(true), []);
@@ -164,6 +161,7 @@ export function SceneProvider({ children }: { children: ReactNode }) {
           <LiteInkScene
             reducedQuality={preview.automaticallyReduced}
             onUnavailable={handleLiteUnavailable}
+            onReady={setLiteReady}
           />
         </SceneErrorBoundary>
       ) : config && isCoarsePointer ? (
@@ -178,6 +176,7 @@ export function SceneProvider({ children }: { children: ReactNode }) {
             measuring={capability.measuring}
             onGLReady={initProbe}
             onFrametime={recordFrametime}
+            onSimulationReady={setSimulationReady}
           />
         </SceneErrorBoundary>
       ) : config ? (
@@ -192,6 +191,7 @@ export function SceneProvider({ children }: { children: ReactNode }) {
               measuring={capability.measuring}
               onGLReady={initProbe}
               onFrametime={recordFrametime}
+              onSimulationReady={setSimulationReady}
             />
           </SceneCanvas>
         </SceneErrorBoundary>
