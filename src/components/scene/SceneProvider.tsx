@@ -101,13 +101,15 @@ export function SceneProvider({ children }: { children: ReactNode }) {
   const [liteUnavailable, setLiteUnavailable] = useState(false);
   const [fullFailed, setFullFailed] = useState(false);
   const [simulationReady, setSimulationReady] = useState(false);
+  const [liteReady, setLiteReady] = useState(false);
   const fullUnavailable = reducedMotion || !webgl2 || !capability.config || fullFailed;
+  const autoFull = !rawCoarsePointer && !fullUnavailable;
   const preview = useInkPreview(
-    reducedMotion || sceneHidden || !webgl2 || !canvasMounted || capability.measuring,
+    reducedMotion || sceneHidden || !webgl2 || !canvasMounted || (autoFull && capability.measuring),
     // Test the actual desktop workload at its existing quality budget.
     // Renderer names alone cannot decide whether that workload is smooth.
-    !rawCoarsePointer && !fullUnavailable,
-    simulationReady,
+    autoFull,
+    autoFull ? simulationReady : liteReady,
   );
   const handleLiteUnavailable = useCallback(() => setLiteUnavailable(true), []);
   const handleFullUnavailable = useCallback(() => setFullFailed(true), []);
@@ -159,6 +161,7 @@ export function SceneProvider({ children }: { children: ReactNode }) {
           <LiteInkScene
             reducedQuality={preview.automaticallyReduced}
             onUnavailable={handleLiteUnavailable}
+            onReady={setLiteReady}
           />
         </SceneErrorBoundary>
       ) : config && isCoarsePointer ? (

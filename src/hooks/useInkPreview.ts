@@ -13,7 +13,7 @@ import { subscribe } from "@/lib/raf";
 
 /** Auto may use simulation on a capable desktop, with a one-way fallback
  * after sustained slow frames. Explicit visitor choices always win. */
-export function useInkPreview(paused: boolean, autoFull: boolean, simulationReady: boolean) {
+export function useInkPreview(paused: boolean, autoFull: boolean, rendererReady: boolean) {
   const [preference, setPreference] = useState<InkPreference>("auto");
   const [ready, setReady] = useState(false);
   const temporaryOverride = useRef(false);
@@ -49,15 +49,7 @@ export function useInkPreview(paused: boolean, autoFull: boolean, simulationRead
   // Keep the verdict for this provider's lifetime. Choosing a manual mode
   // must not turn returning to Auto into a different hardware assessment.
   useEffect(() => {
-    if (
-      !ready ||
-      preference !== "auto" ||
-      paused ||
-      automaticallyReduced ||
-      !autoFull ||
-      !simulationReady
-    )
-      return;
+    if (!ready || preference !== "auto" || paused || automaticallyReduced || !rendererReady) return;
     let last = performance.now();
     let warmedUp = createInkWarmup(last);
     let samples: number[] = [];
@@ -91,7 +83,7 @@ export function useInkPreview(paused: boolean, autoFull: boolean, simulationRead
       document.removeEventListener("visibilitychange", resetWindow);
       window.removeEventListener("resize", resetWindow);
     };
-  }, [ready, preference, paused, automaticallyReduced, autoFull, simulationReady]);
+  }, [ready, preference, paused, automaticallyReduced, rendererReady]);
 
   return {
     ready,
