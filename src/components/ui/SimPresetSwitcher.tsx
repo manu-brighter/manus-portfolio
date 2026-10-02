@@ -3,12 +3,15 @@
 import { useTranslations } from "next-intl";
 import { useEffect, useId, useRef, useState } from "react";
 import { useScene } from "@/components/scene/SceneProvider";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { usePathname } from "@/i18n/navigation";
 import { getSimPreset, SIM_PRESETS, type SimPreset } from "@/lib/content/simPresets";
+import { subscribeToLoaderComplete } from "@/lib/loaderSession";
 import { SPOT_HEX } from "@/lib/palette";
 import { useSimPresetStore } from "@/lib/simPresetStore";
 import { InkPreviewPanel } from "./InkPreviewPanel";
 import styles from "./SimPresetSwitcher.module.css";
+import { SimPresetSwitcherHint } from "./SimPresetSwitcherHint";
 
 /** Also used by the experiments' inline theme controls. */
 export function swatchGradient(preset: SimPreset): string {
@@ -26,11 +29,42 @@ export function SimPresetSwitcher() {
   const [mounted, setMounted] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [notice, setNotice] = useState(false);
+  const [hint, setHint] = useState(false);
+  const reducedMotion = useReducedMotion();
   const notified = useRef(false);
   const container = useRef<HTMLDivElement>(null);
   const toggle = useRef<HTMLButtonElement>(null);
   const panelId = useId();
   useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    if (pathname !== "/" || reducedMotion || expanded) return;
+    try {
+      if (sessionStorage.getItem("manus-studio-hint-shown") === "1") return;
+    } catch {
+      // The bounded hint can still run when site storage is blocked.
+    }
+    let hideTimer: number | undefined;
+    let showTimer: number | undefined;
+    const unsubscribe = subscribeToLoaderComplete(() => {
+      showTimer = window.setTimeout(() => {
+        if (window.scrollY > 100) return;
+        setHint(true);
+        try {
+          sessionStorage.setItem("manus-studio-hint-shown", "1");
+        } catch {
+          // No persistence required for the current visit.
+        }
+        hideTimer = window.setTimeout(() => setHint(false), 5500);
+      }, 1200);
+    });
+    return () => {
+      unsubscribe();
+      window.clearTimeout(showTimer);
+      window.clearTimeout(hideTimer);
+      setHint(false);
+    };
+  }, [pathname, reducedMotion, expanded]);
 
   useEffect(() => {
     if (!automaticallyReduced || notified.current) return;
@@ -79,6 +113,7 @@ export function SimPresetSwitcher() {
           {studio("reducedNotice")}
         </div>
       )}
+      {!reducedMotion && <SimPresetSwitcherHint active={hint && !expanded} />}
       <button
         ref={toggle}
         type="button"

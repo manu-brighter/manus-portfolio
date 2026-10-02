@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "Manuel Heller · Développement & Design",
+    "title": "Manuel Heller · Creative Developer",
     "titleTemplate": "%s · Manuel Heller",
     "description": "Développeur logiciel dans la région de Bâle. PHP, Vue, interfaces métier, intégrations et tests automatisés. Projets web personnels, outils IA et photographie.",
     "keywords": [
@@ -94,10 +94,10 @@
     "auto": "Auto",
     "light": "Animation",
     "full": "Simulation",
-    "autoBody": "Animation, ajustée automatiquement. Réduit les détails si nécessaire pour garder le mouvement fluide.",
+    "autoBody": "Auto utilise la simulation sur les ordinateurs puissants, sinon l’animation. Des ralentissements prolongés simplifient le rendu.",
     "lightBody": "Des formes fluides qui réagissent à tes gestes. Peu de calcul, un niveau de détail fixe.",
     "fullBody": "Des tourbillons physiques qui suivent le pointeur. Demande plus de puissance graphique.",
-    "reducedNotice": "L’encre utilise moins de détails pour préserver la fluidité de la page.",
+    "reducedNotice": "Auto utilise maintenant Animation avec moins de détails pour garder la page fluide.",
     "reducedMotion": "La réduction des animations de votre système est active. Vous pouvez toujours choisir les couleurs.",
     "unavailable": "Cette vue d’encre est actuellement indisponible sur votre appareil. Les couleurs et le contenu restent accessibles.",
     "lightShort": "Encre interactive, peu de calculs",

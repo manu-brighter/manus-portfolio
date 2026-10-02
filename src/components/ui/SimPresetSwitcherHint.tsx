@@ -104,7 +104,8 @@ export function SimPresetSwitcherHint({ active }: { active: boolean }) {
   return (
     <div
       aria-hidden="true"
-      className={`pointer-events-none fixed right-20 bottom-36 z-40 flex flex-col items-end gap-1 transition-opacity duration-500 md:right-auto md:bottom-10 md:left-24 md:items-start ${
+      data-testid="ink-studio-hint"
+      className={`pointer-events-none fixed right-20 bottom-16 z-40 flex flex-col items-end gap-1 transition-opacity duration-500 md:right-auto md:bottom-10 md:left-24 md:items-start ${
         phase === "leaving" ? "opacity-0" : "opacity-100"
       }`}
     >
@@ -112,7 +113,7 @@ export function SimPresetSwitcherHint({ active }: { active: boolean }) {
           otherwise overwrite a same-element Tailwind rotate (same
           transform-replacement trap as the print-jam stamps). */}
       <span className="block rotate-[2deg] md:rotate-[-2deg]">
-        <span className="switcher-hint-chip block rounded-sm border border-paper-line bg-paper/95 px-3 py-2 font-mono text-[0.7rem] text-ink uppercase tracking-[0.18em] shadow-[2px_2px_0_var(--color-ink)]">
+        <span className="switcher-hint-chip block max-w-[min(18rem,calc(100vw-6rem))] rounded-sm border border-paper-line bg-paper/95 px-3 py-2 font-mono text-[0.7rem] text-ink uppercase tracking-[0.18em] shadow-[2px_2px_0_var(--color-ink)]">
           {text.slice(0, typedCount)}
           <span className="switcher-hint-caret">▌</span>
         </span>

@@ -110,7 +110,12 @@ export function OverprintReveal({
   const chars = splitChars(text);
 
   useEffect(() => {
-    if (reducedMotion) return;
+    if (
+      reducedMotion ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      document.documentElement.dataset.motion === "static"
+    )
+      return;
     const root = rootRef.current;
     if (!root) return;
 

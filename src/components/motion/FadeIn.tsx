@@ -70,7 +70,12 @@ export function FadeIn({
   const reducedMotion = useReducedMotion();
 
   useEffect(() => {
-    if (reducedMotion) return;
+    if (
+      reducedMotion ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      document.documentElement.dataset.motion === "static"
+    )
+      return;
     const el = ref.current;
     if (!el) return;
 
@@ -94,12 +99,16 @@ export function FadeIn({
     let unsubLoader: (() => void) | null = null;
 
     const start = () => {
+      el.dataset.fade = "active";
       tween = gsap.to(el, {
         opacity: 1,
         ...(hasTransform ? { y: 0, scale: 1 } : {}),
         duration,
         delay,
         ease: "power2.out",
+        onComplete: () => {
+          el.dataset.fade = "settled";
+        },
       });
     };
 
@@ -149,7 +158,7 @@ export function FadeIn({
   }
 
   return (
-    <Tag ref={ref} className={className} aria-hidden={ariaHidden}>
+    <Tag ref={ref} className={className} aria-hidden={ariaHidden} data-fade="pending">
       {children}
     </Tag>
   );

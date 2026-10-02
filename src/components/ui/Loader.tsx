@@ -1,47 +1,50 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { isLoaderComplete, markLoaderComplete } from "@/lib/loaderSession";
 import styles from "./Loader.module.css";
 
 export { isLoaderComplete };
 
-const LOADER_SESSION_KEY = "manuelheller:loader-shown";
-
-/** A first-visit paper window. Content never waits for this decoration. */
+/** One paper window per document load. Internal navigation never replays it. */
 export function Loader() {
   const maskId = useId();
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(true);
+  const show = useRef<boolean | null>(null);
+  const timer = useRef<number | undefined>(undefined);
   const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     // Clear the shared gate before storage, refs or animation can fail.
     // Subscribers mounted later receive the completion synchronously too.
-    const completed = isLoaderComplete();
-    markLoaderComplete();
-
-    let alreadyShown = completed;
-    try {
-      alreadyShown ||= sessionStorage.getItem(LOADER_SESSION_KEY) === "1";
-      sessionStorage.setItem(LOADER_SESSION_KEY, "1");
-    } catch {
-      // The in-memory completion flag still covers same-page remounts.
+    const root = document.documentElement;
+    // Keep the decision across StrictMode's effect replay. The shared bus is
+    // already complete on that second pass, but this same intro is still active.
+    if (show.current === null) {
+      show.current = !isLoaderComplete() && root.dataset.intro === "waiting";
     }
+    markLoaderComplete();
 
     // Read the media query too: the hook's hydration snapshot is false.
     if (
-      alreadyShown ||
+      !show.current ||
       reducedMotion ||
       window.matchMedia("(prefers-reduced-motion: reduce)").matches
     ) {
+      show.current = false;
+      root.dataset.intro = "done";
       setVisible(false);
       return;
     }
 
     setVisible(true);
-    const timer = window.setTimeout(() => setVisible(false), 900);
-    return () => window.clearTimeout(timer);
+    root.dataset.intro = "running";
+    timer.current = window.setTimeout(() => {
+      root.dataset.intro = "done";
+      setVisible(false);
+    }, 1200);
+    return () => window.clearTimeout(timer.current);
   }, [reducedMotion]);
 
   if (!visible) return null;
@@ -52,7 +55,11 @@ export function Loader() {
       data-testid="loader-overlay"
       className={`pointer-events-none fixed inset-0 z-40 ${styles.window}`}
       onAnimationEnd={(event) => {
-        if (event.target === event.currentTarget) setVisible(false);
+        if (event.target === event.currentTarget) {
+          window.clearTimeout(timer.current);
+          document.documentElement.dataset.intro = "done";
+          setVisible(false);
+        }
       }}
     >
       <svg

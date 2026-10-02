@@ -19,6 +19,7 @@ import { SimPresetSwitcher } from "@/components/ui/SimPresetSwitcher";
 import { SimThemeSync } from "@/components/ui/SimThemeSync";
 import { loadNamespaceGroup } from "@/i18n/messages";
 import { routing } from "@/i18n/routing";
+import { MOTION_STARTUP_SCRIPT } from "@/lib/motion/startup";
 import { escapeForScript } from "@/lib/seo/escapeForScript";
 import { buildJsonLd } from "@/lib/seo/jsonLd";
 import { buildLocaleMetadata } from "@/lib/seo/metadata";
@@ -61,7 +62,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   const jsonLd = buildJsonLd(locale, tMeta("description"));
 
   return (
-    <html lang={locale}>
+    <html lang={locale} suppressHydrationWarning>
       {/* suppressHydrationWarning: browser extensions like ColorZilla
           and Grammarly inject attributes onto <body> before React
           hydrates (e.g. `cz-shortcut-listen`). These can't be
@@ -69,6 +70,11 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
           for the body element only — children are still validated
           normally. Standard Next.js pattern for this case. */}
       <body className="flex min-h-dvh flex-col" suppressHydrationWarning>
+        <script
+          id="motion-startup"
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: fixed startup code, no external input
+          dangerouslySetInnerHTML={{ __html: MOTION_STARTUP_SCRIPT }}
+        />
         <script
           type="application/ld+json"
           // biome-ignore lint/security/noDangerouslySetInnerHtml: ld+json must be raw, not text
