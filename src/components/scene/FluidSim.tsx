@@ -7,6 +7,7 @@ import { applySimPreset, firePresetBurst, getSimPreset } from "@/lib/content/sim
 import { subscribeToSplats } from "@/lib/fluidBus";
 import { FluidOrchestrator, type PointerState } from "@/lib/gl/fluidOrchestrator";
 import type { TierConfig } from "@/lib/gpu";
+import { createInkWarmup } from "@/lib/inkPreview";
 import { subscribeToLoaderComplete } from "@/lib/loaderSession";
 import { MAX_DT_S, subscribe } from "@/lib/raf";
 import { useSimPresetStore } from "@/lib/simPresetStore";
@@ -16,9 +17,16 @@ type FluidSimProps = {
   measuring: boolean;
   onGLReady: (gl: WebGL2RenderingContext) => void;
   onFrametime: (ms: number) => void;
+  onSimulationReady: (ready: boolean) => void;
 };
 
-export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSimProps) {
+export function FluidSim({
+  config,
+  measuring,
+  onGLReady,
+  onFrametime,
+  onSimulationReady,
+}: FluidSimProps) {
   const { gl, size } = useThree();
   const dpr = useThree((state) => state.viewport.dpr);
 
@@ -35,6 +43,9 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
   measuringRef.current = measuring;
   const onFrametimeRef = useRef(onFrametime);
   onFrametimeRef.current = onFrametime;
+  const onSimulationReadyRef = useRef(onSimulationReady);
+  onSimulationReadyRef.current = onSimulationReady;
+  const warmupRef = useRef<ReturnType<typeof createInkWarmup> | null>(null);
 
   // Coarse-pointer (mobile/touch) disables sim interactivity. The hero
   // showcase moves to playgrounds; on the long-scroll only ambient
@@ -69,6 +80,7 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
       orchestrator.setPointerSplatEnabled(false);
     }
     orchestratorRef.current = orchestrator;
+    warmupRef.current = null;
 
     // Preset: apply the persisted selection on every fresh init (first
     // mount, tier auto-tune re-init, locale switch) and re-apply live
@@ -102,6 +114,8 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
       unsubPreset();
       orchestrator.dispose();
       orchestratorRef.current = null;
+      warmupRef.current = null;
+      onSimulationReadyRef.current(false);
     };
   }, [gl, onGLReady, config, isCoarsePointer]);
 
@@ -130,7 +144,17 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
 
       orchestrator.step(dt, elapsedMs, pointerRef.current);
 
-      if (measuringRef.current && orchestrator.isStarted()) {
+      if (orchestrator.isStarted() && warmupRef.current === null) {
+        warmupRef.current = createInkWarmup(performance.now());
+        onSimulationReadyRef.current(true);
+      }
+      if (
+        measuringRef.current &&
+        warmupRef.current?.(
+          performance.now(),
+          document.readyState === "complete" && document.fonts.status !== "loading",
+        )
+      ) {
         const gl2 = gl.getContext() as WebGL2RenderingContext;
         gl2.finish();
         onFrametimeRef.current(performance.now() - t0);

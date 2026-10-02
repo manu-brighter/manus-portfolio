@@ -94,7 +94,7 @@
     "auto": "Auto",
     "light": "Animation",
     "full": "Simulation",
-    "autoBody": "Auto uses simulation on capable desktops and animation elsewhere. Sustained slow frames simplify the rendering.",
+    "autoBody": "Auto starts with simulation on desktop and checks performance after it settles. Sustained slow frames switch it to animation. Mobile starts with animation.",
     "lightBody": "Flowing shapes that respond to you. Less processing, fixed detail level.",
     "fullBody": "Physical swirls that follow your pointer. Uses more graphics power.",
     "reducedNotice": "Auto now uses Animation with fewer details to keep the page fluid.",

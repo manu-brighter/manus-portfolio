@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  createInkWarmup,
   INK_PREFERENCE_KEY,
   type InkPreference,
   isSlowInkWindow,
@@ -12,12 +13,11 @@ import { subscribe } from "@/lib/raf";
 
 /** Auto may use simulation on a capable desktop, with a one-way fallback
  * after sustained slow frames. Explicit visitor choices always win. */
-export function useInkPreview(paused: boolean, autoFull: boolean) {
+export function useInkPreview(paused: boolean, autoFull: boolean, simulationReady: boolean) {
   const [preference, setPreference] = useState<InkPreference>("auto");
   const [ready, setReady] = useState(false);
   const temporaryOverride = useRef(false);
   const [automaticallyReduced, setAutomaticallyReduced] = useState(false);
-  const [revision, setRevision] = useState(0);
 
   useEffect(() => {
     const query = new URLSearchParams(window.location.search).get("ink-preview");
@@ -37,8 +37,6 @@ export function useInkPreview(paused: boolean, autoFull: boolean) {
 
   const select = useCallback((next: InkPreference) => {
     setPreference(next);
-    setAutomaticallyReduced(false);
-    setRevision((value) => value + 1);
     if (!temporaryOverride.current) {
       try {
         window.localStorage.setItem(INK_PREFERENCE_KEY, next);
@@ -48,17 +46,25 @@ export function useInkPreview(paused: boolean, autoFull: boolean) {
     }
   }, []);
 
-  // Revision deliberately restarts the measurement when Auto is chosen twice.
-  // biome-ignore lint/correctness/useExhaustiveDependencies(revision): restarting Auto clears the measurement windows even if the preference did not change
+  // Keep the verdict for this provider's lifetime. Choosing a manual mode
+  // must not turn returning to Auto into a different hardware assessment.
   useEffect(() => {
-    if (!ready || preference !== "auto" || paused || automaticallyReduced) return;
+    if (
+      !ready ||
+      preference !== "auto" ||
+      paused ||
+      automaticallyReduced ||
+      !autoFull ||
+      !simulationReady
+    )
+      return;
     let last = performance.now();
-    let warmUntil = last + 6000;
+    let warmedUp = createInkWarmup(last);
     let samples: number[] = [];
     let slowWindows = 0;
     const resetWindow = () => {
       last = performance.now();
-      warmUntil = last + 2000;
+      warmedUp = createInkWarmup(last, 2000);
       samples = [];
       slowWindows = 0;
     };
@@ -68,7 +74,11 @@ export function useInkPreview(paused: boolean, autoFull: boolean) {
       const now = performance.now();
       const interval = now - last;
       last = now;
-      if (document.hidden || now < warmUntil) return;
+      if (
+        document.hidden ||
+        !warmedUp(now, document.readyState === "complete" && document.fonts.status !== "loading")
+      )
+        return;
       // A single large interruption never decides a window by itself.
       samples.push(interval);
       if (samples.length < 90) return;
@@ -81,12 +91,12 @@ export function useInkPreview(paused: boolean, autoFull: boolean) {
       document.removeEventListener("visibilitychange", resetWindow);
       window.removeEventListener("resize", resetWindow);
     };
-  }, [ready, preference, paused, automaticallyReduced, revision]);
+  }, [ready, preference, paused, automaticallyReduced, autoFull, simulationReady]);
 
   return {
     ready,
     preference,
-    automaticallyReduced,
+    automaticallyReduced: preference === "auto" && automaticallyReduced,
     light: preference === "light" || (preference === "auto" && (!autoFull || automaticallyReduced)),
     select,
   };
