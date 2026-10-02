@@ -27,7 +27,10 @@ export function useInkPreview(paused: boolean) {
     } catch {
       // Site data may be blocked. The controls still work for this visit.
     }
-    setPreference(resolveInkPreference(query, stored));
+    // Touch devices start in Animation regardless of their measured GPU tier.
+    // An explicit saved choice or temporary QA override still takes priority.
+    const defaultPreference = window.matchMedia("(pointer: coarse)").matches ? "light" : "auto";
+    setPreference(resolveInkPreference(query, stored, defaultPreference));
     setReady(true);
   }, []);
 

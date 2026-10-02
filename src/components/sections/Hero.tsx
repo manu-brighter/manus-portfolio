@@ -60,7 +60,6 @@ export function Hero() {
       </h1>
 
       <div className="stamp-column col-span-12 md:col-span-5">
-        <span className="type-label-stamp">{t("bioStamps.role")}</span>
         <span className="type-label-stamp">{t("bioStamps.sideProject")}</span>
         <span className="type-label-stamp">{t("bioStamps.location")}</span>
       </div>

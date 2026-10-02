@@ -173,10 +173,13 @@ export function About() {
             <h3 id="about-portrait-heading" className="type-label-stamp">
               {tCurrently("label")}
             </h3>
-            <dl className="flex flex-col gap-2">
+            <dl className="flex min-w-0 flex-col gap-4">
               {currentlyItems.map((item) => (
-                <div key={item.verb} className="flex items-baseline gap-3 font-mono text-sm">
-                  <dt className="w-24 shrink-0 text-ink-muted uppercase tracking-[0.18em] text-xs">
+                <div
+                  key={item.verb}
+                  className="grid min-w-0 gap-1 font-mono text-sm leading-relaxed [overflow-wrap:anywhere]"
+                >
+                  <dt className="text-ink-muted uppercase tracking-[0.18em] text-xs">
                     {item.verb}
                   </dt>
                   <dd className="text-ink">{item.value}</dd>

@@ -14,6 +14,17 @@ import { devices, expect, test } from "@playwright/test";
 test.use({ ...devices["Pixel 5"] });
 
 test.describe("Photography mobile stack", () => {
+  test("Animation photos reveal automatically without controls or a canvas", async ({ page }) => {
+    await page.goto("/de/?ink-preview=light");
+    await expect(page.getByTestId("lite-ink-canvas")).toBeVisible({ timeout: 15000 });
+    await expect(page.getByTestId("photo-ink-animation")).toHaveCount(5);
+    const first = page.getByTestId("photo-slide").first();
+    await first.scrollIntoViewIfNeeded();
+    await expect(first.getByTestId("photo-ink-animation")).toHaveCount(0, { timeout: 10000 });
+    await expect(page.locator("#photography canvas")).toHaveCount(0);
+    await expect(page.locator("#photography [role='button']")).toHaveCount(0);
+  });
+
   test("renders 5 vertical photo figures with alt text", async ({ page }) => {
     await page.goto("/de/#photography");
     await expect(page.getByTestId("photo-slide")).toHaveCount(5);

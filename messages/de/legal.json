@@ -79,7 +79,7 @@
           "id": "inkPreference",
           "heading": "Tinten-Einstellung",
           "body": [
-            "Die Einstellung für die Bewegung der Tinte wird unter „manus-ink-mode“ im LocalStorage gespeichert (Auto, Leichte Tinte oder Volle Simulation). Sie bleibt bis zur nächsten Änderung oder bis zum Löschen der Browser-Daten erhalten, wird nicht übertragen und enthält keine personenbezogenen Daten. Temporäre Vorschau-Links speichern diese Einstellung nicht."
+            "Die Einstellung für die Bewegung der Tinte wird unter „manus-ink-mode“ im LocalStorage gespeichert (Auto, Animation oder Simulation). Sie bleibt bis zur nächsten Änderung oder bis zum Löschen der Browser-Daten erhalten, wird nicht übertragen und enthält keine personenbezogenen Daten. Temporäre Vorschau-Links speichern diese Einstellung nicht."
           ]
         },
         {

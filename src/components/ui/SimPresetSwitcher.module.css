@@ -5,23 +5,51 @@
   visibility: hidden;
   opacity: 0;
   pointer-events: none;
-  transform: translateY(8px) scale(0.975);
+  transform: translateY(14px) scale(0.93) rotate(-1.5deg);
   transform-origin: bottom right;
   transition:
-    opacity 150ms ease-out,
-    transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
-    visibility 0s 180ms;
+    opacity 140ms ease-out,
+    transform 190ms cubic-bezier(0.4, 0, 1, 1),
+    visibility 0s 190ms;
 }
 
 .panel[data-open="true"] {
   visibility: visible;
   opacity: 1;
   pointer-events: auto;
-  transform: translateY(0) scale(1);
+  transform: translateY(0) scale(1) rotate(0);
   transition:
     opacity 180ms ease-out,
-    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 280ms cubic-bezier(0.16, 1.12, 0.3, 1),
     visibility 0s;
+}
+
+.panel > * {
+  opacity: 0;
+  transform: translateY(7px);
+  transition:
+    opacity 100ms ease-out,
+    transform 140ms ease-out;
+}
+
+.panel[data-open="true"] > * {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 160ms ease-out,
+    transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.panel[data-open="true"] > :nth-child(2) {
+  transition-delay: 25ms;
+}
+
+.panel[data-open="true"] > :nth-child(3) {
+  transition-delay: 50ms;
+}
+
+.panel[data-open="true"] > :nth-child(4) {
+  transition-delay: 75ms;
 }
 
 @media (min-width: 48rem) {
@@ -34,7 +62,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .panel,
-  .panel[data-open="true"] {
+  .panel[data-open="true"],
+  .panel > *,
+  .panel[data-open="true"] > * {
     transform: none;
     transition: none;
   }

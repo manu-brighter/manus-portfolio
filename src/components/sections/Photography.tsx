@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
 import { PhotoInkMask, type SpotColor } from "@/components/scene/PhotoInkMask";
+import { useScene } from "@/components/scene/SceneProvider";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { useLenis } from "@/hooks/useLenis";
 import { useMobileLayout } from "@/hooks/useMobileLayout";
@@ -184,6 +185,8 @@ function PhotoFrame({ slide, index, total }: { slide: Slide; index: number; tota
   const [reveal, setReveal] = useState(false);
   const lenis = useLenis();
   const reducedMotion = useReducedMotion();
+  const { effectsReduced } = useScene();
+  const interactive = !reveal && !reducedMotion && !effectsReduced;
 
   // Subscribe this frame to the shared module-level observer. The
   // earlier per-frame `window.addEventListener("scroll", ...)` +
@@ -216,7 +219,7 @@ function PhotoFrame({ slide, index, total }: { slide: Slide; index: number; tota
   // (and the global *,*::before,*::after rule already snaps any GSAP
   // animation duration to 0.01ms, so the reveal fires immediately).
   const onActivate = useCallback(() => {
-    if (reveal) return;
+    if (!interactive) return;
     const el = ref.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
@@ -229,7 +232,7 @@ function PhotoFrame({ slide, index, total }: { slide: Slide; index: number; tota
         behavior: reducedMotion ? "auto" : "smooth",
       });
     }
-  }, [reveal, lenis, reducedMotion]);
+  }, [interactive, lenis, reducedMotion]);
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Enter" || event.key === " ") {
@@ -253,19 +256,19 @@ function PhotoFrame({ slide, index, total }: { slide: Slide; index: number; tota
   return (
     <figure
       ref={ref}
-      className={`relative w-full ${reveal ? "" : "cursor-pointer"}`}
+      className={`relative w-full ${interactive ? "cursor-pointer" : ""}`}
       style={{ aspectRatio: slide.aspect }}
       data-photo-slide={slide.baseName}
-      // Pre-reveal the figure is interactive (click/enter/space scrolls
+      // Full mode before reveal is interactive (click/enter/space scrolls
       // photo to viewport centre, organic reveal trigger fires there).
       // Post-reveal we drop the affordances — photo is just content.
       // No aria-pressed (this isn't a toggle); role="button" is a
       // one-shot affordance the user activates exactly once per slot.
-      onClick={reveal ? undefined : onActivate}
-      onKeyDown={reveal ? undefined : onKeyDown}
-      tabIndex={reveal ? -1 : 0}
-      role={reveal ? undefined : "button"}
-      aria-label={reveal ? undefined : t(`slides.${slide.altKey}.alt`)}
+      onClick={interactive ? onActivate : undefined}
+      onKeyDown={interactive ? onKeyDown : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      role={interactive ? "button" : undefined}
+      aria-label={interactive ? t(`slides.${slide.altKey}.alt`) : undefined}
     >
       {/* Centre sentinel: spans the figure's bottom half, so its leading
           top edge lands exactly on the photo's vertical centre. The shared
