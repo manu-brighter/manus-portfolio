@@ -39,7 +39,7 @@ test("the opening has visible moving ink before application hydration", async ({
     await expect
       .poll(() =>
         page.evaluate(
-          () => new Set((window as Window & { earlyInkFrames: string[] }).earlyInkFrames).size,
+          () => new Set((window as Window & { earlyInkFrames?: string[] }).earlyInkFrames).size,
         ),
       )
       .toBeGreaterThan(2);
