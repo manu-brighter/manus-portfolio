@@ -143,7 +143,7 @@ test("Auto falls back from simulation after sustained stalls and honors manual S
   await expect(full).toBeVisible({ timeout: 15000 });
   await page.getByRole("button", { name: "Visuals", exact: true }).click();
   await page.getByRole("radio", { name: "Animation", exact: true }).check();
-  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 100));
+  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1000));
   const auto = page.getByRole("radio", { name: "Auto", exact: true });
   await auto.focus();
   await auto.press("Space");
@@ -206,19 +206,29 @@ test("an uncached GPU is sampled only after the real simulation has warmed up", 
     };
     // Controlled timings test when sampling occurs, not the host GPU's speed.
     WebGL2RenderingContext.prototype.drawArrays = () => {};
+    new MutationObserver(() => {
+      const root = document.documentElement;
+      if (root.dataset.simMountedAt || !document.querySelector('[data-scene="root"] canvas'))
+        return;
+      root.dataset.simMountedAt = String(performance.now());
+    }).observe(document, { childList: true, subtree: true });
     WebGL2RenderingContext.prototype.finish = () => {
       const root = document.documentElement;
+      root.dataset.firstGpuSampleAt ??= String(performance.now());
       root.dataset.gpuSamples = String(Number(root.dataset.gpuSamples ?? 0) + 1);
     };
   });
   await page.goto("/de/");
   const full = page.locator('[data-scene="root"] canvas');
   await expect(full).toBeVisible({ timeout: 15000 });
-  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 100));
-  await page.clock.runFor(5000);
-  await expect(page.locator("html")).not.toHaveAttribute("data-gpu-samples");
-  await page.clock.runFor(10000);
+  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1000));
+  await page.clock.runFor(15000);
   await expect(page.locator("html")).toHaveAttribute("data-gpu-samples", "30");
+  const firstSampleDelay = await page.evaluate(() => {
+    const { firstGpuSampleAt, simMountedAt } = document.documentElement.dataset;
+    return Number(firstGpuSampleAt) - Number(simMountedAt);
+  });
+  expect(firstSampleDelay).toBeGreaterThanOrEqual(6000);
   await expect(full).toBeVisible();
   await expect(page.getByTestId("lite-ink-canvas")).toHaveCount(0);
 });
@@ -247,7 +257,7 @@ test("Auto ignores cold-start stalls but still reduces sustained simulation load
   await page.goto("/de/");
   const full = page.locator('[data-scene="root"] canvas');
   await expect(full).toBeVisible({ timeout: 15000 });
-  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 100));
+  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1000));
   await page.clock.runFor(5000);
   await page.evaluate(() => {
     document.documentElement.dataset.frameInterval = "16";
