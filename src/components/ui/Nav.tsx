@@ -247,13 +247,15 @@ export function Nav() {
             })}
           </ul>
 
-          <Link
-            href="/cv"
-            aria-current={pathname === "/cv" ? "page" : undefined}
-            className="shrink-0 rounded-sm border border-ink/30 px-2.5 py-2 font-mono text-xs tracking-wider text-ink transition-colors hover:bg-ink hover:text-paper"
-          >
-            {t("nav.items.cv")}
-          </Link>
+          <span className="shrink-0">
+            <Link
+              href="/cv"
+              aria-current={pathname === "/cv" ? "page" : undefined}
+              className="type-label relative inline-block text-ink-soft underline-offset-4 transition-colors hover:text-ink hover:underline aria-[current=page]:text-ink aria-[current=page]:underline"
+            >
+              {t("nav.items.cv")}
+            </Link>
+          </span>
 
           {/* Locale switcher — unified mobile + desktop UX.
               Closed state: only the current locale is visible (single

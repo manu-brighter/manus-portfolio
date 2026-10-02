@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from "react";
  * switcher.
  *
  * On fresh visits a hand-drawn ink arrow draws itself toward the pill and a
- * mono paper chip types its message like a typewriter. Reads as a
+ * mono paper chip shows its complete message immediately. Reads as a
  * printer's margin annotation on a proof sheet — same visual family
  * as the stamp labels, and the ink/paper tokens make it follow the
  * active theme (Nachtdruck flips it to light-on-dark for free).
@@ -17,19 +17,16 @@ import { useEffect, useRef, useState } from "react";
  * switcher itself carries the accessible naming (radiogroup label +
  * per-dot sr-only names), so screen-reader users lose nothing.
  *
- * Anchored above the switcher's actual container, so its arrow clears
- * the button even when a translated label makes the pill wider. Below
- * `md` the arrow points down-right; desktop points down-left. The parent
+ * Anchored to the button's own wrapper. The arrow ends at its center
+ * on both the compact mobile swatch and the desktop pill. The parent
  * suppresses this decoration for reduced motion in both rendering modes.
  *
- * Timer discipline: every timeout/interval registers in a ref-Set and
+ * Timer discipline: every timeout registers in a ref-Set and
  * is cleared on unmount (project-wide setTimeout convention).
  */
 
 type Phase = "hidden" | "shown" | "leaving";
 
-const TYPE_START_DELAY_MS = 550; // arrow draw leads, text follows
-const TYPE_INTERVAL_MS = 42;
 const LEAVE_MS = 500;
 
 export function SimPresetSwitcherHint({ active }: { active: boolean }) {
@@ -37,7 +34,6 @@ export function SimPresetSwitcherHint({ active }: { active: boolean }) {
   const text = t("hint");
 
   const [phase, setPhase] = useState<Phase>("hidden");
-  const [typedCount, setTypedCount] = useState(0);
   const timersRef = useRef<Set<number>>(new Set());
   const prevActiveRef = useRef(false);
 
@@ -51,26 +47,9 @@ export function SimPresetSwitcherHint({ active }: { active: boolean }) {
       // one-shot, live the moment the trigger becomes re-armable).
       for (const id of timers) {
         window.clearTimeout(id);
-        window.clearInterval(id);
       }
       timers.clear();
       setPhase("shown");
-      setTypedCount(0);
-      const startId = window.setTimeout(() => {
-        timers.delete(startId);
-        const intervalId = window.setInterval(() => {
-          setTypedCount((count) => {
-            if (count >= text.length) {
-              window.clearInterval(intervalId);
-              timers.delete(intervalId);
-              return count;
-            }
-            return count + 1;
-          });
-        }, TYPE_INTERVAL_MS);
-        timers.add(intervalId);
-      }, TYPE_START_DELAY_MS);
-      timers.add(startId);
     } else if (!active && prevActiveRef.current) {
       prevActiveRef.current = false;
       setPhase("leaving");
@@ -80,16 +59,13 @@ export function SimPresetSwitcherHint({ active }: { active: boolean }) {
       }, LEAVE_MS);
       timers.add(leaveId);
     }
-  }, [active, text]);
+  }, [active]);
 
   useEffect(() => {
     const timers = timersRef.current;
     return () => {
       for (const id of timers) {
-        // Timeout and interval ids share one pool in browsers — clear
-        // both ways so the set can hold either kind.
         window.clearTimeout(id);
-        window.clearInterval(id);
       }
       timers.clear();
     };
@@ -101,7 +77,7 @@ export function SimPresetSwitcherHint({ active }: { active: boolean }) {
     <div
       aria-hidden="true"
       data-testid="ink-studio-hint"
-      className={`pointer-events-none absolute right-0 bottom-[calc(100%+0.75rem)] z-40 flex w-max flex-col items-end gap-1 transition-opacity duration-500 md:right-auto md:left-8 md:items-start ${
+      className={`pointer-events-none absolute right-0 bottom-[calc(100%+0.5rem)] z-40 flex w-full flex-col items-end gap-1 transition-opacity duration-500 md:items-start ${
         phase === "leaving" ? "opacity-0" : "opacity-100"
       }`}
     >
@@ -109,31 +85,28 @@ export function SimPresetSwitcherHint({ active }: { active: boolean }) {
           otherwise overwrite a same-element Tailwind rotate (same
           transform-replacement trap as the print-jam stamps). */}
       <span className="block rotate-[2deg] md:rotate-[-2deg]">
-        <span className="switcher-hint-chip block max-w-[min(16rem,calc(100vw-3rem))] rounded-sm border border-paper-line bg-paper/95 px-2.5 py-1.5 font-mono text-[0.625rem] text-ink uppercase tracking-[0.12em] shadow-[2px_2px_0_var(--color-ink)]">
-          {text.slice(0, typedCount)}
-          <span className="switcher-hint-caret">▌</span>
+        <span className="switcher-hint-chip block w-max max-w-[min(16rem,calc(100vw-3rem))] rounded-sm border border-paper-line bg-paper/95 px-2.5 py-1.5 font-mono text-[0.625rem] text-ink uppercase tracking-[0.12em] shadow-[2px_2px_0_var(--color-ink)]">
+          {text}
         </span>
       </span>
-      {/* Arrow — drawn toward the pill. Base (mobile) is mirrored so
-          the same path points down-right at the bottom-right column;
-          md+ uses it as authored (down-left toward the left pill). */}
+      {/* The tip remains centered on the trigger regardless of label width. */}
       <svg
         aria-hidden="true"
-        viewBox="0 0 100 70"
+        viewBox="0 0 44 48"
         fill="none"
-        className="-mt-1 mr-6 h-11 w-16 [transform:scaleX(-1)] md:mr-0 md:[transform:none] md:-ml-4 md:h-12 md:w-18"
+        className="h-12 w-11 shrink-0 self-center"
       >
         <path
-          d="M 92 8 C 76 30, 52 46, 14 54"
+          d="M 5 4 C 32 6, 30 25, 22 46"
           pathLength={1}
           className="switcher-hint-stroke switcher-hint-ghost"
         />
         <path
-          d="M 92 8 C 76 30, 52 46, 14 54"
+          d="M 5 4 C 32 6, 30 25, 22 46"
           pathLength={1}
           className="switcher-hint-stroke switcher-hint-ink"
         />
-        <path d="M 14 54 L 27 44 M 14 54 L 30 60" pathLength={1} className="switcher-hint-head" />
+        <path d="M 22 46 L 18 36 M 22 46 L 31 40" pathLength={1} className="switcher-hint-head" />
       </svg>
     </div>
   );

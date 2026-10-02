@@ -113,32 +113,38 @@ export function SimPresetSwitcher() {
           {studio("reducedNotice")}
         </div>
       )}
-      {!reducedMotion && <SimPresetSwitcherHint active={hint && !expanded} />}
-      <button
-        ref={toggle}
-        type="button"
-        aria-expanded={expanded}
-        aria-controls={panelId}
-        onClick={() => {
-          setExpanded((value) => !value);
-          setNotice(false);
-        }}
-        className="order-last flex min-h-11 items-center gap-2.5 rounded-full border border-ink/30 bg-paper px-4 py-2 font-mono text-xs shadow-[3px_3px_0_var(--color-paper-shade)] transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none"
-      >
-        <span
-          aria-hidden="true"
-          className="size-4 rounded-full border border-ink/20"
-          style={{ background: swatchGradient(getSimPreset(presetId)) }}
-        />
-        {studio("label")}
-        <span
-          aria-hidden="true"
-          className="ml-1 transition-transform duration-200 motion-reduce:transition-none"
-          style={{ transform: expanded ? "rotate(45deg)" : "rotate(0deg)" }}
+      <div className="relative order-last">
+        {!reducedMotion && <SimPresetSwitcherHint active={hint && !expanded} />}
+        <button
+          ref={toggle}
+          data-testid="visuals-toggle"
+          type="button"
+          aria-label={studio("label")}
+          aria-expanded={expanded}
+          aria-controls={panelId}
+          onClick={() => {
+            setExpanded((value) => !value);
+            setNotice(false);
+          }}
+          className="flex size-11 items-center justify-center gap-2.5 rounded-full border border-ink/30 bg-paper font-mono text-xs shadow-[3px_3px_0_var(--color-paper-shade)] transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none md:w-auto md:px-4 md:py-2"
         >
-          +
-        </span>
-      </button>
+          <span
+            aria-hidden="true"
+            className="size-6 rounded-full border border-ink/20 md:size-4"
+            style={{ background: swatchGradient(getSimPreset(presetId)) }}
+          />
+          <span data-visuals-label className="hidden md:inline">
+            {studio("label")}
+          </span>
+          <span
+            aria-hidden="true"
+            className="ml-1 hidden transition-transform duration-200 motion-reduce:transition-none md:inline"
+            style={{ transform: expanded ? "rotate(45deg)" : "rotate(0deg)" }}
+          >
+            +
+          </span>
+        </button>
+      </div>
       <div
         id={panelId}
         data-testid="ink-studio-panel"

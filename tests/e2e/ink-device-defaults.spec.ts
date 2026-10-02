@@ -12,7 +12,7 @@ test("Auto uses simulation on a fast desktop while touch defaults to Animation",
   await expect(
     isMobile ? page.getByTestId("lite-ink-canvas") : page.locator('[data-scene="root"] canvas'),
   ).toBeVisible({ timeout: 15000 });
-  await page.getByRole("button", { name: "Tintenstudio", exact: true }).click();
+  await page.getByRole("button", { name: "Visuals", exact: true }).click();
   await expect(
     page.getByRole("radio", { name: isMobile ? "Animation" : "Auto", exact: true }),
   ).toBeChecked();
@@ -33,12 +33,12 @@ test.describe("manually selected mobile simulation", () => {
       localStorage.setItem("manus-gpu-tier", JSON.stringify({ tier: "minimal", ts: Date.now() }));
     });
     await page.goto("/de/");
-    await page.getByRole("button", { name: "Tintenstudio", exact: true }).click();
+    await page.getByRole("button", { name: "Visuals", exact: true }).click();
     await page.getByRole("radio", { name: "Animation", exact: true }).check();
     await page.getByRole("radio", { name: "Simulation", exact: true }).check();
     const canvas = page.getByTestId("mobile-bg-sim");
     await expect(canvas).toBeVisible({ timeout: 15000 });
-    await page.getByRole("button", { name: "Tintenstudio", exact: true }).click();
+    await page.getByRole("button", { name: "Visuals", exact: true }).click();
     const samples = await canvas.evaluate(async (element) => {
       const opacities: number[] = [];
       for (let step = 1; step <= 8; step++) {
@@ -52,7 +52,7 @@ test.describe("manually selected mobile simulation", () => {
     expect(samples.every((value) => value === 1)).toBe(true);
     await page.reload();
     await expect(canvas).toBeVisible({ timeout: 15000 });
-    await page.getByRole("button", { name: "Tintenstudio", exact: true }).click();
+    await page.getByRole("button", { name: "Visuals", exact: true }).click();
     await expect(page.getByRole("radio", { name: "Simulation", exact: true })).toBeChecked();
   });
 });

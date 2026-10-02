@@ -75,7 +75,7 @@
   },
   "simPresets": {
     "label": "Ink character",
-    "hint": "Psst, switch the theme here!",
+    "hint": "Change the look!",
     "riso": "Riso",
     "wave": "Wave",
     "turbulenz": "Turbulence",
@@ -87,7 +87,7 @@
     "calibratedStamp": "NEU KALIBRIERT · RE-CALIBRATED"
   },
   "inkStudio": {
-    "label": "Ink studio",
+    "label": "Visuals",
     "intro": "Paper, colour and a little motion. Make this view your own.",
     "theme": "Colour palette",
     "motion": "Motion",
