@@ -14,7 +14,7 @@
  * Module-level state survives React re-mounts inside the same JS realm
  * (locale switches re-mount the layout subtree, but the module instance
  * is preserved). Full page reload resets this bus. Loader releases content
- * immediately; its decorative window runs separately once per document.
+ * immediately on mount without a decorative startup overlay.
  *
  * The `isLoaderComplete()` accessor is the synchronous read path used
  * by consumers that need to choose between "subscribe and wait" or "go

@@ -28,19 +28,21 @@ test.describe("entry and project navigation", () => {
     });
   });
 
-  test("document introductions never block navigation and replay on reload", async ({ page }) => {
+  test("document startup and reload reveal content without a fullscreen overlay", async ({
+    page,
+  }) => {
     await page.goto("/de/", { waitUntil: "domcontentloaded" });
     await page.locator('nav a[href="/de/"]').click();
     await expect(page.locator("#hero-heading")).toBeVisible();
-    await expect(page.locator("html")).toHaveAttribute("data-intro-seen", "true");
+    await expect(page.locator("html")).not.toHaveAttribute("data-intro-seen", "true");
     await expect(page.locator("html")).not.toHaveAttribute("data-intro-blocked", "true");
 
     await page.reload();
-    await page.getByRole("button", { name: "Tintenstudio", exact: true }).click();
+    await page.getByRole("button", { name: "Visuals", exact: true }).click();
     await expect(page.getByTestId("ink-studio-panel")).toBeVisible();
     await expect(page.locator("#hero-heading")).toBeVisible();
     await expect(page.getByTestId("loader-overlay")).toHaveCount(0);
-    await expect(page.locator("html")).toHaveAttribute("data-intro-seen", "true");
+    await expect(page.locator("html")).not.toHaveAttribute("data-intro-seen", "true");
   });
 
   test("reduced motion and unavailable storage still reveal the hero", async ({ page }) => {

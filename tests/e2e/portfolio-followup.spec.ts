@@ -43,7 +43,7 @@ test("Animation reveals a photo once without allocating a photo canvas", async (
     element.scrollIntoView({ block: "center", behavior: "instant" }),
   );
   await expect(photo.getByTestId("photo-ink-animation")).toHaveCount(0);
-  await page.getByRole("button", { name: "Tintenstudio", exact: true }).click();
+  await page.getByRole("button", { name: "Visuals", exact: true }).click();
   await page.getByRole("radio", { name: "Simulation", exact: true }).check();
   await expect(photo.locator("canvas")).toHaveCount(0);
   await page.getByRole("radio", { name: "Animation", exact: true }).check();

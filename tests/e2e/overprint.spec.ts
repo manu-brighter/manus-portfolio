@@ -86,7 +86,7 @@ test.describe("overprint — default (ghosts rendered)", () => {
 
     // The print accents must compose with the warm theme's readability halo,
     // including when the theme changes after the reveal has already settled.
-    await page.getByRole("button", { name: "Tintenstudio", exact: true }).click();
+    await page.getByRole("button", { name: "Visuals", exact: true }).click();
     const turbulence = page.getByRole("radio", { name: "Turbulenz", exact: true });
     await turbulence.focus();
     await turbulence.press("Space");

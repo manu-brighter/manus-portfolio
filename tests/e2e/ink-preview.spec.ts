@@ -3,7 +3,7 @@ import { expect, type Page, test } from "@playwright/test";
 const KEY = "manus-ink-mode";
 const fullCanvas = '[data-scene="root"] canvas, [data-testid="mobile-bg-sim"]';
 async function openStudio(page: Page) {
-  await page.getByRole("button", { name: "Tintenstudio", exact: true }).click();
+  await page.getByRole("button", { name: "Visuals", exact: true }).click();
   return page.getByTestId("ink-studio-panel");
 }
 
@@ -90,7 +90,7 @@ test("studio supports theme keyboard selection, Escape and outside dismissal on 
   await expect(page.locator("html")).toHaveAttribute("data-sim-theme", "night");
   await night.press("Escape");
   await expect(panel).toBeHidden();
-  const toggle = page.getByRole("button", { name: "Tintenstudio", exact: true });
+  const toggle = page.getByRole("button", { name: "Visuals", exact: true });
   await expect(toggle).toBeFocused();
   await toggle.press("Enter");
   await expect(panel).toBeVisible();
@@ -199,7 +199,7 @@ test("Auto reduces the light budget after sustained stalls and respects a manual
       (element) => (element as HTMLCanvasElement).width * (element as HTMLCanvasElement).height,
     ),
   ).toBeGreaterThan(0);
-  await page.getByRole("button", { name: "Tintenstudio", exact: true }).press("Enter");
+  await page.getByRole("button", { name: "Visuals", exact: true }).press("Enter");
   await expect(panel.getByRole("radio", { name: "Auto", exact: true })).toBeChecked();
   const full = panel.getByRole("radio", { name: "Simulation", exact: true });
   await full.focus();

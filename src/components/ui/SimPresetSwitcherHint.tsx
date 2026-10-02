@@ -17,9 +17,8 @@ import { useEffect, useRef, useState } from "react";
  * switcher itself carries the accessible naming (radiogroup label +
  * per-dot sr-only names), so screen-reader users lose nothing.
  *
- * Anchored above the switcher's actual container, so its arrow clears
- * the button even when a translated label makes the pill wider. Below
- * `md` the arrow points down-right; desktop points down-left. The parent
+ * Anchored to the button's own wrapper. The arrow ends at its center
+ * on both the compact mobile swatch and the desktop pill. The parent
  * suppresses this decoration for reduced motion in both rendering modes.
  *
  * Timer discipline: every timeout/interval registers in a ref-Set and
@@ -101,7 +100,7 @@ export function SimPresetSwitcherHint({ active }: { active: boolean }) {
     <div
       aria-hidden="true"
       data-testid="ink-studio-hint"
-      className={`pointer-events-none absolute right-0 bottom-[calc(100%+0.75rem)] z-40 flex w-max flex-col items-end gap-1 transition-opacity duration-500 md:right-auto md:left-8 md:items-start ${
+      className={`pointer-events-none absolute right-0 bottom-[calc(100%+0.5rem)] z-40 flex w-full flex-col items-end gap-1 transition-opacity duration-500 md:items-start ${
         phase === "leaving" ? "opacity-0" : "opacity-100"
       }`}
     >
@@ -109,31 +108,29 @@ export function SimPresetSwitcherHint({ active }: { active: boolean }) {
           otherwise overwrite a same-element Tailwind rotate (same
           transform-replacement trap as the print-jam stamps). */}
       <span className="block rotate-[2deg] md:rotate-[-2deg]">
-        <span className="switcher-hint-chip block max-w-[min(16rem,calc(100vw-3rem))] rounded-sm border border-paper-line bg-paper/95 px-2.5 py-1.5 font-mono text-[0.625rem] text-ink uppercase tracking-[0.12em] shadow-[2px_2px_0_var(--color-ink)]">
+        <span className="switcher-hint-chip block w-max max-w-[min(16rem,calc(100vw-3rem))] rounded-sm border border-paper-line bg-paper/95 px-2.5 py-1.5 font-mono text-[0.625rem] text-ink uppercase tracking-[0.12em] shadow-[2px_2px_0_var(--color-ink)]">
           {text.slice(0, typedCount)}
           <span className="switcher-hint-caret">▌</span>
         </span>
       </span>
-      {/* Arrow — drawn toward the pill. Base (mobile) is mirrored so
-          the same path points down-right at the bottom-right column;
-          md+ uses it as authored (down-left toward the left pill). */}
+      {/* The tip remains centered on the trigger regardless of label width. */}
       <svg
         aria-hidden="true"
-        viewBox="0 0 100 70"
+        viewBox="0 0 44 48"
         fill="none"
-        className="-mt-1 mr-6 h-11 w-16 [transform:scaleX(-1)] md:mr-0 md:[transform:none] md:-ml-4 md:h-12 md:w-18"
+        className="h-12 w-11 shrink-0 self-center"
       >
         <path
-          d="M 92 8 C 76 30, 52 46, 14 54"
+          d="M 5 4 C 32 6, 30 25, 22 46"
           pathLength={1}
           className="switcher-hint-stroke switcher-hint-ghost"
         />
         <path
-          d="M 92 8 C 76 30, 52 46, 14 54"
+          d="M 5 4 C 32 6, 30 25, 22 46"
           pathLength={1}
           className="switcher-hint-stroke switcher-hint-ink"
         />
-        <path d="M 14 54 L 27 44 M 14 54 L 30 60" pathLength={1} className="switcher-hint-head" />
+        <path d="M 22 46 L 18 36 M 22 46 L 31 40" pathLength={1} className="switcher-hint-head" />
       </svg>
     </div>
   );

@@ -27,7 +27,7 @@ test("animated text is primed before application scripts hydrate", async ({ page
   await expect(page.locator('#hero-heading [data-layer="ink"]').first()).toHaveCSS("opacity", "1");
 });
 
-test("Tintenfenster appears on a fresh document even with an old session marker", async ({
+test("fresh documents never revive a startup overlay from an old session marker", async ({
   page,
 }) => {
   await page.addInitScript(() => {
@@ -42,10 +42,10 @@ test("Tintenfenster appears on a fresh document even with an old session marker"
     observer.observe(document, { childList: true, subtree: true, attributes: true });
   });
   await page.goto("/de/");
-  await expect(page.locator("html")).toHaveAttribute("data-intro-seen", "true");
+  await expect(page.locator("html")).not.toHaveAttribute("data-intro-seen", "true");
   await expect(page.getByTestId("loader-overlay")).toHaveCount(0);
   await page.reload();
-  await expect(page.locator("html")).toHaveAttribute("data-intro-seen", "true");
+  await expect(page.locator("html")).not.toHaveAttribute("data-intro-seen", "true");
   await expect(page.getByTestId("loader-overlay")).toHaveCount(0);
 });
 
@@ -67,15 +67,17 @@ test("desktop Auto chooses simulation on an RTX GPU despite a stale lower cached
   await page.goto("/de/");
   await expect(page.locator('[data-scene="root"] canvas')).toBeVisible({ timeout: 15000 });
   await expect(page.getByTestId("lite-ink-canvas")).toHaveCount(0);
-  await page.getByRole("button", { name: "Tintenstudio", exact: true }).click();
+  await page.getByRole("button", { name: "Visuals", exact: true }).click();
   await expect(page.getByRole("radio", { name: "Auto", exact: true })).toBeChecked();
 });
 
 test("studio hint returns and is dismissed when the studio opens", async ({ page }) => {
   await page.goto("/de/");
-  await expect(page.getByTestId("ink-studio-hint")).toContainText("Psst", { timeout: 10000 });
+  await expect(page.getByTestId("ink-studio-hint")).toContainText("Change the look!", {
+    timeout: 10000,
+  });
   await expect(page.getByTestId("ink-studio-hint").locator("svg")).toBeVisible();
-  await page.getByRole("button", { name: "Tintenstudio", exact: true }).click();
+  await page.getByRole("button", { name: "Visuals", exact: true }).click();
   await expect(page.getByTestId("ink-studio-hint")).toHaveCount(0);
 });
 
@@ -123,7 +125,7 @@ test("Auto falls back from simulation after sustained stalls and honors manual S
   await page.goto("/de/");
   const full = page.locator('[data-scene="root"] canvas');
   await expect(full).toBeVisible({ timeout: 15000 });
-  await page.getByRole("button", { name: "Tintenstudio", exact: true }).click();
+  await page.getByRole("button", { name: "Visuals", exact: true }).click();
   await page.getByRole("radio", { name: "Animation", exact: true }).check();
   await page.clock.pauseAt(await page.evaluate(() => Date.now() + 100));
   const auto = page.getByRole("radio", { name: "Auto", exact: true });
@@ -135,7 +137,7 @@ test("Auto falls back from simulation after sustained stalls and honors manual S
   await page.clock.runFor(91 * 34);
   await expect(page.getByTestId("lite-ink-canvas")).toBeVisible();
   await expect(full).toHaveCount(0);
-  await page.getByRole("button", { name: "Tintenstudio", exact: true }).press("Enter");
+  await page.getByRole("button", { name: "Visuals", exact: true }).press("Enter");
   const manual = page.getByRole("radio", { name: "Simulation", exact: true });
   await manual.focus();
   await manual.press("Space");

@@ -27,7 +27,7 @@ for (const failure of ["null", "throw", "shader"] as const) {
     await expect(page.locator("html")).toHaveAttribute("data-mobile-attempted", "true", {
       timeout: 15000,
     });
-    await page.getByRole("button", { name: "Tintenstudio", exact: true }).click();
+    await page.getByRole("button", { name: "Visuals", exact: true }).click();
     await expect(
       page.getByTestId("ink-studio-panel").getByText(/Diese Tintenansicht ist auf deinem Gerät/),
     ).toBeVisible();
@@ -48,7 +48,7 @@ test("mobile full renderer reports context loss and removes the failed canvas", 
   await page.goto("/de/?ink-preview=full");
   const canvas = page.getByTestId("mobile-bg-sim");
   await expect(canvas).toBeVisible({ timeout: 15000 });
-  await page.getByRole("button", { name: "Tintenstudio", exact: true }).click();
+  await page.getByRole("button", { name: "Visuals", exact: true }).click();
   await canvas.evaluate((element) => {
     element.dispatchEvent(new Event("webglcontextlost", { cancelable: true }));
   });

@@ -75,7 +75,7 @@
   },
   "simPresets": {
     "label": "Caractère d'encre",
-    "hint": "Psst, change de thème ici !",
+    "hint": "Change the look!",
     "riso": "Riso",
     "wave": "Vague",
     "turbulenz": "Turbulence",
@@ -87,7 +87,7 @@
     "calibratedStamp": "NEU KALIBRIERT · RE-CALIBRATED"
   },
   "inkStudio": {
-    "label": "Atelier d’encre",
+    "label": "Visuals",
     "intro": "Du papier, de la couleur et un peu de mouvement. Composez votre ambiance.",
     "theme": "Palette",
     "motion": "Mouvement",
