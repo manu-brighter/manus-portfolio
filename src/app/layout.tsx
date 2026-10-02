@@ -30,7 +30,7 @@ import type { ReactNode } from "react";
  */
 export const metadata: Metadata = {
   metadataBase: new URL("https://manuelheller.dev"),
-  title: "Manuel Heller · Craft Portfolio",
+  title: "Manuel Heller · Creative Developer",
   description: "Toon Fluid: an Awwwards-grade craft portfolio by Manuel Heller.",
   // Per-locale metadata in [locale]/layout.tsx overrides this for locale routes.
   // The root index.html (locale redirect) inherits this minimal shape.

@@ -11,7 +11,7 @@
 export const SITE = {
   url: "https://manuelheller.dev",
   alias: "https://manuelheller.ch",
-  name: "Manuel Heller · Craft Portfolio",
+  name: "Manuel Heller · Creative Developer",
   shortName: "Manuel Heller",
   tagline: "Full-Stack Developer · PHP & Vue",
   description:

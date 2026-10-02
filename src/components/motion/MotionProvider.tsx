@@ -36,6 +36,7 @@ export function MotionProvider({ children }: MotionProviderProps) {
   const [lenis, setLenis] = useState<Lenis | null>(null);
 
   useEffect(() => {
+    document.documentElement.dataset.motionReady = "true";
     bootstrap();
     return teardown;
   }, []);

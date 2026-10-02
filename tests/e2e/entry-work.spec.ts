@@ -18,7 +18,7 @@ test.describe("entry and project navigation", () => {
     await page.addInitScript(() => {
       const observer = new MutationObserver(() => {
         const intro = document.querySelector('[data-testid="loader-overlay"]');
-        if (!intro) return;
+        if (!intro || getComputedStyle(intro).display === "none") return;
         document.documentElement.dataset.introSeen = "true";
         if (getComputedStyle(intro).pointerEvents !== "none") {
           document.documentElement.dataset.introBlocked = "true";
@@ -28,15 +28,11 @@ test.describe("entry and project navigation", () => {
     });
   });
 
-  test("first entry never blocks navigation and reload skips the introduction", async ({
-    page,
-  }) => {
+  test("document introductions never block navigation and replay on reload", async ({ page }) => {
     await page.goto("/de/", { waitUntil: "domcontentloaded" });
     await page.locator('nav a[href="/de/"]').click();
     await expect(page.locator("#hero-heading")).toBeVisible();
-    await expect
-      .poll(() => page.evaluate(() => sessionStorage.getItem("manuelheller:loader-shown")))
-      .toBe("1");
+    await expect(page.locator("html")).toHaveAttribute("data-intro-seen", "true");
     await expect(page.locator("html")).not.toHaveAttribute("data-intro-blocked", "true");
 
     await page.reload();
@@ -44,7 +40,7 @@ test.describe("entry and project navigation", () => {
     await expect(page.getByTestId("ink-studio-panel")).toBeVisible();
     await expect(page.locator("#hero-heading")).toBeVisible();
     await expect(page.getByTestId("loader-overlay")).toHaveCount(0);
-    await expect(page.locator("html")).not.toHaveAttribute("data-intro-seen", "true");
+    await expect(page.locator("html")).toHaveAttribute("data-intro-seen", "true");
   });
 
   test("reduced motion and unavailable storage still reveal the hero", async ({ page }) => {

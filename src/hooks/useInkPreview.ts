@@ -10,8 +10,9 @@ import {
 } from "@/lib/inkPreview";
 import { subscribe } from "@/lib/raf";
 
-/** Auto always starts light; sustained slow frames only reduce its rendering budget. */
-export function useInkPreview(paused: boolean) {
+/** Auto may use simulation on a capable desktop, with a one-way fallback
+ * after sustained slow frames. Explicit visitor choices always win. */
+export function useInkPreview(paused: boolean, autoFull: boolean) {
   const [preference, setPreference] = useState<InkPreference>("auto");
   const [ready, setReady] = useState(false);
   const temporaryOverride = useRef(false);
@@ -86,7 +87,7 @@ export function useInkPreview(paused: boolean) {
     ready,
     preference,
     automaticallyReduced,
-    light: preference !== "full",
+    light: preference === "light" || (preference === "auto" && (!autoFull || automaticallyReduced)),
     select,
   };
 }

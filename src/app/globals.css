@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+/* Prime animated text before hydration. The early script enables this only
+ * when motion is allowed; no-JS and failed-bundle visits stay readable. */
+:where([data-motion="enabled"]) [data-overprint="pending"] [data-layer="ink"],
+:where([data-motion="enabled"]) [data-fade="pending"] {
+  opacity: 0;
+}
+
 /* Animate the separate print plates only during their one-shot reveal.
  * Settled glyphs keep the same offsets as painted shadows, avoiding hundreds
  * of persistent blended/promoted layers over the moving ink background. */

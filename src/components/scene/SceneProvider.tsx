@@ -14,7 +14,7 @@ import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useGPUCapability } from "@/hooks/useGPUCapability";
 import { useInkPreview } from "@/hooks/useInkPreview";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { type GPUTier, getTierDPR, type TierConfig } from "@/lib/gpu";
+import { type GPUTier, getTierDPR, matchRenderer, type TierConfig } from "@/lib/gpu";
 import type { InkPreference } from "@/lib/inkPreview";
 import { subscribeToLoaderComplete } from "@/lib/loaderSession";
 import { useSceneVisibilityStore } from "@/lib/sceneVisibilityStore";
@@ -58,17 +58,30 @@ export function useScene() {
   return useContext(SceneContext);
 }
 
-function useWebGL2(): boolean {
-  const [supported, setSupported] = useState(false);
+function useWebGL2(onReady: (gl: WebGL2RenderingContext) => void) {
+  const [support, setSupport] = useState<{ supported: boolean; hardwareTier: GPUTier | null }>({
+    supported: false,
+    hardwareTier: null,
+  });
   useEffect(() => {
     try {
       // A detached probe is collected naturally. Never poison contexts with loseContext.
-      setSupported(document.createElement("canvas").getContext("webgl2") !== null);
+      const gl = document.createElement("canvas").getContext("webgl2");
+      let hardwareTier: GPUTier | null = null;
+      if (gl) {
+        const extension = gl.getExtension("WEBGL_debug_renderer_info");
+        const renderer = extension ? gl.getParameter(extension.UNMASKED_RENDERER_WEBGL) : null;
+        hardwareTier = typeof renderer === "string" ? matchRenderer(renderer) : null;
+        onReady(gl);
+      }
+      // Current hardware chooses the mode; cached quality still limits the
+      // physics budget. An old low tier must not hide a newly detected RTX.
+      setSupport({ supported: gl !== null, hardwareTier });
     } catch {
-      setSupported(false);
+      setSupport({ supported: false, hardwareTier: null });
     }
-  }, []);
-  return supported;
+  }, [onReady]);
+  return support;
 }
 
 type EBProps = { fallback: ReactNode; children: ReactNode; onUnavailable: () => void };
@@ -90,17 +103,19 @@ class SceneErrorBoundary extends Component<EBProps, { hasError: boolean }> {
 export function SceneProvider({ children }: { children: ReactNode }) {
   const reducedMotion = useReducedMotion();
   const { capability, initProbe, recordFrametime } = useGPUCapability();
-  const webgl2 = useWebGL2();
+  const { supported: webgl2, hardwareTier } = useWebGL2(initProbe);
+  const rawCoarsePointer = useCoarsePointer();
   const sceneHidden = useSceneVisibilityStore((s) => s.hidden);
   const [canvasMounted, setCanvasMounted] = useState(false);
   const [liteUnavailable, setLiteUnavailable] = useState(false);
   const [fullFailed, setFullFailed] = useState(false);
+  const fullUnavailable = reducedMotion || !webgl2 || !capability.config || fullFailed;
   const preview = useInkPreview(
     reducedMotion || sceneHidden || !webgl2 || !canvasMounted || liteUnavailable,
+    !rawCoarsePointer && (hardwareTier ?? capability.tier) === "high" && !fullUnavailable,
   );
   const handleLiteUnavailable = useCallback(() => setLiteUnavailable(true), []);
   const handleFullUnavailable = useCallback(() => setFullFailed(true), []);
-  const rawCoarsePointer = useCoarsePointer();
   const [recordOverride, setRecordOverride] = useState(false);
   useEffect(() => {
     setRecordOverride(new URLSearchParams(window.location.search).has("record-bg"));
@@ -120,7 +135,6 @@ export function SceneProvider({ children }: { children: ReactNode }) {
   }, [preview.ready, preview.light, canvasMounted]);
 
   // A cached physics tier does not describe Lite's single-pass requirements.
-  const fullUnavailable = reducedMotion || !webgl2 || !capability.config || fullFailed;
   const inkUnavailable =
     reducedMotion || !webgl2 || (preview.light ? liteUnavailable : fullUnavailable);
   const config = capability.config;

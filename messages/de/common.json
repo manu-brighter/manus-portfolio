@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "Manuel Heller · Softwareentwicklung & Design",
+    "title": "Manuel Heller · Creative Developer",
     "titleTemplate": "%s · Manuel Heller",
     "description": "Softwareentwickler aus der Basel-Region. PHP, Vue, Fachoberflächen, Schnittstellen und Testautomatisierung. Eigene Webprojekte, AI-Werkzeuge und Fotografie.",
     "keywords": [
@@ -94,10 +94,10 @@
     "auto": "Auto",
     "light": "Animation",
     "full": "Simulation",
-    "autoBody": "Animation, automatisch abgestimmt. Reduziert bei Bedarf Details, damit alles in Bewegung bleibt.",
+    "autoBody": "Auto nutzt Simulation auf leistungsfähigen Desktop-Geräten, sonst Animation. Bei anhaltendem Ruckeln wird die Darstellung vereinfacht.",
     "lightBody": "Fliessende Formen, die auf dich reagieren. Wenig Rechenaufwand, feste Detailstufe.",
     "fullBody": "Physikalische Wirbel, die deinem Zeiger folgen. Braucht mehr Grafikleistung.",
-    "reducedNotice": "Die Tinte läuft jetzt mit weniger Details, damit die Seite flüssig bleibt.",
+    "reducedNotice": "Auto nutzt jetzt Animation mit weniger Details, damit die Seite flüssig bleibt.",
     "reducedMotion": "Deine Systemeinstellung für reduzierte Bewegung ist aktiv. Farben kannst du weiterhin wählen.",
     "unavailable": "Diese Tintenansicht ist auf deinem Gerät gerade nicht verfügbar. Farben und Inhalte bleiben zugänglich.",
     "lightShort": "Interaktive Tinte, sparsam berechnet",

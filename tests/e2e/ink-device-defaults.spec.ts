@@ -1,14 +1,17 @@
 import { expect, test } from "@playwright/test";
 
-test("a fast cached GPU does not change the device's default ink mode", async ({
+test("Auto uses simulation on a fast desktop while touch defaults to Animation", async ({
   page,
   isMobile,
 }) => {
   await page.addInitScript(() => {
     localStorage.setItem("manus-gpu-tier", JSON.stringify({ tier: "high", ts: Date.now() }));
+    WebGL2RenderingContext.prototype.drawArrays = () => {};
   });
   await page.goto("/de/");
-  await expect(page.getByTestId("lite-ink-canvas")).toBeVisible({ timeout: 15000 });
+  await expect(
+    isMobile ? page.getByTestId("lite-ink-canvas") : page.locator('[data-scene="root"] canvas'),
+  ).toBeVisible({ timeout: 15000 });
   await page.getByRole("button", { name: "Tintenstudio", exact: true }).click();
   await expect(
     page.getByRole("radio", { name: isMobile ? "Animation" : "Auto", exact: true }),
