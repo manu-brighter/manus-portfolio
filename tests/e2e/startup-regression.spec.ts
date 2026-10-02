@@ -81,6 +81,22 @@ test("studio hint returns and is dismissed when the studio opens", async ({ page
   await expect(page.getByTestId("ink-studio-hint")).toHaveCount(0);
 });
 
+test("studio hint shows its complete copy as soon as it appears", async ({ page }) => {
+  await page.addInitScript(() => {
+    const observer = new MutationObserver(() => {
+      const note = document.querySelector('[data-testid="ink-studio-hint"]');
+      if (!note) return;
+      document.documentElement.dataset.firstHintCopy = note.textContent?.trim();
+      observer.disconnect();
+    });
+    observer.observe(document, { childList: true, subtree: true });
+  });
+  await page.goto("/de/");
+  await expect(page.locator("html")).toHaveAttribute("data-first-hint-copy", "Change the look!", {
+    timeout: 10000,
+  });
+});
+
 test("content stays readable without JavaScript", async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();

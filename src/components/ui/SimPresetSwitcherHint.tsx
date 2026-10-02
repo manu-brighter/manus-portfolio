@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from "react";
  * switcher.
  *
  * On fresh visits a hand-drawn ink arrow draws itself toward the pill and a
- * mono paper chip types its message like a typewriter. Reads as a
+ * mono paper chip shows its complete message immediately. Reads as a
  * printer's margin annotation on a proof sheet — same visual family
  * as the stamp labels, and the ink/paper tokens make it follow the
  * active theme (Nachtdruck flips it to light-on-dark for free).
@@ -21,14 +21,12 @@ import { useEffect, useRef, useState } from "react";
  * on both the compact mobile swatch and the desktop pill. The parent
  * suppresses this decoration for reduced motion in both rendering modes.
  *
- * Timer discipline: every timeout/interval registers in a ref-Set and
+ * Timer discipline: every timeout registers in a ref-Set and
  * is cleared on unmount (project-wide setTimeout convention).
  */
 
 type Phase = "hidden" | "shown" | "leaving";
 
-const TYPE_START_DELAY_MS = 550; // arrow draw leads, text follows
-const TYPE_INTERVAL_MS = 42;
 const LEAVE_MS = 500;
 
 export function SimPresetSwitcherHint({ active }: { active: boolean }) {
@@ -36,7 +34,6 @@ export function SimPresetSwitcherHint({ active }: { active: boolean }) {
   const text = t("hint");
 
   const [phase, setPhase] = useState<Phase>("hidden");
-  const [typedCount, setTypedCount] = useState(0);
   const timersRef = useRef<Set<number>>(new Set());
   const prevActiveRef = useRef(false);
 
@@ -50,26 +47,9 @@ export function SimPresetSwitcherHint({ active }: { active: boolean }) {
       // one-shot, live the moment the trigger becomes re-armable).
       for (const id of timers) {
         window.clearTimeout(id);
-        window.clearInterval(id);
       }
       timers.clear();
       setPhase("shown");
-      setTypedCount(0);
-      const startId = window.setTimeout(() => {
-        timers.delete(startId);
-        const intervalId = window.setInterval(() => {
-          setTypedCount((count) => {
-            if (count >= text.length) {
-              window.clearInterval(intervalId);
-              timers.delete(intervalId);
-              return count;
-            }
-            return count + 1;
-          });
-        }, TYPE_INTERVAL_MS);
-        timers.add(intervalId);
-      }, TYPE_START_DELAY_MS);
-      timers.add(startId);
     } else if (!active && prevActiveRef.current) {
       prevActiveRef.current = false;
       setPhase("leaving");
@@ -79,16 +59,13 @@ export function SimPresetSwitcherHint({ active }: { active: boolean }) {
       }, LEAVE_MS);
       timers.add(leaveId);
     }
-  }, [active, text]);
+  }, [active]);
 
   useEffect(() => {
     const timers = timersRef.current;
     return () => {
       for (const id of timers) {
-        // Timeout and interval ids share one pool in browsers — clear
-        // both ways so the set can hold either kind.
         window.clearTimeout(id);
-        window.clearInterval(id);
       }
       timers.clear();
     };
@@ -109,8 +86,7 @@ export function SimPresetSwitcherHint({ active }: { active: boolean }) {
           transform-replacement trap as the print-jam stamps). */}
       <span className="block rotate-[2deg] md:rotate-[-2deg]">
         <span className="switcher-hint-chip block w-max max-w-[min(16rem,calc(100vw-3rem))] rounded-sm border border-paper-line bg-paper/95 px-2.5 py-1.5 font-mono text-[0.625rem] text-ink uppercase tracking-[0.12em] shadow-[2px_2px_0_var(--color-ink)]">
-          {text.slice(0, typedCount)}
-          <span className="switcher-hint-caret">▌</span>
+          {text}
         </span>
       </span>
       {/* The tip remains centered on the trigger regardless of label width. */}
