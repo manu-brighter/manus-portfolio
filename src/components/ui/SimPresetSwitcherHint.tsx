@@ -7,8 +7,7 @@ import { useEffect, useRef, useState } from "react";
  * SimPresetSwitcherHint — one-shot onboarding note for the preset
  * switcher.
  *
- * While the switcher's intro peek holds the dot row open (fresh loads
- * only), a hand-drawn ink arrow draws itself toward the pill and a
+ * On fresh visits a hand-drawn ink arrow draws itself toward the pill and a
  * mono paper chip types its message like a typewriter. Reads as a
  * printer's margin annotation on a proof sheet — same visual family
  * as the stamp labels, and the ink/paper tokens make it follow the
@@ -18,13 +17,10 @@ import { useEffect, useRef, useState } from "react";
  * switcher itself carries the accessible naming (radiogroup label +
  * per-dot sr-only names), so screen-reader users lose nothing.
  *
- * Position mirrors the pill's breakpoint split: below `md` the pill
- * sits bottom-right (hint floats left of it, arrow flipped to point
- * down-right); from `md` up the pill is bottom-left (hint floats
- * right of it, arrow points down-left). The parent only mounts this
- * on the live-sim path (config + no reduced motion), so there is no
- * reduced-motion branch here — reduced-motion users never see the
- * switcher at all.
+ * Anchored above the switcher's actual container, so its arrow clears
+ * the button even when a translated label makes the pill wider. Below
+ * `md` the arrow points down-right; desktop points down-left. The parent
+ * suppresses this decoration for reduced motion in both rendering modes.
  *
  * Timer discipline: every timeout/interval registers in a ref-Set and
  * is cleared on unmount (project-wide setTimeout convention).
@@ -105,7 +101,7 @@ export function SimPresetSwitcherHint({ active }: { active: boolean }) {
     <div
       aria-hidden="true"
       data-testid="ink-studio-hint"
-      className={`pointer-events-none fixed right-20 bottom-16 z-40 flex flex-col items-end gap-1 transition-opacity duration-500 md:right-auto md:bottom-10 md:left-24 md:items-start ${
+      className={`pointer-events-none absolute right-0 bottom-[calc(100%+0.75rem)] z-40 flex w-max flex-col items-end gap-1 transition-opacity duration-500 md:right-auto md:left-8 md:items-start ${
         phase === "leaving" ? "opacity-0" : "opacity-100"
       }`}
     >
@@ -113,7 +109,7 @@ export function SimPresetSwitcherHint({ active }: { active: boolean }) {
           otherwise overwrite a same-element Tailwind rotate (same
           transform-replacement trap as the print-jam stamps). */}
       <span className="block rotate-[2deg] md:rotate-[-2deg]">
-        <span className="switcher-hint-chip block max-w-[min(18rem,calc(100vw-6rem))] rounded-sm border border-paper-line bg-paper/95 px-3 py-2 font-mono text-[0.7rem] text-ink uppercase tracking-[0.18em] shadow-[2px_2px_0_var(--color-ink)]">
+        <span className="switcher-hint-chip block max-w-[min(16rem,calc(100vw-3rem))] rounded-sm border border-paper-line bg-paper/95 px-2.5 py-1.5 font-mono text-[0.625rem] text-ink uppercase tracking-[0.12em] shadow-[2px_2px_0_var(--color-ink)]">
           {text.slice(0, typedCount)}
           <span className="switcher-hint-caret">▌</span>
         </span>
@@ -125,7 +121,7 @@ export function SimPresetSwitcherHint({ active }: { active: boolean }) {
         aria-hidden="true"
         viewBox="0 0 100 70"
         fill="none"
-        className="-mt-1 mr-8 h-14 w-20 [transform:scaleX(-1)] md:mr-0 md:[transform:none] md:-ml-5 md:h-16 md:w-24"
+        className="-mt-1 mr-6 h-11 w-16 [transform:scaleX(-1)] md:mr-0 md:[transform:none] md:-ml-4 md:h-12 md:w-18"
       >
         <path
           d="M 92 8 C 76 30, 52 46, 14 54"

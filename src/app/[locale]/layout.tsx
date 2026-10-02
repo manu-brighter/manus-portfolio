@@ -83,6 +83,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
         <NextIntlClientProvider locale={locale} messages={commonMessages}>
           <MotionProvider>
             <SceneProvider>
+              <Loader />
               <a className="skip-link" href="#main">
                 {t("label")}
               </a>
@@ -96,7 +97,6 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
               <SimThemeSync />
               <InkCursor />
               <ScrollInkCoupling />
-              <Loader />
               <InkWipeOverlay />
               <ConsoleMenu />
               <PrintJamOverlay />
