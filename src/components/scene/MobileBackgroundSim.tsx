@@ -11,15 +11,18 @@ import {
 import { capDPR, getTierDPR, type TierConfig } from "@/lib/gpu";
 import { createInkWarmup } from "@/lib/inkPreview";
 import { subscribeToLoaderComplete } from "@/lib/loaderSession";
-import { SPOT_COLORS } from "@/lib/palette";
+import { SPOT_COLORS, type SpotColor } from "@/lib/palette";
 import { MAX_DT_S, subscribe } from "@/lib/raf";
 import { useSimPresetStore } from "@/lib/simPresetStore";
 
 /** A single fixed background simulation, visible throughout native scrolling.
- * Touch input only injects genuine taps; scroll velocity gently moves the ink. */
+ * Passive touch strokes and scroll velocity gently move the ink. */
 
-const TAP_MOVE_TOLERANCE_PX = 12; // beyond this a touch is a scroll, not a tap
 const TAP_MAX_MS = 400; // longer than this is a long-press, not a tap
+const TOUCH_MIN_MOVE_PX = 2;
+const TOUCH_MAX_FORCE = 0.12;
+
+type TouchSplat = { x: number; y: number; dx: number; dy: number; color: SpotColor };
 
 // Scroll → ink coupling. Mirrors the Desktop
 // ScrollInkCoupling constants, adjusted for native-scroll velocity
@@ -50,6 +53,7 @@ export function MobileBackgroundSim({
 }: MobileBackgroundSimProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const orchestratorRef = useRef<FluidOrchestrator | null>(null);
+  const touchSplatRef = useRef<TouchSplat | null>(null);
   const pointerRef = useRef<PointerState>({
     x: 0,
     y: 0,
@@ -171,59 +175,110 @@ export function MobileBackgroundSim({
     };
   }, [config, reduced, onGLReady]);
 
-  // Tap-to-splat at the document level (the canvas is pointer-events:none).
-  // Only a genuine tap pokes the sim — a drag is the user scrolling.
+  // Passive document-level input leaves the browser in charge of scrolling.
+  // Movement only replaces a pending sample; the shared RAF consumes at most
+  // one splat per frame, including when touch events arrive in bursts.
   useEffect(() => {
     if (reduced) return;
 
-    let startX = 0;
-    let startY = 0;
-    let startT = 0;
-    let moved = false;
-    let onChrome = false;
+    let gesture: {
+      id: number;
+      x: number;
+      y: number;
+      startedAt: number;
+      moved: boolean;
+      color: SpotColor;
+    } | null = null;
+
+    const cancel = () => {
+      gesture = null;
+      touchSplatRef.current = null;
+    };
+    const clampPosition = (value: number) => Math.max(0, Math.min(1, value));
+    const clampForce = (value: number) =>
+      Math.max(-TOUCH_MAX_FORCE, Math.min(TOUCH_MAX_FORCE, value));
 
     const onStart = (e: TouchEvent) => {
+      cancel();
+      if (e.touches.length !== 1 || document.hidden) return;
       const t = e.touches[0];
       if (!t) return;
-      startX = t.clientX;
-      startY = t.clientY;
-      startT = performance.now();
-      moved = false;
-      // Taps on interactive UI (nav, links, the preset switcher's
-      // [data-no-splat] pill, form fields) act on that UI — poking a
-      // splat under it reads as an accident, not a feature.
-      onChrome =
+      if (
         e.target instanceof Element &&
-        e.target.closest("[data-no-splat], a, button, input, textarea, select, label") !== null;
+        e.target.closest(
+          '[data-no-splat], a, button, input, textarea, select, label, [role="button"], [role="link"], [contenteditable]:not([contenteditable="false"])',
+        )
+      )
+        return;
+      gesture = {
+        id: t.identifier,
+        x: t.clientX,
+        y: t.clientY,
+        startedAt: performance.now(),
+        moved: false,
+        // Spot intensity selects the current theme's existing ladder band.
+        color: SPOT_COLORS[Math.floor(Math.random() * SPOT_COLORS.length)] ?? "rose",
+      };
     };
     const onMove = (e: TouchEvent) => {
+      if (!gesture) return;
       const t = e.touches[0];
-      if (!t) return;
-      if (Math.hypot(t.clientX - startX, t.clientY - startY) > TAP_MOVE_TOLERANCE_PX) {
-        moved = true;
+      if (e.touches.length !== 1 || !t || t.identifier !== gesture.id) {
+        cancel();
+        return;
       }
+      const dx = t.clientX - gesture.x;
+      const dy = gesture.y - t.clientY;
+      if ((dx === 0 && dy === 0) || (!gesture.moved && Math.hypot(dx, dy) < TOUCH_MIN_MOVE_PX))
+        return;
+      const pending = touchSplatRef.current;
+      touchSplatRef.current = {
+        x: clampPosition(t.clientX / window.innerWidth),
+        y: clampPosition(1 - t.clientY / window.innerHeight),
+        dx: clampForce((pending?.dx ?? 0) + dx / window.innerWidth),
+        dy: clampForce((pending?.dy ?? 0) + dy / window.innerHeight),
+        color: gesture.color,
+      };
+      gesture.x = t.clientX;
+      gesture.y = t.clientY;
+      gesture.moved = true;
     };
-    const onEnd = () => {
-      if (onChrome || moved || performance.now() - startT > TAP_MAX_MS) return;
-      const orchestrator = orchestratorRef.current;
-      if (!orchestrator) return;
-      const u = startX / window.innerWidth;
-      const v = 1 - startY / window.innerHeight;
-      // Random spot color per tap — the injected RGB's magnitude picks
-      // the ladder band, so varying spots gives varied bands instead of
-      // the flat all-white -> always-top-band look the first cut had.
-      const color = SPOT_COLORS[Math.floor(Math.random() * SPOT_COLORS.length)] ?? "rose";
-      orchestrator.injectSplat(u, v, color, 0, 0);
+    const onEnd = (e: TouchEvent) => {
+      if (!gesture) return;
+      if (e.touches.length !== 0 || e.changedTouches[0]?.identifier !== gesture.id) {
+        cancel();
+        return;
+      }
+      if (!gesture.moved && performance.now() - gesture.startedAt <= TAP_MAX_MS) {
+        touchSplatRef.current = {
+          x: clampPosition(gesture.x / window.innerWidth),
+          y: clampPosition(1 - gesture.y / window.innerHeight),
+          dx: 0,
+          dy: 0,
+          color: gesture.color,
+        };
+      }
+      gesture = null;
+    };
+    const onVisibility = () => {
+      if (document.hidden) cancel();
     };
 
     document.addEventListener("touchstart", onStart, { passive: true });
     document.addEventListener("touchmove", onMove, { passive: true });
     document.addEventListener("touchend", onEnd, { passive: true });
+    document.addEventListener("touchcancel", cancel, { passive: true });
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("blur", cancel);
 
     return () => {
+      cancel();
       document.removeEventListener("touchstart", onStart);
       document.removeEventListener("touchmove", onMove);
       document.removeEventListener("touchend", onEnd);
+      document.removeEventListener("touchcancel", cancel);
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("blur", cancel);
     };
   }, [reduced]);
 
@@ -276,6 +331,11 @@ export function MobileBackgroundSim({
       const dt = Math.min(deltaMs * 0.001, MAX_DT_S);
       virtualElapsedMs += Math.min(deltaMs, MAX_DT_S * 1000);
       const startedAt = performance.now();
+      const touch = touchSplatRef.current;
+      if (touch && !document.hidden && orchestrator.isStarted()) {
+        touchSplatRef.current = null;
+        orchestrator.injectSplat(touch.x, touch.y, touch.color, touch.dx, touch.dy);
+      }
       orchestrator.step(dt, virtualElapsedMs, pointerRef.current);
       if (orchestrator.isStarted() && warmupRef.current === null) {
         warmupRef.current = createInkWarmup(performance.now());

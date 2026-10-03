@@ -19,7 +19,12 @@ test.describe("Photography mobile stack", () => {
     await expect(page.getByTestId("lite-ink-canvas")).toBeVisible({ timeout: 15000 });
     await expect(page.getByTestId("photo-ink-animation")).toHaveCount(5);
     const first = page.getByTestId("photo-slide").first();
-    await first.scrollIntoViewIfNeeded();
+    // Mere visibility no longer reveals the photo: its center must reach
+    // the upper viewport so the effect has time to register while scrolling.
+    await first.locator("img").evaluate((image) => {
+      const box = image.getBoundingClientRect();
+      window.scrollBy({ top: box.top + box.height / 2 - innerHeight * 0.39, behavior: "instant" });
+    });
     await expect(first.getByTestId("photo-ink-animation")).toHaveCount(0, { timeout: 10000 });
     await expect(page.locator("#photography canvas")).toHaveCount(0);
     await expect(page.locator("#photography [role='button']")).toHaveCount(0);

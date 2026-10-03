@@ -1,4 +1,5 @@
 import { Polaroid } from "@/components/case-study/Polaroid";
+import { ExternalLinkIcon } from "@/components/ui/ExternalLinkIcon";
 
 type PublicShot = {
   slug: string;
@@ -134,9 +135,7 @@ export function PublicCard({
           {footerLabel}
         </span>
         {footerDomain}
-        <span aria-hidden="true" className="font-mono text-base not-italic">
-          ↗
-        </span>
+        <ExternalLinkIcon />
         <span className="sr-only">{footerExternal}</span>
       </a>
     </div>

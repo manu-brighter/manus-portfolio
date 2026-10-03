@@ -12,6 +12,7 @@ import {
   useState,
 } from "react";
 import { useScene } from "@/components/scene/SceneProvider";
+import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { Link, useRouter } from "@/i18n/navigation";
 import type { ExperimentSlug } from "@/lib/content/playground";
@@ -24,10 +25,8 @@ type PlaygroundCardProps = {
   cardSpot: SpotColor;
   /** Static visual rendered behind the card text. Always present. */
   visual: ReactNode;
-  /** Optional live mini-sim component, lazy-mounted on first hover/
-   *  focus and cross-faded over the static visual. Receives a `paused`
-   *  prop synced to hover/focus state — false while interacted with,
-   *  true otherwise (orchestrator pauses, state preserved). */
+  /** Live preview on desktop hover/focus or centered mobile media.
+   * Desktop preserves paused state; mobile releases inactive previews. */
   LiveSim?: ComponentType<{ paused: boolean }>;
 };
 
@@ -52,6 +51,9 @@ type PlaygroundCardProps = {
  * stays mounted (so re-hover is instant) but its `paused` prop flips
  * true → orchestrator stops sim work. State preserved.
  *
+ * Touch: the centered media frame activates the preview. Leaving the
+ * center band or hiding the page unmounts it to release its GL resources.
+ *
  * Reduced motion: skip the LiveSim entirely, the static SVG is the
  * card's full visual.
  */
@@ -59,6 +61,7 @@ export function PlaygroundCard({ slug, i18nKey, cardSpot, visual, LiveSim }: Pla
   const t = useTranslations(`playground.experiments.${i18nKey}`);
   const tCommon = useTranslations("playground");
   const reducedMotion = useReducedMotion();
+  const isCoarse = useCoarsePointer();
   const { effectsReduced } = useScene();
   const router = useRouter();
   const startGrow = useInkWipeStore((s) => s.startGrow);
@@ -69,30 +72,42 @@ export function PlaygroundCard({ slug, i18nKey, cardSpot, visual, LiveSim }: Pla
   const [pageVisible, setPageVisible] = useState(true);
   const navTimerRef = useRef<number | null>(null);
   const linkRef = useRef<HTMLAnchorElement>(null);
+  const centerRef = useRef<HTMLDivElement>(null);
 
-  // Visibility only pauses an intentionally activated preview. Scrolling
-  // through cards never allocates a secondary WebGL context.
+  // Desktop visibility only pauses intentionally activated previews.
+  // Mobile additionally requires the media frame to be centered.
   useEffect(() => {
     if (reducedMotion) return;
-    const root = linkRef.current;
+    const root = isCoarse ? centerRef.current : linkRef.current;
     if (!root) return;
-    const obs = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (!entry) return;
-        setInViewport(entry.isIntersecting);
-      },
-      { threshold: 0 },
-    );
-    obs.observe(root);
+    let obs: IntersectionObserver | null = null;
+    const observe = () => {
+      obs?.disconnect();
+      // Percent root margins resolve against width. Height-derived pixels
+      // keep the central 35% band narrow on tall phones; the media's center
+      // marker avoids activating a second frame merely clipping that band.
+      const margin = isCoarse ? window.innerHeight * 0.325 : 0;
+      obs = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          if (!entry) return;
+          setInViewport(entry.isIntersecting);
+        },
+        { threshold: 0, rootMargin: `-${margin}px 0px -${margin}px 0px` },
+      );
+      obs.observe(root);
+    };
+    observe();
+    if (isCoarse) window.addEventListener("resize", observe);
     const onVisibility = () => setPageVisible(!document.hidden);
     onVisibility();
     document.addEventListener("visibilitychange", onVisibility);
     return () => {
-      obs.disconnect();
+      obs?.disconnect();
+      window.removeEventListener("resize", observe);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [reducedMotion]);
+  }, [reducedMotion, isCoarse]);
 
   // Cancel a pending router.push if the card unmounts before the wipe
   // completes (e.g. user navigates via the locale switcher mid-grow).
@@ -109,6 +124,8 @@ export function PlaygroundCard({ slug, i18nKey, cardSpot, visual, LiveSim }: Pla
 
   const cssVars = { "--card-spot": SPOT_CSS_VAR[cardSpot] } as CSSProperties;
   const showLive = LiveSim && !reducedMotion;
+  const previewActive = inViewport && pageVisible && (isCoarse || hovered);
+  const mountPreview = isCoarse ? previewActive : activated;
 
   const onEnter = () => {
     setHovered(true);
@@ -174,17 +191,21 @@ export function PlaygroundCard({ slug, i18nKey, cardSpot, visual, LiveSim }: Pla
           "transition-[transform,box-shadow] duration-[280ms] ease-out",
         ].join(" ")}
       >
+        <div
+          ref={centerRef}
+          aria-hidden="true"
+          className="pointer-events-none absolute left-1/2 top-1/2 h-px w-px"
+        />
         {/* Keep the SVG underneath: failed GL initialization stays useful. */}
         <div className="absolute inset-0">{visual}</div>
 
-        {/* Live sim layer — lazy-mounted on first hover, then sticks
-            around in paused state for instant re-hovers. */}
-        {showLive && activated ? (
+        {/* Mobile retains only active previews; desktop preserves hover state. */}
+        {showLive && mountPreview ? (
           <div
             className="absolute inset-0 transition-opacity duration-[320ms] ease-out"
-            style={{ opacity: hovered && inViewport ? 1 : 0 }}
+            style={{ opacity: previewActive ? 1 : 0 }}
           >
-            <LiveSim paused={!hovered || !inViewport || !pageVisible} />
+            <LiveSim paused={!previewActive} />
           </div>
         ) : null}
       </div>

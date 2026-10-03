@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
 import { PhotoInkMask, type SpotColor } from "@/components/scene/PhotoInkMask";
 import { useScene } from "@/components/scene/SceneProvider";
+import { PhotographyLink } from "@/components/ui/PhotographyLink";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { useLenis } from "@/hooks/useLenis";
 import { useMobileLayout } from "@/hooks/useMobileLayout";
@@ -418,17 +419,7 @@ export function Photography() {
 
       <div className="container-page grid-12 mt-20 gap-y-4 md:mt-28">
         <div className="col-span-12 md:col-span-8 md:col-start-3">
-          <a
-            href={t("ctaHref")}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group inline-flex items-baseline gap-3 bg-spot-amber px-4 py-3 font-display italic text-ink-print text-[clamp(1rem,1.4vw,1.4rem)] leading-none w-fit shadow-[3px_3px_0_var(--color-ink)] transition-[transform,box-shadow] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[1px_1px_0_var(--color-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper motion-reduce:transition-none"
-          >
-            <span>{t("ctaLabel")}</span>
-            <span aria-hidden="true" className="font-mono not-italic">
-              ↗
-            </span>
-          </a>
+          <PhotographyLink href={t("ctaHref")} label={t("ctaLabel")} />
         </div>
       </div>
     </section>

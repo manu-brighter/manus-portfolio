@@ -5,6 +5,7 @@ import { type ReactNode, useCallback, useEffect, useRef, useState } from "react"
 import { FadeIn } from "@/components/motion/FadeIn";
 import { PhotoInkAnimation } from "@/components/scene/PhotoInkAnimation";
 import { useScene } from "@/components/scene/SceneProvider";
+import { PhotographyLink } from "@/components/ui/PhotographyLink";
 import type { SpotColor } from "@/lib/palette";
 
 /**
@@ -99,31 +100,52 @@ const LAYOUT_CLASS: Record<MobileSlide["layout"], string> = {
 };
 
 function MobilePhotoFrame({ spotColor, children }: { spotColor: SpotColor; children: ReactNode }) {
-  const { effectsReduced, inkUnavailable, reducedMotion } = useScene();
-  const animated = effectsReduced && !inkUnavailable && !reducedMotion;
+  const { inkUnavailable, reducedMotion } = useScene();
+  const animated = !inkUnavailable && !reducedMotion;
   const ref = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLSpanElement>(null);
   const [reveal, setReveal] = useState(false);
   const [finished, setFinished] = useState(false);
   const complete = useCallback(() => setFinished(true), []);
 
   useEffect(() => {
-    if (!animated || reveal || !ref.current) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (!entries.some((entry) => entry.isIntersecting && entry.intersectionRatio >= 0.25))
-          return;
-        setReveal(true);
-        observer.disconnect();
-      },
-      { threshold: 0.25 },
-    );
-    observer.observe(ref.current);
-    return () => observer.disconnect();
+    const sentinel = sentinelRef.current;
+    if (!animated || reveal || !sentinel) return;
+    let observer: IntersectionObserver;
+    const observe = () => {
+      observer?.disconnect();
+      observer = new IntersectionObserver(
+        (entries) => {
+          if (!entries.some((entry) => entry.isIntersecting)) return;
+          setReveal(true);
+          observer.disconnect();
+        },
+        // IO percentages resolve against width, so use height-derived px.
+        // Keep the already-passed region eligible: fast swipes must not
+        // leave a visible, shallow photo covered after skipping the line.
+        {
+          rootMargin: `0px 0px -${window.innerHeight * 0.595}px 0px`,
+          threshold: 0,
+        },
+      );
+      observer.observe(sentinel);
+    };
+    observe();
+    window.addEventListener("resize", observe, { passive: true });
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", observe);
+    };
   }, [animated, reveal]);
 
   return (
     <div ref={ref} className="relative">
       {children}
+      <span
+        ref={sentinelRef}
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-1/2 bottom-0"
+      />
       {animated && !finished && (
         <PhotoInkAnimation
           spotColor={spotColor}
@@ -186,15 +208,7 @@ export function PhotographyMobile() {
         ))}
       </div>
       <div className="container-page mt-14">
-        <a
-          href={t("ctaHref")}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex min-h-11 items-center gap-3 bg-spot-amber px-4 py-3 font-display text-lg italic text-ink-print shadow-[3px_3px_0_var(--color-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-4 focus-visible:ring-offset-paper"
-        >
-          <span>{t("ctaLabel")}</span>
-          <span aria-hidden="true">↗</span>
-        </a>
+        <PhotographyLink href={t("ctaHref")} label={t("ctaLabel")} />
       </div>
     </section>
   );
