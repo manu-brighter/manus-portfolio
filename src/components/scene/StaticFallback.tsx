@@ -3,7 +3,7 @@
 export function StaticFallback() {
   return (
     <div
-      className="pointer-events-none fixed inset-0 z-0 h-lvh w-full"
+      className="pointer-events-none fixed inset-0 z-0"
       aria-hidden="true"
       style={{
         background:

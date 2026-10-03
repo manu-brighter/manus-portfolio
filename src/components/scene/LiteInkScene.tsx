@@ -100,8 +100,7 @@ export function LiteInkScene({
     gl.bindVertexArray(vao);
     const resize = () => {
       const width = Math.max(1, window.innerWidth);
-      // clientHeight = 100lvh, which reaches under the iOS toolbar.
-      const height = Math.max(1, canvas.clientHeight || window.innerHeight);
+      const height = Math.max(1, window.innerHeight);
       const budget = qualityRef.current ? 450000 : 900000;
       const scale = Math.min(1, window.devicePixelRatio || 1, Math.sqrt(budget / (width * height)));
       canvas.width = Math.max(1, Math.floor(width * scale));
@@ -197,7 +196,7 @@ export function LiteInkScene({
       // current so leaving their edge cannot inject the whole skipped path.
       if (event.target instanceof Element && event.target.closest("[data-no-splat]")) return;
       pointerX = event.clientX / Math.max(1, window.innerWidth);
-      pointerY = 1 - event.clientY / Math.max(1, canvas.clientHeight || window.innerHeight);
+      pointerY = 1 - event.clientY / Math.max(1, window.innerHeight);
       // Integrate distance, not event count: a 1000Hz mouse must impart the
       // same motion as a 60Hz mouse travelling along the same path.
       movedDistance += distance / Math.max(1, Math.min(window.innerWidth, window.innerHeight));
@@ -206,7 +205,7 @@ export function LiteInkScene({
     let sinceDraw = 0;
     let lastDrawAt = performance.now();
     let time = 0;
-    let scroll = window.scrollY / Math.max(1, canvas.clientHeight || window.innerHeight);
+    let scroll = window.scrollY / Math.max(1, window.innerHeight);
     const visibility = () => {
       accumulated = 0;
       sinceDraw = 0;
@@ -267,8 +266,7 @@ export function LiteInkScene({
         trail[offset + 2] = energy * (1 - i * 0.12);
       }
       scroll +=
-        (window.scrollY / Math.max(1, canvas.clientHeight || window.innerHeight) - scroll) *
-        (1 - Math.exp(-dt * 3));
+        (window.scrollY / Math.max(1, window.innerHeight) - scroll) * (1 - Math.exp(-dt * 3));
       // biome-ignore lint/correctness/useHookAtTopLevel: WebGL API method, not a React hook
       gl.useProgram(activeProgram);
       gl.bindVertexArray(vao);
@@ -302,7 +300,7 @@ export function LiteInkScene({
       data-testid="lite-ink-canvas"
       aria-hidden="true"
       tabIndex={-1}
-      className="pointer-events-none fixed inset-0 z-0 h-lvh w-full"
+      className="pointer-events-none fixed inset-0 z-0 h-full w-full"
     />
   );
 }
