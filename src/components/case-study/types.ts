@@ -25,4 +25,6 @@ import type {
 export type Fact = CaseStudyFacts[number];
 export type StackRow = CaseStudyStack[number];
 export type Feature = CaseStudyHighlightFeature;
-export type DateCaption = CaseStudyHookStation;
+// Picked, not aliased: the hook station also carries its screenshot alt,
+// which the highlight stations keep on their highlight entry instead.
+export type DateCaption = Pick<CaseStudyHookStation, "datestamp" | "polaroidCaption">;

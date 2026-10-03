@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { hasLocale } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { use } from "react";
+import { routing } from "@/i18n/routing";
 import { dur, ease } from "@/lib/motion/tokens";
+import { buildPageShareMetadata } from "@/lib/seo/metadata";
+import { SITE } from "@/lib/site";
 
 /**
  * Internal design-system reference. Content stays English across all
@@ -11,14 +16,8 @@ import { dur, ease } from "@/lib/motion/tokens";
  * `[locale]` so the routing stays homogeneous and `generateStaticParams`
  * doesn't need a special case.
  *
- * Root layout already sets `robots: noindex` globally; repeated here for
- * safety in case Phase 11 inverts the default.
+ * Carries its own noindex: the locale layout defaults to `index: true`.
  */
-
-export const metadata: Metadata = {
-  title: "Styleguide · Manuel Heller",
-  robots: { index: false, follow: false },
-};
 
 const PALETTE: Array<{ token: string; cssVar: string; role: string }> = [
   { token: "paper", cssVar: "--color-paper", role: "Dominant surface (≥70%)" },
@@ -28,7 +27,7 @@ const PALETTE: Array<{ token: string; cssVar: string; role: string }> = [
   { token: "ink", cssVar: "--color-ink", role: "Body text, bold outlines" },
   { token: "ink-soft", cssVar: "--color-ink-soft", role: "Secondary text" },
   { token: "ink-muted", cssVar: "--color-ink-muted", role: "Tertiary text (UI labels)" },
-  { token: "ink-faint", cssVar: "--color-ink-faint", role: "Decorative only — not for text" },
+  { token: "ink-faint", cssVar: "--color-ink-faint", role: "Decorative only, not for text" },
   { token: "spot-rose", cssVar: "--color-spot-rose", role: "Primary spot (CTAs)" },
   { token: "spot-amber", cssVar: "--color-spot-amber", role: "Warm accent" },
   { token: "spot-mint", cssVar: "--color-spot-mint", role: "Cool accent + focus ring" },
@@ -44,13 +43,13 @@ const TYPE_SAMPLES = [
     className: "type-body-lg",
     label: "type-body-lg",
     sample:
-      "Lead body — sets the editorial tone for long-form sections like About and case studies.",
+      "Lead body: sets the editorial tone for long-form sections like About and case studies.",
   },
   {
     className: "type-body",
     label: "type-body",
     sample:
-      "Default body copy — stays inside the 65ch comfort range to keep reading rhythm steady across viewports.",
+      "Default body copy, stays inside the 65ch comfort range to keep reading rhythm steady across viewports.",
   },
   { className: "type-label", label: "type-label", sample: "Section · Eyebrow" },
 ] as const;
@@ -58,6 +57,24 @@ const TYPE_SAMPLES = [
 type StyleguideProps = {
   params: Promise<{ locale: string }>;
 };
+
+export async function generateMetadata({ params }: StyleguideProps): Promise<Metadata> {
+  const { locale } = await params;
+  if (!hasLocale(routing.locales, locale)) notFound();
+  const title = "Styleguide · Manuel Heller";
+  const description = "Internal design token and typography reference for manuelheller.dev.";
+  const url = `${SITE.url}/${locale}/styleguide/`;
+  return {
+    // `absolute`: the title already carries the name; the locale layout
+    // template would append it a second time.
+    title: { absolute: title },
+    // Self-canonical: the inherited one points at the locale home.
+    alternates: { canonical: url },
+    description,
+    ...buildPageShareMetadata({ locale, url, title, description }),
+    robots: { index: false, follow: false },
+  };
+}
 
 export default function StyleguidePage({ params }: StyleguideProps) {
   const { locale } = use(params);
@@ -69,7 +86,7 @@ export default function StyleguidePage({ params }: StyleguideProps) {
         <p className="type-label text-ink-muted">Internal · Design System</p>
         <h1 className="type-h1 text-ink">Tokens, type, motion.</h1>
         <p className="type-body text-ink-soft">
-          Visual baseline for the Phase 1 design system. All tokens here are authoritative —
+          Visual baseline for the Phase 1 design system. All tokens here are authoritative:
           components consume them, never duplicate.
         </p>
       </header>

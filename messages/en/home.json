@@ -593,7 +593,8 @@
     "stations": {
       "hook": {
         "datestamp": "2022.08",
-        "polaroidCaption": "Joggediballa · Mobile · Live"
+        "polaroidCaption": "Joggediballa · Mobile · Live",
+        "screenshotAlt": "Joggediballa homepage in mobile view"
       },
       "stack": {
         "heading": "Stack note"

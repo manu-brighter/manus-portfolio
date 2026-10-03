@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { routing } from "@/i18n/routing";
 import { SITE } from "@/lib/site";
 
 /**
@@ -18,6 +19,8 @@ export default function manifest(): MetadataRoute.Manifest {
     name: SITE.name,
     short_name: SITE.shortName,
     description: SITE.description,
+    id: "/",
+    lang: routing.defaultLocale,
     start_url: "/",
     display: "standalone",
     background_color: "#f0e8dc", // --color-paper

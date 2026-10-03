@@ -15,7 +15,7 @@ test.describe("wordmark returns home", () => {
     await page.goto("/de/cv/");
     await expect(page.locator('[data-page="cv"]')).toBeVisible();
 
-    await page.locator('nav a[href="/de/"]').click();
+    await page.locator('nav a[href="/de/"]:not([hreflang])').click();
     await expect(page).toHaveURL(/\/de\/?$/);
     await expect(page.locator("#about")).toBeAttached();
   });
@@ -27,7 +27,7 @@ test.describe("wordmark returns home", () => {
       .poll(() => page.evaluate(() => window.scrollY), { timeout: 5000 })
       .toBeGreaterThan(500);
 
-    await page.locator('nav a[href="/de/"]').click();
+    await page.locator('nav a[href="/de/"]:not([hreflang])').click();
     // Lenis animates, so poll rather than sampling once.
     await expect
       .poll(() => page.evaluate(() => Math.round(window.scrollY)), { timeout: 5000 })

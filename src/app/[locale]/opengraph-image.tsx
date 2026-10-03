@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { routing } from "@/i18n/routing";
 import { renderSocialCard } from "@/lib/seo/socialCard";
+import { SITE } from "@/lib/site";
 
 // Dynamic OG image — 1200x630 paper-bg with Manuel's brand PNG
 // upper-left and the localised title + tagline right-aligned.
@@ -14,7 +15,7 @@ import { renderSocialCard } from "@/lib/seo/socialCard";
 // Required for `output: "export"` static-export mode — Next 16 won't
 // pre-render dynamic OG routes without an explicit force-static.
 export const dynamic = "force-static";
-export const alt = "Manuel Heller · Creative Developer";
+export const alt = SITE.name;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

@@ -79,7 +79,9 @@ export async function renderSocialCard({
       >
         <div
           style={{
-            fontSize: 72,
+            // 60, not 72: the three-part home title wraps to three lines
+            // at 72 and crowds the description on the 600px Twitter card.
+            fontSize: 60,
             fontStyle: "italic",
             lineHeight: 1,
             marginBottom: 24,

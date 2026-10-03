@@ -80,7 +80,9 @@ export function CaseStudy() {
     () =>
       PUBLIC_SHOT_CONFIG.map((cfg, i) => ({
         ...cfg,
-        alt: `${publicLayerLabel} ${i + 1}`,
+        // The localized caption describes the shot; the numbered layer
+        // label is only a fallback for a missing catalog entry.
+        alt: publicShotsI18n[i]?.caption || `${publicLayerLabel} ${i + 1}`,
         datestamp: publicShotsI18n[i]?.datestamp ?? "",
         caption: publicShotsI18n[i]?.caption ?? "",
       })),
@@ -95,7 +97,7 @@ export function CaseStudy() {
     const out: LightboxImage[] = [
       {
         ...LIGHTBOX_IMAGES.hook,
-        alt: "Joggediballa Homepage Mobile",
+        alt: hookStation.screenshotAlt,
         caption: hookStation.polaroidCaption ?? "",
       },
     ];
@@ -127,6 +129,7 @@ export function CaseStudy() {
     highlightAdmin.polaroidCaption,
     highlightOverlay.polaroidCaption,
     hookStation.polaroidCaption,
+    hookStation.screenshotAlt,
     publicShots,
   ]);
 
@@ -158,6 +161,7 @@ export function CaseStudy() {
         hookText={t("hook")}
         datestamp={hookStation.datestamp}
         polaroidCaption={hookStation.polaroidCaption ?? ""}
+        screenshotAlt={hookStation.screenshotAlt}
         lightboxIndex={0}
         onPolaroidClick={handleOpen(0)}
       />
@@ -232,6 +236,7 @@ export function CaseStudy() {
             hook={{
               hookText: t("hook"),
               station: hookStation,
+              screenshotAlt: hookStation.screenshotAlt,
               onClick: handleOpen(0),
             }}
             context={{

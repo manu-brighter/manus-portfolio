@@ -1,19 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { NextIntlClientProvider } from "next-intl";
-import { setRequestLocale } from "next-intl/server";
+import { hasLocale, NextIntlClientProvider } from "next-intl";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ExperimentRouter } from "@/components/playground/ExperimentRouter";
 import { loadNamespaceGroup } from "@/i18n/messages";
 import { routing } from "@/i18n/routing";
 import { EXPERIMENTS, getExperiment } from "@/lib/content/playground";
-
-// Playground experiments are decorative, not portfolio content. noindex stops
-// them from cluttering brand SERPs. We allow crawling (no robots.txt disallow)
-// so Google reliably sees this tag — relying solely on robots.txt risks
-// snippet-less URL listings when third parties link to an experiment.
-export const metadata: Metadata = {
-  robots: { index: false, follow: false },
-};
+import { buildPageShareMetadata } from "@/lib/seo/metadata";
+import { SITE } from "@/lib/site";
 
 /**
  * Per-experiment route. Static-export-friendly: every (locale × slug)
@@ -42,6 +36,39 @@ export function generateStaticParams() {
 type PlaygroundExperimentPageProps = {
   params: Promise<{ locale: string; slug: string }>;
 };
+
+// Playground experiments are decorative, not portfolio content. noindex stops
+// them from cluttering brand SERPs. We allow crawling (no robots.txt disallow)
+// so Google reliably sees this tag — relying solely on robots.txt risks
+// snippet-less URL listings when third parties link to an experiment.
+//
+// Title + caption reuse the experiment's own catalog strings; canonical and
+// og:url point at the experiment itself, not at the locale home the layout
+// would otherwise inherit.
+export async function generateMetadata({
+  params,
+}: PlaygroundExperimentPageProps): Promise<Metadata> {
+  const { locale, slug } = await params;
+  const experiment = getExperiment(slug);
+  if (!hasLocale(routing.locales, locale) || !experiment) notFound();
+  const t = await getTranslations({
+    locale,
+    namespace: `playground.experiments.${experiment.i18nKey}`,
+  });
+  const tMeta = await getTranslations({ locale, namespace: "meta" });
+  // Share title runs through the same template as <title>, so og:title
+  // and twitter:title read "Ink Drop Studio · Manuel Heller" too.
+  const title = tMeta("titleTemplate").replace("%s", t("cardTitle"));
+  const description = t("caption");
+  const url = `${SITE.url}/${locale}/playground/${experiment.slug}/`;
+  return {
+    title: { absolute: title },
+    description,
+    alternates: { canonical: url },
+    ...buildPageShareMetadata({ locale, url, title, description }),
+    robots: { index: false, follow: false },
+  };
+}
 
 export default async function PlaygroundExperimentPage({ params }: PlaygroundExperimentPageProps) {
   const { locale, slug } = await params;

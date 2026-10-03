@@ -11,7 +11,10 @@ import "@fontsource-variable/inter/wght.css";
 import "@fontsource-variable/jetbrains-mono/wght.css";
 
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
+import { routing } from "@/i18n/routing";
+import { SITE } from "@/lib/site";
 
 /**
  * Root layout is a pass-through — the real `<html>`/`<body>` shell lives
@@ -28,13 +31,17 @@ import type { ReactNode } from "react";
  *
  * CSS + font imports stay here so they apply to the redirect page too.
  */
-export const metadata: Metadata = {
-  metadataBase: new URL("https://manuelheller.dev"),
-  title: "Manuel Heller · Creative Developer",
-  description: "Toon Fluid: an Awwwards-grade craft portfolio by Manuel Heller.",
-  // Per-locale metadata in [locale]/layout.tsx overrides this for locale routes.
-  // The root index.html (locale redirect) inherits this minimal shape.
-};
+export async function generateMetadata(): Promise<Metadata> {
+  // Per-locale metadata in [locale]/layout.tsx overrides this for locale
+  // routes. Only the bare-root redirect (`/`) and the 404 inherit it, so it
+  // carries the default locale's home copy instead of a hand-kept string.
+  const t = await getTranslations({ locale: routing.defaultLocale, namespace: "meta" });
+  return {
+    metadataBase: new URL(SITE.url),
+    title: t("title"),
+    description: t("description"),
+  };
+}
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return children;

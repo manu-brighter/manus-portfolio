@@ -817,6 +817,16 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 - **Mobile hamburger menu**: `useState` + custom toggle (not `<details>`) —
   needs JS for mq-resize-close behaviour anyway, and animation needs the
   open state to drive className transitions. Esc-to-close explicit.
+- **The Nav locale switcher (`LocaleSwitcher.tsx`) is a globe toggle over
+  crawlable links.** The four options are real `<a href hreflang lang>`
+  in the static HTML even while closed (aria-hidden + tabIndex -1 +
+  visibility hidden) — they are the only internal links to the EN/FR/IT
+  homes, so do not turn them back into buttons. Consequence for tests:
+  `nav a[href="/de/"]` now matches the wordmark AND the DE option on
+  home (strict-mode violation) — scope nav link selectors with
+  `:not([hreflang])`. CSS classes own the server-rendered and
+  reduced-motion look; the GSAP timeline owns the animated state and
+  `clearProps` on cleanup — don't mix the two on one property.
 - **Locale switch uses View Transitions API directly**
   (`document.startViewTransition()`), not Next.js's experimental wrapper.
   Falls back gracefully when API unavailable.
