@@ -9,7 +9,7 @@ import { expect, test } from "@playwright/test";
 
 test("CV nav link is the current page on /cv and nowhere else", async ({ page }) => {
   await page.goto("/de/cv/");
-  const cvLink = page.locator('nav a[href^="/de/cv"]');
+  const cvLink = page.locator('nav a[href^="/de/cv"]:not([hreflang])');
   await expect(cvLink).toHaveAttribute("aria-current", "page");
 
   await page.goto("/de/");

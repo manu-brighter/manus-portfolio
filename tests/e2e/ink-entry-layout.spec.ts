@@ -73,7 +73,8 @@ test("header CV typography aligns with language and navigation labels", async ({
     await page.evaluate(() => document.fonts.ready);
     const layout = await page.evaluate(() => {
       const cv = document.querySelector('nav a[href="/de/cv/"]')!;
-      const language = document.querySelector('nav button[aria-current="true"]')!;
+      // The switcher toggle is an icon: align its glyph box, not text.
+      const language = document.querySelector("nav [data-locale-globe]")!;
       const textCenter = (element: Element) => {
         const range = document.createRange();
         range.selectNodeContents(element);
@@ -87,7 +88,10 @@ test("header CV typography aligns with language and navigation labels", async ({
           getComputedStyle(element).visibility === "visible",
       );
       return {
-        languageOffset: Math.abs(textCenter(cv) - textCenter(language)),
+        languageOffset: Math.abs(
+          textCenter(cv) -
+            (language.getBoundingClientRect().top + language.getBoundingClientRect().height / 2),
+        ),
         navigationOffsets: links.map((link) => Math.abs(textCenter(cv) - textCenter(link))),
         border: getComputedStyle(cv).borderTopWidth,
       };

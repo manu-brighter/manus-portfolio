@@ -12,7 +12,7 @@ import { devices, expect, test } from "@playwright/test";
  *      Enter navigates focus to #main (or its first focusable child).
  *   2. Nav Tab order: each nav item receives a visible :focus-visible
  *      outline when focused via Tab.
- *   3. Locale-switcher Escape return: Tab to the active locale button,
+ *   3. Locale-switcher Escape return: Tab to the globe toggle,
  *      Enter to expand, Escape to collapse — focus returns to the trigger.
  *
  * Desktop Chrome only (keyboard nav is consistent enough that mobile-
@@ -102,7 +102,7 @@ test.describe("keyboard navigation", () => {
   });
 
   test("locale-switcher Escape collapses and focus returns to trigger", async ({ page }) => {
-    // Tab to find the active locale button (aria-expanded is set on it).
+    // Tab to find the globe toggle (data-testid="locale-toggle").
     const MAX_TABS = 15;
     let expandedTrigger = false;
 
@@ -113,13 +113,13 @@ test.describe("keyboard navigation", () => {
         if (!el) return null;
         return {
           ariaExpanded: el.getAttribute("aria-expanded"),
-          ariaCurrent: el.getAttribute("aria-current"),
+          testId: el.getAttribute("data-testid"),
           tag: el.tagName.toLowerCase(),
         };
       });
 
-      // The active locale button has aria-current="true" and aria-expanded
-      if (info?.tag === "button" && info.ariaCurrent === "true" && info.ariaExpanded !== null) {
+      // The toggle is the switcher's only tab stop while closed.
+      if (info?.tag === "button" && info.testId === "locale-toggle" && info.ariaExpanded !== null) {
         expandedTrigger = true;
 
         // Open the locale switcher.

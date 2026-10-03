@@ -5,7 +5,7 @@ import { LOCALE_STORAGE_KEY } from "@/lib/localePreference";
 /**
  * F-testing-coverage-3: Locale-switch View Transitions.
  *
- * Starts at /de/, clicks the EN locale button, waits for URL to change
+ * Starts at /de/, opens the globe toggle, clicks the EN link, waits for URL to change
  * to /en/, and asserts html[lang]="en". Runs in both Chromium (VT
  * supported) and WebKit (fallback path — synchronous navigation).
  *
@@ -25,15 +25,12 @@ test.describe("locale switch via nav switcher", () => {
     await page.goto("/de/");
     await expect(page.locator("html")).toHaveAttribute("lang", "de");
 
-    // The current locale (DE) is always visible. Click it to expand
-    // the other locales, then click EN.
-    const deButton = page.getByRole("button", { name: /deutsch/i });
-    await deButton.click();
-
-    // After expanding, click the EN locale button.
-    const enButton = page.getByRole("button", { name: /english/i });
-    await expect(enButton).toBeVisible();
-    await enButton.click();
+    // The globe toggle names the current language; open it, then
+    // click the EN link (accessible name = endonym).
+    await page.getByRole("button", { name: /deutsch/i }).click();
+    const enLink = page.getByRole("link", { name: "English", exact: true });
+    await expect(enLink).toBeVisible();
+    await enLink.click();
 
     await page.waitForURL(/\/en\//);
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
@@ -53,12 +50,11 @@ test.describe("locale switch via nav switcher", () => {
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
 
     // Expand from EN and switch to DE.
-    const enButton = page.getByRole("button", { name: /english/i });
-    await enButton.click();
+    await page.getByRole("button", { name: /english/i }).click();
 
-    const deButton = page.getByRole("button", { name: /deutsch/i });
-    await expect(deButton).toBeVisible();
-    await deButton.click();
+    const deLink = page.getByRole("link", { name: "Deutsch", exact: true });
+    await expect(deLink).toBeVisible();
+    await deLink.click();
 
     await page.waitForURL(/\/de\//);
     await expect(page.locator("html")).toHaveAttribute("lang", "de");
