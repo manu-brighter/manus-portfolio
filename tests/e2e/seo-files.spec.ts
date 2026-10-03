@@ -35,6 +35,9 @@ test.describe("@seo sitemap.xml", () => {
     // hreflang alternates emitted via xhtml:link rel="alternate"
     expect(body).toContain("xhtml:link");
     expect(body).toContain('rel="alternate"');
+    // Full reciprocal set: each entry lists itself and x-default too.
+    expect(body).toContain('hreflang="x-default" href="https://manuelheller.dev/de/"');
+    expect(body).not.toContain("projects/portfolio/homepage-800w.jpg");
   });
 });
 
@@ -49,9 +52,11 @@ test.describe("@seo robots.txt", () => {
     expect(body, "must contain User-agent: *").toMatch(/User-[Aa]gent:\s*\*/i);
     expect(body, "must point at sitemap.xml").toMatch(/Sitemap:\s*\S*sitemap\.xml/);
     // Allow line-wrapped Disallow paths but reject "Disallow: /"
-    // alone (would deindex everything). robots.ts emits
-    // disallow: ["/_next/"] which is fine — noindex routes use the
+    // alone (would deindex everything). Noindex routes use the
     // page-level robots meta tag instead of a robots.txt disallow.
+    // `/_next/` must stay crawlable: Google renders with its CSS/JS.
+    expect(body, "must NOT disallow /_next/").not.toMatch(/Disallow:[^\n]*_next/i);
+    expect(body, "no non-standard Host line").not.toMatch(/^Host:/im);
     const disallowAll = /^Disallow:\s*\/\s*$/m.test(body);
     expect(disallowAll, "must NOT have Disallow: / (full-site deindex)").toBe(false);
     // Legal + playground routes must NOT be disallowed at the
@@ -126,4 +131,56 @@ test.describe("@seo canonical URLs on legal routes", () => {
       expect(match?.[1], `canonical on ${path}`).toBe(canonical);
     });
   }
+});
+
+/**
+ * Sub-route share + title guard. Next.js field-replaces `openGraph` per
+ * segment, so a page that only sets `title` silently shares the home
+ * card; and a metaTitle that already ends in the name doubles up under
+ * the locale layout's "%s · Manuel Heller" template.
+ */
+test.describe("@seo sub-route titles and share metadata", () => {
+  const ROUTES = [
+    { path: "/de/impressum/", title: "Impressum · Manuel Heller" },
+    { path: "/fr/datenschutz/", title: "Confidentialité · Manuel Heller" },
+    { path: "/de/cv/", title: "CV · Manuel Heller" },
+    { path: "/de/styleguide/", title: "Styleguide · Manuel Heller" },
+    { path: "/de/playground/ink-drop-studio/", title: "Ink Drop Studio · Manuel Heller" },
+  ];
+
+  for (const { path, title } of ROUTES) {
+    test(`${path} has its own title, canonical and og:url`, async ({ request, baseURL }) => {
+      const body = await (await request.get(`${baseURL}${path}`)).text();
+      expect(body.match(/<title>([^<]*)<\/title>/)?.[1]).toBe(title);
+      const self = `https://manuelheller.dev${path}`;
+      expect(body.match(/<link\s+rel="canonical"\s+href="([^"]+)"/i)?.[1]).toBe(self);
+      expect(body.match(/<meta\s+property="og:url"\s+content="([^"]+)"/i)?.[1]).toBe(self);
+      expect(body.match(/<meta\s+property="og:title"\s+content="([^"]+)"/i)?.[1]).toBe(title);
+    });
+  }
+
+  test("/de/ carries a CH og:locale and the other three as alternates", async ({
+    request,
+    baseURL,
+  }) => {
+    const body = await (await request.get(`${baseURL}/de/`)).text();
+    expect(body).toContain('<meta property="og:locale" content="de_CH"');
+    for (const alt of ["en_US", "fr_CH", "it_CH"]) {
+      expect(body).toContain(`<meta property="og:locale:alternate" content="${alt}"`);
+    }
+  });
+});
+
+test.describe("@seo bare root", () => {
+  test("/ emits exactly one robots meta (noindex, follow) and a share card", async ({
+    request,
+    baseURL,
+  }) => {
+    const body = await (await request.get(`${baseURL}/`)).text();
+    const robots = body.match(/<meta\s+name="robots"\s+content="[^"]+"/gi) ?? [];
+    expect(robots, "exactly one robots meta").toHaveLength(1);
+    expect(robots[0]).toMatch(/noindex,\s*follow/i);
+    expect(body).toContain('<meta property="og:url" content="https://manuelheller.dev/de/"');
+    expect(body).toContain('content="https://manuelheller.dev/de/opengraph-image"');
+  });
 });

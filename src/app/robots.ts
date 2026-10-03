@@ -2,8 +2,9 @@ import type { MetadataRoute } from "next";
 import { SITE } from "@/lib/site";
 
 /**
- * robots.txt — production allows all crawlers; only `/_next/` internals are
- * disallowed.
+ * robots.txt: production allows all crawlers, including `/_next/` (Google
+ * renders pages and needs the CSS/JS chunks there). No `host` line either;
+ * it is a non-standard Yandex extension that Google ignores.
  *
  * Routes we don't want indexed (playground experiments, legal pages,
  * styleguide) use page-level `robots: { index: false }` metadata instead
@@ -34,10 +35,8 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/_next/"],
       },
     ],
     sitemap: `${SITE.url}/sitemap.xml`,
-    host: SITE.url,
   };
 }

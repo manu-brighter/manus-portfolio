@@ -15,24 +15,41 @@ const PORTRAIT_CAPTION: Record<Locale, string> = {
   it: "Foto ritratto Manuel Heller, sviluppatore full-stack Basilea",
 };
 
+const PERSON_ID = `${SITE.url}/#person`;
+const WEBSITE_ID = `${SITE.url}/#website`;
+const ORGANIZATION_ID = `${SITE.url}/#organization`;
+
 /**
- * JSON-LD structured data — Person + WebSite schema. Embedded as a
- * single <script type="application/ld+json"> tag in the locale layout.
+ * JSON-LD structured data, embedded as a single
+ * <script type="application/ld+json"> tag in the locale layout.
  *
- * Person -> search engines surface Manuel as the named author of the
- * site; populates the right-side knowledge panel for personal-name
- * searches.
+ * One `@graph` with stable `@id`s instead of loose top-level objects, so
+ * crawlers resolve every reference to the same entity rather than seeing
+ * three unrelated "Manuel Heller" nodes:
  *
- * WebSite -> declares the site's identity, sets up sitelinks search
- * box (if/when site-internal search exists), and provides locale
- * alternates as `inLanguage`.
+ * Person (#person) -> Manuel as the named author of the site; populates
+ * the knowledge panel for personal-name searches. `sameAs` lists only his
+ * own profiles; Jogge di Balla is modelled as `memberOf` with the club's
+ * own URL and Instagram.
+ *
+ * WebSite (#website) -> the site's identity, published by #person, with
+ * the rendered locale as `inLanguage`.
+ *
+ * Organization (#organization) exists ONLY to carry `logo`, which is the
+ * Google-documented property for the site logo next to a search result
+ * (`WebSite.image` is valid schema but Google's logo docs read
+ * Organization.logo). 512x512 paper-bg PNG: square so Google doesn't crop,
+ * paper bg so it reads cleanly on dark search surfaces.
  */
-export function buildJsonLd(locale: Locale, description: string): Record<string, unknown>[] {
+export function buildJsonLd(locale: Locale, description: string): Record<string, unknown> {
+  const home = `${SITE.url}/`;
+  const personRef = { "@id": PERSON_ID };
+
   const person = {
-    "@context": "https://schema.org",
     "@type": "Person",
+    "@id": PERSON_ID,
     name: SITE.author.name,
-    url: SITE.url,
+    url: home,
     image: {
       "@type": "ImageObject",
       contentUrl: `${SITE.url}/profile/manuel-heller-portrait-1200w.jpg`,
@@ -40,20 +57,20 @@ export function buildJsonLd(locale: Locale, description: string): Record<string,
       width: 1200,
       height: 1800,
       caption: PORTRAIT_CAPTION[locale],
-      creator: {
-        "@type": "Person",
-        name: SITE.author.name,
-      },
-      copyrightHolder: {
-        "@type": "Person",
-        name: SITE.author.name,
-      },
+      creator: personRef,
+      copyrightHolder: personRef,
       copyrightNotice: `© ${SITE.author.name}`,
     },
     jobTitle: "Full-Stack Developer",
     worksFor: {
       "@type": "Organization",
       name: "zvoove Switzerland AG",
+    },
+    memberOf: {
+      "@type": "Organization",
+      name: SITE.joggediballa.name,
+      url: SITE.joggediballa.url,
+      sameAs: [SITE.joggediballa.instagram],
     },
     address: {
       "@type": "PostalAddress",
@@ -81,49 +98,26 @@ export function buildJsonLd(locale: Locale, description: string): Record<string,
       "AI-Assisted Development",
     ],
     email: `mailto:${SITE.author.email}`,
-    sameAs: [
-      SITE.author.socials.github,
-      SITE.author.socials.linkedin,
-      SITE.author.socials.photos,
-      SITE.author.socials.instagram,
-    ],
+    sameAs: [SITE.author.socials.github, SITE.author.socials.linkedin, SITE.author.socials.photos],
   };
 
   const webSite = {
-    "@context": "https://schema.org",
     "@type": "WebSite",
+    "@id": WEBSITE_ID,
     name: SITE.name,
     alternateName: SITE.shortName,
-    url: SITE.url,
+    url: home,
     description,
     inLanguage: locale,
-    author: {
-      "@type": "Person",
-      name: SITE.author.name,
-      url: SITE.url,
-    },
-    publisher: {
-      "@type": "Person",
-      name: SITE.author.name,
-    },
+    author: personRef,
+    publisher: personRef,
   };
 
-  // Organization entity exists ONLY to carry the `logo` property — that
-  // is the schema.org / Google-documented path for the "site logo next
-  // to result" SERP feature (the joggediballa.ch effect referenced in
-  // the original site-logo polish). `WebSite.image` is valid schema but
-  // Google's logo docs explicitly look at Organization.logo, so the
-  // previous WebSite.image-only approach silently missed the goal.
-  //
-  // 512×512 paper-bg PNG — square shape and paper-bg both important:
-  // square so Google doesn't crop, paper bg so it looks clean against
-  // Google's dark search surfaces (transparent variant would show
-  // whatever bg color Google chose underneath).
   const organization = {
-    "@context": "https://schema.org",
     "@type": "Organization",
+    "@id": ORGANIZATION_ID,
     name: SITE.shortName,
-    url: SITE.url,
+    url: home,
     logo: {
       "@type": "ImageObject",
       url: `${SITE.url}/icon-512.png`,
@@ -131,7 +125,11 @@ export function buildJsonLd(locale: Locale, description: string): Record<string,
       width: 512,
       height: 512,
     },
+    founder: personRef,
   };
 
-  return [person, webSite, organization];
+  return {
+    "@context": "https://schema.org",
+    "@graph": [person, webSite, organization],
+  };
 }

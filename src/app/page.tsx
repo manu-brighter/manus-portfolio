@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { LOCALE_STORAGE_KEY } from "@/lib/localePreference";
 import { escapeForScript } from "@/lib/seo/escapeForScript";
+import { buildPageShareMetadata } from "@/lib/seo/metadata";
+import { SITE } from "@/lib/site";
 
 /**
  * Root language-detection redirect.
@@ -36,10 +39,27 @@ import { escapeForScript } from "@/lib/seo/escapeForScript";
  * locale, silently ignoring a stored choice.
  */
 
-export const metadata: Metadata = {
-  title: "Manuel Heller · Creative Developer",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  // Default-locale home copy: `/` is what people paste into chats, so the
+  // share card has to match the page it lands on (/de/ without a stored
+  // choice or browser hint).
+  const locale = routing.defaultLocale;
+  const t = await getTranslations({ locale, namespace: "meta" });
+  const title = t("title");
+  const description = t("description");
+  const languages: Record<string, string> = {};
+  for (const l of routing.locales) languages[l] = `${SITE.url}/${l}/`;
+  languages["x-default"] = `${SITE.url}/${locale}/`;
+  return {
+    title,
+    description,
+    alternates: { languages },
+    ...buildPageShareMetadata({ locale, url: `${SITE.url}/${locale}/`, title, description }),
+    // A redirect stub is not a landing page, but the locale homes it links
+    // to must stay discoverable, so `follow` stays on.
+    robots: { index: false, follow: true },
+  };
+}
 
 const REDIRECT_SCRIPT = `
 (function () {
@@ -83,12 +103,14 @@ export default function RootRedirect() {
   return (
     <html lang={routing.defaultLocale}>
       <head>
-        {/* 1s delay (not 0) so the inline script — which does proper
-            Accept-Language detection — almost always beats the refresh
-            on slow devices (plan supported-target: Iris Xe). The refresh
-            is strictly a no-JS safety net. */}
-        <meta httpEquiv="refresh" content={`1; url=${fallbackHref}`} />
-        <meta name="robots" content="noindex, nofollow" />
+        {/* No-JS safety net only, hence inside <noscript>: with JS on, a
+            refresh would race the inline script's location.replace() and
+            could override the detected locale with the default one. That
+            race is why it used to wait 1s; out of the scripted path it can
+            fire immediately. Robots meta comes from `metadata` above. */}
+        <noscript>
+          <meta httpEquiv="refresh" content={`0; url=${fallbackHref}`} />
+        </noscript>
       </head>
       <body>
         <script

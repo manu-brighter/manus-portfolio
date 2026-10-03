@@ -11,7 +11,10 @@
 export const SITE = {
   url: "https://manuelheller.dev",
   alias: "https://manuelheller.ch",
-  name: "Manuel Heller · Creative Developer",
+  /** Home title. Mirrors `meta.title` in every locale common.json (identical
+   *  English string in all four locales); used where no catalog is
+   *  available synchronously (OG image `alt` exports, manifest). */
+  name: "Manuel Heller · Software Developer · Photographer",
   shortName: "Manuel Heller",
   tagline: "Full-Stack Developer · PHP & Vue",
   description:
@@ -24,8 +27,15 @@ export const SITE = {
       github: "https://github.com/manu-brighter",
       linkedin: "https://linkedin.com/in/manuel-heller-15a831223",
       photos: "https://manuelheller.myportfolio.com/portfolio",
-      instagram: "https://instagram.com/joggediballa",
     },
+  },
+  /** Jogge di Balla, the association Manuel co-founded (case study).
+   *  Its Instagram is the club's account, not a personal profile, so
+   *  it lives here and not under `author.socials`. */
+  joggediballa: {
+    name: "Jogge di Balla",
+    url: "https://joggediballa.ch",
+    instagram: "https://instagram.com/joggediballa",
   },
   /** Public repos referenced from the Work side-projects strip. URLs
    *  live here, not in the i18n catalogs — one file beats four JSONs

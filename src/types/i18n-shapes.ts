@@ -17,14 +17,9 @@
 // here — that's the "translation parity" sprint. This module only
 // fixes the type-vs-source drift at the i18n boundary.
 
-import type deCommon from "../../messages/de/common.json";
 import type deCv from "../../messages/de/cv.json";
 import type deHome from "../../messages/de/home.json";
 import type deLegal from "../../messages/de/legal.json";
-
-// --- meta -----------------------------------------------------------
-
-export type MetaKeywords = (typeof deCommon)["meta"]["keywords"];
 
 // --- about ----------------------------------------------------------
 

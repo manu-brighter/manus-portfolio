@@ -28,6 +28,7 @@ type PublicShot = {
 type HookConfig = {
   hookText: string;
   station: DateCaption;
+  screenshotAlt: string;
   onClick?: () => void;
 };
 
@@ -102,6 +103,7 @@ export function DioramaCards({ hook, context, admin, overlay, public: pub }: Pro
           hookText={hook.hookText}
           datestamp={hook.station.datestamp}
           polaroidCaption={hook.station.polaroidCaption ?? ""}
+          screenshotAlt={hook.screenshotAlt}
           lightboxIndex={0}
           onPolaroidClick={hook.onClick}
         />

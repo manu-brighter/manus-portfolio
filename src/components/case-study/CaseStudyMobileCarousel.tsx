@@ -219,6 +219,7 @@ export function CaseStudyMobileCarousel({ handleOpen, publicShots }: Props) {
                 hookText={t("hook")}
                 datestamp={hookStation.datestamp}
                 polaroidCaption={hookStation.polaroidCaption ?? ""}
+                screenshotAlt={hookStation.screenshotAlt}
                 lightboxIndex={0}
                 onPolaroidClick={handleOpen(0)}
               />

@@ -4,6 +4,7 @@ type Props = {
   hookText: string;
   datestamp: string;
   polaroidCaption: string;
+  screenshotAlt: string;
   onPolaroidClick?: () => void;
   lightboxIndex?: number;
 };
@@ -18,6 +19,7 @@ export function HookCard({
   hookText,
   datestamp,
   polaroidCaption,
+  screenshotAlt,
   onPolaroidClick,
   lightboxIndex,
 }: Props) {
@@ -45,7 +47,7 @@ export function HookCard({
             />
             <img
               src="/projects/joggediballa/homepage-phone-540w.jpg"
-              alt="Joggediballa Homepage Mobile"
+              alt={screenshotAlt}
               width={540}
               height={960}
               loading="lazy"

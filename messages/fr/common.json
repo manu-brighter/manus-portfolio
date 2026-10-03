@@ -1,19 +1,8 @@
 {
   "meta": {
-    "title": "Manuel Heller · Creative Developer",
+    "title": "Manuel Heller · Software Developer · Photographer",
     "titleTemplate": "%s · Manuel Heller",
-    "description": "Développeur logiciel dans la région de Bâle. PHP, Vue, interfaces métier, intégrations et tests automatisés. Projets web personnels, outils IA et photographie.",
-    "keywords": [
-      "Manuel Heller",
-      "PHP",
-      "Vue.js",
-      "Full-Stack",
-      "AI",
-      "WebGL",
-      "Portfolio",
-      "Basel",
-      "Schweiz"
-    ]
+    "description": "Développeur logiciel dans la région de Bâle. PHP, Vue, interfaces métier, intégrations et tests automatisés. Projets web personnels, outils IA et photographie."
   },
   "skipLink": {
     "label": "Aller au contenu"
@@ -43,8 +32,7 @@
   },
   "localeSwitcher": {
     "ariaLabel": "Langue",
-    "currentLabel": "Langue actuelle : {name}",
-    "switchLabel": "Passer en {name}",
+    "toggleLabel": "Choisir la langue, actuelle : {name}",
     "locales": {
       "de": "Deutsch",
       "en": "English",
