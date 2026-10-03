@@ -126,7 +126,10 @@ export function LiteInkScene({
       gl.uniform1i(uniforms.style, STYLES.indexOf(visuals.style));
       gl.uniform1f(uniforms.grain, visuals.grainStrength);
       gl.uniform1f(uniforms.edge, visuals.edgeStrength);
-      speed = visuals.ambientTimeScale;
+      // Analytic washes need a livelier clock than the fluid solver.
+      // Tempo changes keep the same single draw and work on every viewport.
+      const animationTempo = visuals.style === "wave" ? 2 : visuals.style === "aquarell" ? 4 : 1;
+      speed = visuals.ambientTimeScale * animationTempo;
     };
     resize();
     applyPreset();

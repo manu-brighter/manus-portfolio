@@ -78,14 +78,17 @@ export function VibecodedStamp({ children, delay = 0 }: Props) {
   }, [reducedMotion, delay]);
 
   return (
-    <span ref={wrapRef} className="relative inline-block px-1.5 align-baseline">
+    <span
+      ref={wrapRef}
+      className="relative inline-block shrink-0 whitespace-nowrap align-baseline md:px-1.5"
+    >
       <span
         ref={haloRef}
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 -z-10 rounded-sm"
         style={{ backgroundColor: "var(--color-spot-rose)", filter: "blur(6px)" }}
       />
-      <span className="type-label inline-block border-[1.5px] border-ink bg-paper px-[0.4em] py-[0.2em] text-[0.55rem] text-ink md:text-[0.75rem]">
+      <span className="type-label inline-block border-[1.5px] border-ink bg-paper px-[0.4em] py-[0.2em] text-[0.5rem] tracking-[0.04em] text-ink md:text-[0.75rem] md:tracking-[0.18em]">
         {children}
       </span>
     </span>

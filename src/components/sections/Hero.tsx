@@ -29,7 +29,7 @@ export function Hero() {
     <section
       id="hero"
       aria-labelledby="hero-heading"
-      className="container-page grid-12 relative min-h-[calc(100dvh-9rem)] items-end gap-y-12 py-16 md:py-24"
+      className="container-page grid-12 relative min-h-[calc(100svh-4.3125rem)] items-end gap-y-12 py-16 md:min-h-[calc(100dvh-9rem)] md:py-24"
     >
       <div className="stamp-column col-span-12 self-start text-ink-muted md:col-span-4">
         <span className="type-label">{t("statusStamps.section")}</span>

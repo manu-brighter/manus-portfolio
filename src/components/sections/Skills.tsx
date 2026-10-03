@@ -89,14 +89,14 @@ export function Skills() {
               ) : null}
             </header>
 
-            <ul className="col-span-12 flex flex-wrap gap-x-6 gap-y-3 font-display md:col-span-8">
+            <ul className="col-span-12 flex flex-wrap gap-x-4 gap-y-3 font-display md:col-span-8 md:gap-x-6">
               {tier.items.map((item, i) => (
                 <li
                   key={item.name}
-                  className={`${TIER_ITEM_CLASSES[tier.weight]} flex items-baseline gap-2 text-ink`}
+                  className={`${TIER_ITEM_CLASSES[tier.weight]} flex max-w-full items-baseline gap-1.5 text-ink md:gap-2`}
                 >
                   {i > 0 ? (
-                    <span aria-hidden="true" className="text-ink-faint">
+                    <span aria-hidden="true" className="hidden text-ink-faint md:inline">
                       ·
                     </span>
                   ) : null}

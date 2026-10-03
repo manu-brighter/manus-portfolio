@@ -1,3 +1,4 @@
+import { ExternalLinkIcon } from "@/components/ui/ExternalLinkIcon";
 import type { SpotColor } from "@/lib/palette";
 import { SPOT_CSS_VAR } from "@/lib/palette";
 
@@ -72,7 +73,7 @@ export function SideProjectCard({
 
       <span className="inline-flex items-center gap-2 self-start rounded-[2px] border-[1.5px] border-ink bg-paper px-3 py-1.5 font-mono text-xs uppercase tracking-[0.18em] text-ink transition-[transform,box-shadow] duration-200 group-hover:translate-x-[2px] group-hover:translate-y-[2px] group-hover:shadow-[3px_3px_0_var(--card-spot)]">
         {ctaLabel}
-        <span aria-hidden="true">↗</span>
+        <ExternalLinkIcon />
       </span>
     </a>
   );
