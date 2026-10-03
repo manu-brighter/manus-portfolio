@@ -229,6 +229,14 @@
   mix-blend-mode: screen;
 }
 
+/* Rose spot fills keep their value on every theme, so a glyph sitting
+ * ON one must stay dark. Night flips --color-ink to cream (~2.2:1 on
+ * rose); its dark paper token restores the contrast. Border and offset
+ * shadow keep following ink, they sit against the page, not the fill. */
+[data-sim-theme="night"] .photo-link-stamp {
+  color: var(--color-paper);
+}
+
 /* Turbulenz is the one LIGHT theme whose sim paints near-black (the
  * deep-violet band under its Sobel contours), and the droplet swarm
  * parks that pool right under the pointer. Multiply can only ever

@@ -120,11 +120,13 @@ function MobilePhotoFrame({ spotColor, children }: { spotColor: SpotColor; child
           setReveal(true);
           observer.disconnect();
         },
+        // Line sits at 58% of the viewport height: the reveal starts just
+        // before the photo centre reaches the screen middle, not after.
         // IO percentages resolve against width, so use height-derived px.
         // Keep the already-passed region eligible: fast swipes must not
         // leave a visible, shallow photo covered after skipping the line.
         {
-          rootMargin: `0px 0px -${window.innerHeight * 0.595}px 0px`,
+          rootMargin: `0px 0px -${window.innerHeight * 0.42}px 0px`,
           threshold: 0,
         },
       );
