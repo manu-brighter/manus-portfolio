@@ -57,7 +57,7 @@
     "raw-loader": "^4.0.2",
     "tailwindcss": "^4.3.3",
     "tweakpane": "^4.0.5",
-    "typescript": "^6.0.3"
+    "typescript": "^7.0.2"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
