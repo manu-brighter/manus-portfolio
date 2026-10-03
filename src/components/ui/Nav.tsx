@@ -88,6 +88,8 @@ export function Nav() {
   // the anchor in one click. `usePathname()` returns the locale-stripped
   // path, so "/" === home.
   const onHome = pathname === "/";
+  // `trailingSlash: true` can surface as "/cv/"; normalise before matching.
+  const onCv = pathname.replace(/\/$/, "") === "/cv";
   const buildHref = (hash: string) => (onHome ? hash : `/${currentLocale}/${hash}`);
 
   // Anchor navigation handler. Two flows:
@@ -250,8 +252,10 @@ export function Nav() {
           <span className="shrink-0">
             <Link
               href="/cv"
-              aria-current={pathname === "/cv" ? "page" : undefined}
-              className="type-label relative inline-block text-ink-soft underline-offset-4 transition-colors hover:text-ink hover:underline aria-[current=page]:text-ink aria-[current=page]:underline"
+              aria-current={onCv ? "page" : undefined}
+              className={`type-label relative inline-block transition-colors active:scale-[0.94] active:duration-100 after:pointer-events-none after:absolute after:bottom-[-3px] after:left-0 after:h-[1.5px] after:w-full after:origin-left after:bg-ink after:transition-transform after:duration-300 after:ease-out after:content-[''] hover:after:scale-x-100 ${
+                onCv ? "text-ink after:scale-x-100" : "text-ink-soft after:scale-x-0 hover:text-ink"
+              }`}
             >
               {t("nav.items.cv")}
             </Link>

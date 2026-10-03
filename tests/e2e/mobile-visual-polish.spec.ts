@@ -17,7 +17,7 @@ test("hero fills the initial mobile viewport", async ({ page }) => {
 });
 
 for (const mode of ["light", "full"]) {
-  test(`${mode} mobile photos wait until their center reaches the upper viewport`, async ({
+  test(`${mode} mobile photos reveal just before their center reaches the viewport middle`, async ({
     page,
   }) => {
     await page.addInitScript(() => {
@@ -31,13 +31,13 @@ for (const mode of ["light", "full"]) {
     await expect(reveal).toHaveAttribute("data-revealing", "false");
     await photo.locator("img").evaluate((image) => {
       const box = image.getBoundingClientRect();
-      window.scrollBy({ top: box.top + box.height / 2 - innerHeight * 0.6, behavior: "instant" });
+      window.scrollBy({ top: box.top + box.height / 2 - innerHeight * 0.66, behavior: "instant" });
     });
     await page.waitForTimeout(300);
     await expect(reveal).toHaveAttribute("data-revealing", "false");
     await photo.locator("img").evaluate((image) => {
       const box = image.getBoundingClientRect();
-      window.scrollBy({ top: box.top + box.height / 2 - innerHeight * 0.39, behavior: "instant" });
+      window.scrollBy({ top: box.top + box.height / 2 - innerHeight * 0.55, behavior: "instant" });
     });
     await expect(reveal).toHaveCount(0, { timeout: 10000 });
     // A fast swipe can jump over the trigger line. A shallow image that

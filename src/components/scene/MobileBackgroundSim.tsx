@@ -82,7 +82,8 @@ export function MobileBackgroundSim({
     const dpr = capDPR(getTierDPR(config.tier));
     const sizeCanvas = () => {
       canvas.width = Math.max(1, Math.floor(window.innerWidth * dpr));
-      canvas.height = Math.max(1, Math.floor(window.innerHeight * dpr));
+      // clientHeight = 100lvh, which reaches under the iOS toolbar.
+      canvas.height = Math.max(1, Math.floor((canvas.clientHeight || window.innerHeight) * dpr));
     };
     sizeCanvas();
 
@@ -220,6 +221,9 @@ export function MobileBackgroundSim({
         color: SPOT_COLORS[Math.floor(Math.random() * SPOT_COLORS.length)] ?? "rose",
       };
     };
+    // The canvas is 100lvh tall (under the iOS toolbar), so map touches
+    // against its height, not the smaller visible viewport.
+    const surfaceHeight = () => Math.max(1, canvasRef.current?.clientHeight || window.innerHeight);
     const onMove = (e: TouchEvent) => {
       if (!gesture) return;
       const t = e.touches[0];
@@ -234,9 +238,9 @@ export function MobileBackgroundSim({
       const pending = touchSplatRef.current;
       touchSplatRef.current = {
         x: clampPosition(t.clientX / window.innerWidth),
-        y: clampPosition(1 - t.clientY / window.innerHeight),
+        y: clampPosition(1 - t.clientY / surfaceHeight()),
         dx: clampForce((pending?.dx ?? 0) + dx / window.innerWidth),
-        dy: clampForce((pending?.dy ?? 0) + dy / window.innerHeight),
+        dy: clampForce((pending?.dy ?? 0) + dy / surfaceHeight()),
         color: gesture.color,
       };
       gesture.x = t.clientX;
@@ -252,7 +256,7 @@ export function MobileBackgroundSim({
       if (!gesture.moved && performance.now() - gesture.startedAt <= TAP_MAX_MS) {
         touchSplatRef.current = {
           x: clampPosition(gesture.x / window.innerWidth),
-          y: clampPosition(1 - gesture.y / window.innerHeight),
+          y: clampPosition(1 - gesture.y / surfaceHeight()),
           dx: 0,
           dy: 0,
           color: gesture.color,
@@ -367,10 +371,14 @@ export function MobileBackgroundSim({
       aria-hidden="true"
       tabIndex={-1}
       style={{
+        // top + 100lvh instead of inset: 0. iOS Safari ends inset-0 fixed
+        // layers where the toolbar starts, although the page stays visible
+        // behind it; the large viewport height reaches under the toolbar.
         position: "fixed",
-        inset: 0,
+        top: 0,
+        left: 0,
         width: "100%",
-        height: "100%",
+        height: "100lvh",
         zIndex: 0,
         pointerEvents: "none",
         // Promote the fixed layer and retain the last frame during Safari repaint pauses.
