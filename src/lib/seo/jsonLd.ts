@@ -125,7 +125,6 @@ export function buildJsonLd(locale: Locale, description: string): Record<string,
       width: 512,
       height: 512,
     },
-    founder: personRef,
   };
 
   return {

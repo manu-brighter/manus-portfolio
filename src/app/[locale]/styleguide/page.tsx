@@ -62,6 +62,7 @@ export async function generateMetadata({ params }: StyleguideProps): Promise<Met
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   const title = "Styleguide · Manuel Heller";
+  const description = "Internal design token and typography reference for manuelheller.dev.";
   const url = `${SITE.url}/${locale}/styleguide/`;
   return {
     // `absolute`: the title already carries the name; the locale layout
@@ -69,7 +70,8 @@ export async function generateMetadata({ params }: StyleguideProps): Promise<Met
     title: { absolute: title },
     // Self-canonical: the inherited one points at the locale home.
     alternates: { canonical: url },
-    ...buildPageShareMetadata({ locale, url, title }),
+    description,
+    ...buildPageShareMetadata({ locale, url, title, description }),
     robots: { index: false, follow: false },
   };
 }

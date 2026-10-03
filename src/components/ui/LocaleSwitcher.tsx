@@ -12,7 +12,7 @@ import { rememberLocale } from "@/lib/localePreference";
 import { dur } from "@/lib/motion/tokens";
 
 /**
- * LocaleSwitcher — the navbar language control.
+ * LocaleSwitcher: the navbar language control.
  *
  * Closed: a hand-drawn globe icon. The navbar used to show the current
  * code ("DE") next to "CV", and two two-letter abbreviations side by side

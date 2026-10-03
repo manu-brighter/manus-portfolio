@@ -1221,6 +1221,18 @@
     transform: translate(2px, 1px);
   }
 
+  /* Inside a link the link owns hover/focus (padded hit area, keyboard
+   * focus), not the glyph-sized span. */
+  a:is(:hover, :focus-visible) .misreg-hover::before {
+    opacity: 0.7;
+    transform: translate(-2px, -1px);
+  }
+
+  a:is(:hover, :focus-visible) .misreg-hover::after {
+    opacity: 0.7;
+    transform: translate(2px, 1px);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .misreg-hover::before,
     .misreg-hover::after {

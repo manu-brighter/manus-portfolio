@@ -32,7 +32,7 @@ test.describe("entry and project navigation", () => {
     page,
   }) => {
     await page.goto("/de/", { waitUntil: "domcontentloaded" });
-    await page.locator('nav a[href="/de/"]').click();
+    await page.locator('nav a[href="/de/"]:not([hreflang])').click();
     await expect(page.locator("#hero-heading")).toBeVisible();
     await expect(page.locator("html")).not.toHaveAttribute("data-intro-seen", "true");
     await expect(page.locator("html")).not.toHaveAttribute("data-intro-blocked", "true");
