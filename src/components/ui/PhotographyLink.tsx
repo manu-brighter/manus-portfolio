@@ -16,7 +16,7 @@ export function PhotographyLink({ href, label }: { href: string; label: string }
           {new URL(href).hostname}
         </span>
       </span>
-      <span className="grid size-10 shrink-0 place-items-center rounded-full border-[1.5px] border-ink bg-spot-rose shadow-[2px_2px_0_var(--color-ink)] transition-[transform,box-shadow] duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:shadow-[3px_3px_0_var(--color-ink)] motion-reduce:transform-none">
+      <span className="photo-link-stamp grid size-10 shrink-0 place-items-center rounded-full border-[1.5px] border-ink bg-spot-rose shadow-[2px_2px_0_var(--color-ink)] transition-[transform,box-shadow] duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:shadow-[3px_3px_0_var(--color-ink)] motion-reduce:transform-none">
         <ExternalLinkIcon className="size-5" />
       </span>
     </a>

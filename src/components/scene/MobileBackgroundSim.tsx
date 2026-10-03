@@ -371,12 +371,12 @@ export function MobileBackgroundSim({
       aria-hidden="true"
       tabIndex={-1}
       style={{
-        // top + 100lvh instead of inset: 0. iOS Safari ends inset-0 fixed
-        // layers where the toolbar starts, although the page stays visible
-        // behind it; the large viewport height reaches under the toolbar.
+        // 100lvh height wins over inset's bottom. iOS Safari ends inset-0
+        // fixed layers where the toolbar starts, although the page stays
+        // visible behind it; the large viewport height reaches under the
+        // toolbar. inset: 0 stays as the fallback for browsers without lvh.
         position: "fixed",
-        top: 0,
-        left: 0,
+        inset: 0,
         width: "100%",
         height: "100lvh",
         zIndex: 0,

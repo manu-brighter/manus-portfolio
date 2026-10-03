@@ -206,7 +206,7 @@ export function LiteInkScene({
     let sinceDraw = 0;
     let lastDrawAt = performance.now();
     let time = 0;
-    let scroll = window.scrollY / Math.max(1, window.innerHeight);
+    let scroll = window.scrollY / Math.max(1, canvas.clientHeight || window.innerHeight);
     const visibility = () => {
       accumulated = 0;
       sinceDraw = 0;
@@ -267,7 +267,7 @@ export function LiteInkScene({
         trail[offset + 2] = energy * (1 - i * 0.12);
       }
       scroll +=
-        (window.scrollY / Math.max(1, window.innerHeight) - scroll) * (1 - Math.exp(-dt * 3));
+        (window.scrollY / Math.max(1, canvas.clientHeight || window.innerHeight) - scroll) * (1 - Math.exp(-dt * 3));
       // biome-ignore lint/correctness/useHookAtTopLevel: WebGL API method, not a React hook
       gl.useProgram(activeProgram);
       gl.bindVertexArray(vao);
@@ -301,7 +301,7 @@ export function LiteInkScene({
       data-testid="lite-ink-canvas"
       aria-hidden="true"
       tabIndex={-1}
-      className="pointer-events-none fixed top-0 left-0 z-0 h-lvh w-full"
+      className="pointer-events-none fixed inset-0 z-0 h-lvh w-full"
     />
   );
 }
