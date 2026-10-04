@@ -15,11 +15,7 @@
         {
           "id": "responsible",
           "heading": "Responsable du contenu",
-          "body": [
-            "Manuel Heller",
-            "Martisackerweg 18, 4203 Grellingen, Suisse",
-            "manuelheller@bluewin.ch"
-          ]
+          "body": ["Manuel Heller", "Martisackerweg 18, 4203 Grellingen, Suisse", "{email}"]
         },
         {
           "id": "character",
@@ -61,11 +57,7 @@
         {
           "id": "responsible",
           "heading": "Responsable du traitement",
-          "body": [
-            "Manuel Heller",
-            "Martisackerweg 18, 4203 Grellingen, Suisse",
-            "manuelheller@bluewin.ch"
-          ]
+          "body": ["Manuel Heller", "Martisackerweg 18, 4203 Grellingen, Suisse", "{email}"]
         },
         {
           "id": "data",
@@ -96,7 +88,7 @@
           "body": [
             "Lors de l'utilisation du formulaire de contact, ton nom, ton adresse e-mail et ton message sont transmis chiffrés à un intermédiaire technique : la requête est reçue à la périphérie Cloudflare (Cloudflare, Inc., USA) par un Cloudflare Worker et me parvient sous forme d'e-mail via le service de messagerie Resend (Resend, Inc., USA). Les deux fournisseurs sont couverts par les clauses contractuelles types (art. 46 RGPD) pour les transferts de données vers les USA. Seules les données que tu saisis toi-même dans le formulaire sont traitées.",
             "Si la transmission échoue, le formulaire propose en remplacement un lien mailto. Le message passe alors par ton propre client e-mail et ton fournisseur de messagerie, pas par un serveur sous mon contrôle.",
-            "Base légale dans les deux cas : ton consentement par l'envoi (art. 6(1)(a) RGPD, art. 31(1) nLPD). Les messages entrants sont supprimés après réponse, au plus tard après six mois. Tu peux à tout moment demander l'accès, la rectification ou la suppression. Écris simplement à manuelheller@bluewin.ch."
+            "Base légale dans les deux cas : ton consentement par l'envoi (art. 6(1)(a) RGPD, art. 31(1) nLPD). Les messages entrants sont supprimés après réponse, au plus tard après six mois. Tu peux à tout moment demander l'accès, la rectification ou la suppression. Écris simplement à {email}."
           ]
         },
         {
@@ -125,7 +117,7 @@
           "id": "rights",
           "heading": "Tes droits",
           "body": [
-            "Selon la loi suisse sur la protection des données (nLPD) et le RGPD européen, tu as le droit d'accès, de rectification, de suppression, de limitation du traitement et de portabilité des données. Pour toute demande, écris à : manuelheller@bluewin.ch.",
+            "Selon la loi suisse sur la protection des données (nLPD) et le RGPD européen, tu as le droit d'accès, de rectification, de suppression, de limitation du traitement et de portabilité des données. Pour toute demande, écris à : {email}.",
             "Pour des plaintes concernant le traitement de tes données, tu peux t'adresser à l'autorité de surveillance compétente : en Suisse, au Préposé fédéral à la protection des données et à la transparence (PFPDT, https://www.edoeb.admin.ch). Au sein de l'UE, à l'autorité de protection des données de ton pays de résidence."
           ]
         }

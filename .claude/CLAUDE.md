@@ -642,6 +642,17 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   lost). Honeypot field (`bot-trap`, off-screen, `tabIndex=-1`, `aria-hidden`)
   — trip silently swallows (`return` after `preventDefault`), re-checked
   server-side in the Worker; never expose mailto fallback to bots.
+- **The contact address never ships as plaintext** (anti-harvester).
+  `SITE.author.email` is `{ user, domain }`; `assembleEmail()`
+  (`src/lib/email.ts`) joins it and may only run in the browser
+  (effects, handlers, client-only render paths). Visible spots use
+  `<ProtectedEmail>`: the prerender carries an "[at]" placeholder, the
+  effect swaps in the real mailto link (print runs after hydration, so
+  the CV PDF keeps the real address). Legal copy marks the spot with
+  the `{email}` token in `legal.json` (read via `t.raw`, so no ICU
+  parse), and `public/maintenance.html` joins it in an inline script
+  (needs a hash once CSP drops `'unsafe-inline'`). No `email` in
+  JSON-LD. Regression spec: `tests/e2e/email-protection.spec.ts`.
 - **Legal**: `/[locale]/impressum` + `/[locale]/datenschutz` as separate
   routes through shared `<LegalDocument namespace>` server component.
   CH-conform DSG/revDSG + EU DSGVO informational. No cookie banner (site

@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { ContactForm } from "@/components/ui/ContactForm";
+import { ProtectedEmail } from "@/components/ui/ProtectedEmail";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Link } from "@/i18n/navigation";
 import { SITE } from "@/lib/site";
@@ -21,14 +22,20 @@ import { SITE } from "@/lib/site";
  * makes them readable mailto/url targets near the form.
  */
 
-type DirectChannel = {
-  key: "email" | "github" | "linkedin" | "photos" | "cv";
-  label: string;
-  value: string;
-  href: string;
-  /** Locale-internal route — rendered through the i18n <Link>. */
-  internal?: boolean;
-};
+type DirectChannel =
+  | {
+      key: "github" | "linkedin" | "photos" | "cv";
+      label: string;
+      value: string;
+      href: string;
+      /** Locale-internal route — rendered through the i18n <Link>. */
+      internal?: boolean;
+    }
+  | {
+      /** Rendered by <ProtectedEmail>, never as a prerendered literal. */
+      key: "email";
+      label: string;
+    };
 
 // Shared by both branches of the internal/external link split below —
 // one string, so a styling tweak can't land on only one tag.
@@ -42,8 +49,6 @@ export function Contact() {
     {
       key: "email",
       label: t("channels.email"),
-      value: SITE.author.email,
-      href: `mailto:${SITE.author.email}`,
     },
     {
       key: "github",
@@ -106,7 +111,9 @@ export function Contact() {
                     {channel.label}
                   </dt>
                   <dd>
-                    {channel.internal ? (
+                    {channel.key === "email" ? (
+                      <ProtectedEmail className={CHANNEL_LINK_CLASS} />
+                    ) : channel.internal ? (
                       <Link href={channel.href} className={CHANNEL_LINK_CLASS}>
                         {channel.value}
                       </Link>

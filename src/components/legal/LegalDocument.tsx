@@ -1,5 +1,7 @@
 import { useTranslations } from "next-intl";
+import { ProtectedEmail } from "@/components/ui/ProtectedEmail";
 import { Link } from "@/i18n/navigation";
+import { EMAIL_TOKEN } from "@/lib/email";
 import type { LegalSections } from "@/types/i18n-shapes";
 
 /**
@@ -13,6 +15,25 @@ import type { LegalSections } from "@/types/i18n-shapes";
  * Namespace is parametrised so the same renderer drives both pages from
  * `legal.impressum` and `legal.datenschutz`.
  */
+
+// The legal copy marks the contact address with EMAIL_TOKEN instead of
+// spelling it out, so the static HTML carries no harvestable address.
+function renderParagraph(paragraph: string) {
+  if (!paragraph.includes(EMAIL_TOKEN)) return paragraph;
+  // Every token gets an address, so a second one can't swallow the text after it.
+  return paragraph.split(EMAIL_TOKEN).flatMap((part, i) =>
+    i === 0
+      ? [part]
+      : [
+          <ProtectedEmail
+            // biome-ignore lint/suspicious/noArrayIndexKey: split order is stable
+            key={i}
+            className="underline decoration-spot-rose decoration-2 underline-offset-4"
+          />,
+          part,
+        ],
+  );
+}
 
 type LegalDocumentProps = {
   namespace: "legal.impressum" | "legal.datenschutz";
@@ -52,7 +73,7 @@ export function LegalDocument({ namespace }: LegalDocumentProps) {
                     }`}
                     className="type-body text-ink"
                   >
-                    {paragraph}
+                    {renderParagraph(paragraph)}
                   </p>
                 ))}
               </div>

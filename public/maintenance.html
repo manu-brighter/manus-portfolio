@@ -286,7 +286,19 @@
       <span class="dot">·</span>
       <span>manuelheller.dev</span>
       <span class="dot">·</span>
-      <a href="mailto:manuelheller@bluewin.ch">manuelheller@bluewin.ch</a>
+      <span id="contact-email">manuelheller [at] bluewin.ch</span>
     </footer>
+    <script>
+      // The address is joined at runtime so it never ships as plaintext
+      // for mail harvesters (same rule as src/lib/email.ts).
+      (function () {
+        const el = document.getElementById("contact-email");
+        const address = ["manuelheller", "bluewin.ch"].join("@");
+        const link = document.createElement("a");
+        link.href = `mailto:${address}`;
+        link.textContent = address;
+        el.replaceWith(link);
+      })();
+    </script>
   </body>
 </html>

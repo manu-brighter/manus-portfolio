@@ -15,11 +15,7 @@
         {
           "id": "responsible",
           "heading": "Responsabile dei contenuti",
-          "body": [
-            "Manuel Heller",
-            "Martisackerweg 18, 4203 Grellingen, Svizzera",
-            "manuelheller@bluewin.ch"
-          ]
+          "body": ["Manuel Heller", "Martisackerweg 18, 4203 Grellingen, Svizzera", "{email}"]
         },
         {
           "id": "character",
@@ -61,11 +57,7 @@
         {
           "id": "responsible",
           "heading": "Titolare del trattamento",
-          "body": [
-            "Manuel Heller",
-            "Martisackerweg 18, 4203 Grellingen, Svizzera",
-            "manuelheller@bluewin.ch"
-          ]
+          "body": ["Manuel Heller", "Martisackerweg 18, 4203 Grellingen, Svizzera", "{email}"]
         },
         {
           "id": "data",
@@ -96,7 +88,7 @@
           "body": [
             "Quando utilizzi il modulo di contatto, nome, indirizzo e-mail e messaggio vengono trasmessi in forma cifrata a un intermediario tecnico: la richiesta viene ricevuta all'edge di Cloudflare (Cloudflare, Inc., USA) da un Cloudflare Worker e mi viene recapitata come e-mail tramite il servizio di posta Resend (Resend, Inc., USA). Entrambi i provider sono coperti da Clausole Contrattuali Standard (art. 46 GDPR) per i trasferimenti di dati verso gli USA. Vengono trattati esclusivamente i dati che inserisci tu stesso nel modulo.",
             "Se la trasmissione fallisce, il modulo offre in alternativa un link mailto. Il messaggio passa allora dal tuo client e-mail e dal tuo provider, non da un server sotto il mio controllo.",
-            "Base legale in entrambi i casi: il tuo consenso con l'invio (art. 6(1)(a) GDPR, art. 31(1) nLPD). I messaggi in arrivo vengono cancellati dopo la risposta, al più tardi dopo sei mesi. Puoi richiedere accesso, rettifica o cancellazione in qualsiasi momento. Scrivi semplicemente a manuelheller@bluewin.ch."
+            "Base legale in entrambi i casi: il tuo consenso con l'invio (art. 6(1)(a) GDPR, art. 31(1) nLPD). I messaggi in arrivo vengono cancellati dopo la risposta, al più tardi dopo sei mesi. Puoi richiedere accesso, rettifica o cancellazione in qualsiasi momento. Scrivi semplicemente a {email}."
           ]
         },
         {
@@ -125,7 +117,7 @@
           "id": "rights",
           "heading": "I tuoi diritti",
           "body": [
-            "Secondo la Legge svizzera sulla protezione dei dati (nLPD) e il GDPR europeo hai il diritto di accesso, rettifica, cancellazione, limitazione del trattamento e portabilità dei dati. Per qualsiasi richiesta scrivi a: manuelheller@bluewin.ch.",
+            "Secondo la Legge svizzera sulla protezione dei dati (nLPD) e il GDPR europeo hai il diritto di accesso, rettifica, cancellazione, limitazione del trattamento e portabilità dei dati. Per qualsiasi richiesta scrivi a: {email}.",
             "Per reclami sul trattamento dei tuoi dati puoi rivolgerti all'autorità di controllo competente: in Svizzera all'Incaricato federale della protezione dei dati e della trasparenza (IFPDT, https://www.edoeb.admin.ch). Nell'UE, all'autorità per la protezione dei dati del tuo paese di residenza."
           ]
         }
