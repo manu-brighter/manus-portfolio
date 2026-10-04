@@ -1,4 +1,6 @@
 // tests/e2e/email-protection.spec.ts
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
 import { expect, test } from "@playwright/test";
 
 /**
@@ -10,7 +12,14 @@ import { expect, test } from "@playwright/test";
 
 const ADDRESS_RE = /[a-z0-9._%+-]+@bluewin\.ch/i;
 
-for (const path of ["/de/", "/de/cv/", "/de/impressum/", "/de/datenschutz/", "/maintenance.html"]) {
+const PATHS = [
+  "/de/",
+  "/de/cv/",
+  ...["de", "en", "fr", "it"].flatMap((l) => [`/${l}/impressum/`, `/${l}/datenschutz/`]),
+  "/maintenance.html",
+];
+
+for (const path of PATHS) {
   test(`${path} ships no plaintext address but renders a mailto after load`, async ({
     page,
     request,
@@ -22,3 +31,22 @@ for (const path of ["/de/", "/de/cv/", "/de/impressum/", "/de/datenschutz/", "/m
     await expect(page.locator('a[href^="mailto:"]').first()).toHaveAttribute("href", ADDRESS_RE);
   });
 }
+
+// The document check above can't see JS chunks or RSC payloads, which is
+// where a minifier could constant-fold the parts back together. Scan the
+// whole export instead (only meaningful against the static build).
+test("no file in the static export contains the joined address", () => {
+  test.skip(process.env.E2E_TARGET !== "prod", "Needs the static export in ./out");
+  const hits: string[] = [];
+  const walk = (dir: string) => {
+    for (const name of readdirSync(dir)) {
+      const file = join(dir, name);
+      if (statSync(file).isDirectory()) walk(file);
+      else if (/\.(html|txt|js|json|xml|webmanifest)$/.test(name)) {
+        if (ADDRESS_RE.test(readFileSync(file, "utf8"))) hits.push(file);
+      }
+    }
+  };
+  walk(join(process.cwd(), "out"));
+  expect(hits).toEqual([]);
+});

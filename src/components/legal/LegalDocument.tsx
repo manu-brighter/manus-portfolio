@@ -20,13 +20,18 @@ import type { LegalSections } from "@/types/i18n-shapes";
 // spelling it out, so the static HTML carries no harvestable address.
 function renderParagraph(paragraph: string) {
   if (!paragraph.includes(EMAIL_TOKEN)) return paragraph;
-  const [before, after] = paragraph.split(EMAIL_TOKEN);
-  return (
-    <>
-      {before}
-      <ProtectedEmail className="underline decoration-spot-rose decoration-2 underline-offset-4" />
-      {after}
-    </>
+  // Every token gets an address, so a second one can't swallow the text after it.
+  return paragraph.split(EMAIL_TOKEN).flatMap((part, i) =>
+    i === 0
+      ? [part]
+      : [
+          <ProtectedEmail
+            // biome-ignore lint/suspicious/noArrayIndexKey: split order is stable
+            key={i}
+            className="underline decoration-spot-rose decoration-2 underline-offset-4"
+          />,
+          part,
+        ],
   );
 }
 

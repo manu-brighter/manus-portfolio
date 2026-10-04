@@ -51,6 +51,8 @@ export function ContactForm() {
   const requiredNoteId = useId();
 
   const [status, setStatus] = useState<Status>("idle");
+  // Joined only once the form has failed: that state never prerenders.
+  const fallbackEmail = status === "error" ? assembleEmail() : "";
   const abortTimerRef = useRef<number | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const mountedRef = useRef(true);
@@ -251,10 +253,10 @@ export function ContactForm() {
           <span>
             {t("status.error")}{" "}
             <a
-              href={`mailto:${assembleEmail()}?subject=${encodeURIComponent(t("status.mailSubject"))}&body=${encodeURIComponent(`${nameValueRef.current ? `${t("status.fromLabel")} ${nameValueRef.current}\n\n` : ""}${messageValueRef.current}`)}`}
+              href={`mailto:${fallbackEmail}?subject=${encodeURIComponent(t("status.mailSubject"))}&body=${encodeURIComponent(`${nameValueRef.current ? `${t("status.fromLabel")} ${nameValueRef.current}\n\n` : ""}${messageValueRef.current}`)}`}
               className="underline decoration-spot-rose decoration-2 underline-offset-4 transition-colors hover:text-ink"
             >
-              {assembleEmail()}
+              {fallbackEmail}
             </a>
           </span>
         )}
