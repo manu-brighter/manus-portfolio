@@ -4,6 +4,7 @@ import { CvActions } from "@/components/cv/CvActions";
 import { CvDyeSync } from "@/components/cv/CvDyeSync";
 import { CvInkStamp } from "@/components/cv/CvInkStamp";
 import { PlateCornerMarks } from "@/components/ui/PlateCornerMarks";
+import { ProtectedEmail } from "@/components/ui/ProtectedEmail";
 import { Link } from "@/i18n/navigation";
 import { SPOT_CSS_VAR, type SpotColor } from "@/lib/palette";
 import { SITE } from "@/lib/site";
@@ -49,6 +50,10 @@ import type {
  * Server component — `cv` strings never ship to the client; the two
  * client islands (print button, ink stamp) get strings as props.
  */
+
+// Shared by the protected email chip and the plain link chips.
+const CV_CONTACT_CHIP_CLASS =
+  "inline-block rounded-[2px] border border-ink bg-paper px-2.5 py-1 font-mono text-[0.7rem] text-ink tracking-[0.08em] transition-colors hover:bg-ink hover:text-paper-tint";
 
 const SPOT_SEQUENCE: readonly SpotColor[] = ["rose", "amber", "mint", "violet"];
 
@@ -359,9 +364,10 @@ export function CvDocument() {
 
   // Paper targets only: visible text === destination. No LinkedIn —
   // a shortened label that differs from the real URL is worthless in
-  // a printed document.
+  // a printed document. The email chip renders through <ProtectedEmail>
+  // (prepended below): print runs after hydration, so paper still gets
+  // the real address.
   const contacts = [
-    { label: SITE.author.email, href: `mailto:${SITE.author.email}` },
     { label: "manuelheller.dev", href: SITE.url },
     { label: "github.com/manu-brighter", href: SITE.author.socials.github },
   ];
@@ -496,6 +502,9 @@ export function CvDocument() {
             </p>
 
             <ul className="mt-4 flex flex-wrap gap-x-2.5 gap-y-2" aria-label={t("contactLabel")}>
+              <li>
+                <ProtectedEmail className={CV_CONTACT_CHIP_CLASS} />
+              </li>
               {contacts.map((contact) => (
                 <li key={contact.label}>
                   <a
@@ -503,7 +512,7 @@ export function CvDocument() {
                     {...(contact.href.startsWith("http")
                       ? { target: "_blank", rel: "noopener noreferrer" }
                       : {})}
-                    className="inline-block rounded-[2px] border border-ink bg-paper px-2.5 py-1 font-mono text-[0.7rem] text-ink tracking-[0.08em] transition-colors hover:bg-ink hover:text-paper-tint"
+                    className={CV_CONTACT_CHIP_CLASS}
                   >
                     {contact.label}
                   </a>

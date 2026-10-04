@@ -22,7 +22,9 @@ export const SITE = {
   author: {
     name: "Manuel Heller",
     region: "Basel-Region, Schweiz",
-    email: "manuelheller@bluewin.ch",
+    /** Split on purpose: joined only in the browser (`@/lib/email`) so
+     *  the address never ships as plaintext for mail harvesters. */
+    email: { user: "manuelheller", domain: "bluewin.ch" },
     socials: {
       github: "https://github.com/manu-brighter",
       linkedin: "https://linkedin.com/in/manuel-heller-15a831223",

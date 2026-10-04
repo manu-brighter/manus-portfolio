@@ -3,7 +3,7 @@
 import gsap from "gsap";
 import { useTranslations } from "next-intl";
 import { useEffect, useId, useRef, useState } from "react";
-import { SITE } from "@/lib/site";
+import { assembleEmail } from "@/lib/email";
 
 /**
  * Contact form — client component for submit-state choreography.
@@ -22,7 +22,7 @@ import { SITE } from "@/lib/site";
  *
  * Graceful degrade: if the request fails (network, non-2xx, timeout, or the
  * endpoint isn't reachable) the form drops to an `error` state with a
- * pre-filled `mailto:` link to SITE.author.email — the visitor's message is
+ * pre-filled `mailto:` link to the contact address — the visitor's message is
  * never lost.
  *
  * Validation is intentionally light: HTML5 constraints (`required`, `type`,
@@ -251,10 +251,10 @@ export function ContactForm() {
           <span>
             {t("status.error")}{" "}
             <a
-              href={`mailto:${SITE.author.email}?subject=${encodeURIComponent(t("status.mailSubject"))}&body=${encodeURIComponent(`${nameValueRef.current ? `${t("status.fromLabel")} ${nameValueRef.current}\n\n` : ""}${messageValueRef.current}`)}`}
+              href={`mailto:${assembleEmail()}?subject=${encodeURIComponent(t("status.mailSubject"))}&body=${encodeURIComponent(`${nameValueRef.current ? `${t("status.fromLabel")} ${nameValueRef.current}\n\n` : ""}${messageValueRef.current}`)}`}
               className="underline decoration-spot-rose decoration-2 underline-offset-4 transition-colors hover:text-ink"
             >
-              {SITE.author.email}
+              {assembleEmail()}
             </a>
           </span>
         )}

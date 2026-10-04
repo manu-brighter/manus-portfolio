@@ -15,11 +15,7 @@
         {
           "id": "responsible",
           "heading": "Verantwortlich für den Inhalt",
-          "body": [
-            "Manuel Heller",
-            "Martisackerweg 18, 4203 Grellingen, Schweiz",
-            "manuelheller@bluewin.ch"
-          ]
+          "body": ["Manuel Heller", "Martisackerweg 18, 4203 Grellingen, Schweiz", "{email}"]
         },
         {
           "id": "character",
@@ -61,11 +57,7 @@
         {
           "id": "responsible",
           "heading": "Verantwortlicher",
-          "body": [
-            "Manuel Heller",
-            "Martisackerweg 18, 4203 Grellingen, Schweiz",
-            "manuelheller@bluewin.ch"
-          ]
+          "body": ["Manuel Heller", "Martisackerweg 18, 4203 Grellingen, Schweiz", "{email}"]
         },
         {
           "id": "data",
@@ -96,7 +88,7 @@
           "body": [
             "Bei Nutzung des Kontaktformulars werden Name, E-Mail-Adresse und Nachricht verschlüsselt an einen technischen Mittler übermittelt: Die Anfrage wird an der Cloudflare-Edge (Cloudflare, Inc., USA) von einem Cloudflare Worker entgegengenommen und über den E-Mail-Dienst Resend (Resend, Inc., USA) als E-Mail an mich zugestellt. Beide Anbieter sind über Standard-Vertragsklauseln (Art. 46 DSGVO) für Datentransfers in die USA abgesichert. Verarbeitet werden ausschliesslich die Daten, die du selbst in das Formular eingibst.",
             "Schlägt die Übermittlung fehl, bietet das Formular ersatzweise einen mailto-Link an. Die Nachricht läuft dann über deinen eigenen E-Mail-Client und E-Mail-Provider, nicht über einen Server unter meiner Kontrolle.",
-            "Rechtsgrundlage in beiden Fällen: deine Einwilligung durch das Absenden (Art. 6 Abs. 1 lit. a DSGVO, Art. 31 Abs. 1 DSG). Eingehende Nachrichten werden nach Beantwortung gelöscht, spätestens jedoch nach sechs Monaten. Du kannst jederzeit Auskunft, Berichtigung oder Löschung verlangen. Schreib einfach an manuelheller@bluewin.ch."
+            "Rechtsgrundlage in beiden Fällen: deine Einwilligung durch das Absenden (Art. 6 Abs. 1 lit. a DSGVO, Art. 31 Abs. 1 DSG). Eingehende Nachrichten werden nach Beantwortung gelöscht, spätestens jedoch nach sechs Monaten. Du kannst jederzeit Auskunft, Berichtigung oder Löschung verlangen. Schreib einfach an {email}."
           ]
         },
         {
@@ -125,7 +117,7 @@
           "id": "rights",
           "heading": "Deine Rechte",
           "body": [
-            "Nach Schweizer Datenschutzgesetz (revDSG) und EU-DSGVO hast du das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung und Datenportabilität. Wende dich für alle Anfragen an: manuelheller@bluewin.ch.",
+            "Nach Schweizer Datenschutzgesetz (revDSG) und EU-DSGVO hast du das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung und Datenportabilität. Wende dich für alle Anfragen an: {email}.",
             "Für Beschwerden über die Verarbeitung deiner Daten kannst du dich an die zuständige Aufsichtsbehörde wenden: in der Schweiz an den Eidgenössischen Datenschutzbeauftragten (EDÖB, https://www.edoeb.admin.ch); innerhalb der EU an die Datenschutzbehörde deines Wohnsitzlandes."
           ]
         }

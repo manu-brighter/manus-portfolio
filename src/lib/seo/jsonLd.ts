@@ -97,7 +97,6 @@ export function buildJsonLd(locale: Locale, description: string): Record<string,
       "WebGL Shaders",
       "AI-Assisted Development",
     ],
-    email: `mailto:${SITE.author.email}`,
     sameAs: [SITE.author.socials.github, SITE.author.socials.linkedin, SITE.author.socials.photos],
   };
 
