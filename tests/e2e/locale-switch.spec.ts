@@ -42,7 +42,11 @@ test.describe("locale switch via nav switcher", () => {
     expect(stored, "explicit locale switch must be remembered").toBe("en");
 
     await page.goto("/");
-    await page.waitForURL(/\/en\/$/);
+    // "commit": the redirect target is what this asserts. After the soft
+    // locale navigation above, WebKit (Playwright 1.63) reaches /en/ but
+    // never reports its load event to the waiter, so waiting for load
+    // times out although the page is there.
+    await page.waitForURL(/\/en\/$/, { waitUntil: "commit" });
   });
 
   test("switching back: EN → DE restores /de/ and lang=de", async ({ page }) => {
