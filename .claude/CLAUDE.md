@@ -62,17 +62,29 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 ## Performance rules
 
 - One active background renderer; never mount competing canvases per section.
-  Auto/Light uses `LiteInkScene`; explicit Full uses the existing physics renderer.
+  Light uses `LiteInkScene`; explicit Full uses the existing physics renderer.
 - All animations share one RAF ticker (GSAP + Lenis + R3F coordinated in `raf.ts`)
-- **Production Ink Studio:** Auto starts with the single-pass analytical
-  `LiteInkScene` on both desktop and touch devices. It never promotes itself
-  to Full. After startup, two consecutive slow frame windows can lower Lite's
-  pixel budget and cadence. Explicit Light and Full choices win over automatic
-  adaptation. Reduced motion and renderer failure use `StaticFallback`.
+- **Production Ink Studio has two modes, Light and Full. There is no Auto.**
+  Light (the single-pass analytical `LiteInkScene`) is the default on every
+  device; Full only runs after an explicit choice (or a `?ink-preview=full`
+  QA link). Nothing promotes Light to Full or demotes Full to Light. After
+  startup, two consecutive slow frame windows can lower Light's own pixel
+  budget and cadence (`useInkPreview`, default and explicit Light alike);
+  that never changes the mode. Reduced motion and renderer failure use
+  `StaticFallback`.
+  - Auto was removed because its desktop path STARTED in Full
+    (`autoFull = fine pointer && Full available`) and relied on a demotion
+    heuristic that real laggy laptops never tripped: it sampled main-thread
+    rAF intervals (not GPU cost) only after a 6s+ warmup, needed >=20% of
+    frames >25ms in two CONSECUTIVE 90-frame windows (a steady 35-50fps
+    stutter never qualifies, one fast window resets the count), and the
+    verdict was never persisted, so every reload began in Full again. Don't
+    reintroduce a self-promoting or self-demoting mode.
 - Lite follows the active home section and interpolates palettes in its existing
   render pass. Work and photography receive quieter ink around their content.
   `useScene().effectsReduced` suppresses secondary effects in Light/fallback.
-- The visible Light-mode name is **Flow**; storage/query values remain `light`.
+- The visible mode names are **Animation** (Light) and **Simulation** (Full);
+  storage/query values remain `light` / `full`.
   Native wheel/trackpad input is not smoothed by Lenis; explicit anchors are.
   Full photo masks initialize when visible, allow cursor input before reveal,
   and sleep after 750ms of pointer inactivity. Their budget is 30Hz/450k pixels;
@@ -93,7 +105,7 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   - Tier picked at startup by `lib/gpu.ts` + `useGPUCapability` (renderer
     name match + frametime probe). `useGPUCapability` lazy-inits from
     localStorage cache to avoid blank-flash mid-session reinit.
-  - These tiers govern explicit Full physics. Auto's sustained-window
+  - These tiers govern explicit Full physics. Light's sustained-window
     adaptation lives in `useInkPreview`, outside `FluidSim.tsx`, and only
     reduces Lite's rendering budget. Do not silently downgrade explicit Full.
 - **Iris Xe is a supported target** (Manuel's work laptop) — no regression
@@ -152,10 +164,13 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   being complete. Adding a key means editing the disclosure in all four
   locale files (properly translated there, not DE-mirrored) in the same
   commit.
-- Ink Studio stores explicit mode choices under `manus-ink-mode` in
-  localStorage, with guarded reads/writes and disclosure in all legal locales.
-  `?ink-preview=auto|light|full` remains a temporary QA override; choices made
-  while a valid override is active must not overwrite the saved preference.
+- Ink Studio stores explicit mode choices (`light` | `full`) under
+  `manus-ink-mode` in localStorage, with guarded reads/writes and disclosure
+  in all legal locales. The key is only written on an explicit choice; a
+  legacy `auto` or any other invalid value counts as no preference (-> Light)
+  and is removed on load. `?ink-preview=light|full` remains a temporary QA
+  override (`auto` is no longer valid and is ignored); choices made while a
+  valid override is active must not overwrite the saved preference.
 
 ## Accessibility (non-negotiable)
 
@@ -397,7 +412,7 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 
 ## Mobile architecture (post mobile-wow-pass)
 
-- **Auto/Light uses LiteInkScene on phone, tablet and desktop.** Explicit
+- **Light (the default) uses LiteInkScene on phone, tablet and desktop.** Explicit
   Full routes coarse pointers to `MobileBackgroundSim`, fine pointers to
   SceneCanvas+FluidSim. The `AmbientVideo` tablet fallback remains retired.
 - **Scroll behavior is platform-split** in MobileBackgroundSim: the
@@ -408,7 +423,7 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   blanket drain — the blank-on-scroll flicker was explicit user feedback.
 - **Presets + themes are pointer-agnostic:** both renderers use the same
   persisted preset. SimPresetSwitcher is the compact Ink Studio disclosure
-  for theme and Auto/Light/Full controls, with native radio navigation,
+  for theme and Light/Full (Animation/Simulation) controls, with native radio navigation,
   Escape/outside dismissal and focus restoration. It reports reduced-motion
   and graphics-unavailable states without claiming that a live renderer runs.
 - **Tap-to-splat** reads touch at document level; taps on interactive UI
@@ -480,6 +495,9 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 
 - **`fluidBus`** (`src/lib/fluidBus.ts`) — pub/sub for fire-and-forget splat
   injection (Work cards → root FluidSim). Cleared when sim is paused.
+  Only the Full renderer subscribes: under the default Animation (Light)
+  every fluidBus emit is a silent no-op until LiteInkScene learns to
+  take impulses (open follow-up).
 - **`inkWipeStore`** (zustand) — 4-phase state machine for the page-transition
   primitive (PlaygroundCard → InkWipeOverlay).
 - **`sceneVisibilityStore`** (zustand) — toggles `display: none` on the root
@@ -558,8 +576,8 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   - The photo may not start at opacity 0: that flashed the bare
     full-size spot plate for ~2 frames.
   Open drops one fluidBus splat at
-  the pointer, close leaves a two-splat burst at the tile (desktop
-  only — no mobile subscriber).
+  the pointer, close leaves a two-splat burst at the tile (Full
+  renderer only, no Light/mobile subscriber, see `fluidBus`).
   The overlay is a **fixed div, NOT `dialog.showModal()`** with manual
   focus pin/restore (single close control). Heads-up for tests: the
   mobile hamburger nav keeps a permanent `role="dialog"` node in the
@@ -880,7 +898,7 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   `CLAUDE.md`. `.claude/settings.json` enforces this by omitting
   `Edit/Write(docs/**)`. The permission prompt is the right friction.
 - Apply duotone/posterise shaders to pro photos or UI screenshots
-- Silently override an explicit Full preference with Auto's Lite adaptation
+- Silently override an explicit Full preference, or start Full without one
 - Use `text-ink-faint` for text content
 - Use spot colors as text on paper without checking AA contrast
 - Interpolate Tailwind class names (`bg-spot-${x}`) — use static maps

@@ -22,7 +22,7 @@ export function InkPreviewPanel() {
         {t("motion")}
       </legend>
       <div className="flex flex-col gap-1">
-        {(["auto", "light", "full"] as const).map((mode) => (
+        {(["light", "full"] as const).map((mode) => (
           <label
             key={mode}
             className="flex min-h-11 cursor-pointer items-center gap-3 rounded-sm px-2 has-checked:bg-paper-shade has-disabled:cursor-default has-disabled:opacity-60"
@@ -41,11 +41,9 @@ export function InkPreviewPanel() {
               <span id={`${descriptionId}-${mode}`} className="block text-sm">
                 {t(mode)}
               </span>
-              {mode !== "auto" && (
-                <span className="block text-[0.65rem] leading-relaxed text-ink-muted">
-                  {t(`${mode}Short`)}
-                </span>
-              )}
+              <span className="block text-[0.65rem] leading-relaxed text-ink-muted">
+                {t(`${mode}Short`)}
+              </span>
             </span>
           </label>
         ))}

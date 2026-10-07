@@ -38,7 +38,8 @@ import { hasTileReveal, type RevealTileKey, type StampKey } from "./tileReveals"
  * felt slow — user feedback). The click also drops a real sim splat
  * at the pointer (visible for the beat before the backdrop covers),
  * and closing leaves a small ink burst where the plate was pulled —
- * both ride the always-on hero FluidSim via fluidBus, so they no-op
+ * both ride the hero FluidSim via fluidBus, so they only show under
+ * an explicit Simulation choice and no-op under the default Animation,
  * on coarse pointers (no subscriber) and under reduced motion.
  * The corner "+" chip is the standing affordance; it rotates with the
  * hover choreography. Tiles without assets (pingpong) stay decorative

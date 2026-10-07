@@ -82,31 +82,14 @@
     "intro": "Papier, Farbe und ein wenig Bewegung. Stell dir deine Ansicht zusammen.",
     "theme": "Farbwelt",
     "motion": "Bewegung",
-    "auto": "Auto",
     "light": "Animation",
     "full": "Simulation",
-    "autoBody": "Auto startet am Desktop mit Simulation und prüft nach dem Anlaufen die Leistung. Bei anhaltendem Ruckeln wechselt es zu Animation. Auf Mobile startet Animation.",
-    "lightBody": "Fliessende Formen, die auf dich reagieren. Wenig Rechenaufwand, feste Detailstufe.",
+    "lightBody": "Fliessende Formen, die auf dich reagieren. Braucht wenig Rechenleistung.",
     "fullBody": "Physikalische Wirbel, die deinem Zeiger folgen. Braucht mehr Grafikleistung.",
-    "reducedNotice": "Auto nutzt jetzt Animation mit weniger Details, damit die Seite flüssig bleibt.",
+    "reducedNotice": "Animation läuft jetzt mit weniger Details, damit die Seite flüssig bleibt.",
     "reducedMotion": "Deine Systemeinstellung für reduzierte Bewegung ist aktiv. Farben kannst du weiterhin wählen.",
     "unavailable": "Diese Tintenansicht ist auf deinem Gerät gerade nicht verfügbar. Farben und Inhalte bleiben zugänglich.",
     "lightShort": "Interaktive Tinte, sparsam berechnet",
     "fullShort": "Echte Flüssigkeitssimulation, mehr Rechenaufwand"
-  },
-  "inkPreview": {
-    "label": "Tintenlabor · lokale Vorschau",
-    "autoTitle": "Etwas weniger Wirbel, damit alles flüssig bleibt.",
-    "autoBody": "Wir haben die Effekte automatisch reduziert. Du kannst die volle Tintensimulation trotzdem einschalten. Dabei kann es ruckeln.",
-    "lightTitle": "Leichte Tinte. Immer in Bewegung.",
-    "lightBody": "Die Tinte bewegt sich und reagiert auf dich, mit weniger Rechenaufwand. Probiere beide Varianten direkt aus.",
-    "fullTitle": "Alle Wirbel auf deiner Seite.",
-    "fullBody": "Die volle Tintensimulation ist aktiv. Falls es ruckelt, kannst du jederzeit zur leichteren Variante wechseln.",
-    "unavailableTitle": "Die Tinte macht eine Pause.",
-    "unavailableBody": "Reduzierte Bewegung oder fehlende Grafikunterstützung hat Vorrang. Alle Inhalte bleiben verfügbar.",
-    "switch": "Volle Tintensimulation",
-    "automatic": "Automatische Auswahl",
-    "manual": "Deine Auswahl",
-    "reset": "Automatik testen"
   }
 }

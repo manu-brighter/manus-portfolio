@@ -15,7 +15,7 @@ import { useGPUCapability } from "@/hooks/useGPUCapability";
 import { useInkPreview } from "@/hooks/useInkPreview";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { type GPUTier, getTierDPR, type TierConfig } from "@/lib/gpu";
-import type { InkPreference } from "@/lib/inkPreview";
+import { DEFAULT_INK_PREFERENCE, type InkPreference } from "@/lib/inkPreview";
 import { subscribeToLoaderComplete } from "@/lib/loaderSession";
 import { useSceneVisibilityStore } from "@/lib/sceneVisibilityStore";
 import { FluidSim } from "./FluidSim";
@@ -46,7 +46,7 @@ const SceneContext = createContext<SceneContextValue>({
   tier: "static",
   config: null,
   effectsReduced: true,
-  inkPreference: "auto",
+  inkPreference: DEFAULT_INK_PREFERENCE,
   selectInk: () => {},
   automaticallyReduced: false,
   inkUnavailable: true,
@@ -100,16 +100,13 @@ export function SceneProvider({ children }: { children: ReactNode }) {
   const [canvasMounted, setCanvasMounted] = useState(false);
   const [liteUnavailable, setLiteUnavailable] = useState(false);
   const [fullFailed, setFullFailed] = useState(false);
-  const [simulationReady, setSimulationReady] = useState(false);
   const [liteReady, setLiteReady] = useState(false);
   const fullUnavailable = reducedMotion || !webgl2 || !capability.config || fullFailed;
-  const autoFull = !rawCoarsePointer && !fullUnavailable;
+  // Only Animation's own frame budget is observed. Simulation is never
+  // started or stopped on the visitor's behalf.
   const preview = useInkPreview(
-    reducedMotion || sceneHidden || !webgl2 || !canvasMounted || (autoFull && capability.measuring),
-    // Test the actual desktop workload at its existing quality budget.
-    // Renderer names alone cannot decide whether that workload is smooth.
-    autoFull,
-    autoFull ? simulationReady : liteReady,
+    reducedMotion || sceneHidden || !webgl2 || !canvasMounted,
+    liteReady,
   );
   const handleLiteUnavailable = useCallback(() => setLiteUnavailable(true), []);
   const handleFullUnavailable = useCallback(() => setFullFailed(true), []);
@@ -176,7 +173,6 @@ export function SceneProvider({ children }: { children: ReactNode }) {
             measuring={capability.measuring}
             onGLReady={initProbe}
             onFrametime={recordFrametime}
-            onSimulationReady={setSimulationReady}
           />
         </SceneErrorBoundary>
       ) : config ? (
@@ -191,7 +187,6 @@ export function SceneProvider({ children }: { children: ReactNode }) {
               measuring={capability.measuring}
               onGLReady={initProbe}
               onFrametime={recordFrametime}
-              onSimulationReady={setSimulationReady}
             />
           </SceneCanvas>
         </SceneErrorBoundary>
