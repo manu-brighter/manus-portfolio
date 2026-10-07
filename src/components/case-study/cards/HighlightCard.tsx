@@ -52,7 +52,13 @@ export function HighlightCard({
   const base = `/projects/joggediballa/${slug}`;
   return (
     <div className="flex h-full flex-col overflow-hidden gap-[clamp(0.5rem,1.2vh,0.75rem)] bg-paper-tint p-[clamp(0.625rem,1.6vh,1rem)]">
-      <div className="flex-shrink-0">
+      {/* The copy below keeps its natural height; the screenshot is the
+          part that gives way. On short viewports the card (vh) shrinks
+          faster than the copy (rem floors), so the polaroid crops its
+          photo from the bottom down to 40% of the card instead of the
+          last feature rows getting cut off. DioramaFit takes over if
+          even that is not enough. */}
+      <div className="min-h-[40%] shrink">
         <Polaroid
           aspect="16/9"
           rotate={0}
@@ -62,6 +68,7 @@ export function HighlightCard({
           className="w-full"
           onClick={onPolaroidClick}
           lightboxIndex={lightboxIndex}
+          fit
         >
           <picture className="block h-full w-full">
             <source
@@ -83,7 +90,7 @@ export function HighlightCard({
           </picture>
         </Polaroid>
       </div>
-      <div className="flex flex-1 flex-col gap-[clamp(0.375rem,0.9vh,0.5rem)] min-h-0">
+      <div className="flex shrink-0 flex-col gap-[clamp(0.375rem,0.9vh,0.5rem)]">
         <p className="font-mono text-[clamp(0.625rem,1vh,0.95rem)] uppercase tracking-[0.16em] text-ink inline-flex items-center gap-1.5">
           <span aria-hidden="true" className={`inline-block size-1.5 ${DOT_BG_CLASS[slug]}`} />
           {kicker}

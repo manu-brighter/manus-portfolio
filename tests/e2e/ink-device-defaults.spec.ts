@@ -1,22 +1,54 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 
-test("Auto uses simulation on a fast desktop while touch defaults to Animation", async ({
-  page,
-  isMobile,
-}) => {
+const KEY = "manus-ink-mode";
+const fullCanvas = '[data-scene="root"] canvas, [data-testid="mobile-bg-sim"]';
+
+async function expectAnimationDefault(page: Page) {
+  await expect(page.getByTestId("lite-ink-canvas")).toBeVisible({ timeout: 15000 });
+  await expect(page.locator(fullCanvas)).toHaveCount(0);
+  await page.getByRole("button", { name: "Visuals", exact: true }).click();
+  await expect(page.getByRole("radio", { name: "Animation", exact: true })).toBeChecked();
+  await expect(page.getByRole("radio", { name: "Simulation", exact: true })).not.toBeChecked();
+}
+
+test("Animation is the default on desktop and touch, even on a fast GPU", async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem("manus-gpu-tier", JSON.stringify({ tier: "high", ts: Date.now() }));
     WebGL2RenderingContext.prototype.drawArrays = () => {};
   });
   await page.goto("/de/");
-  await expect(
-    isMobile ? page.getByTestId("lite-ink-canvas") : page.locator('[data-scene="root"] canvas'),
-  ).toBeVisible({ timeout: 15000 });
+  await expectAnimationDefault(page);
+  // Only an explicit choice is ever written.
+  expect(await page.evaluate((key) => localStorage.getItem(key), KEY)).toBeNull();
+});
+
+test("a stored legacy Auto choice resolves to Animation and is cleared", async ({ page }) => {
+  await page.addInitScript((key) => {
+    // Only seed once: the cleanup itself is under test across the reload.
+    if (sessionStorage.getItem("seeded")) return;
+    sessionStorage.setItem("seeded", "1");
+    localStorage.setItem("manus-gpu-tier", JSON.stringify({ tier: "high", ts: Date.now() }));
+    localStorage.setItem(key, "auto");
+    WebGL2RenderingContext.prototype.drawArrays = () => {};
+  }, KEY);
+  await page.goto("/de/");
+  await expectAnimationDefault(page);
+  await expect.poll(() => page.evaluate((key) => localStorage.getItem(key), KEY)).toBeNull();
+  await page.reload();
+  await expectAnimationDefault(page);
+});
+
+test("an explicit Simulation choice persists and wins over the default", async ({ page }) => {
+  await page.addInitScript((key) => {
+    localStorage.setItem("manus-gpu-tier", JSON.stringify({ tier: "minimal", ts: Date.now() }));
+    localStorage.setItem(key, "full");
+  }, KEY);
+  await page.goto("/de/");
+  await expect(page.locator(fullCanvas)).toBeVisible({ timeout: 15000 });
+  await expect(page.getByTestId("lite-ink-canvas")).toHaveCount(0);
   await page.getByRole("button", { name: "Visuals", exact: true }).click();
-  await expect(
-    page.getByRole("radio", { name: isMobile ? "Animation" : "Auto", exact: true }),
-  ).toBeChecked();
-  await expect(page.getByTestId("mobile-bg-sim")).toHaveCount(0);
+  await expect(page.getByRole("radio", { name: "Simulation", exact: true })).toBeChecked();
+  expect(await page.evaluate((key) => localStorage.getItem(key), KEY)).toBe("full");
 });
 
 test.describe("manually selected mobile simulation", () => {

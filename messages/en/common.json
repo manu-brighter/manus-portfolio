@@ -82,31 +82,14 @@
     "intro": "Paper, colour and a little motion. Make this view your own.",
     "theme": "Colour palette",
     "motion": "Motion",
-    "auto": "Auto",
     "light": "Animation",
     "full": "Simulation",
-    "autoBody": "Auto starts with simulation on desktop and checks performance after it settles. Sustained slow frames switch it to animation. Mobile starts with animation.",
-    "lightBody": "Flowing shapes that respond to you. Less processing, fixed detail level.",
+    "lightBody": "Flowing shapes that respond to you. Light on processing.",
     "fullBody": "Physical swirls that follow your pointer. Uses more graphics power.",
-    "reducedNotice": "Auto now uses Animation with fewer details to keep the page fluid.",
+    "reducedNotice": "Animation now runs with fewer details to keep the page fluid.",
     "reducedMotion": "Your system's reduced motion setting is active. You can still choose colours.",
     "unavailable": "This ink view is currently unavailable on your device. Colours and content remain accessible.",
     "lightShort": "Interactive ink, less processing",
     "fullShort": "Real fluid simulation, more processing"
-  },
-  "inkPreview": {
-    "label": "Ink lab · local preview",
-    "autoTitle": "Fewer swirls. A smoother ride.",
-    "autoBody": "We reduced the effects automatically. You can still turn on the full ink simulation, though it may stutter.",
-    "lightTitle": "Light ink. Always moving.",
-    "lightBody": "The ink moves and responds to you with less processing. Try both versions here.",
-    "fullTitle": "Every swirl, in full.",
-    "fullBody": "The full ink simulation is running. If it stutters, you can switch to the lighter version at any time.",
-    "unavailableTitle": "The ink is taking a break.",
-    "unavailableBody": "Reduced motion or unavailable graphics support takes priority. All content remains available.",
-    "switch": "Full ink simulation",
-    "automatic": "Automatic selection",
-    "manual": "Your selection",
-    "reset": "Try automatic mode"
   }
 }

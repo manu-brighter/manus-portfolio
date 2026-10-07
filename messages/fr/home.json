@@ -107,7 +107,7 @@
             "vibecoded": true
           },
           {
-            "name": "tRPC · Drizzle",
+            "name": "tRPC · Drizzle ORM",
             "vibecoded": true
           },
           {
@@ -341,16 +341,16 @@
         "year": "MMXXVI",
         "role": "Concept · Design · Développement · Hébergement",
         "stack": [
-          "Next.js 16",
-          "React 19",
+          "Next.js",
+          "React",
           "TypeScript",
-          "Tailwind v4",
+          "Tailwind CSS",
           "GSAP · ScrollTrigger",
           "Lenis",
-          "R3F",
-          "shaders WebGL",
+          "React Three Fiber",
+          "WebGL · GLSL",
           "next-intl",
-          "zustand · state"
+          "Zustand"
         ],
         "description": "Ce site, tout simplement. De l’encre interactive calculée sur GPU, cinq thèmes visuels, quatre langues et mes photos au milieu. Un terrain de jeu pour tout ce qui me plaît dans le code et le design, avec des tests de navigateur automatisés sous le capot.",
         "summary": [
@@ -386,13 +386,13 @@
         "year": "MMXXIV–MMXXVI",
         "role": "Concept · Design · Fullstack · Hébergement",
         "stack": [
-          "React 19",
+          "React",
           "Vite",
           "TypeScript",
           "tRPC",
           "Drizzle ORM",
           "MySQL",
-          "Tailwind",
+          "Tailwind CSS",
           "shadcn/ui"
         ],
         "description": "Plateforme associative et événementielle développée sur plusieurs mois : permissions, membres de soutien et suivi des présences, avec un système de commandes et de caisse pour le service, la cuisine et le bar. Utilisée régulièrement et enrichie en continu.",
@@ -426,7 +426,7 @@
           "title": "Shot-Counter",
           "tagline": "Scoreboard de soirée · App desktop",
           "description": "Tableau de scores pour équipes avec accès par QR sur le réseau local et scores synchronisés. Application Electron pour Windows et Linux.",
-          "stack": ["Vue 3", "Express 5", "SQLite", "SSE", "Electron"],
+          "stack": ["Vue.js", "Express", "SQLite", "SSE", "Electron"],
           "ctaLabel": "Repo & téléchargement"
         },
         {
@@ -505,7 +505,7 @@
     "platform": {
       "stack": [
         {
-          "tech": "React 19 · Vite",
+          "tech": "React · Vite",
           "use": "Frontend & Build"
         },
         {
@@ -521,7 +521,7 @@
           "use": "Base de données"
         },
         {
-          "tech": "Tailwind · shadcn/ui",
+          "tech": "Tailwind CSS · shadcn/ui",
           "use": "Styling & composants"
         }
       ]

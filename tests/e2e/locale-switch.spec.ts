@@ -21,6 +21,13 @@ import { LOCALE_STORAGE_KEY } from "@/lib/localePreference";
  */
 
 test.describe("locale switch via nav switcher", () => {
+  // CI WebKit renders the ink background in software; the main thread is
+  // so busy that React commits the cross-locale navigation late (a trace
+  // showed ~24s until html[lang] flipped), which ate the whole 30s budget.
+  test.beforeEach(({ browserName }) => {
+    test.slow(browserName === "webkit", "Software-rendered WebGL starves the main thread in CI");
+  });
+
   test("DE → EN: URL changes to /en/ and html[lang] flips to en", async ({ page }) => {
     await page.goto("/de/");
     await expect(page.locator("html")).toHaveAttribute("lang", "de");

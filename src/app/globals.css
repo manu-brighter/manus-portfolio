@@ -237,6 +237,18 @@
   color: var(--color-paper);
 }
 
+/* Contact channel marker band (`.channel-link`). Riso, Wave and Aquarell
+ * use the amber slot as-is (Wave/Aquarell already re-ink amber above).
+ * Turbulenz: amber vanishes on apricot paper, mint is the one spot that
+ * separates from it. Night keeps the rose it was designed around, mixed
+ * down into the dark paper so the cream ink on top stays ~6:1. */
+[data-sim-theme="warm"] .channel-link {
+  --channel-mark: color-mix(in srgb, var(--color-spot-mint) 85%, var(--color-paper));
+}
+[data-sim-theme="night"] .channel-link {
+  --channel-mark: color-mix(in srgb, var(--color-spot-rose) 45%, var(--color-paper));
+}
+
 /* Turbulenz is the one LIGHT theme whose sim paints near-black (the
  * deep-violet band under its Sobel contours), and the droplet swarm
  * parks that pool right under the pointer. Multiply can only ever
@@ -1166,6 +1178,42 @@
     .riso-submit:focus-visible:not(:disabled) {
       transform: none;
     }
+  }
+
+  /* Contact "Direkt-Kanäle" links. A thin ink rule at rest (a 2px rose
+   * underline read like a spell-check squiggle on the light papers),
+   * and on hover/focus a riso marker band printed in from the left
+   * behind the lower half of the glyphs. The band is a FILL under ink
+   * text, never coloured text, and it is mixed into the theme PAPER
+   * (opaque), not into transparency: over the live sim a see-through
+   * band blended into whatever dye sat underneath and vanished (Wave),
+   * and an opaque one gives the ink a known backdrop, so AA holds on
+   * every theme (ink on a light band; cream on a dark band under
+   * night). Per-theme `--channel-mark` overrides sit with the other
+   * theme blocks near the top of this file. The mint focus ring stays
+   * the global one. */
+  .channel-link {
+    --channel-mark: color-mix(in srgb, var(--color-spot-amber) 85%, var(--color-paper));
+    color: var(--color-ink);
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.32em;
+    text-decoration-color: color-mix(in srgb, currentColor 38%, transparent);
+    background-image: linear-gradient(var(--channel-mark), var(--channel-mark));
+    background-repeat: no-repeat;
+    background-position: 0 92%;
+    background-size: 0% 0.62em;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    transition:
+      background-size 0.22s cubic-bezier(0.7, 0, 0.2, 1),
+      text-decoration-color 0.22s ease-out;
+  }
+
+  .channel-link:hover,
+  .channel-link:focus-visible {
+    background-size: 100% 0.62em;
+    text-decoration-color: currentColor;
   }
 
   /* ------------------------------------------------------------

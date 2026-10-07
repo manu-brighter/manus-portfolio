@@ -9,7 +9,6 @@ async function openStudio(page: Page) {
 
 test("ordinary home starts with light ink and a closed studio, even with a cached static physics tier", async ({
   page,
-  isMobile,
 }) => {
   await page.addInitScript(() => {
     localStorage.setItem("manus-gpu-tier", JSON.stringify({ tier: "static", ts: Date.now() }));
@@ -20,10 +19,9 @@ test("ordinary home starts with light ink and a closed studio, even with a cache
   await expect(page.locator(fullCanvas)).toHaveCount(0);
   await expect(page.getByTestId("ink-studio-panel")).toBeHidden();
   const panel = await openStudio(page);
-  await expect(
-    panel.getByRole("radio", { name: isMobile ? "Animation" : "Auto", exact: true }),
-  ).toBeChecked();
+  await expect(panel.getByRole("radio", { name: "Animation", exact: true })).toBeChecked();
   await expect(panel.getByRole("radio", { name: "Simulation", exact: true })).toBeDisabled();
+  await expect(panel.getByRole("radio", { name: "Auto", exact: true })).toHaveCount(0);
 });
 
 test("manual mode persists and native keyboard controls can return to light ink", async ({
@@ -51,12 +49,30 @@ test("manual mode persists and native keyboard controls can return to light ink"
 test("temporary QA overrides do not overwrite saved choices, including interaction", async ({
   page,
 }) => {
-  await page.addInitScript(() => localStorage.setItem("manus-ink-mode", "full"));
-  await page.goto("/de/?ink-preview=light");
-  await expect(page.getByTestId("lite-ink-canvas")).toBeVisible({ timeout: 15000 });
+  await page.addInitScript(() => {
+    localStorage.setItem("manus-gpu-tier", JSON.stringify({ tier: "minimal", ts: Date.now() }));
+    localStorage.setItem("manus-ink-mode", "light");
+  });
+  await page.goto("/de/?ink-preview=full");
+  await expect(page.locator(fullCanvas)).toBeVisible({ timeout: 15000 });
   const panel = await openStudio(page);
-  await panel.getByRole("radio", { name: "Auto", exact: true }).check();
-  expect(await page.evaluate((key) => localStorage.getItem(key), KEY)).toBe("full");
+  await panel.getByRole("radio", { name: "Animation", exact: true }).check();
+  await expect(page.getByTestId("lite-ink-canvas")).toBeVisible({ timeout: 15000 });
+  await panel.getByRole("radio", { name: "Simulation", exact: true }).check();
+  expect(await page.evaluate((key) => localStorage.getItem(key), KEY)).toBe("light");
+});
+
+test("a retired or invalid query value is no override and never starts simulation", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("manus-gpu-tier", JSON.stringify({ tier: "high", ts: Date.now() }));
+  });
+  await page.goto("/de/?ink-preview=auto");
+  await expect(page.getByTestId("lite-ink-canvas")).toBeVisible({ timeout: 15000 });
+  await expect(page.locator(fullCanvas)).toHaveCount(0);
+  const panel = await openStudio(page);
+  await expect(panel.getByRole("radio", { name: "Animation", exact: true })).toBeChecked();
 });
 
 test("blocked storage preserves functional studio controls", async ({ page }) => {
@@ -140,14 +156,9 @@ test("no WebGL still exposes theme settings and an honest status", async ({ page
   await expect(page.locator("html")).toHaveAttribute("data-sim-theme", "night");
 });
 
-test("Auto reduces the light budget after sustained stalls and respects a manual full override", async ({
+test("Animation reduces its own budget after sustained stalls and never downgrades a manual Simulation", async ({
   page,
-  isMobile,
 }) => {
-  test.skip(
-    !isMobile,
-    "Desktop Auto starts with simulation; its fallback has a separate regression",
-  );
   test.setTimeout(90000);
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.clock.install();
@@ -167,16 +178,18 @@ test("Auto reduces the light budget after sustained stalls and respects a manual
   await expect(canvas).toBeVisible({ timeout: 15000 });
   const panel = await openStudio(page);
   const light = panel.getByRole("radio", { name: "Animation", exact: true });
+  const full = panel.getByRole("radio", { name: "Simulation", exact: true });
+  await expect(light).toBeChecked();
+  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1000));
+  // Detour through Simulation and back with the clock paused so startup and
+  // action timing cannot contribute samples: re-entering Animation starts a
+  // fresh observation. Keyboard activation needs no compositor-stability wait.
+  await full.focus();
+  await full.press("Space");
   await light.focus();
   await light.press("Space");
-  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1000));
-  // Re-enter Auto with the clock paused so startup and action timing cannot
-  // contribute samples. Keyboard activation needs no compositor-stability wait.
-  const auto = panel.getByRole("radio", { name: "Auto", exact: true });
-  await auto.focus();
-  await auto.press("Space");
-  await expect(auto).toBeChecked();
-  await auto.press("Escape");
+  await expect(light).toBeChecked();
+  await light.press("Escape");
   const initialPixels = await canvas.evaluate(
     (element) => (element as HTMLCanvasElement).width * (element as HTMLCanvasElement).height,
   );
@@ -205,17 +218,18 @@ test("Auto reduces the light budget after sustained stalls and respects a manual
     ),
   ).toBeGreaterThan(0);
   await page.getByRole("button", { name: "Visuals", exact: true }).press("Enter");
-  await expect(panel.getByRole("radio", { name: "Auto", exact: true })).toBeChecked();
-  const full = panel.getByRole("radio", { name: "Simulation", exact: true });
+  await expect(light).toBeChecked();
   await full.focus();
   await full.press("Space");
+  // The same sustained stalls must leave an explicit Simulation alone.
   await page.clock.runFor(6000 + 181 * 34);
   await expect(full).toBeChecked();
   await expect(canvas).toHaveCount(0);
   await expect(page.locator(fullCanvas)).toBeVisible();
-  await expect(page.getByText(/Auto nutzt jetzt Animation mit weniger Details/)).toHaveCount(0);
-  await auto.focus();
-  await auto.press("Space");
+  await expect(page.getByText(/Animation läuft jetzt mit weniger Details/)).toHaveCount(0);
+  // The Animation verdict is kept for the visit: no second learning phase.
+  await light.focus();
+  await light.press("Space");
   await page.clock.runFor(34);
   await expect(canvas).toBeVisible();
   expect(

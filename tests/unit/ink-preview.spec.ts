@@ -38,17 +38,20 @@ test("sustained missed frames and severe stalls qualify for reduction", () => {
   expect(isSlowInkWindow(Array(90).fill(16.7))).toBe(false);
 });
 
-test("only known modes are valid preferences", () => {
+test("only known modes are valid preferences, the retired Auto is not", () => {
   expect(parseInkPreference(null)).toBeNull();
   expect(parseInkPreference("false")).toBeNull();
   expect(parseInkPreference("light")).toBe("light");
   expect(parseInkPreference("full")).toBe("full");
-  expect(parseInkPreference("auto")).toBe("auto");
+  expect(parseInkPreference("auto")).toBeNull();
 });
 
-test("Auto is the default and a temporary URL overrides a valid saved preference", () => {
-  expect(resolveInkPreference(null, null)).toBe("auto");
-  expect(resolveInkPreference("invalid", "invalid")).toBe("auto");
+test("Animation is the default and a temporary URL overrides a valid saved preference", () => {
+  expect(resolveInkPreference(null, null)).toBe("light");
+  expect(resolveInkPreference("invalid", "invalid")).toBe("light");
+  // A value saved before Auto was removed is no preference, never Simulation.
+  expect(resolveInkPreference(null, "auto")).toBe("light");
+  expect(resolveInkPreference("auto", null)).toBe("light");
   expect(resolveInkPreference(null, "full")).toBe("full");
   expect(resolveInkPreference("light", "full")).toBe("light");
   expect(resolveInkPreference("full", "light")).toBe("full");

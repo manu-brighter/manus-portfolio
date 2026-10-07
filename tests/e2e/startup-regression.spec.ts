@@ -49,27 +49,41 @@ test("fresh documents never revive a startup overlay from an old session marker"
   await expect(page.getByTestId("loader-overlay")).toHaveCount(0);
 });
 
-test("desktop Auto chooses simulation on an RTX GPU despite a stale lower cached tier", async ({
-  page,
-  isMobile,
-}) => {
-  test.skip(isMobile, "Touch devices always start with Animation");
-  await page.addInitScript(() => {
-    localStorage.setItem("manus-gpu-tier", JSON.stringify({ tier: "minimal", ts: Date.now() }));
-    const original = WebGL2RenderingContext.prototype.getParameter;
-    WebGL2RenderingContext.prototype.getParameter = function (parameter) {
-      return parameter === 37446 ? "NVIDIA GeForce RTX 3080" : original.call(this, parameter);
-    };
-    // Hardware identity is simulated: avoid making software rendering itself
-    // change the controller's decision while checking the selected renderer.
-    WebGL2RenderingContext.prototype.drawArrays = () => {};
+const fullCanvas = '[data-scene="root"] canvas, [data-testid="mobile-bg-sim"]';
+
+for (const renderer of [
+  "NVIDIA GeForce RTX 3080",
+  "Unknown desktop GPU",
+  "Intel(R) Iris(R) Xe Graphics",
+]) {
+  test(`${renderer} starts with Animation and never promotes itself to Simulation`, async ({
+    page,
+  }) => {
+    test.setTimeout(60000);
+    await page.clock.install();
+    await page.addInitScript((name) => {
+      window.requestAnimationFrame = (callback) =>
+        window.setTimeout(() => callback(performance.now()), 16);
+      window.cancelAnimationFrame = (id) => window.clearTimeout(id);
+      // A fast cached physics tier is the strongest invitation to promote.
+      localStorage.setItem("manus-gpu-tier", JSON.stringify({ tier: "high", ts: Date.now() }));
+      const original = WebGL2RenderingContext.prototype.getParameter;
+      WebGL2RenderingContext.prototype.getParameter = function (parameter) {
+        return parameter === 37446 ? name : original.call(this, parameter);
+      };
+      WebGL2RenderingContext.prototype.drawArrays = () => {};
+    }, renderer);
+    await page.goto("/de/");
+    const lite = page.getByTestId("lite-ink-canvas");
+    await expect(lite).toBeVisible({ timeout: 15000 });
+    await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1000));
+    await page.clock.runFor(20000);
+    await expect(lite).toBeVisible();
+    await expect(page.locator(fullCanvas)).toHaveCount(0);
+    await page.getByRole("button", { name: "Visuals", exact: true }).click();
+    await expect(page.getByRole("radio", { name: "Animation", exact: true })).toBeChecked();
   });
-  await page.goto("/de/");
-  await expect(page.locator('[data-scene="root"] canvas')).toBeVisible({ timeout: 15000 });
-  await expect(page.getByTestId("lite-ink-canvas")).toHaveCount(0);
-  await page.getByRole("button", { name: "Visuals", exact: true }).click();
-  await expect(page.getByRole("radio", { name: "Auto", exact: true })).toBeChecked();
-});
+}
 
 test("studio hint returns and is dismissed when the studio opens", async ({ page }) => {
   await page.goto("/de/");
@@ -120,11 +134,9 @@ test("failed application scripts fall back to readable server content", async ({
   await expect(page.getByTestId("loader-overlay")).toBeHidden();
 });
 
-test("Auto falls back from simulation after sustained stalls and honors manual Simulation", async ({
+test("an explicit Simulation is never downgraded by cold-start or sustained stalls", async ({
   page,
-  isMobile,
 }) => {
-  test.skip(isMobile, "Touch defaults stay Animation");
   test.setTimeout(90000);
   await page.clock.install();
   await page.addInitScript(() => {
@@ -132,71 +144,32 @@ test("Auto falls back from simulation after sustained stalls and honors manual S
       window.setTimeout(() => callback(performance.now()), 34);
     window.cancelAnimationFrame = (id) => window.clearTimeout(id);
     localStorage.setItem("manus-gpu-tier", JSON.stringify({ tier: "minimal", ts: Date.now() }));
-    const original = WebGL2RenderingContext.prototype.getParameter;
-    WebGL2RenderingContext.prototype.getParameter = function (parameter) {
-      return parameter === 37446 ? "NVIDIA GeForce RTX 3080" : original.call(this, parameter);
-    };
+    localStorage.setItem("manus-ink-mode", "full");
     WebGL2RenderingContext.prototype.drawArrays = () => {};
   });
   await page.goto("/de/");
-  const full = page.locator('[data-scene="root"] canvas');
+  const full = page.locator(fullCanvas);
   await expect(full).toBeVisible({ timeout: 15000 });
-  await page.getByRole("button", { name: "Visuals", exact: true }).click();
-  await page.getByRole("radio", { name: "Animation", exact: true }).check();
   await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1000));
-  const auto = page.getByRole("radio", { name: "Auto", exact: true });
-  await auto.focus();
-  await auto.press("Space");
-  await auto.press("Escape");
-  await page.clock.runFor(6000 + 90 * 34);
-  await expect(full).toBeVisible();
-  await page.clock.runFor(91 * 34 + 1000);
-  await expect(page.getByTestId("lite-ink-canvas")).toBeVisible();
-  await expect(full).toHaveCount(0);
-  await page.getByRole("button", { name: "Visuals", exact: true }).press("Enter");
-  const manual = page.getByRole("radio", { name: "Simulation", exact: true });
-  await manual.focus();
-  await manual.press("Space");
-  await page.clock.runFor(6000 + 181 * 34);
-  await expect(manual).toBeChecked();
+  // Every frame is late, far past the two windows Animation would need.
+  await page.clock.runFor(6000 + 181 * 34 + 14000);
   await expect(full).toBeVisible();
   await expect(page.getByTestId("lite-ink-canvas")).toHaveCount(0);
-  await auto.focus();
-  await auto.press("Space");
-  await expect(auto).toBeChecked();
-  await expect(page.getByTestId("lite-ink-canvas")).toBeVisible();
-  await expect(full).toHaveCount(0);
+  await expect(page.getByTestId("ink-studio").getByRole("status")).toHaveCount(0);
+  await page.getByRole("button", { name: "Visuals", exact: true }).click();
+  await expect(page.getByRole("radio", { name: "Simulation", exact: true })).toBeChecked();
 });
 
-for (const renderer of ["Unknown desktop GPU", "Intel(R) Iris(R) Xe Graphics"]) {
-  test(`desktop Auto measures real simulation instead of excluding ${renderer}`, async ({
-    page,
-    isMobile,
-  }) => {
-    test.skip(isMobile, "Touch devices always start with Animation");
-    await page.addInitScript((name) => {
-      localStorage.setItem("manus-gpu-tier", JSON.stringify({ tier: "low", ts: Date.now() }));
-      const original = WebGL2RenderingContext.prototype.getParameter;
-      WebGL2RenderingContext.prototype.getParameter = function (parameter) {
-        return parameter === 37446 ? name : original.call(this, parameter);
-      };
-      WebGL2RenderingContext.prototype.drawArrays = () => {};
-    }, renderer);
-    await page.goto("/de/");
-    await expect(page.locator('[data-scene="root"] canvas')).toBeVisible({ timeout: 15000 });
-    await expect(page.getByTestId("lite-ink-canvas")).toHaveCount(0);
-  });
-}
-
-test("an uncached GPU is sampled only after the real simulation has warmed up", async ({
+test("an uncached GPU is sampled only after an explicit simulation has warmed up", async ({
   page,
   isMobile,
 }) => {
-  test.skip(isMobile, "Touch defaults stay Animation");
+  test.skip(isMobile, "The desktop renderer is the one under test");
   test.setTimeout(90000);
   await page.clock.install();
   await page.addInitScript(() => {
     localStorage.removeItem("manus-gpu-tier");
+    localStorage.setItem("manus-ink-mode", "full");
     window.requestAnimationFrame = (callback) =>
       window.setTimeout(() => callback(performance.now()), 16);
     window.cancelAnimationFrame = (id) => window.clearTimeout(id);
@@ -236,44 +209,4 @@ test("an uncached GPU is sampled only after the real simulation has warmed up", 
   expect(firstSampleDelay).toBeGreaterThanOrEqual(6000);
   await expect(full).toBeVisible();
   await expect(page.getByTestId("lite-ink-canvas")).toHaveCount(0);
-});
-
-test("Auto ignores cold-start stalls but still reduces sustained simulation load", async ({
-  page,
-  isMobile,
-}) => {
-  test.skip(isMobile, "Touch defaults stay Animation");
-  test.setTimeout(90000);
-  await page.clock.install();
-  await page.addInitScript(() => {
-    window.requestAnimationFrame = (callback) =>
-      window.setTimeout(
-        () => callback(performance.now()),
-        Number(document.documentElement?.dataset.frameInterval ?? 34),
-      );
-    window.cancelAnimationFrame = (id) => window.clearTimeout(id);
-    localStorage.setItem("manus-gpu-tier", JSON.stringify({ tier: "minimal", ts: Date.now() }));
-    const original = WebGL2RenderingContext.prototype.getParameter;
-    WebGL2RenderingContext.prototype.getParameter = function (parameter) {
-      return parameter === 37446 ? "NVIDIA GeForce RTX 3080" : original.call(this, parameter);
-    };
-    WebGL2RenderingContext.prototype.drawArrays = () => {};
-  });
-  await page.goto("/de/");
-  const full = page.locator('[data-scene="root"] canvas');
-  await expect(full).toBeVisible({ timeout: 15000 });
-  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1000));
-  await page.clock.runFor(5000);
-  await page.evaluate(() => {
-    document.documentElement.dataset.frameInterval = "16";
-  });
-  await page.clock.runFor(12000);
-  await expect(full).toBeVisible();
-  await expect(page.getByTestId("lite-ink-canvas")).toHaveCount(0);
-  await page.evaluate(() => {
-    document.documentElement.dataset.frameInterval = "34";
-  });
-  await page.clock.runFor(14000);
-  await expect(page.getByTestId("lite-ink-canvas")).toBeVisible();
-  await expect(full).toHaveCount(0);
 });

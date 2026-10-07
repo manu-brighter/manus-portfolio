@@ -8,7 +8,7 @@ import { HookCard } from "@/components/case-study/cards/HookCard";
 import { PublicCard } from "@/components/case-study/cards/PublicCard";
 import { StackCard } from "@/components/case-study/cards/StackCard";
 import { WhatCard } from "@/components/case-study/cards/WhatCard";
-import { DioramaCards } from "@/components/case-study/DioramaCards";
+import { DioramaAdminCopy, DioramaCards } from "@/components/case-study/DioramaCards";
 import { DioramaIllustration } from "@/components/case-study/DioramaIllustration";
 import { DioramaLupe } from "@/components/case-study/DioramaLupe";
 import { DioramaTrack } from "@/components/case-study/DioramaTrack";
@@ -223,6 +223,19 @@ export function CaseStudy() {
     );
   }
 
+  // Admin station content, shared by the real card and the lupe's
+  // magnified copy of it.
+  const adminConfig = adminHighlight
+    ? {
+        kicker: adminHighlight.kicker,
+        title: adminHighlight.title,
+        lede: adminHighlight.lede,
+        features: adminHighlight.features,
+        screenshotAlt: adminHighlight.screenshotAlt,
+        station: highlightAdmin,
+      }
+    : null;
+
   // Desktop: full diorama with sticky-pin + horizontal scroll.
   return (
     <>
@@ -231,7 +244,7 @@ export function CaseStudy() {
           {t("headline")}
         </h2>
         <DioramaIllustration />
-        {adminHighlight && overlayHighlight ? (
+        {adminConfig && overlayHighlight ? (
           <DioramaCards
             hook={{
               hookText: t("hook"),
@@ -247,12 +260,7 @@ export function CaseStudy() {
               stack,
             }}
             admin={{
-              kicker: adminHighlight.kicker,
-              title: adminHighlight.title,
-              lede: adminHighlight.lede,
-              features: adminHighlight.features,
-              screenshotAlt: adminHighlight.screenshotAlt,
-              station: highlightAdmin,
+              ...adminConfig,
               onClick: handleOpen(1),
             }}
             overlay={{
@@ -276,7 +284,7 @@ export function CaseStudy() {
             }}
           />
         ) : null}
-        <DioramaLupe />
+        <DioramaLupe>{adminConfig ? <DioramaAdminCopy admin={adminConfig} /> : null}</DioramaLupe>
       </DioramaTrack>
       <Lightbox />
     </>
