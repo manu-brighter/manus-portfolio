@@ -40,6 +40,12 @@ type Props = {
    *  data-lightbox-index, used by the parent CaseStudy to look up the
    *  source rect at open time. */
   lightboxIndex?: number;
+  /** Let the frame give up height inside a height-constrained flex
+   *  parent: the figure fills its parent's height and the photo crops
+   *  from the bottom (the `<img>` carries `object-top`) instead of the
+   *  surrounding copy being pushed out of the card. At its natural size
+   *  the frame looks exactly like the default. */
+  fit?: boolean;
 };
 
 const SPOT_VAR: Record<Props["spot"], string> = {
@@ -59,10 +65,15 @@ export function Polaroid({
   className,
   onClick,
   lightboxIndex,
+  fit = false,
 }: Props) {
   const reducedMotion = useReducedMotion();
   const effectiveRotate = reducedMotion ? 0 : rotate;
   const cssVars = { "--polaroid-spot": SPOT_VAR[spot] } as CSSProperties;
+  // `fit`: column flex so the photo (min-h-0) is the one part that
+  // shrinks; datestamp/caption keep their size.
+  const layoutClass = fit ? "flex h-full flex-col" : "inline-block";
+  const photoFitClass = fit ? " min-h-0" : "";
   return (
     <figure
       // pt has its own clamp with a 1rem floor so the absolutely-
@@ -72,7 +83,7 @@ export function Polaroid({
       // bottom edge overlapping the inner image div. Split into
       // explicit px / pb / pt so the pt floor doesn't depend on
       // Tailwind's CSS source order beating the shorthand `p-*`.
-      className={`plate-corners relative inline-block bg-paper-tint px-[clamp(0.5rem,1.2vh,1rem)] pt-[clamp(1rem,1.5vh,1.25rem)] pb-[clamp(0.5rem,1.2vh,1rem)] ${className ?? ""}`}
+      className={`plate-corners relative ${layoutClass} bg-paper-tint px-[clamp(0.5rem,1.2vh,1rem)] pt-[clamp(1rem,1.5vh,1.25rem)] pb-[clamp(0.5rem,1.2vh,1rem)] ${className ?? ""}`}
       style={{
         ...cssVars,
         transform: `rotate(${effectiveRotate}deg)`,
@@ -99,14 +110,14 @@ export function Polaroid({
           }}
           aria-haspopup="dialog"
           data-lightbox-index={lightboxIndex}
-          className="relative overflow-hidden border-[1.5px] border-ink cursor-zoom-in transition-transform duration-300 hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper motion-reduce:transition-none motion-reduce:hover:scale-100"
+          className={`relative overflow-hidden border-[1.5px] border-ink cursor-zoom-in transition-transform duration-300 hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper motion-reduce:transition-none motion-reduce:hover:scale-100${photoFitClass}`}
           style={{ aspectRatio: aspect }}
         >
           {children}
         </div>
       ) : (
         <div
-          className="relative overflow-hidden border-[1.5px] border-ink"
+          className={`relative overflow-hidden border-[1.5px] border-ink${photoFitClass}`}
           style={{ aspectRatio: aspect }}
         >
           {children}

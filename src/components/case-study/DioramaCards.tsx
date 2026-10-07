@@ -4,6 +4,7 @@ import { HookCard } from "@/components/case-study/cards/HookCard";
 import { PublicCard } from "@/components/case-study/cards/PublicCard";
 import { StackCard } from "@/components/case-study/cards/StackCard";
 import { WhatCard } from "@/components/case-study/cards/WhatCard";
+import { DioramaFit } from "@/components/case-study/DioramaFit";
 import type { DateCaption, Fact, Feature, StackRow } from "@/components/case-study/types";
 
 type PublicShot = {
@@ -80,7 +81,9 @@ type Props = {
 
 type CardKey = "hook" | "what" | "stack" | "admin" | "overlay" | "public";
 
-const CARD_LAYOUT: Record<CardKey, CSSProperties> = {
+// Exported for DioramaLupe, which renders a decorative copy of the admin
+// card at the same track position to magnify it.
+export const CARD_LAYOUT: Record<CardKey, CSSProperties> = {
   hook: { left: "22vh", top: "30vh", width: "60vh", height: "54vh", transform: "rotate(-3deg)" },
   what: { left: "88vh", top: "18vh", width: "44vh", height: "38vh", transform: "rotate(2deg)" },
   stack: { left: "88vh", top: "66vh", width: "44vh", height: "28vh", transform: "rotate(-2deg)" },
@@ -95,54 +98,73 @@ const CARD_LAYOUT: Record<CardKey, CSSProperties> = {
   public: { left: "296vh", top: "22vh", width: "110vh", height: "62vh", transform: "rotate(2deg)" },
 };
 
+// Every text card sits in a DioramaFit: the boxes are vh-sized, the copy
+// has rem floors, so on short viewports the copy would otherwise be cut
+// off by the card's overflow clip. PublicCard is left out on purpose: it
+// has no clip, and its rotated polaroids would read as "overflow" to the
+// measurement although no text is affected.
 export function DioramaCards({ hook, context, admin, overlay, public: pub }: Props) {
   return (
     <div className="absolute inset-0">
       <article style={{ position: "absolute", ...CARD_LAYOUT.hook }}>
-        <HookCard
-          hookText={hook.hookText}
-          datestamp={hook.station.datestamp}
-          polaroidCaption={hook.station.polaroidCaption ?? ""}
-          screenshotAlt={hook.screenshotAlt}
-          lightboxIndex={0}
-          onPolaroidClick={hook.onClick}
-        />
+        <DioramaFit>
+          <HookCard
+            hookText={hook.hookText}
+            datestamp={hook.station.datestamp}
+            polaroidCaption={hook.station.polaroidCaption ?? ""}
+            screenshotAlt={hook.screenshotAlt}
+            lightboxIndex={0}
+            onPolaroidClick={hook.onClick}
+          />
+        </DioramaFit>
       </article>
       <article style={{ position: "absolute", ...CARD_LAYOUT.what }}>
-        <WhatCard label={context.whatLabel} facts={context.facts} storyParas={context.storyParas} />
+        <DioramaFit>
+          <WhatCard
+            label={context.whatLabel}
+            facts={context.facts}
+            storyParas={context.storyParas}
+          />
+        </DioramaFit>
       </article>
       <article style={{ position: "absolute", ...CARD_LAYOUT.stack }}>
-        <StackCard heading={context.stackHeading} stack={context.stack} />
+        <DioramaFit>
+          <StackCard heading={context.stackHeading} stack={context.stack} />
+        </DioramaFit>
       </article>
       <article style={{ position: "absolute", ...CARD_LAYOUT.admin }}>
-        <HighlightCard
-          slug="admin"
-          spot="rose"
-          kicker={admin.kicker}
-          title={admin.title}
-          lede={admin.lede}
-          features={admin.features}
-          screenshotAlt={admin.screenshotAlt}
-          datestamp={admin.station.datestamp}
-          polaroidCaption={admin.station.polaroidCaption ?? ""}
-          lightboxIndex={1}
-          onPolaroidClick={admin.onClick}
-        />
+        <DioramaFit>
+          <HighlightCard
+            slug="admin"
+            spot="rose"
+            kicker={admin.kicker}
+            title={admin.title}
+            lede={admin.lede}
+            features={admin.features}
+            screenshotAlt={admin.screenshotAlt}
+            datestamp={admin.station.datestamp}
+            polaroidCaption={admin.station.polaroidCaption ?? ""}
+            lightboxIndex={1}
+            onPolaroidClick={admin.onClick}
+          />
+        </DioramaFit>
       </article>
       <article style={{ position: "absolute", ...CARD_LAYOUT.overlay }}>
-        <HighlightCard
-          slug="twitchoverlay"
-          spot="amber"
-          kicker={overlay.kicker}
-          title={overlay.title}
-          lede={overlay.lede}
-          features={overlay.features}
-          screenshotAlt={overlay.screenshotAlt}
-          datestamp={overlay.station.datestamp}
-          polaroidCaption={overlay.station.polaroidCaption ?? ""}
-          lightboxIndex={2}
-          onPolaroidClick={overlay.onClick}
-        />
+        <DioramaFit>
+          <HighlightCard
+            slug="twitchoverlay"
+            spot="amber"
+            kicker={overlay.kicker}
+            title={overlay.title}
+            lede={overlay.lede}
+            features={overlay.features}
+            screenshotAlt={overlay.screenshotAlt}
+            datestamp={overlay.station.datestamp}
+            polaroidCaption={overlay.station.polaroidCaption ?? ""}
+            lightboxIndex={2}
+            onPolaroidClick={overlay.onClick}
+          />
+        </DioramaFit>
       </article>
       <article style={{ position: "absolute", ...CARD_LAYOUT.public }}>
         <PublicCard
