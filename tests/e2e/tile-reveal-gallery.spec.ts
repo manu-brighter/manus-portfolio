@@ -115,6 +115,10 @@ test.describe("@about tile reveal gallery", () => {
               new PointerEvent(type, {
                 bubbles: true,
                 pointerType: "touch",
+                // A real single finger is always the primary pointer; the
+                // constructor defaults isPrimary to false, which the overlay
+                // treats as a second (pinch) finger and ignores.
+                isPrimary: true,
                 clientX: cx,
                 clientY: cy,
               }),
