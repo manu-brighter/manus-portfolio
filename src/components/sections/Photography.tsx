@@ -301,7 +301,13 @@ function PhotoFrame({ slide, index, total }: { slide: Slide; index: number; tota
           className="block h-full w-full object-cover shadow-[6px_6px_0_var(--color-ink)] outline outline-[1.5px] outline-ink"
         />
       </picture>
-      <PhotoInkMask spotColor={slide.spot} reveal={reveal} className="z-10" />
+      <PhotoInkMask
+        spotColor={slide.spot}
+        reveal={reveal}
+        seed={index}
+        aspect={slide.aspect}
+        className="z-10"
+      />
 
       {/* Mono-stempel caption — ink-revealed in parallel with the photo.
           `transition-all` was painting every animatable property on

@@ -47,7 +47,10 @@ for (const mode of ["light", "full"]) {
       const box = image.getBoundingClientRect();
       window.scrollBy({ top: box.top + box.height / 2 - innerHeight * 0.25, behavior: "instant" });
     });
-    await expect(panorama.getByTestId("photo-ink-animation")).toHaveCount(0, { timeout: 2000 });
+    // The Light reveal itself runs ~2.9s (slow bloom by design), so the
+    // bound is reveal length + slack: it still fails if the skipped
+    // photo never triggers (the overlay would stay mounted for good).
+    await expect(panorama.getByTestId("photo-ink-animation")).toHaveCount(0, { timeout: 5000 });
     await expect(page.locator("#photography canvas")).toHaveCount(0);
   });
 }
