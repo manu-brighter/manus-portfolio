@@ -7,7 +7,8 @@ import { useHoverOrCenterViewport } from "@/hooks/useHoverOrCenterViewport";
 import { useLenis } from "@/hooks/useLenis";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { dispatchSplat } from "@/lib/fluidBus";
-import { dur, ease } from "@/lib/motion/tokens";
+import { gsapEase } from "@/lib/motion/gsapEase";
+import { dur } from "@/lib/motion/tokens";
 import type { SpotColor } from "@/lib/palette";
 import type { WorkProjects } from "@/types/i18n-shapes";
 
@@ -189,7 +190,7 @@ export function WorkCard(props: WorkCardProps) {
     if (!card) return;
 
     const pills = pillsRef.current?.querySelectorAll("li") ?? [];
-    const easeCurve = `cubic-bezier(${ease.riso.join(",")})`;
+    const easeCurve = gsapEase().riso;
 
     if (hovered) {
       gsap.to(pills, {

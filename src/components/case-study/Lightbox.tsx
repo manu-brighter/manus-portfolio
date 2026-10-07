@@ -7,7 +7,8 @@ import { useCallback, useEffect, useRef } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useCursorHostStore } from "@/lib/cursorHostStore";
 import { useLightboxStore } from "@/lib/lightboxStore";
-import { dur, ease } from "@/lib/motion/tokens";
+import { gsapEase } from "@/lib/motion/gsapEase";
+import { dur } from "@/lib/motion/tokens";
 
 /**
  * Lightbox — case-study image zoom modal.
@@ -20,7 +21,6 @@ import { dur, ease } from "@/lib/motion/tokens";
  * Touch swipe in Task 8. This task ships the open/close lifecycle and
  * the image rendering only.
  */
-const easeExpoCSS = `cubic-bezier(${ease.expo[0]}, ${ease.expo[1]}, ${ease.expo[2]}, ${ease.expo[3]})`;
 
 export function Lightbox() {
   const t = useTranslations("caseStudy.lightbox");
@@ -167,7 +167,11 @@ export function Lightbox() {
       // Number → number (prev/next) — short cross-fade, no FLIP.
       if (reducedMotion) return;
       gsap.killTweensOf(figure);
-      gsap.fromTo(figure, { opacity: 0 }, { opacity: 1, duration: dur.micro, ease: easeExpoCSS });
+      gsap.fromTo(
+        figure,
+        { opacity: 0 },
+        { opacity: 1, duration: dur.micro, ease: gsapEase().expo },
+      );
       return;
     }
 
@@ -201,7 +205,7 @@ export function Lightbox() {
         scale: 1,
         opacity: 1,
         duration: dur.short,
-        ease: easeExpoCSS,
+        ease: gsapEase().expo,
       },
     );
   }, [activeIndex, reducedMotion, sourceRect]);

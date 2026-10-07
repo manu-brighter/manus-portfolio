@@ -3,7 +3,8 @@
 import gsap from "gsap";
 import { type ReactNode, useEffect, useRef } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { dur, ease } from "@/lib/motion/tokens";
+import { gsapEase } from "@/lib/motion/gsapEase";
+import { dur } from "@/lib/motion/tokens";
 
 /**
  * VibecodedStamp — wraps the [vibecoded] marker text and animates it
@@ -42,7 +43,7 @@ export function VibecodedStamp({ children, delay = 0 }: Props) {
     gsap.set(halo, { opacity: 0, scale: 0.6 });
 
     let fired = false;
-    const easeCurve = `cubic-bezier(${ease.riso.join(",")})`;
+    const easeCurve = gsapEase().riso;
 
     const observer = new IntersectionObserver(
       (entries) => {
