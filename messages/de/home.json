@@ -233,7 +233,7 @@
       ]
     },
     "pullQuotes": {
-      "werIchBin": "Code, Kamera, Photoshop: [[alles, was zwischen Code und Bild Spass macht]].",
+      "werIchBin": "Kamera, Photoshop, Shader: alles, was zwischen [[Code und Bild]] Spass macht.",
       "anfangen": "Ich will verstehen, [[wie das alles unter der Haube]] läuft.",
       "aiWorkflow": "Die AI tippt schneller. [[Das letzte Wort]] bleibt bei mir.",
       "antrieb": "[[Neugier]]. Und ein Verein, der das Ergebnis wirklich benutzt."
@@ -352,7 +352,7 @@
         "summary": [
           {
             "label": "Aufgabe",
-            "body": "Ein Portfolio, das zeigt, was ich kann, ohne es zu behaupten."
+            "body": "Ein Portfolio, das vorführt, was ich kann. Live, im Browser."
           },
           {
             "label": "Mein Beitrag",
@@ -391,7 +391,7 @@
           "Tailwind CSS",
           "shadcn/ui"
         ],
-        "description": "Vereins- und Eventplattform für Jogge di Balla: Mitglieder und Gönner, Rollenrechte, Anwesenheiten, und ein Kassensystem, das Bestellungen direkt an Küche und Bar schickt. Läuft seit 2024 bei jedem Event.",
+        "description": "Vereins- und Eventplattform für Jogge di Balla: Mitglieder und Gönner, Rollenrechte, Anwesenheiten, und ein Kassensystem, das Bestellungen direkt an Küche und Bar schickt. Seit 2024 an den Events des Vereins im Einsatz.",
         "summary": [
           {
             "label": "Aufgabe",
@@ -568,7 +568,7 @@
     },
     "reflection": {
       "label": "Was ich gelernt habe",
-      "body": "Ein echter Verein ist der beste QA-Tester: jedes Event findet einen neuen Edge Case. Deshalb gibt es automatisierte Tests, und deshalb liegt der Root-Server bei mir."
+      "body": "Ein echter Verein ist der beste QA-Tester: jedes Event findet einen neuen Edge Case. Deshalb gibt es automatisierte Tests. Den Root-Server dahinter richte ich selbst ein und betreibe ihn auch."
     },
     "footerLink": {
       "label": "Live im Einsatz",

@@ -233,9 +233,9 @@
       ]
     },
     "pullQuotes": {
-      "werIchBin": "Code, appareil photo, Photoshop : [[tout ce qui se joue entre code et image]].",
+      "werIchBin": "Appareil photo, Photoshop, shaders : tout ce qui se joue entre [[code et image]].",
       "anfangen": "Je veux comprendre [[ce qui se passe sous le capot]].",
-      "aiWorkflow": "L’IA tape plus vite. [[Le dernier mot]] reste à moi.",
+      "aiWorkflow": "L’IA tape plus vite. [[Le dernier mot]] me revient.",
       "antrieb": "[[La curiosité]]. Et un club qui utilise vraiment le résultat."
     },
     "marginalia": {
@@ -352,7 +352,7 @@
         "summary": [
           {
             "label": "Enjeu",
-            "body": "Un portfolio qui montre ce que je sais faire, au lieu de le prétendre."
+            "body": "Un portfolio qui montre ce que je sais faire. En direct, dans le navigateur."
           },
           {
             "label": "Ma contribution",
@@ -391,7 +391,7 @@
           "Tailwind CSS",
           "shadcn/ui"
         ],
-        "description": "Plateforme associative et événementielle pour Jogge di Balla : membres et donateurs, droits par rôle, présences, et un système de caisse qui envoie les commandes directement à la cuisine et au bar. En service à chaque événement depuis 2024.",
+        "description": "Plateforme associative et événementielle pour Jogge di Balla : membres et donateurs, droits par rôle, présences, et un système de caisse qui envoie les commandes directement à la cuisine et au bar. En service lors des événements de l'association depuis 2024.",
         "summary": [
           {
             "label": "Enjeu",
@@ -568,7 +568,7 @@
     },
     "reflection": {
       "label": "Ce que j’ai appris",
-      "body": "Un vrai club est le meilleur testeur QA : chaque événement trouve un nouvel edge case. C’est pour ça qu’il y a des tests automatisés, et que je gère moi-même le serveur root."
+      "body": "Une vraie association est le meilleur testeur QA : chaque événement trouve un nouveau edge case. D'où les tests automatisés. Le serveur root derrière, je le configure et l'administre moi-même."
     },
     "footerLink": {
       "label": "Live en service",

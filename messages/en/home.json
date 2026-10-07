@@ -233,7 +233,7 @@
       ]
     },
     "pullQuotes": {
-      "werIchBin": "Code, camera, Photoshop: [[anything between code and image]].",
+      "werIchBin": "Camera, Photoshop, shaders: anything between [[code and image]].",
       "anfangen": "I want to understand [[what happens under the hood]].",
       "aiWorkflow": "The AI types faster. [[The final say]] stays with me.",
       "antrieb": "[[Curiosity]]. And a club that actually uses the result."
@@ -352,7 +352,7 @@
         "summary": [
           {
             "label": "Challenge",
-            "body": "A portfolio that shows what I can do instead of claiming it."
+            "body": "A portfolio that shows what I can do. Live, in the browser."
           },
           {
             "label": "My contribution",
@@ -391,7 +391,7 @@
           "Tailwind CSS",
           "shadcn/ui"
         ],
-        "description": "Club and event platform for Jogge di Balla: members and supporters, role permissions, attendance, and a POS system that sends orders straight to the kitchen and bar. Running at every event since 2024.",
+        "description": "Club and event platform for Jogge di Balla: members and supporters, role permissions, attendance, and a POS system that sends orders straight to the kitchen and bar. In use at the club's events since 2024.",
         "summary": [
           {
             "label": "Challenge",
@@ -568,7 +568,7 @@
     },
     "reflection": {
       "label": "What I learned",
-      "body": "A real club is the best QA team: every event finds a new edge case. That's why there are automated tests, and why the root server is mine to run."
+      "body": "A real club is the best QA team: every event finds a new edge case. That's why there are automated tests. The root server behind it is set up and run by me."
     },
     "footerLink": {
       "label": "Live in the wild",
@@ -653,7 +653,7 @@
   },
   "contact": {
     "sectionLabel": "Section 07 · Contact",
-    "headline": "Write me.",
+    "headline": "Get in touch.",
     "subhead": "An idea, a question, a photography tip or just hello: my inbox is open.",
     "intro": {
       "label": "Quick note",

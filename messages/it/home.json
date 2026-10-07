@@ -233,7 +233,7 @@
       ]
     },
     "pullQuotes": {
-      "werIchBin": "Codice, fotocamera, Photoshop: [[tutto ciò che sta tra codice e immagine]].",
+      "werIchBin": "Fotocamera, Photoshop, shader: tutto ciò che sta tra [[codice e immagine]].",
       "anfangen": "Voglio capire [[cosa succede sotto il cofano]].",
       "aiWorkflow": "L’AI scrive più in fretta. [[L’ultima parola]] resta mia.",
       "antrieb": "[[La curiosità]]. E un club che usa davvero il risultato."
@@ -352,7 +352,7 @@
         "summary": [
           {
             "label": "Obiettivo",
-            "body": "Un portfolio che mostra cosa so fare, invece di dichiararlo."
+            "body": "Un portfolio che mostra cosa so fare. Dal vivo, nel browser."
           },
           {
             "label": "Il mio contributo",
@@ -360,7 +360,7 @@
           },
           {
             "label": "Risultato",
-            "body": "Questo sito. Se scatta, dimmi su quale dispositivo."
+            "body": "Questo sito. Se va a scatti, dimmi su quale dispositivo."
           }
         ],
         "metaNote": "L’inchiostro viene calcolato in modo interattivo sulla GPU. I livelli di qualità adattano il carico al dispositivo.",
@@ -391,7 +391,7 @@
           "Tailwind CSS",
           "shadcn/ui"
         ],
-        "description": "Piattaforma associativa e per eventi per Jogge di Balla: soci e sostenitori, permessi per ruolo, presenze, e un sistema di cassa che manda gli ordini direttamente a cucina e bar. In uso a ogni evento dal 2024.",
+        "description": "Piattaforma associativa e per eventi per Jogge di Balla: soci e sostenitori, permessi per ruolo, presenze, e un sistema di cassa che manda gli ordini direttamente a cucina e bar. In uso agli eventi dell'associazione dal 2024.",
         "summary": [
           {
             "label": "Obiettivo",
@@ -575,7 +575,7 @@
     },
     "reflection": {
       "label": "Cosa ho imparato",
-      "body": "Un vero club è il miglior tester QA: ogni evento trova un nuovo edge case. Per questo ci sono test automatizzati, e per questo il server root lo gestisco io."
+      "body": "Un'associazione vera è il miglior tester QA: ogni evento trova un nuovo edge case. Per questo ci sono test automatizzati. Il server root dietro lo configuro e lo gestisco io."
     },
     "footerLink": {
       "label": "Live in azione",
