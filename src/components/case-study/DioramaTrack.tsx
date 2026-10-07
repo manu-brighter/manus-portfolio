@@ -64,7 +64,12 @@ export function DioramaTrack({ children, mobileFallback, wideFallback, sectionLa
   const [short, setShort] = useState(false);
   const sceneHidden = useSceneVisibilityStore((s) => s.hidden);
 
-  useEffect(() => {
+  // Layout, not a passive effect. ScrollToOnLoad reads the published
+  // layout in its own effect, which runs after every layout effect. A
+  // passive sync let the first commit pin the desktop diorama on a
+  // phone, the jump landed in that tall page, and the fallback then
+  // collapsed it so the target was off screen.
+  useLayoutEffect(() => {
     const narrowMq = window.matchMedia(`(max-width: ${MOBILE_MAX_WIDTH - 1}px)`);
     const shortMq = window.matchMedia(`(max-height: ${FALLBACK_MAX_HEIGHT - 1}px)`);
     const sync = () => {
