@@ -85,8 +85,14 @@ void main() {
         + drive.xy * 0.05 * (1.0 - exp(-age * 2.2));
       vec2 d = p - center;
       vec2 e = d + ragged * radius * 0.38;
+      // Wide blooms (Aquarell) lift less density per area, or one card
+      // hover floods the viewport into the top plate. The spot plate
+      // keeps the undamped strength: damping it too drops the peak
+      // under the plate threshold, so the drop never takes its colour.
+      // INK_BLOOM_DAMP_REF must match liteBloomRadius(0.015).
+      float damp = min(1.0, 0.122474 / max(shape.w, 0.001));
       float s = exp(-dot(e, e) / (radius * radius)) * drive.z * rise;
-      float m = s * fall;
+      float m = s * damp * fall;
       // Local swirl plus a push along the throw: the sheet itself reacts.
       warp += (vec2(-d.y, d.x) / radius * 0.10 + drive.xy * 0.03) * m;
       bloom += m;

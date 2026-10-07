@@ -574,8 +574,8 @@ Source of truth: `src/app/globals.css` (`@theme` block).
     x/y/age/radius + dx/dy/strength/ladder slot), live ones packed at
     the front, `uImpulseCount` stops the shader loop, so idle frames
     cost one uniform branch and upload nothing. Life 2.2s; a full
-    buffer only recycles a slot past 60% of its life (a younger one
-    would visibly pop), otherwise the newcomer is dropped.
+    buffer only recycles a slot past 90% of its life (earlier the drop
+    is still visible and pops), otherwise the newcomer is dropped.
   - **Same ink, not an overlay**: a bloom lifts the sheet density (the
     theme's own plates ring outward around it), swirls the sheet
     locally, and prints a small core in the ladder slot of its spot
@@ -590,8 +590,9 @@ Source of truth: `src/app/globals.css` (`@theme` block).
     scroll force): Light's parallax already drifts the sheet; a second
     push would double it.
   - **Radius follows the preset** like Full's: no-radius splats use
-    Full's medium splatRadius × `splatRadiusScale`, wide blooms are
-    damped (Full's lower Aquarell dyeScale), and a live preset switch
+    Full's medium splatRadius × `splatRadiusScale`, wide blooms damp
+    only the density lift (the spot plate stays full strength, or
+    Aquarell never clears its plate threshold), and a live preset switch
     drops a centred preview bloom (ring, or a droplet cloud for swarm
     presets; the initial apply stays silent).
   - **Reading sections**: a live bloom lifts the section quieting

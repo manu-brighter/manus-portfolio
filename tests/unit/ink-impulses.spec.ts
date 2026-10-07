@@ -60,8 +60,14 @@ test("preset radius scale and explicit radii size the bloom; wide blooms deposit
   const wide = shapeOf(impulses, 1)[3] ?? 0;
   expect(tiny).toBeLessThan(wide);
   expect(shapeOf(impulses, 2)[3]).toBeCloseTo(liteBloomRadius(0.004));
+  // The density damp lives in the shader and must track the reference bloom.
+  const frag = readFileSync(resolve(__dirname, "../../src/shaders/ink-lite/render.frag.glsl"), "utf8");
+  expect(liteBloomRadius(LITE_BASE_SPLAT_RADIUS).toFixed(6)).toBe("0.122474");
+  expect(frag).toContain("0.122474 / max(shape.w, 0.001)");
+  // Strength is the spot weight. Wide Aquarell blooms used to damp it
+  // too, and the spot plate then never cleared its threshold.
   expect(driveOf(impulses, 0)[2]).toBeCloseTo(1);
-  expect(driveOf(impulses, 1)[2]).toBeLessThan(0.5);
+  expect(driveOf(impulses, 1)[2]).toBeCloseTo(1);
 });
 
 test("expired blooms leave the packed buffer and the drain uploads exactly once", () => {
@@ -87,7 +93,7 @@ test("a full buffer never pops a young bloom, but recycles a mostly faded one", 
     impulses.advance(0.05);
   }
   expect(pushSplatImpulse(impulses, { x: 0.99, y: 0.5, color: "rose" }, 0)).toBe(false);
-  impulses.advance(INK_IMPULSE_LIFE_S * 0.62 - 0.05 * INK_IMPULSE_CAPACITY + 0.05);
+  impulses.advance(INK_IMPULSE_LIFE_S * 0.92 - 0.05 * (INK_IMPULSE_CAPACITY - 1));
   expect(pushSplatImpulse(impulses, { x: 0.99, y: 0.5, color: "rose" }, 0)).toBe(true);
   expect(impulses.count).toBe(INK_IMPULSE_CAPACITY);
   // The oldest slot (the first push) was recycled.

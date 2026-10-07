@@ -18,14 +18,16 @@ import { SPOT_RGB, type SpotColor } from "@/lib/palette";
 
 /** Slots in the uniform arrays. Must equal INK_IMPULSES in render.frag.glsl.
  *  Sized for the shipped storms: `manu.burst()` drops 14 at once, and the
- *  Fehldruck interval (one per 110ms) fills it with the oldest already
- *  past EVICT_AFTER_S, so the storm recycles faded slots without pops. */
+ *  Fehldruck interval (one per 110ms) fills the buffer. A newcomer is
+ *  dropped until the oldest has nearly faded, so a full storm doesn't pop. */
 export const INK_IMPULSE_CAPACITY = 16;
 /** Bloom lifetime in seconds. Must equal INK_IMPULSE_LIFE in the shader. */
 export const INK_IMPULSE_LIFE_S = 2.2;
-/** A full buffer only evicts an impulse that has mostly faded; a younger
- *  one would visibly pop, so the newcomer is dropped instead. */
-const EVICT_AFTER_S = INK_IMPULSE_LIFE_S * 0.6;
+/** A full buffer only evicts an impulse that has nearly faded. At 60% of
+ *  the life the drop is still about half strength and pops. 90% is where
+ *  the shader fade is a few percent, so the newcomer is dropped instead
+ *  of replacing a bloom you can still see. */
+const EVICT_AFTER_S = INK_IMPULSE_LIFE_S * 0.9;
 /** Full's medium-tier splatRadius. Light has no physics tier, so bus
  *  splats without a radius override bloom at this size. */
 export const LITE_BASE_SPLAT_RADIUS = 0.015;
@@ -131,15 +133,6 @@ export function liteBloomRadius(splatRadius: number): number {
   return Math.min(0.42, Math.max(0.04, Math.sqrt(Math.max(0, splatRadius))));
 }
 
-const BASE_BLOOM_RADIUS = liteBloomRadius(LITE_BASE_SPLAT_RADIUS);
-
-/** Wide blooms deposit less ink per area, the way Full's lower Aquarell
- *  dyeScale offsets its huge splats: without it one card hover floods the
- *  viewport into the top plate. Small blooms keep full strength. */
-function wideBloomDamping(radius: number): number {
-  return Math.min(1, BASE_BLOOM_RADIUS / radius);
-}
-
 /**
  * Translate a fluidBus request into an impulse, read exactly as
  * FluidSim reads it: x/y normalised to the fixed full-viewport canvas,
@@ -180,7 +173,7 @@ export function pushSplatImpulse(
     scroll,
     req.dx ?? 0,
     req.dy ?? 0,
-    strength * wideBloomDamping(radius),
+    strength,
     slot,
     radius,
   );
@@ -216,7 +209,7 @@ export function pushPresetImpulses(
         scroll,
         Math.cos(angle) * 1.2,
         Math.sin(angle) * 1.2,
-        wideBloomDamping(radius),
+        1,
         i % 4,
         radius,
       );
@@ -224,8 +217,7 @@ export function pushPresetImpulses(
     return;
   }
   const radius = liteBloomRadius(LITE_BASE_SPLAT_RADIUS * scale * 1.2);
-  const damping = wideBloomDamping(radius);
-  impulses.push(0.5, 0.5, scroll, 0, 0, 1.15 * damping, 3, radius * 1.25);
+  impulses.push(0.5, 0.5, scroll, 0, 0, 1.15, 3, radius * 1.25);
   for (let i = 0; i < 4; i++) {
     const angle = (i / 4) * Math.PI * 2 + Math.PI / 4;
     impulses.push(
@@ -234,7 +226,7 @@ export function pushPresetImpulses(
       scroll,
       Math.cos(angle) * 1.2,
       Math.sin(angle) * 1.2,
-      0.9 * damping,
+      0.9,
       i,
       radius,
     );
