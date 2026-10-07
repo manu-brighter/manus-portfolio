@@ -3,7 +3,7 @@ precision highp float;
 
 // Separable 9-tap Gaussian blur. Run twice (uDirection = (1,0) then
 // (0,1)) for one full 2D Gaussian; run more iterations to widen the
-// effective sigma. Used by TextStamper as the SDF approximation —
+// effective sigma. Used by TextStamper as the SDF approximation --
 // blurring the rasterised text alpha mask gives a soft falloff at the
 // edges that visually reads as a signed-distance field for our use
 // case (fluid will then advect the result anyway).
@@ -14,13 +14,13 @@ precision highp float;
 uniform sampler2D uSource;
 uniform vec2 uTexelSize;     // 1 / texture dimensions
 uniform vec2 uDirection;     // (1,0) horizontal, (0,1) vertical
-uniform float uStride;       // tap spacing multiplier — wider = blurrier
+uniform float uStride;       // tap spacing multiplier -- wider = blurrier
 
 in vec2 vUv;
 out vec4 fragColor;
 
 void main() {
-  // Pre-normalised 9-tap Gaussian weights (sigma ≈ 2.0 in tap-space).
+  // Pre-normalised 9-tap Gaussian weights (sigma ~ 2.0 in tap-space).
   const float w0 = 0.227027;
   const float w1 = 0.194594;
   const float w2 = 0.121622;

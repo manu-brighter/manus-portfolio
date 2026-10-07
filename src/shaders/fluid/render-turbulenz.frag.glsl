@@ -1,22 +1,21 @@
 #version 300 es
-// highp: pixel-space halftone coords and the noise include both
-// exceed fp16 range -- see render-riso.frag.glsl.
+// highp: the sheet clock and pixel-space grain exceed fp16 range.
 precision highp float;
 
-// #include <noise>
-// #include <sobel>
+// #include <ink-sheet>
 
 in vec2 vUv;
 
 uniform sampler2D uDye;
-uniform vec2 uSimTexel;
-uniform float uOutlineThreshold;
+uniform vec2 uTexelSize;
 uniform float uGrainStrength;
 uniform float uEdgeStrength;
-uniform float uTime;
+uniform float uSheet;
+uniform float uSheetTime;
+uniform float uScroll;
+uniform float uSection;
 
 uniform vec3 uPaperColor;
-uniform vec3 uInkColor;
 uniform vec3 uSpotRose;
 uniform vec3 uSpotAmber;
 uniform vec3 uSpotMint;
@@ -24,55 +23,53 @@ uniform vec3 uSpotViolet;
 
 out vec4 fragColor;
 
-// Screenprint comic: hard quantized bands, halftone dot ramps inside
-// each band transition, and true ink contour lines from a Sobel pass.
-// The crisp pole of the four styles -- zero softness anywhere.
+// Turbulenz -- Light Turbulenz's crisp angular islands in its colours,
+// torn up by the real droplet swarm: the advected sheet (dye alpha)
+// carries the island field into the high-confinement vortices, the
+// swarm's own droplets print on top. Crisp translucent plates and rim
+// shading match ink-lite/render.frag.glsl, style 2 (the old halftone +
+// black contour look is retired: owner preferred the Light colours).
 
-const float DOT_PITCH_PX = 9.0;
-// 4 ink bands over paper -- matches the 4-slot ladder exactly.
-const float BANDS = 4.0;
+// Splat dye weight with and without the sheet underneath. Without a sheet
+// (playground sims) the scale keeps the old banded shader's saturation
+// point: its top band sat at dye length 1.0, the plates here top out at
+// 0.57. At 1.0 Type-as-Fluid words and studio pools printed as one solid
+// top-band mass (screenshot-verified).
+const float SPLAT_SOLO = 0.6;
+const float SPLAT_ON_SHEET = 0.35;
 
-vec3 bandColor(float idx) {
-  // idx 0 = paper, 1..4 = ladder low -> high (slot names are legacy).
-  if (idx < 0.5) return uPaperColor;
-  if (idx < 1.5) return uSpotMint;
-  if (idx < 2.5) return uSpotAmber;
-  if (idx < 3.5) return uSpotRose;
+vec3 plateColor(int index) {
+  if (index == 0) return uSpotMint;
+  if (index == 1) return uSpotAmber;
+  if (index == 2) return uSpotRose;
   return uSpotViolet;
 }
 
 void main() {
-  vec3 dye = clamp(texture(uDye, vUv).rgb, vec3(0.0), vec3(1.0));
-  float density = min(length(dye), 1.0);
+  vec4 dye = texture(uDye, vUv);
+  float splat = length(clamp(dye.rgb, vec3(0.0), vec3(1.0)));
+  float density = dye.a * uSheet + splat * mix(SPLAT_SOLO, SPLAT_ON_SHEET, uSheet);
 
-  // Continuous band coordinate: 0 = paper, BANDS = fully inked.
-  float bandF = density * BANDS;
-  float idx = floor(bandF);
-  float bandFrac = fract(bandF);
+  // Registration drift on Light's island coordinate (without the chop:
+  // the physics already tears the plates).
+  float aspect = uTexelSize.y / uTexelSize.x;
+  vec2 p = (vUv - 0.5) * vec2(aspect, 1.0);
+  p.y += uScroll * INK_PARALLAX;
+  vec2 q = p * 1.85 + inkFold(p, uSheetTime * 0.12) * 0.32;
 
-  // Halftone: rotated dot grid in pixel space (gl_FragCoord is
-  // spec-guaranteed highp); dots grow with the in-band fraction and
-  // reveal the NEXT band -- a screenprint tonal ramp instead of a
-  // soft gradient. fwidth-AA keeps the crawling dye field from
-  // shimmering the dot edges without softening the look.
-  vec2 grid = mat2(0.7071, -0.7071, 0.7071, 0.7071) * gl_FragCoord.xy / DOT_PITCH_PX;
-  float dotDist = length(fract(grid) - 0.5);
-  float aa = fwidth(dotDist);
-  float dotMask = smoothstep(bandFrac * 0.62 + aa, bandFrac * 0.62 - aa, dotDist);
+  // Crisp pole of the styles; derivatives only widen the edge where the
+  // sim-resolution field would otherwise alias.
+  float softness = max(0.014, fwidth(density));
+  vec3 color = uPaperColor;
+  for (int i = 0; i < 4; i++) {
+    float threshold = 0.12 + float(i) * 0.15;
+    float plate = density + sin(q.y * 7.0 + float(i) * 1.7) * 0.025;
+    float coverage = smoothstep(threshold - softness, threshold + softness, plate);
+    color = mix(color, plateColor(i), coverage * 0.55);
+    float rim = 1.0 - smoothstep(0.005, max(0.023, softness * 1.4), abs(plate - threshold));
+    color *= 1.0 - rim * coverage * uEdgeStrength * 0.10;
+  }
 
-  vec3 color = mix(bandColor(idx), bandColor(idx + 1.0), dotMask);
-
-  // Ink contour lines: Sobel on the dye field, drawn as actual ink
-  // strokes (not just a darkened fill). Stepped in SIM texels so the
-  // edge response is viewport-independent (the dye texture is
-  // sim-resolution; canvas-texel steps starve at 4K).
-  float edge = sobelEdge(uDye, vUv, uSimTexel * 0.75);
-  float line = smoothstep(uOutlineThreshold * 0.5, uOutlineThreshold, edge / (density + 1.0));
-  color = mix(color, uInkColor, line * uEdgeStrength);
-
-  // Coarse grain -- rougher stock than the riso default.
-  float grain = snoise(vUv * 260.0 + uTime * 0.05);
-  color *= 1.0 + grain * uGrainStrength;
-
-  fragColor = vec4(color, 1.0);
+  color += inkGrain(gl_FragCoord.xy) * uGrainStrength * 0.22 * smoothstep(0.05, 0.3, density);
+  fragColor = vec4(inkQuiet(color, uPaperColor, vUv, uSection), 1.0);
 }
