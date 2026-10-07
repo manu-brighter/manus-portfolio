@@ -46,6 +46,11 @@ type Props = {
    *  surrounding copy being pushed out of the card. At its natural size
    *  the frame looks exactly like the default. */
   fit?: boolean;
+  /** `rem`: fixed rem padding and type instead of the vh clamps. The
+   *  vh scale exists for the horizontal diorama (a 100vh-tall track);
+   *  in a normal vertical flow it shrinks captions to ~8px on short
+   *  laptop viewports. */
+  scale?: "vh" | "rem";
 };
 
 const SPOT_VAR: Record<Props["spot"], string> = {
@@ -66,6 +71,7 @@ export function Polaroid({
   onClick,
   lightboxIndex,
   fit = false,
+  scale = "vh",
 }: Props) {
   const reducedMotion = useReducedMotion();
   const effectiveRotate = reducedMotion ? 0 : rotate;
@@ -74,6 +80,10 @@ export function Polaroid({
   // shrinks; datestamp/caption keep their size.
   const layoutClass = fit ? "flex h-full flex-col" : "inline-block";
   const photoFitClass = fit ? " min-h-0" : "";
+  const remScale = scale === "rem";
+  const paddingClass = remScale
+    ? "px-3 pt-5 pb-3"
+    : "px-[clamp(0.5rem,1.2vh,1rem)] pt-[clamp(1rem,1.5vh,1.25rem)] pb-[clamp(0.5rem,1.2vh,1rem)]";
   return (
     <figure
       // pt has its own clamp with a 1rem floor so the absolutely-
@@ -83,7 +93,7 @@ export function Polaroid({
       // bottom edge overlapping the inner image div. Split into
       // explicit px / pb / pt so the pt floor doesn't depend on
       // Tailwind's CSS source order beating the shorthand `p-*`.
-      className={`plate-corners relative ${layoutClass} bg-paper-tint px-[clamp(0.5rem,1.2vh,1rem)] pt-[clamp(1rem,1.5vh,1.25rem)] pb-[clamp(0.5rem,1.2vh,1rem)] ${className ?? ""}`}
+      className={`plate-corners relative ${layoutClass} bg-paper-tint ${paddingClass} ${className ?? ""}`}
       style={{
         ...cssVars,
         transform: `rotate(${effectiveRotate}deg)`,
@@ -126,7 +136,9 @@ export function Polaroid({
       {datestamp ? (
         <span
           aria-hidden="true"
-          className="absolute top-1 right-2 font-mono text-[clamp(0.5rem,0.65vh,0.6rem)] tracking-[0.16em] text-ink-muted"
+          className={`absolute top-1 right-2 font-mono tracking-[0.16em] text-ink-muted ${
+            remScale ? "text-[0.625rem]" : "text-[clamp(0.5rem,0.65vh,0.6rem)]"
+          }`}
         >
           {datestamp}
         </span>
@@ -140,7 +152,9 @@ export function Polaroid({
         // guarantees the property gets applied regardless of utility-
         // class compilation. Tighter tracking on mobile too.
         <figcaption
-          className="mt-2 font-mono text-[clamp(0.5rem,0.75vh,0.7rem)] tracking-[0.12em] text-ink-muted uppercase md:tracking-[0.18em]"
+          className={`mt-2 font-mono tracking-[0.12em] text-ink-muted uppercase md:tracking-[0.18em] ${
+            remScale ? "text-[0.6875rem]" : "text-[clamp(0.5rem,0.75vh,0.7rem)]"
+          }`}
           style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}
         >
           {caption}

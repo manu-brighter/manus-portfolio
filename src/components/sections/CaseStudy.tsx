@@ -3,12 +3,17 @@
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo } from "react";
+import { CaseStudyStacked } from "@/components/case-study/CaseStudyStacked";
 import { HighlightCard } from "@/components/case-study/cards/HighlightCard";
 import { HookCard } from "@/components/case-study/cards/HookCard";
 import { PublicCard } from "@/components/case-study/cards/PublicCard";
 import { StackCard } from "@/components/case-study/cards/StackCard";
 import { WhatCard } from "@/components/case-study/cards/WhatCard";
-import { DioramaAdminCopy, DioramaCards } from "@/components/case-study/DioramaCards";
+import {
+  DioramaAdminCopy,
+  DioramaCards,
+  type DioramaCardsProps,
+} from "@/components/case-study/DioramaCards";
 import { DioramaIllustration } from "@/components/case-study/DioramaIllustration";
 import { DioramaLupe } from "@/components/case-study/DioramaLupe";
 import { DioramaTrack } from "@/components/case-study/DioramaTrack";
@@ -236,54 +241,76 @@ export function CaseStudy() {
       }
     : null;
 
-  // Desktop: full diorama with sticky-pin + horizontal scroll.
+  // Station config shared by the horizontal diorama and the wide-but-
+  // short vertical layout, so both render the same content with the
+  // same lightbox indices.
+  const stations: DioramaCardsProps | null =
+    adminConfig && overlayHighlight
+      ? {
+          hook: {
+            hookText: t("hook"),
+            station: hookStation,
+            screenshotAlt: hookStation.screenshotAlt,
+            onClick: handleOpen(0),
+          },
+          context: {
+            whatLabel: t("context.label"),
+            facts,
+            storyParas,
+            stackHeading: stackStation.heading,
+            stack,
+          },
+          admin: {
+            ...adminConfig,
+            onClick: handleOpen(1),
+          },
+          overlay: {
+            kicker: overlayHighlight.kicker,
+            title: overlayHighlight.title,
+            lede: overlayHighlight.lede,
+            features: overlayHighlight.features,
+            screenshotAlt: overlayHighlight.screenshotAlt,
+            station: highlightOverlay,
+            onClick: handleOpen(2),
+          },
+          public: {
+            shots: publicShots,
+            reflectionLabel: t("reflection.label"),
+            reflectionBody: t("reflection.body"),
+            footerLabel: t("footerLink.label"),
+            footerDomain: t("footerLink.domain"),
+            footerUrl: t("footerLink.url"),
+            footerExternal: t("footerLink.external"),
+            onShotClick: (i) => handleOpen(3 + i)(),
+          },
+        }
+      : null;
+
+  // Desktop: full diorama with sticky-pin + horizontal scroll. Short
+  // desktop viewports and reduced motion get the vertical
+  // CaseStudyStacked; narrow ones the phone stack (see DioramaTrack).
   return (
     <>
-      <DioramaTrack mobileFallback={mobileFallback} sectionLabel={t("sectionLabel")}>
+      <DioramaTrack
+        mobileFallback={mobileFallback}
+        wideFallback={
+          stations ? (
+            <CaseStudyStacked
+              headline={t("headline")}
+              sectionLabel={t("sectionLabel")}
+              {...stations}
+            />
+          ) : (
+            mobileFallback
+          )
+        }
+        sectionLabel={t("sectionLabel")}
+      >
         <h2 id="case-study-heading" className="sr-only">
           {t("headline")}
         </h2>
         <DioramaIllustration />
-        {adminConfig && overlayHighlight ? (
-          <DioramaCards
-            hook={{
-              hookText: t("hook"),
-              station: hookStation,
-              screenshotAlt: hookStation.screenshotAlt,
-              onClick: handleOpen(0),
-            }}
-            context={{
-              whatLabel: t("context.label"),
-              facts,
-              storyParas,
-              stackHeading: stackStation.heading,
-              stack,
-            }}
-            admin={{
-              ...adminConfig,
-              onClick: handleOpen(1),
-            }}
-            overlay={{
-              kicker: overlayHighlight.kicker,
-              title: overlayHighlight.title,
-              lede: overlayHighlight.lede,
-              features: overlayHighlight.features,
-              screenshotAlt: overlayHighlight.screenshotAlt,
-              station: highlightOverlay,
-              onClick: handleOpen(2),
-            }}
-            public={{
-              shots: publicShots,
-              reflectionLabel: t("reflection.label"),
-              reflectionBody: t("reflection.body"),
-              footerLabel: t("footerLink.label"),
-              footerDomain: t("footerLink.domain"),
-              footerUrl: t("footerLink.url"),
-              footerExternal: t("footerLink.external"),
-              onShotClick: (i) => handleOpen(3 + i)(),
-            }}
-          />
-        ) : null}
+        {stations ? <DioramaCards {...stations} /> : null}
         <DioramaLupe>{adminConfig ? <DioramaAdminCopy admin={adminConfig} /> : null}</DioramaLupe>
       </DioramaTrack>
       <Lightbox />

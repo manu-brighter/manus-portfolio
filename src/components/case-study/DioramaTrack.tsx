@@ -20,11 +20,13 @@ if (typeof window !== "undefined") {
  * track scales consistently across normal desktop and ultrawide
  * displays. Ink-column fluid sim is rendered separately by parent.
  *
- * Fallback (width <768px OR height <900px) and reduced-motion: pin
- * disabled, children render in a vertical fallback flow (parent passes
- * a `mobileFallback` prop with a vertical-stack representation). The
- * height branch catches flat laptop viewports (1366x768, 1600x900,
- * 1280x720) where vh-scaled cards become unreadably small.
+ * Fallbacks (pin disabled, vertical flow):
+ *   - narrow (width <768px): `mobileFallback`, the phone stack.
+ *   - wide but short (width >=768px, height <700px) and reduced motion
+ *     at desktop width: `wideFallback`, a desktop-width vertical layout
+ *     (CaseStudyStacked). Flat laptop viewports (1366x768, 1280x720
+ *     with browser chrome) land here because vh-scaled diorama cards
+ *     get unreadably small, and they used to get the phone stack.
  */
 
 const MOBILE_MAX_WIDTH = 768;
@@ -34,13 +36,15 @@ export const TRACK_WIDTH_VH = 420;
 type Props = {
   /** Diorama content — typically <DioramaIllustration /> + <DioramaCards />. */
   children: ReactNode;
-  /** Vertical-stack fallback rendered on mobile / reduced-motion. */
+  /** Vertical-stack fallback for narrow viewports (<768px). */
   mobileFallback: ReactNode;
+  /** Desktop-width vertical layout for short viewports and reduced motion. */
+  wideFallback: ReactNode;
   /** Decorative section identity stamp shown top-left of the desktop diorama. */
   sectionLabel: string;
 };
 
-export function DioramaTrack({ children, mobileFallback, sectionLabel }: Props) {
+export function DioramaTrack({ children, mobileFallback, wideFallback, sectionLabel }: Props) {
   const reducedMotion = useReducedMotion();
   // The PIN TARGET is an inner wrapper, never the <section> itself.
   // ScrollTrigger's pin wraps the pinned element in a `div.pin-spacer`
@@ -55,18 +59,27 @@ export function DioramaTrack({ children, mobileFallback, sectionLabel }: Props) 
   const pinRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<ScrollTrigger | null>(null);
-  const [useFallback, setUseFallback] = useState(false);
+  const [narrow, setNarrow] = useState(false);
+  const [short, setShort] = useState(false);
   const sceneHidden = useSceneVisibilityStore((s) => s.hidden);
 
   useEffect(() => {
-    const mq = window.matchMedia(
-      `(max-width: ${MOBILE_MAX_WIDTH - 1}px), (max-height: ${FALLBACK_MAX_HEIGHT - 1}px)`,
-    );
-    setUseFallback(mq.matches);
-    const onChange = (e: MediaQueryListEvent) => setUseFallback(e.matches);
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
+    const narrowMq = window.matchMedia(`(max-width: ${MOBILE_MAX_WIDTH - 1}px)`);
+    const shortMq = window.matchMedia(`(max-height: ${FALLBACK_MAX_HEIGHT - 1}px)`);
+    const sync = () => {
+      setNarrow(narrowMq.matches);
+      setShort(shortMq.matches);
+    };
+    sync();
+    narrowMq.addEventListener("change", sync);
+    shortMq.addEventListener("change", sync);
+    return () => {
+      narrowMq.removeEventListener("change", sync);
+      shortMq.removeEventListener("change", sync);
+    };
   }, []);
+
+  const useFallback = narrow || short;
 
   useEffect(() => {
     if (reducedMotion || useFallback) return;
@@ -133,7 +146,7 @@ export function DioramaTrack({ children, mobileFallback, sectionLabel }: Props) 
         aria-labelledby="case-study-heading"
         className="relative bg-paper py-20"
       >
-        {mobileFallback}
+        {narrow ? mobileFallback : wideFallback}
       </section>
     );
   }

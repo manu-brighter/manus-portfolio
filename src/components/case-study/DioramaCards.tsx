@@ -62,7 +62,7 @@ type PublicConfig = {
   onShotClick?: (shotIndex: number) => void;
 };
 
-type Props = {
+export type DioramaCardsProps = {
   hook: HookConfig;
   context: ContextConfig;
   admin: HighlightConfig;
@@ -103,7 +103,7 @@ export const CARD_LAYOUT: Record<CardKey, CSSProperties> = {
 // off by the card's overflow clip. PublicCard is left out on purpose: it
 // has no clip, and its rotated polaroids would read as "overflow" to the
 // measurement although no text is affected.
-export function DioramaCards({ hook, context, admin, overlay, public: pub }: Props) {
+export function DioramaCards({ hook, context, admin, overlay, public: pub }: DioramaCardsProps) {
   return (
     <div className="absolute inset-0">
       <article style={{ position: "absolute", ...CARD_LAYOUT.hook }}>
