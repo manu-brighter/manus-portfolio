@@ -3,7 +3,7 @@
     "sectionLabel": "Section 06 · Playground",
     "eyebrow": "Section 06 · Playground",
     "headline": "Wo der Fluid-Sim spielen darf.",
-    "lede": "Zwei Shader-Experimente, beide auf dem Tinte-/Druck-Narrativ verankert. Pure Craft-Demonstration, kein Produkt-Kontext.",
+    "lede": "Zwei Shader-Experimente mit derselben Tinte wie im Hero. Hier darf man draufklicken, bis es ruckelt.",
     "openLabel": "Experiment öffnen",
     "shell": {
       "back": "ZURÜCK ZUM PLAYGROUND"
@@ -12,9 +12,9 @@
       "inkDropStudio": {
         "cardTitle": "Ink Drop Studio",
         "cardKicker": "01 · INK DROP STUDIO",
-        "cardBody": "Leere Paper-Canvas, Klick spawnt Ink-Tropfen in der gewählten Spot-Farbe. Slider für Sim-Parameter, Bomb-Button, Freeze-Button.",
+        "cardBody": "Leeres Blatt. Klick setzt Tinte in der aktuellen Spot-Farbe, die Slider drehen an der Physik, BOMB macht Chaos, FREEZE hält alles an.",
         "title": "Ink Drop Studio.",
-        "caption": "Spielwiese für die Hero-Simulation. Klick = Ink-Splat, Slider = Sim-Parameter, „Bomb\" wenn dir gerade nach Chaos ist.",
+        "caption": "Spielwiese für die Hero-Simulation. Klick = Ink-Splat, Slider = Sim-Parameter, „Bomb“, wenn dir gerade nach Chaos ist.",
         "buttonBomb": "BOMB",
         "buttonFreeze": "FREEZE",
         "buttonResume": "RESUME",

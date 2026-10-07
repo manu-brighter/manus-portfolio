@@ -77,7 +77,7 @@ test.describe("entry and project navigation", () => {
     const project = page.locator("#joggediballa");
     await project.scrollIntoViewIfNeeded();
     await expect(project.locator("dt")).toHaveText(["Aufgabe", "Mein Beitrag", "Ergebnis"]);
-    await expect(project.locator("dd").last()).toContainText("Regelmässig im Einsatz");
+    await expect(project.locator("dd").last()).toContainText("Vereinsalltag und Eventabend");
     await project.getByRole("link").click();
     await expect
       .poll(() => page.locator("#case-study").evaluate((el) => el.getBoundingClientRect().top))

@@ -3,7 +3,7 @@
     "sectionLabel": "Section 06 · Playground",
     "eyebrow": "Section 06 · Playground",
     "headline": "Là où la simulation de fluide a le droit de jouer.",
-    "lede": "Deux expérimentations shader, toutes deux ancrées dans la narration encre/impression. Pure démonstration de craft, pas de contexte produit.",
+    "lede": "Deux expériences shader avec la même encre que dans le hero. Ici, on clique jusqu’à ce que ça saccade.",
     "openLabel": "Ouvrir l'expérimentation",
     "shell": {
       "back": "RETOUR AU PLAYGROUND"
@@ -12,7 +12,7 @@
       "inkDropStudio": {
         "cardTitle": "Ink Drop Studio",
         "cardKicker": "01 · INK DROP STUDIO",
-        "cardBody": "Toile papier vide, un clic fait naître des gouttes d'encre dans la spot color choisie. Sliders pour les paramètres de simulation, bouton bomb, bouton freeze.",
+        "cardBody": "Feuille blanche. Un clic dépose de l'encre dans la spot color actuelle, les sliders règlent la physique, BOMB sème le chaos, FREEZE fige tout.",
         "title": "Ink Drop Studio.",
         "caption": "Bac à sable pour la simulation hero. Clic = ink splat, sliders = paramètres de simulation, « Bomb » si tu as envie de chaos.",
         "buttonBomb": "BOMB",

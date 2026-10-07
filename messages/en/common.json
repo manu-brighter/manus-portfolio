@@ -2,7 +2,7 @@
   "meta": {
     "title": "Manuel Heller · Software Developer · Photographer",
     "titleTemplate": "%s · Manuel Heller",
-    "description": "Software developer in the Basel region. PHP, Vue, business interfaces, integrations and test automation. Own web projects, AI tools and photography."
+    "description": "Full-stack developer from the Basel region. PHP and Vue at work, own web projects, Claude Code and wildlife photography on the side."
   },
   "skipLink": {
     "label": "Skip to content"
@@ -65,7 +65,7 @@
     "aboutObjectsLabel": "Off the Screen"
   },
   "simPresets": {
-    "label": "Ink character",
+    "label": "Ink Style",
     "hint": "Change the look!",
     "riso": "Riso",
     "wave": "Wave",
@@ -80,7 +80,7 @@
   "inkStudio": {
     "label": "Visuals",
     "intro": "Paper, colour and a little motion. Make this view your own.",
-    "theme": "Colour palette",
+    "theme": "Theme",
     "motion": "Motion",
     "light": "Animation",
     "full": "Simulation",

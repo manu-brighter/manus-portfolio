@@ -49,7 +49,6 @@ export function Work() {
   const t = useTranslations("work");
   const projects = t.raw("projects") as WorkProjects;
   const sideProjects = t.raw("sideProjects.items") as WorkSideProjects;
-  const vibecodedLabel = t("vibecodedStamp");
 
   // Hard-coded order matches briefing §4: Portfolio first (meta-card),
   // Jogge di Balla second. We look up by id rather than relying on
@@ -87,8 +86,6 @@ export function Work() {
               metaNote={portfolio.metaNote}
               ctaLabel={portfolio.ctaLabel}
               splatColor="rose"
-              vibecoded
-              vibecodedLabel={vibecodedLabel}
               click={{ kind: "scroll-hero" }}
               media={
                 portfolio.reveal ? (
@@ -139,8 +136,6 @@ export function Work() {
               summary={joggediballa.summary}
               ctaLabel={joggediballa.ctaLabel}
               splatColor="amber"
-              vibecoded
-              vibecodedLabel={vibecodedLabel}
               click={{ kind: "anchor", target: "#case-study" }}
               media={
                 // Theme-aware: swaps to the real darkmode homepage

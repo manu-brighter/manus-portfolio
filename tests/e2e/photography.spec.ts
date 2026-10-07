@@ -23,9 +23,9 @@ test.describe("photography section", () => {
     await expect(section).toBeAttached();
 
     // Headline is i18n'd per locale post-rework (F-i18n-4). On /de/ it reads
-    // "Durch die Linse." — match either the German or English variant so the
-    // test stays locale-stable.
-    const heading = section.getByRole("heading", { name: /Durch die Linse\.|Through the Lens\./ });
+    // "Tiere und Autos. …", so match either the German or English variant
+    // to keep the test locale-stable.
+    const heading = section.getByRole("heading", { name: /Tiere und Autos\.|Animals and cars\./ });
     await expect(heading).toBeVisible();
     // The DE lede also mentions "Sony α7 IV"; scope to the type-label-stamp
     // class so we only match the tech stamp itself, not the body copy.
