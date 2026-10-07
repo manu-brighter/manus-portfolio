@@ -132,8 +132,8 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
   // the warmup window only capture the render pass (~1ms) and would
   // mis-tier first-time visitors as `high`.
   useEffect(() => {
-    // Same scroll choreography as Light: the sheet drifts and rides with
-    // the page, reading sections open a paper interval. Self-refreshing
+    // Same scroll choreography as Light: the sheet drifts against the
+    // page scroll, reading sections open a paper interval. Self-refreshing
     // on client navigation (this tree sits outside the router context).
     const scrollTracker = createInkScrollTracker();
     const unsubscribe = subscribe((deltaMs, elapsedMs) => {

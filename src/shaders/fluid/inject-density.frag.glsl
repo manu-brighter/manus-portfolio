@@ -1,15 +1,15 @@
 #version 300 es
 precision highp float;
 
-// Density-texture injection — reads a normalized alpha mask from
-// uStamp and additively writes (uColor × stampValue × uStrength) on
+// Density-texture injection -- reads a normalized alpha mask from
+// uStamp and additively writes (uColor x stampValue x uStrength) on
 // top of the current dye field. Used by TextStamper to write text-
 // shaped ink into the existing fluid sim.
 //
 // Sampling note: dye and stamp are typically the same dimensions
-// (sim resolution, e.g. 256² or 512²) so a straight texture() pickup
+// (sim resolution, e.g. 256^2 or 512^2) so a straight texture() pickup
 // is correct. If the stamp is a different size we still read in
-// normalized UV (0..1) — bilinear filter is set in the FBO factory.
+// normalized UV (0..1) -- bilinear filter is set in the FBO factory.
 
 uniform sampler2D uDye;     // current dye field (RGBA16F)
 uniform sampler2D uStamp;   // density mask (R or A channel; we read .r)

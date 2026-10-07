@@ -305,17 +305,24 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   (`createInkScrollTracker`) is the single source for smoothed scroll +
   section quieting, used by LiteInkScene, FluidSim and
   MobileBackgroundSim (it re-observes sections itself once they detach,
-  because FluidSim sits inside R3F without router context). In Full the
-  sheet pass carries alpha AND splat dye up with the page at 0.35x page
-  speed (`SHEET_SCROLL_CARRY`, capped per step) while the target drifts
-  by Light's 0.075 offset with the OPPOSITE sign (Light `p.y += ...`,
-  Full `p.y -= ...`, both in the same y-up vUv space): Full's sheet rides
-  up with the page, Light's sheet drifts down against it. Reading
-  sections fade to paper exactly like Light. The tracker re-observes
-  sections on resize only after a 200ms debounce and keeps the current
-  section (iOS URL-bar resizes fire mid-scroll). The old zero-dye
-  velocity coupling (ScrollInkCoupling, mobile onScroll) still runs on
-  top.
+  because FluidSim sits inside R3F without router context). **Both modes
+  drift the ink AGAINST the scroll** (owner decision: scrolling down,
+  the plates move down on screen, 0.075 viewport heights per viewport
+  scrolled). Light offsets its field with `p.y += uScroll * 0.075`; Full
+  uses the same sign in the sheet target and every render shader's
+  plate drift, and the sheet pass carries alpha AND splat dye by the SAME
+  0.075 (`SHEET_SCROLL_CARRY`, sampling from above), so the advected
+  sheet stays registered with its moving target: physics distortions
+  travel with the parallax instead of cross-fading toward it. Ink carried
+  in at the top edge starts on the target. An earlier cut carried the
+  ink UP at 0.35x against a target drifting with it, i.e. opposite to
+  Light. The zero-dye velocity coupling (ScrollInkCoupling, mobile
+  onScroll) was flipped to push DOWN on scroll-down so it never fights
+  the drift. Verified with a Light-vs-Full scroll-frame comparison
+  (riso + wave, low tier). Reading sections fade to paper exactly like
+  Light. The tracker re-observes sections on resize only after a 200ms
+  debounce and keeps the current section (iOS URL-bar resizes fire
+  mid-scroll).
 - **Idle ambient swarm**: the ambient rig runs up to 10 wandering points
   (3 hand-tuned A/B/C + 7 procedural golden-angle extras) —
   `FluidVisuals.ambientPointCount` picks how many, `ambientChurn` (0..1)

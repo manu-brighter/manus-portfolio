@@ -57,7 +57,7 @@ void main() {
   // Plate drift reads Light's folded domain on the same clock.
   float aspect = uTexelSize.y / uTexelSize.x;
   vec2 p = (vUv - 0.5) * vec2(aspect, 1.0);
-  p.y -= uScroll * 0.075;
+  p.y += uScroll * 0.075;
   vec2 q = p + inkFold(p, uSheetTime * 0.12) * 0.48;
 
   // Screen derivatives keep thin plate edges stable on low-resolution tiers.

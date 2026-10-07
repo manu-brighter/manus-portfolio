@@ -1,7 +1,7 @@
 #version 300 es
 precision highp float;
 
-// Procedural Fluid-Ink-Wipe — fullscreen ink-coverage shader.
+// Procedural Fluid-Ink-Wipe -- fullscreen ink-coverage shader.
 //
 // We don't run a real fluid sim for the page transition; over a 1s
 // window the visual difference between true Navier-Stokes and a
@@ -20,7 +20,7 @@ precision highp float;
 //
 // Output is the Riso ink colour multiplied by the coverage alpha.
 // Caller composes the result over the page via the canvas's own alpha
-// blending — no manual paper-color blending here.
+// blending -- no manual paper-color blending here.
 
 uniform float uPhase;       // 0..1 progress within the current phase
 uniform float uDirection;   // +1 growing, -1 retracting
@@ -28,7 +28,7 @@ uniform vec2 uClickPos;     // 0..1, origin at viewport bottom-left
                             //  (caller flips Y from clientY)
 uniform float uAspect;      // viewport width / viewport height
 uniform vec3 uColor;        // Riso spot for the ink front
-uniform float uTime;        // seconds — drives the noise animation
+uniform float uTime;        // seconds -- drives the noise animation
 
 in vec2 vUv;
 out vec4 fragColor;
@@ -67,7 +67,7 @@ void main() {
   float maxR = sqrt(farX * farX + farY * farY);
 
   // Phase-driven advancing/retreating front radius. Direction +1 grows
-  // 0→maxR, -1 retracts maxR→0. The 1.04 multiplier overshoots a touch
+  // 0->maxR, -1 retracts maxR->0. The 1.04 multiplier overshoots a touch
   // so the soft smoothstep boundary fully clears the screen at phase=1.
   float front = (uDirection > 0.0 ? uPhase : 1.0 - uPhase) * maxR * 1.04;
 
@@ -87,7 +87,7 @@ void main() {
   float softness = 0.05 * maxR;
   float ink = 1.0 - smoothstep(bumpedFront - softness, bumpedFront, r);
 
-  // Halftone fringe at the bleed zone — small dots in slightly darker
+  // Halftone fringe at the bleed zone -- small dots in slightly darker
   // ink right where the front is currently feathering. Adds the Riso
   // print-edge feel for free.
   vec2 px = vUv * vec2(uAspect, 1.0) * 220.0;

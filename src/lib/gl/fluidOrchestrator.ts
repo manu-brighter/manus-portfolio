@@ -87,12 +87,15 @@ const SPOT_COLORS = SPOT_RGB;
 // (Turbulenz runs a swarm of 8). Time-scale governs the whole rig.
 const AMBIENT_TIME_SCALE = 0.0003;
 
-// Scroll carry: the hero sheet + splat dye travel with the page at this
-// fraction of its speed (viewport heights -> UV), so scrolling visibly
-// drags the ink the way Light's sheet drifts. Per-step cap keeps a long
-// anchor jump from smearing the whole field in one frame.
-const SHEET_SCROLL_CARRY = 0.35;
-const SHEET_CARRY_MAX_STEP = 0.08;
+// Scroll carry: the hero sheet + splat dye drift AGAINST the page scroll
+// at Light's parallax rate (viewport heights -> UV; must equal the 0.075
+// in ink-lite/render.frag.glsl and the fluid sheet/render shaders). The
+// target drifts by the same amount, so the carry keeps the advected
+// sheet and splat dye registered with it: physics distortions travel
+// with the parallax instead of cross-fading toward a moving target.
+// Per-step cap only guards a pathological scroll jump.
+const SHEET_SCROLL_CARRY = 0.075;
+const SHEET_CARRY_MAX_STEP = 0.5;
 
 type AmbientPoint = {
   center: readonly [number, number];
@@ -787,7 +790,8 @@ export class FluidOrchestrator {
    * Page scroll (viewport heights, smoothed) and section quieting
    * (0 = full ink, 1 = reading section), as tracked by
    * `createInkScrollTracker()`. Scroll drifts the sheet target and
-   * carries the printed ink with the page; quiet opens Light's paper
+   * carries the printed ink against the page at Light's parallax rate;
+   * quiet opens Light's paper
    * interval around reading sections in the render pass.
    */
   setScrollState(scroll: number, quiet: number): void {

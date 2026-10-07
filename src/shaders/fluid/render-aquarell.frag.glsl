@@ -53,7 +53,7 @@ void main() {
   float t = uSheetTime * 0.12;
   float aspect = uTexelSize.y / uTexelSize.x;
   vec2 p = (vUv - 0.5) * vec2(aspect, 1.0);
-  p.y -= uScroll * 0.075;
+  p.y += uScroll * 0.075;
   vec2 q = p * 0.78 + vec2(sin(p.y * 3.1 + t * 0.3), cos(p.x * 2.6 - t * 0.25)) * 0.26;
 
   float softness = max(0.095, fwidth(density) * 0.8);

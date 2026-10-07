@@ -21,8 +21,9 @@ uniform float uRelax;
 // target, which under-inked Full vs Light, worse on half-rate tiers where
 // the dissipation is squared). 1.0 when no advect follows (priming).
 uniform float uDissipation;
-// Vertical UV shift for this step: scrolling carries the printed ink
-// with the page (positive = up, like the content).
+// Vertical UV shift for this step, matched to the target's parallax
+// drift so the advected sheet and splat dye stay registered with it.
+// Positive = down: like Light, the ink drifts AGAINST the page scroll.
 uniform float uCarry;
 
 out vec4 fragColor;
@@ -33,18 +34,19 @@ out vec4 fragColor;
 // Light renderer's analytic field here. Physics bends, rolls and chops
 // the bands; the target keeps the theme's composition legible.
 void main() {
-  vec2 source = vUv - vec2(0.0, uCarry);
+  vec2 source = vUv + vec2(0.0, uCarry);
   vec4 dye = texture(uDye, source);
-  // Splat ink carried in from beyond the canvas edge is blank paper;
-  // the sheet relaxes back in on its own.
   float inside = step(0.0, source.y) * step(source.y, 1.0);
   vec2 p = (vUv - 0.5) * vec2(uAspect, 1.0);
-  // Same offset as Light, mirrored so the target rides up with the carry.
-  p.y -= uScroll * 0.075;
+  // Light's parallax offset (ink-lite/render.frag.glsl), same sign.
+  p.y += uScroll * 0.075;
   vec2 q;
   float target = inkSheet(p, uSheetTime * 0.12, uStyle, 0.0, q);
+  // Carried in from beyond the canvas edge: splat ink is blank paper and
+  // the sheet starts on its target instead of a stretched edge row.
+  float carried = mix(target, dye.a, inside);
   // advect(mix(a, T, r) / d) = mix(a, T, r): steady state is exactly T,
   // and only the relaxation decides how long a physical distortion lives.
-  float sheet = mix(dye.a, target, uRelax) / max(uDissipation, 0.5);
+  float sheet = mix(carried, target, uRelax) / max(uDissipation, 0.5);
   fragColor = vec4(dye.rgb * inside, sheet);
 }

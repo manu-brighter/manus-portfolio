@@ -306,14 +306,15 @@ export function MobileBackgroundSim({
       lastInjectT = now;
 
       const force = Math.min(Math.abs(velocity) * COUPLE_VELOCITY_TO_FORCE, COUPLE_MAX_FORCE);
-      // y origin is canvas-bottom: scroll-down (velocity > 0) moves
-      // content up, so the ink drifts up with it; scroll-up mirrors.
+      // y origin is canvas-bottom: scroll-down (velocity > 0) pushes the
+      // ink DOWN, against the content, matching Light's parallax drift
+      // and the sheet carry; scroll-up mirrors.
       orchestratorRef.current?.injectSplat(
         0.5,
         0.5,
         NO_DYE,
         0,
-        velocity > 0 ? force : -force,
+        velocity > 0 ? -force : force,
         COUPLE_FORCE_RADIUS,
       );
     };
@@ -326,7 +327,7 @@ export function MobileBackgroundSim({
   useEffect(() => {
     if (reduced) return;
     let virtualElapsedMs = 0;
-    // Same scroll choreography as Light: the sheet rides with native
+    // Same scroll choreography as Light: the sheet drifts against native
     // scrolling, reading sections open a paper interval.
     const scrollTracker = createInkScrollTracker();
     const unsub = subscribe((deltaMs) => {

@@ -54,7 +54,7 @@ void main() {
   // the physics already tears the plates).
   float aspect = uTexelSize.y / uTexelSize.x;
   vec2 p = (vUv - 0.5) * vec2(aspect, 1.0);
-  p.y -= uScroll * 0.075;
+  p.y += uScroll * 0.075;
   vec2 q = p * 1.85 + inkFold(p, uSheetTime * 0.12) * 0.32;
 
   // Crisp pole of the styles; derivatives only widen the edge where the
