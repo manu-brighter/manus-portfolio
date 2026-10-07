@@ -88,19 +88,24 @@ const HOME_SECTION_IDS = SECTIONS.map((s) => s.id);
  * Where a locale switch should land: same route, same place on it.
  *
  * The option hrefs stay hash-free and static (crawlable); position is
- * composed only at click time. An explicit URL hash is carried over
- * verbatim. On home without one, the section currently in view is
- * handed to ScrollToOnLoad through the same sessionStorage stash the
- * Nav uses, so the URL doesn't grow a hash the visitor never typed. The
- * hero needs nothing: a fresh page starts there anyway.
+ * composed only at click time.
+ *
+ * On home the section actually in view wins over the URL hash: nothing
+ * on home updates the hash while scrolling, so a hash from a shared
+ * link, a middle-clicked "/#contact" or the private-window Nav fallback
+ * is usually stale. The section is handed to ScrollToOnLoad through the
+ * same sessionStorage stash the Nav uses, so the URL doesn't grow a hash
+ * the visitor never typed. In the hero nothing is needed (a fresh page
+ * starts there). The hash only counts when no section crosses the line.
+ * Other routes have no scroll-spy, so their hash is carried over as is.
  */
 function switchTarget(pathname: string): string {
-  const hash = window.location.hash;
-  if (hash.length > 1) return `${pathname}${hash}`;
-  if (pathname !== "/") return pathname;
+  const hash = window.location.hash.length > 1 ? window.location.hash : "";
+  if (pathname !== "/") return `${pathname}${hash}`;
   const section = sectionAtViewportLine(HOME_SECTION_IDS);
-  if (!section || section === "hero") return pathname;
-  return stashHomeSection(section);
+  if (section === "hero") return pathname;
+  if (section) return stashHomeSection(section);
+  return `${pathname}${hash}`;
 }
 
 export function LocaleSwitcher() {
