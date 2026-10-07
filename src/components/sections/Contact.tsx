@@ -38,9 +38,10 @@ type DirectChannel =
     };
 
 // Shared by both branches of the internal/external link split below —
-// one string, so a styling tweak can't land on only one tag.
-const CHANNEL_LINK_CLASS =
-  "text-ink underline decoration-spot-rose decoration-2 underline-offset-4 transition-colors hover:text-ink-soft";
+// one string, so a styling tweak can't land on only one tag. The look
+// (thin ink rule + per-theme marker band on hover/focus) lives in
+// globals.css as `.channel-link`, because the band colour is themed.
+const CHANNEL_LINK_CLASS = "channel-link";
 
 export function Contact() {
   const t = useTranslations("contact");

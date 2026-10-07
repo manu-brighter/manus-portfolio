@@ -107,11 +107,10 @@ const PARALLAX = {
  * carried the base offset, so the resting look degraded after one hover.
  * Parallax now scales the panel from `transform-origin: 0 0` instead —
  * only the overhang breathes, the text stays covered by construction.
- * The panel also bleeds 8px past the card's left edge (`-left-2` +
- * wider calc) to cover the italic titles' negative side bearing; the
- * scale math below ignores that constant bleed (sub-pixel error).
- * Keep in sync with the literal sizing classes on the backing div
- * (Tailwind can't interpolate class names).
+ * On top of the overhang the panel bleeds a uniform pad past every
+ * edge of the card (see the backing div), so the overhang is measured
+ * from the padded edge. Keep in sync with the literal inset classes on
+ * the backing div (Tailwind can't interpolate class names).
  */
 const BACKING_OVERHANG_PX = 12;
 
@@ -247,12 +246,16 @@ export function WorkCard(props: WorkCardProps) {
           gsap.to(card, { x: magX, y: magY + offsetY, duration: dur.short, ease: "power2.out" });
           // Backing parallax varies the bottom-right overhang via scale
           // from the pinned top-left corner (see BACKING_OVERHANG_PX).
-          // Clamped at 0 so the panel never retreats past the card edge.
+          // Clamped at 0 so the panel never retreats past its padded
+          // edge. offsetWidth/Height are layout sizes, unaffected by the
+          // scale itself, so the ratio stays stable across frames.
           const overX = Math.max(0, BACKING_OVERHANG_PX + targetX * PARALLAX.backing);
           const overY = Math.max(0, BACKING_OVERHANG_PX + targetY * PARALLAX.backing);
+          const backingW = backing.offsetWidth;
+          const backingH = backing.offsetHeight;
           gsap.to(backing, {
-            scaleX: (rect.width + overX) / (rect.width + BACKING_OVERHANG_PX),
-            scaleY: (rect.height + overY) / (rect.height + BACKING_OVERHANG_PX),
+            scaleX: (backingW - BACKING_OVERHANG_PX + overX) / backingW,
+            scaleY: (backingH - BACKING_OVERHANG_PX + overY) / backingH,
             transformOrigin: "0 0",
             duration: dur.medium,
             ease: "power2.out",
@@ -401,19 +404,25 @@ export function WorkCard(props: WorkCardProps) {
           {/* Backing block — riso underlay pinned at the card's top-left,
               oversized bottom-right by BACKING_OVERHANG_PX so the offset
               look never uncovers card text (see the constant's comment).
-              The panel additionally bleeds 8px past the LEFT edge: the
-              Instrument Serif italic titles paint left of their text box
-              (negative side bearing — the "J" in "Jogge di Balla" poked
-              out of the color). Extending the panel beats indenting the
-              text, which would break the shared left edge with the media
-              frame. On coarse pointers (mobile/touch) there is no cursor
-              parallax (gated by isCoarse below), so the bottom-right
-              overhang is dropped and only the left bleed remains. */}
+              Under that overhang the panel bleeds a uniform pad past
+              EVERY edge (12px, 20px from `md`), so media and copy sit
+              inside the color with breathing room instead of on its
+              edge. The pad has to clear the Instrument Serif italic
+              titles' negative side bearing: the "J" of "Jogge di Balla"
+              paints left of its text box and touched the panel edge with
+              the old 8px left-only bleed. Bleeding the panel beats
+              indenting the content, which would break the shared left
+              edge of media frame and copy. On coarse pointers
+              (mobile/touch) there is no cursor parallax (gated by
+              isCoarse below), so the bottom-right overhang is dropped
+              and the pad stays symmetric. */}
           <div
             ref={backingRef}
             aria-hidden="true"
-            className={`-left-2 absolute top-0 will-change-transform ${
-              isCoarse ? "h-full w-[calc(100%+8px)]" : "h-[calc(100%+12px)] w-[calc(100%+20px)]"
+            className={`absolute will-change-transform ${
+              isCoarse
+                ? "-inset-3 md:-inset-5"
+                : "-top-3 -left-3 -right-6 -bottom-6 md:-top-5 md:-left-5 md:-right-8 md:-bottom-8"
             }`}
             style={{
               background: `var(--color-spot-${splatColor})`,
