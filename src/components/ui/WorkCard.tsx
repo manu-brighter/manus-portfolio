@@ -20,7 +20,8 @@ import type { WorkProjects } from "@/types/i18n-shapes";
  * sources for the global Hero fluid-sim. The card itself is plain
  * DOM/SVG (no second WebGL canvas), but hover/click events dispatch
  * splat requests onto `fluidBus` which the FluidSim drains on its
- * next step. When the Hero canvas is out of viewport the sim is
+ * next step (under the default Animation, LiteInkScene prints them as
+ * ink blooms instead). When the Hero canvas is out of viewport the sim is
  * paused (Phase 4 deviation) and queued splats are discarded —
  * acceptable: the click-burst on the Portfolio card lands AFTER the
  * smooth-scroll back to the hero, when the sim has resumed.
