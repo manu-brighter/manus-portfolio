@@ -33,7 +33,8 @@ test.describe("Work card secondary links", () => {
     await expect(card.getByRole("link", { name: /Case Study/ })).toHaveCount(1);
   });
 
-  test("hovering the secondary link does not press the CTA stamp", async ({ page }) => {
+  test("hovering the secondary link does not press the CTA stamp", async ({ page, hasTouch }) => {
+    test.skip(hasTouch, "Hover states don't exist on touch devices");
     const card = page.locator("#joggediballa");
     const cardLink = card.getByRole("link", { name: /Case Study/ });
     const stamp = cardLink.locator("span", { hasText: "Case Study" }).first();

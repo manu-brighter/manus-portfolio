@@ -64,7 +64,13 @@ test.describe("locale switch keeps position", () => {
     await expect(page.locator("#work")).toBeInViewport({ ratio: 0.1, timeout: 10_000 });
   });
 
-  test("the home section in view survives the switch without a hash", async ({ page }) => {
+  test("the home section in view survives the switch without a hash", async ({
+    page,
+    isMobile,
+  }) => {
+    // Uses the pinned desktop diorama as a scroll landmark; phones get the
+    // case-study carousel, which has no pin spacer.
+    test.skip(isMobile, "Desktop pinned diorama only");
     await page.goto("/de/");
     await settleOnPhotography(page);
     await switchToEnglish(page);
@@ -73,7 +79,10 @@ test.describe("locale switch keeps position", () => {
     await expect(page.locator("#photography")).toBeInViewport({ ratio: 0.1, timeout: 10_000 });
   });
 
-  test("on home the section in view beats a stale hash", async ({ page }) => {
+  test("on home the section in view beats a stale hash", async ({ page, isMobile }) => {
+    // Uses the pinned desktop diorama as a scroll landmark; phones get the
+    // case-study carousel, which has no pin spacer.
+    test.skip(isMobile, "Desktop pinned diorama only");
     await page.goto("/de/#work");
     await expect(page.locator("#work")).toBeInViewport({ ratio: 0.1, timeout: 10_000 });
     // Let ScrollToOnLoad's 800ms post-mount correction to #work fire
