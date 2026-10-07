@@ -41,7 +41,7 @@ type ContextConfig = {
   stack: StackRow[];
 };
 
-type HighlightConfig = {
+export type HighlightConfig = {
   kicker: string;
   title: string;
   lede: string;
@@ -179,6 +179,33 @@ export function DioramaCards({ hook, context, admin, overlay, public: pub }: Pro
           onShotClick={pub.onShotClick}
         />
       </article>
+    </div>
+  );
+}
+
+/**
+ * Decorative copy of the admin station for DioramaLupe's lens: same
+ * track position and size as the real card, so the lens can magnify it
+ * in place. No click handler and no lightbox index: the Lightbox looks
+ * its FLIP source up by `data-lightbox-index`, and a duplicate would
+ * hijack it. The lupe renders this subtree `inert` + aria-hidden.
+ */
+export function DioramaAdminCopy({ admin }: { admin: HighlightConfig }) {
+  return (
+    <div style={{ position: "absolute", ...CARD_LAYOUT.admin }}>
+      <DioramaFit>
+        <HighlightCard
+          slug="admin"
+          spot="rose"
+          kicker={admin.kicker}
+          title={admin.title}
+          lede={admin.lede}
+          features={admin.features}
+          screenshotAlt=""
+          datestamp={admin.station.datestamp}
+          polaroidCaption={admin.station.polaroidCaption ?? ""}
+        />
+      </DioramaFit>
     </div>
   );
 }
