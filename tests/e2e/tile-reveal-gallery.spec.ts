@@ -30,7 +30,7 @@ test.describe("@about tile reveal gallery", () => {
   test("arrow keys and buttons page through every revealable tile with wrap-around", async ({
     page,
   }) => {
-    const overlay = await openTile(page, /Kamera/);
+    const overlay = await openTile(page, /Camera/);
     const counter = overlay.getByTestId("tile-reveal-counter");
     const figure = overlay.getByTestId("tile-reveal-figure");
     await expect(counter).toHaveText(`1 / ${TOTAL}`);
@@ -62,11 +62,11 @@ test.describe("@about tile reveal gallery", () => {
 
     // The live region announces the switch with counter, name and caption.
     await expect(overlay.locator("[aria-live='polite']")).toContainText(`${TOTAL} / ${TOTAL}`);
-    await expect(overlay.locator("[aria-live='polite']")).toContainText("Tiefe");
+    await expect(overlay.locator("[aria-live='polite']")).toContainText("Dive");
   });
 
   test("Tab cycles prev, next, close without leaving the overlay", async ({ page }) => {
-    const overlay = await openTile(page, /Kamera/);
+    const overlay = await openTile(page, /Camera/);
     const prev = overlay.getByRole("button", { name: "Vorheriges Bild" });
     const next = overlay.getByRole("button", { name: "Nächstes Bild" });
     const close = overlay.getByRole("button", { name: "Schliessen" });
@@ -82,7 +82,7 @@ test.describe("@about tile reveal gallery", () => {
   });
 
   test("closing restores focus to the tile that was showing last", async ({ page }) => {
-    const overlay = await openTile(page, /Kamera/);
+    const overlay = await openTile(page, /Camera/);
     await page.keyboard.press("ArrowRight");
     await expect(overlay.getByTestId("tile-reveal-counter")).toHaveText(`2 / ${TOTAL}`);
     await page.keyboard.press("Escape");
@@ -92,7 +92,7 @@ test.describe("@about tile reveal gallery", () => {
   });
 
   test("@a11y the open overlay has no axe violations after a switch", async ({ page }) => {
-    const overlay = await openTile(page, /Kamera/);
+    const overlay = await openTile(page, /Camera/);
     await page.keyboard.press("ArrowRight");
     await expect(overlay.getByTestId("tile-reveal-counter")).toHaveText(`2 / ${TOTAL}`);
     // Let the switch snap settle so contrast is measured on the final frame.
@@ -105,7 +105,7 @@ test.describe("@about tile reveal gallery", () => {
   });
 
   test("a horizontal touch swipe pages, a vertical one does not", async ({ page }) => {
-    const overlay = await openTile(page, /Kamera/);
+    const overlay = await openTile(page, /Camera/);
     const counter = overlay.getByTestId("tile-reveal-counter");
     const swipe = async (dx: number, dy: number) => {
       await overlay.evaluate(
