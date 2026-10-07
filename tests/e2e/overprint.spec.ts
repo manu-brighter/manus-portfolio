@@ -64,11 +64,16 @@ test.describe("overprint — default (ghosts rendered)", () => {
 
   test("finished reveal retains printed accents without permanent animation layers", async ({
     page,
+    browserName,
   }) => {
+    // The settled state is the assertion. WebKit CI renders the hero ink
+    // in software and can stall the reveal's rAF well past 10s; the
+    // same check just gets a longer window there.
+    test.slow(browserName === "webkit", "Software-rendered WebGL starves the main thread in CI");
     await page.goto("/de/");
     const heading = page.locator("#hero-heading");
     await expect(heading.locator('[data-overprint="settled"]')).toHaveCount(2, {
-      timeout: 10000,
+      timeout: browserName === "webkit" ? 30_000 : 10_000,
     });
     const ink = heading.locator('[data-layer="ink"]').first();
     await expect(ink).toBeVisible();
