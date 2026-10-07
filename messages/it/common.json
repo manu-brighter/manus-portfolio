@@ -84,7 +84,7 @@
     "motion": "Movimento",
     "light": "Animazione",
     "full": "Simulazione",
-    "lightBody": "Forme fluide che reagiscono ai tuoi gesti. Pochi calcoli, meno dettagli in caso di rallentamenti prolungati.",
+    "lightBody": "Forme fluide che reagiscono ai tuoi gesti. Leggero da calcolare.",
     "fullBody": "Vortici fisici che seguono il puntatore. Richiede più potenza grafica.",
     "reducedNotice": "Animazione ora gira con meno dettagli per mantenere la pagina fluida.",
     "reducedMotion": "La riduzione del movimento del sistema è attiva. Puoi comunque scegliere i colori.",

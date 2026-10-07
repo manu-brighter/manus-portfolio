@@ -84,7 +84,7 @@
     "motion": "Bewegung",
     "light": "Animation",
     "full": "Simulation",
-    "lightBody": "Fliessende Formen, die auf dich reagieren. Wenig Rechenaufwand, bei anhaltendem Ruckeln mit weniger Details.",
+    "lightBody": "Fliessende Formen, die auf dich reagieren. Braucht wenig Rechenleistung.",
     "fullBody": "Physikalische Wirbel, die deinem Zeiger folgen. Braucht mehr Grafikleistung.",
     "reducedNotice": "Animation läuft jetzt mit weniger Details, damit die Seite flüssig bleibt.",
     "reducedMotion": "Deine Systemeinstellung für reduzierte Bewegung ist aktiv. Farben kannst du weiterhin wählen.",

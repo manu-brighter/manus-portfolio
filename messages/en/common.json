@@ -84,7 +84,7 @@
     "motion": "Motion",
     "light": "Animation",
     "full": "Simulation",
-    "lightBody": "Flowing shapes that respond to you. Less processing, with fewer details if frames keep dropping.",
+    "lightBody": "Flowing shapes that respond to you. Light on processing.",
     "fullBody": "Physical swirls that follow your pointer. Uses more graphics power.",
     "reducedNotice": "Animation now runs with fewer details to keep the page fluid.",
     "reducedMotion": "Your system's reduced motion setting is active. You can still choose colours.",

@@ -495,6 +495,9 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 
 - **`fluidBus`** (`src/lib/fluidBus.ts`) — pub/sub for fire-and-forget splat
   injection (Work cards → root FluidSim). Cleared when sim is paused.
+  Only the Full renderer subscribes: under the default Animation (Light)
+  every fluidBus emit is a silent no-op until LiteInkScene learns to
+  take impulses (open follow-up).
 - **`inkWipeStore`** (zustand) — 4-phase state machine for the page-transition
   primitive (PlaygroundCard → InkWipeOverlay).
 - **`sceneVisibilityStore`** (zustand) — toggles `display: none` on the root
