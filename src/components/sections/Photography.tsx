@@ -269,7 +269,14 @@ function PhotoFrame({ slide, index, total }: { slide: Slide; index: number; tota
       onKeyDown={interactive ? onKeyDown : undefined}
       tabIndex={interactive ? 0 : undefined}
       role={interactive ? "button" : undefined}
-      aria-label={interactive ? t(`slides.${slide.altKey}.alt`) : undefined}
+      // The name says what activating does, then what the photo shows.
+      // A bare alt as a button name read as "button, pelican on a post"
+      // with no hint of an action. The role stays on coarse pointers
+      // too: tablets get this frame, and a tap does the same scroll-to-
+      // reveal, so it is a real control there as well.
+      aria-label={
+        interactive ? t("revealLabel", { alt: t(`slides.${slide.altKey}.alt`) }) : undefined
+      }
     >
       {/* Centre sentinel: spans the figure's bottom half, so its leading
           top edge lands exactly on the photo's vertical centre. The shared
