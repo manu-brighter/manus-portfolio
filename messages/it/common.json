@@ -30,6 +30,9 @@
       "close": "Chiudi menu"
     }
   },
+  "rootRedirect": {
+    "continue": "Vai al portfolio"
+  },
   "localeSwitcher": {
     "ariaLabel": "Lingua",
     "toggleLabel": "Scegli la lingua, attuale: {name}",

@@ -19,7 +19,9 @@ export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations({ locale: routing.defaultLocale, namespace: "notFound" });
   return {
     title: t("metaTitle"),
-    robots: { index: false, follow: false },
+    // No `robots` here: Next already injects <meta name="robots"
+    // content="noindex"> on every not-found render, and a second tag
+    // duplicated it. Following the locale-home links is fine.
   };
 }
 

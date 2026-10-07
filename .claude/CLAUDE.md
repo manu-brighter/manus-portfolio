@@ -784,9 +784,11 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   `robots: { index: true, follow: true }` — the default for content routes.
   Routes that should NOT be indexed override `robots` at the page level
   (page-level metadata field-replaces the layout's `robots` object, not
-  deep-merges): `not-found.tsx`, root `page.tsx` (locale-redirect),
+  deep-merges): root `page.tsx` (locale-redirect),
   `[locale]/styleguide`, `[locale]/impressum`, `[locale]/datenschutz`,
-  `[locale]/playground/[slug]`. Legal pages use `index: false, follow: true`
+  `[locale]/playground/[slug]`. `not-found.tsx` sets NO `robots`: Next
+  injects `noindex` on every not-found render itself, and an explicit
+  one only duplicated the tag. Legal pages use `index: false, follow: true`
   (allow link discovery); playground + styleguide use `false, false`
   (dead-end routes). `robots.txt` does NOT disallow these — noindex on a
   crawl-allowed page is the only signal that reliably prevents snippet-less
