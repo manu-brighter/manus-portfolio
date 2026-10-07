@@ -393,11 +393,14 @@ export function WorkCard(props: WorkCardProps) {
     // Hover state lives on the article, not the link: the card holds a
     // second link (live site / source) outside the card anchor, and
     // moving the pointer onto it must not read as "leaving the card".
+    // The CTA stamp's CSS press-in is scoped to the card link instead
+    // (named group `group/card`), so hovering the secondary link does
+    // not press a stamp that belongs to a different destination.
     <article
       ref={rootRef}
       id={id}
       aria-labelledby={titleId}
-      className={`group relative ${className ?? ""}`}
+      className={`relative ${className ?? ""}`}
       style={style}
       onPointerEnter={onPointerEnter}
       onPointerLeave={() => setHovered(false)}
@@ -441,7 +444,7 @@ export function WorkCard(props: WorkCardProps) {
           onClick={onClick}
           onFocus={() => setHovered(true)}
           onBlur={() => setHovered(false)}
-          className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-4 focus-visible:ring-offset-paper"
+          className="group/card block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-4 focus-visible:ring-offset-paper"
           {...(href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
         >
           {/* Media frame — screenshot or generative visual. */}
@@ -506,7 +509,7 @@ export function WorkCard(props: WorkCardProps) {
             </ul>
 
             {/* CTA stamp. */}
-            <span className="mt-6 inline-block rounded-[2px] border-[1.5px] border-ink bg-paper px-4 py-2 font-mono text-xs uppercase tracking-[0.18em] text-ink transition-transform group-hover:translate-x-1 group-hover:translate-y-1 group-hover:shadow-[3px_3px_0_var(--color-ink)]">
+            <span className="mt-6 inline-block rounded-[2px] border-[1.5px] border-ink bg-paper px-4 py-2 font-mono text-xs uppercase tracking-[0.18em] text-ink transition-transform group-hover/card:translate-x-1 group-hover/card:translate-y-1 group-hover/card:shadow-[3px_3px_0_var(--color-ink)]">
               {ctaLabel}
               {click.kind !== "scroll-hero" ? <span aria-hidden="true"> →</span> : null}
             </span>

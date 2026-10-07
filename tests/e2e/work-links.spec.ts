@@ -33,6 +33,22 @@ test.describe("Work card secondary links", () => {
     await expect(card.getByRole("link", { name: /Case Study/ })).toHaveCount(1);
   });
 
+  test("hovering the secondary link does not press the CTA stamp", async ({ page }) => {
+    const card = page.locator("#joggediballa");
+    const cardLink = card.getByRole("link", { name: /Case Study/ });
+    const stamp = cardLink.locator("span", { hasText: "Case Study" }).first();
+    const live = card.locator('a[href="https://joggediballa.ch"]');
+    const stampTranslate = () => stamp.evaluate((el) => getComputedStyle(el).translate);
+
+    await live.scrollIntoViewIfNeeded();
+    await live.hover();
+    await page.waitForTimeout(300);
+    expect(await stampTranslate()).toBe("none");
+
+    await card.locator("h3").hover();
+    await expect.poll(stampTranslate).not.toBe("none");
+  });
+
   test("Portfolio card links to its source", async ({ page }) => {
     const card = page.locator("#portfolio");
     const source = card.locator('a[href="https://github.com/manu-brighter/manus-portfolio"]');
