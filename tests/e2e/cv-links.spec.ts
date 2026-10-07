@@ -29,10 +29,36 @@ test.describe("CV entry and exit links", () => {
 
     await contact.click();
     await expect(page).toHaveURL(/\/de\/$/);
-    // ScrollToOnLoad jumps once the case-study layout is published.
+    // ScrollToOnLoad jumps after mount and keeps correcting briefly.
     // Contact sits near the page end, so it may not reach the very top;
     // being on screen is the observable outcome.
     await expect(page.locator("#contact")).toBeInViewport({ ratio: 0.3, timeout: 10_000 });
+  });
+
+  test("wheeling away during the section jump is not pulled back", async ({ page }) => {
+    await page.goto("/de/cv/");
+    await page
+      .locator("[data-cv-toolbar]")
+      .getByRole("link", { name: /contact/i })
+      .click();
+    await expect(page).toHaveURL(/\/de\/$/);
+    await page.waitForTimeout(300);
+    await page.mouse.wheel(0, -1400);
+    // The wheel itself eases for a moment. Sample after that, then
+    // make sure the correction loop does not pull Contact back.
+    await page.waitForTimeout(600);
+    const yAfter = await page.evaluate(() => window.scrollY);
+    const contactTop = await page
+      .locator("#contact")
+      .evaluate((el) => el.getBoundingClientRect().top);
+    await page.waitForTimeout(2000);
+    const yLater = await page.evaluate(() => window.scrollY);
+    const contactLater = await page
+      .locator("#contact")
+      .evaluate((el) => el.getBoundingClientRect().top);
+    expect(contactTop).toBeGreaterThan(200);
+    expect(contactLater).toBeGreaterThan(200);
+    expect(Math.abs(yLater - yAfter)).toBeLessThan(160);
   });
 
   test("CV toolbar links stay off the printed sheet", async ({ page }) => {

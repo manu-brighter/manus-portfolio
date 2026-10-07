@@ -64,11 +64,9 @@ export function DioramaTrack({ children, mobileFallback, wideFallback, sectionLa
   const [short, setShort] = useState(false);
   const sceneHidden = useSceneVisibilityStore((s) => s.hidden);
 
-  // Layout, not a passive effect. ScrollToOnLoad reads the published
-  // layout in its own effect, which runs after every layout effect. A
-  // passive sync let the first commit pin the desktop diorama on a
-  // phone, the jump landed in that tall page, and the fallback then
-  // collapsed it so the target was off screen.
+  // Layout, not a passive effect. The media query has to win before
+  // paint, or the first commit pins the desktop diorama on a phone
+  // and the following fallback collapses that tall page.
   useLayoutEffect(() => {
     const narrowMq = window.matchMedia(`(max-width: ${MOBILE_MAX_WIDTH - 1}px)`);
     const shortMq = window.matchMedia(`(max-height: ${FALLBACK_MAX_HEIGHT - 1}px)`);
@@ -87,14 +85,20 @@ export function DioramaTrack({ children, mobileFallback, wideFallback, sectionLa
 
   const useFallback = narrow || short;
 
-  // Layout effect, not a post-paint rAF. ScrollToOnLoad's effect runs
-  // after this, and a starved WebKit main thread can delay rAF past the
-  // moment the jump has to be correct. Measuring here, the pin spacer
-  // already exists when that jump reads section positions. A reused
-  // section node can still carry the previous page's attribute; clear
-  // it before the new pin is in, or the jump fires on the pre-pin layout.
+  // Layout effect, not a post-paint rAF. A starved WebKit main thread
+  // can delay rAF past the moment a section jump has to be correct.
+  // Measuring here, the pin spacer already exists for that jump.
   useLayoutEffect(() => {
     if (reducedMotion || useFallback) return;
+    // The first commit still has useFallback false: hydration reports
+    // no reduced motion and a desktop width until the media-query
+    // effect's setState lands. Read the live query here so a phone,
+    // a short laptop and reduced motion never build the desktop pin
+    // just to tear it down.
+    const blocked = window.matchMedia(
+      `(max-width: ${MOBILE_MAX_WIDTH - 1}px), (max-height: ${FALLBACK_MAX_HEIGHT - 1}px), (prefers-reduced-motion: reduce)`,
+    ).matches;
+    if (blocked) return;
     const pinEl = pinRef.current;
     const track = trackRef.current;
     const section = sectionRef.current;

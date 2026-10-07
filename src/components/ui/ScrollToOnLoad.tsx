@@ -16,17 +16,45 @@ import { SCROLL_TO_ON_LOAD_KEY } from "@/lib/homeSection";
  * the pin then inserts its spacer and every later section shifts
  * down, so the visitor lands one section off.
  *
- * The jump is instant and repeats until the target has stayed in view.
- * The case-study pin, and the phone fallback that replaces a first
- * desktop pin, both change the page height after mount. One shot then
- * lands a section off. WebKit also drops a smooth scroll once the
- * navigation gesture has ended, so the correction cannot be a glide.
+ * The jump is instant and repeats until the target has stayed in view
+ * through WATCH_MS. The pin can still change the page height after the
+ * first jump. WebKit drops a smooth scroll once the navigation gesture
+ * has ended, so the correction cannot be a glide. Wheel, touch, keys
+ * and pointer input end the correction: a visitor who scrolls on is
+ * not pulled back.
  *
- * The stash is consumed when the scroll runs, not when the effect
- * starts. React 19 StrictMode double-invokes effects: removing on
- * entry meant the second mount found an empty stash and never
- * scrolled. Cleanup only cancels a jump that has not run yet.
+ * The stash is consumed when the jump finishes, or on a real unmount.
+ * React 19 StrictMode double-invokes effects: removing the key in
+ * cleanup meant the second mount found an empty stash and never
+ * scrolled. Cleanup only schedules the removal; the remount cancels it.
  */
+
+/** Keep correcting at least this long, so a late pin still lands. */
+const WATCH_MS = 1500;
+/** Stop even if the target never arrives. Also the rAF backup. */
+const GIVE_UP_MS = 4000;
+
+const INTENT_EVENTS = ["wheel", "touchstart", "keydown", "pointerdown"] as const;
+
+let dropStashTimer: number | null = null;
+
+function cancelScheduledStashDrop() {
+  if (dropStashTimer === null) return;
+  window.clearTimeout(dropStashTimer);
+  dropStashTimer = null;
+}
+
+function scheduleStashDrop() {
+  cancelScheduledStashDrop();
+  dropStashTimer = window.setTimeout(() => {
+    dropStashTimer = null;
+    try {
+      sessionStorage.removeItem(SCROLL_TO_ON_LOAD_KEY);
+    } catch {
+      // The key is already gone, or site storage is blocked.
+    }
+  }, 0);
+}
 
 function readTarget(): string {
   let target = window.location.hash.slice(1);
@@ -43,19 +71,31 @@ function readTarget(): string {
   }
 }
 
+function dropStashNow() {
+  cancelScheduledStashDrop();
+  try {
+    sessionStorage.removeItem(SCROLL_TO_ON_LOAD_KEY);
+  } catch {
+    // The URL fallback still scrolls successfully without storage.
+  }
+}
+
 export function ScrollToOnLoad() {
   const lenis = useLenis();
   const lenisRef = useRef(lenis);
   lenisRef.current = lenis;
 
   useEffect(() => {
+    // StrictMode remounts synchronously and must still see the stash.
+    cancelScheduledStashDrop();
     const target = readTarget();
     if (!target) return;
 
     let raf = 0;
+    let backup = 0;
     let done = false;
-    const deadline = performance.now() + 4000;
-    const watchUntil = performance.now() + 1500;
+    const watchUntil = performance.now() + WATCH_MS;
+    const deadline = performance.now() + GIVE_UP_MS;
 
     const element = () => document.getElementById(target);
 
@@ -76,26 +116,34 @@ export function ScrollToOnLoad() {
         // The pin changes the page height. Resize first or Lenis
         // clamps the target to the pre-pin limit.
         scroller.resize();
-        scroller.scrollTo(el, { immediate: true, force: true });
+        scroller.scrollTo(el, { immediate: true });
         return;
       }
       el.scrollIntoView({ behavior: "instant", block: "start" });
+    };
+
+    const removeIntent = () => {
+      for (const type of INTENT_EVENTS) {
+        window.removeEventListener(type, finish);
+      }
     };
 
     const finish = () => {
       if (done) return;
       done = true;
       cancelAnimationFrame(raf);
-      try {
-        sessionStorage.removeItem(SCROLL_TO_ON_LOAD_KEY);
-      } catch {
-        // The URL fallback still scrolls successfully without storage.
-      }
+      window.clearTimeout(backup);
+      removeIntent();
+      dropStashNow();
     };
 
-    // Keep aligning through the pin (and a view-transition scroll
-    // restore). Stopping on the first steady frames landed in the
-    // case study once the spacer finished growing.
+    for (const type of INTENT_EVENTS) {
+      window.addEventListener(type, finish, { passive: true });
+    }
+
+    // Keep aligning through the pin. A view-transition scroll restore
+    // or a late spacer can move the target after the first jump.
+    // rAF can stall while WebGL is busy; the timer is the backup.
     const settle = () => {
       if (done) return;
       if (!inView()) jump();
@@ -110,16 +158,18 @@ export function ScrollToOnLoad() {
       }
       raf = requestAnimationFrame(settle);
     };
-    const backup = window.setTimeout(() => {
+    backup = window.setTimeout(() => {
       if (!done && !inView()) jump();
       finish();
-    }, 4000);
+    }, GIVE_UP_MS);
     settle();
 
     return () => {
       done = true;
       cancelAnimationFrame(raf);
       window.clearTimeout(backup);
+      removeIntent();
+      scheduleStashDrop();
     };
   }, []);
 
