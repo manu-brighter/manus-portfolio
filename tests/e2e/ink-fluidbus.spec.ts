@@ -14,7 +14,12 @@ import { expect, type Page, test } from "@playwright/test";
  * it also pins the y-up convention (a y-down read lands in the control).
  */
 
-test.use({ viewport: { width: 1280, height: 800 } });
+test.use({
+  viewport: { width: 1280, height: 800 },
+  // CSS-pixel screenshots. The mobile project otherwise keeps its device
+  // scale, and the sample rects below are laid out for a 1x 1280x800 shot.
+  deviceScaleFactor: 1,
+});
 
 type Rect = { x: number; y: number; width: number; height: number };
 
@@ -63,6 +68,7 @@ async function regionDiffs(decoder: Page, before: Buffer, after: Buffer, rects: 
 test("a fluidBus splat blooms in the Animation renderer where it was dropped, then drains", async ({
   page,
   context,
+  browserName,
 }) => {
   await page.goto("/de/?ink-preview=light");
   const canvas = page.getByTestId("lite-ink-canvas");
@@ -89,12 +95,19 @@ test("a fluidBus splat blooms in the Animation renderer where it was dropped, th
     });
   // Idle frames carry no impulses.
   expect(await impulseCount()).toBe(0);
-  const decoder = await context.newPage();
-  // Ambient drift of the target over one sampling interval, no splat.
-  const before = await page.screenshot();
-  await page.waitForTimeout(INTERVAL_MS);
-  const settled = await page.screenshot();
-  const [drift = 0] = await regionDiffs(decoder, before, settled, [TARGET]);
+  // WebKit's page screenshot does not include the WebGL drawing buffer, so
+  // the position check (which needs those pixels) runs on Chromium only.
+  // Every browser still has to show the uniform going live and draining.
+  const pixels = browserName !== "webkit";
+  const decoder = pixels ? await context.newPage() : null;
+  let drift = 0;
+  let settled: Buffer | null = null;
+  if (decoder) {
+    const before = await page.screenshot();
+    await page.waitForTimeout(INTERVAL_MS);
+    settled = await page.screenshot();
+    [drift = 0] = await regionDiffs(decoder, before, settled, [TARGET]);
+  }
   await page.evaluate(() => {
     // burst() reads x, y, colour, dx, dy from Math.random in that order:
     // x = 0.08 + r * 0.84 -> 0.25, y -> 0.75, rest centred (mint, no throw).
@@ -107,17 +120,20 @@ test("a fluidBus splat blooms in the Animation renderer where it was dropped, th
       Math.random = random;
     }
   });
-  await page.waitForTimeout(INTERVAL_MS);
-  const [bloom = 0, mirror = 0] = await regionDiffs(decoder, settled, await page.screenshot(), [
-    TARGET,
-    MIRROR,
-  ]);
-  // Compared over one equal interval each: the ambient sheet keeps drifting,
-  // so "eventually different" would also pass for a misplaced bloom.
-  expect(bloom).toBeGreaterThan(6);
-  expect(bloom).toBeGreaterThan(drift * 2 + 2);
-  expect(bloom).toBeGreaterThan(mirror * 1.5);
+  await expect.poll(impulseCount, { timeout: 2000 }).toBeGreaterThan(0);
+  if (decoder && settled) {
+    await page.waitForTimeout(INTERVAL_MS);
+    const [bloom = 0, mirror = 0] = await regionDiffs(decoder, settled, await page.screenshot(), [
+      TARGET,
+      MIRROR,
+    ]);
+    // Compared over one equal interval each: the ambient sheet keeps drifting,
+    // so "eventually different" would also pass for a misplaced bloom.
+    expect(bloom).toBeGreaterThan(6);
+    expect(bloom).toBeGreaterThan(drift * 2 + 2);
+    expect(bloom).toBeGreaterThan(mirror * 1.5);
+    await decoder.close();
+  }
   // The bloom is short-lived: the buffer drains back to an idle frame.
   await expect.poll(impulseCount, { timeout: 10000 }).toBe(0);
-  await decoder.close();
 });
