@@ -13,7 +13,8 @@
       "family": "Heller,",
       "given": "Manuel."
     },
-    "tagline": "Developer · Photographer · Visual Tinkerer"
+    "tagline": "Developer · Photographer · Visual Tinkerer",
+    "cvLink": "Voir le CV"
   },
   "currently": {
     "label": "Currently",
@@ -332,6 +333,11 @@
     "sectionLabel": "Section 03 · Work",
     "headline": "Deux projets, tous deux en ligne.",
     "subhead": "Ce site et la plateforme de notre club. Concept, design, code et hébergement : tout est de moi, Claude Code dans le terminal.",
+    "links": {
+      "live": "joggediballa.ch",
+      "source": "Source",
+      "newTab": "ouvre dans un nouvel onglet"
+    },
     "projects": [
       {
         "id": "portfolio",
@@ -621,6 +627,7 @@
   "photography": {
     "sectionLabel": "Section 05 · Photography",
     "eyebrow": "Section 05 · Photography",
+    "revealLabel": "Révéler la photo : {alt}",
     "headline": "Des animaux et des voitures. Aucun ne tient en place.",
     "lede": "Pour les animaux, je pars seul au Costa Rica ou en Thaïlande et j’attends ; les voitures sont en général plus près. Les deux demandent de la patience et la bonne lumière. Avec le Sony α7 IV depuis 2023.",
     "techLabel": "SONY α7 IV · 24–600mm · depuis 2023",
@@ -691,11 +698,13 @@
         "sending": "Envoi …"
       },
       "requiredNote": "Tous les champs sont obligatoires",
+      "privacyNote": "Ton message m’arrive par e-mail et est supprimé après ma réponse · <link>Confidentialité</link>",
       "status": {
         "fromLabel": "De :",
         "success": "Merci, ton message est bien arrivé. Je te recontacte.",
         "error": "Ça n'a pas fonctionné, écris-moi directement :",
-        "mailSubject": "Demande via manuelheller.dev"
+        "mailSubject": "Demande via manuelheller.dev",
+        "stamp": "Reçu"
       }
     }
   }

@@ -2,7 +2,7 @@
 
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useSceneVisibilityStore } from "@/lib/sceneVisibilityStore";
 
@@ -20,11 +20,13 @@ if (typeof window !== "undefined") {
  * track scales consistently across normal desktop and ultrawide
  * displays. Ink-column fluid sim is rendered separately by parent.
  *
- * Fallback (width <768px OR height <900px) and reduced-motion: pin
- * disabled, children render in a vertical fallback flow (parent passes
- * a `mobileFallback` prop with a vertical-stack representation). The
- * height branch catches flat laptop viewports (1366x768, 1600x900,
- * 1280x720) where vh-scaled cards become unreadably small.
+ * Fallbacks (pin disabled, vertical flow):
+ *   - narrow (width <768px): `mobileFallback`, the phone stack.
+ *   - wide but short (width >=768px, height <700px) and reduced motion
+ *     at desktop width: `wideFallback`, a desktop-width vertical layout
+ *     (CaseStudyStacked). Flat laptop viewports (1366x768, 1280x720
+ *     with browser chrome) land here because vh-scaled diorama cards
+ *     get unreadably small, and they used to get the phone stack.
  */
 
 const MOBILE_MAX_WIDTH = 768;
@@ -34,13 +36,15 @@ export const TRACK_WIDTH_VH = 420;
 type Props = {
   /** Diorama content — typically <DioramaIllustration /> + <DioramaCards />. */
   children: ReactNode;
-  /** Vertical-stack fallback rendered on mobile / reduced-motion. */
+  /** Vertical-stack fallback for narrow viewports (<768px). */
   mobileFallback: ReactNode;
+  /** Desktop-width vertical layout for short viewports and reduced motion. */
+  wideFallback: ReactNode;
   /** Decorative section identity stamp shown top-left of the desktop diorama. */
   sectionLabel: string;
 };
 
-export function DioramaTrack({ children, mobileFallback, sectionLabel }: Props) {
+export function DioramaTrack({ children, mobileFallback, wideFallback, sectionLabel }: Props) {
   const reducedMotion = useReducedMotion();
   // The PIN TARGET is an inner wrapper, never the <section> itself.
   // ScrollTrigger's pin wraps the pinned element in a `div.pin-spacer`
@@ -54,61 +58,85 @@ export function DioramaTrack({ children, mobileFallback, sectionLabel }: Props) 
   // unmoved section and the whole subtree goes with it — timing-proof.
   const pinRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
   const triggerRef = useRef<ScrollTrigger | null>(null);
-  const [useFallback, setUseFallback] = useState(false);
+  const [narrow, setNarrow] = useState(false);
+  const [short, setShort] = useState(false);
   const sceneHidden = useSceneVisibilityStore((s) => s.hidden);
 
-  useEffect(() => {
-    const mq = window.matchMedia(
-      `(max-width: ${MOBILE_MAX_WIDTH - 1}px), (max-height: ${FALLBACK_MAX_HEIGHT - 1}px)`,
-    );
-    setUseFallback(mq.matches);
-    const onChange = (e: MediaQueryListEvent) => setUseFallback(e.matches);
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
+  // Layout, not a passive effect. The media query has to win before
+  // paint, or the first commit pins the desktop diorama on a phone
+  // and the following fallback collapses that tall page.
+  useLayoutEffect(() => {
+    const narrowMq = window.matchMedia(`(max-width: ${MOBILE_MAX_WIDTH - 1}px)`);
+    const shortMq = window.matchMedia(`(max-height: ${FALLBACK_MAX_HEIGHT - 1}px)`);
+    const sync = () => {
+      setNarrow(narrowMq.matches);
+      setShort(shortMq.matches);
+    };
+    sync();
+    narrowMq.addEventListener("change", sync);
+    shortMq.addEventListener("change", sync);
+    return () => {
+      narrowMq.removeEventListener("change", sync);
+      shortMq.removeEventListener("change", sync);
+    };
   }, []);
 
-  useEffect(() => {
+  const useFallback = narrow || short;
+
+  // Layout effect, not a post-paint rAF. A starved WebKit main thread
+  // can delay rAF past the moment a section jump has to be correct.
+  // Measuring here, the pin spacer already exists for that jump.
+  useLayoutEffect(() => {
     if (reducedMotion || useFallback) return;
+    // The first commit still has useFallback false: hydration reports
+    // no reduced motion and a desktop width until the media-query
+    // effect's setState lands. Read the live query here so a phone,
+    // a short laptop and reduced motion never build the desktop pin
+    // just to tear it down.
+    const blocked = window.matchMedia(
+      `(max-width: ${MOBILE_MAX_WIDTH - 1}px), (max-height: ${FALLBACK_MAX_HEIGHT - 1}px), (prefers-reduced-motion: reduce)`,
+    ).matches;
+    if (blocked) return;
     const pinEl = pinRef.current;
     const track = trackRef.current;
+    const section = sectionRef.current;
     if (!pinEl || !track) return;
+    section?.removeAttribute("data-case-study-layout");
 
-    let raf2 = 0;
+    const trackWidth = track.scrollWidth;
+    const viewportWidth = pinEl.clientWidth;
+    let distance = trackWidth - viewportWidth;
+    if (distance <= 0) {
+      section?.setAttribute("data-case-study-layout", "flat");
+      return;
+    }
 
-    const raf1 = requestAnimationFrame(() => {
-      raf2 = requestAnimationFrame(() => {
-        const trackWidth = track.scrollWidth;
-        const viewportWidth = pinEl.clientWidth;
-        let distance = trackWidth - viewportWidth;
-        if (distance <= 0) return;
-
-        triggerRef.current = ScrollTrigger.create({
-          trigger: pinEl,
-          start: "top top",
-          end: () => `+=${distance}`,
-          pin: true,
-          scrub: 0.6,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-          onRefresh: () => {
-            distance = track.scrollWidth - pinEl.clientWidth;
-          },
-          onUpdate: (self) => {
-            gsap.set(track, { x: -distance * self.progress });
-          },
-        });
-
-        ScrollTrigger.refresh();
-      });
+    triggerRef.current = ScrollTrigger.create({
+      trigger: pinEl,
+      start: "top top",
+      end: () => `+=${distance}`,
+      pin: true,
+      scrub: 0.6,
+      anticipatePin: 1,
+      invalidateOnRefresh: true,
+      onRefresh: () => {
+        distance = track.scrollWidth - pinEl.clientWidth;
+      },
+      onUpdate: (self) => {
+        gsap.set(track, { x: -distance * self.progress });
+      },
     });
 
+    ScrollTrigger.refresh();
+    section?.setAttribute("data-case-study-layout", "pinned");
+
     return () => {
-      cancelAnimationFrame(raf1);
-      cancelAnimationFrame(raf2);
       triggerRef.current?.kill(true);
       triggerRef.current = null;
       gsap.set(track, { x: 0 });
+      section?.removeAttribute("data-case-study-layout");
     };
   }, [reducedMotion, useFallback]);
 
@@ -130,10 +158,11 @@ export function DioramaTrack({ children, mobileFallback, sectionLabel }: Props) 
     return (
       <section
         id="case-study"
+        data-case-study-layout={narrow ? "phone" : "stacked"}
         aria-labelledby="case-study-heading"
         className="relative bg-paper py-20"
       >
-        {mobileFallback}
+        {narrow ? mobileFallback : wideFallback}
       </section>
     );
   }
@@ -142,17 +171,37 @@ export function DioramaTrack({ children, mobileFallback, sectionLabel }: Props) 
     // The section is deliberately unstyled height-wise: the pin-spacer
     // that ScrollTrigger injects around the inner wrapper dictates the
     // section's height during and after the pin.
-    <section id="case-study" aria-labelledby="case-study-heading" className="relative bg-paper">
-      <div ref={pinRef} className="relative h-screen overflow-hidden bg-paper">
-        {/* Floating section identity stamp — visible on desktop diorama only. */}
-        <p
-          aria-hidden="true"
-          className="absolute top-6 left-6 z-10 type-label-stamp text-ink-muted"
-        >
-          {sectionLabel}
-        </p>
-        <div ref={trackRef} className="relative h-full" style={{ width: `${TRACK_WIDTH_VH}vh` }}>
-          {children}
+    <section
+      ref={sectionRef}
+      id="case-study"
+      aria-labelledby="case-study-heading"
+      className="relative bg-paper"
+    >
+      {/* Pin host: a keyed wrapper GSAP never moves. ScrollTrigger wraps
+          the pinned div in a pin-spacer, so React must never be the one
+          to detach the pinned div itself. Without this host, a RUNTIME
+          switch to a fallback (resize below the width/height threshold,
+          DevTools docking, toggling reduced motion) made React call
+          section.removeChild(pinnedDiv) while that div sat inside the
+          spacer: NotFoundError. Neither the passive kill(true) cleanup
+          nor a layout-effect cleanup can prevent it, because React
+          applies child deletions before the parent's effect cleanups.
+          With the host, React removes the host (still a direct child of
+          the section) and the spacer goes with it. The key keeps React
+          from reusing this div for the fallback's own root div, which
+          would bring the removeChild back one level down. */}
+      <div key="diorama-pin-host">
+        <div ref={pinRef} className="relative h-screen overflow-hidden bg-paper">
+          {/* Floating section identity stamp — visible on desktop diorama only. */}
+          <p
+            aria-hidden="true"
+            className="absolute top-6 left-6 z-10 type-label-stamp text-ink-muted"
+          >
+            {sectionLabel}
+          </p>
+          <div ref={trackRef} className="relative h-full" style={{ width: `${TRACK_WIDTH_VH}vh` }}>
+            {children}
+          </div>
         </div>
       </div>
     </section>

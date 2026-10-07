@@ -11,9 +11,18 @@
  * (sitemaps, OG cards, share-links).
  */
 
+import type { GPUTier } from "@/lib/gpu";
 import type { SpotColor } from "@/lib/palette";
 
 export type ExperimentSlug = "ink-drop-studio" | "type-as-fluid";
+
+/**
+ * Quality tier both full-screen experiments run at, independent of the
+ * device tier the hero picked (they are opt-in, interactive canvases).
+ * Shared with ExperimentChrome's tech stamp so the readout ("256² Grid")
+ * is the value the sim actually uses.
+ */
+export const PLAYGROUND_SIM_TIER: Exclude<GPUTier, "static"> = "medium";
 
 // Re-exported from `@/lib/palette` (the canonical home for the Riso
 // palette types). Kept exported here so existing consumers that

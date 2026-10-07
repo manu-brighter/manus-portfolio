@@ -106,6 +106,11 @@ test.describe("photography section", () => {
     });
     await page.goto("/de/?ink-preview=full");
     await expect(page.locator("#photography canvas")).toHaveCount(5, { timeout: 15000 });
+    // Pre-reveal frames are buttons; their name says what activating
+    // does before what the photo shows.
+    const lastFrame = page.locator("#photography [data-photo-slide]").last();
+    await expect(lastFrame).toHaveAttribute("role", "button");
+    await expect(lastFrame).toHaveAccessibleName(/^Bild aufdecken: \S/);
   });
 
   test("Full mode settles a photo reveal once and releases its mask canvas", async ({ page }) => {

@@ -8,6 +8,7 @@ import { useLenis } from "@/hooks/useLenis";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { SECTIONS } from "@/lib/content/sections";
+import { stashHomeSection } from "@/lib/homeSection";
 import { navLabelLang } from "@/lib/navLang";
 
 /**
@@ -93,15 +94,9 @@ export function Nav() {
       }
       return;
     }
-    let destination = "/";
-    try {
-      sessionStorage.setItem("scrollToOnLoad", target);
-    } catch {
-      // The URL carries the target when private-mode storage is blocked.
-      // ScrollToOnLoad corrects the early native jump after pinning settles.
-      destination = `/${hash}`;
-    }
-    router.push(destination);
+    // The URL carries the target when private-mode storage is blocked;
+    // ScrollToOnLoad corrects the early native jump after pinning settles.
+    router.push(stashHomeSection(target));
   };
 
   // The wordmark is the site's "back to the top of home" control. As a
@@ -232,10 +227,8 @@ export function Nav() {
           </span>
 
           {/* Locale switcher: globe toggle + crawlable hreflang links.
-              TODO: `usePathname` strips query + hash. If `#work`-
-              anchored users switch locale they lose position; compose
-              href from `usePathname()` + `window.location.hash` once
-              that's a real complaint. */}
+              The switch keeps position (URL hash, or the home section in
+              view), composed at click time in switchTarget(). */}
           <LocaleSwitcher />
         </div>
       </div>

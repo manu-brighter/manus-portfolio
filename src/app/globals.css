@@ -1301,7 +1301,15 @@
    * `attr(data-text)`. Triggered by :hover and :focus-visible.
    *
    * Note: data-text attribute is required on the element for the
-   * pseudo-elements to render the same glyphs in offset position. */
+   * pseudo-elements to render the same glyphs in offset position.
+   *
+   * The ghosts are always generated (opacity 0 at rest), and generated
+   * content is part of the accessible name: screen readers read every
+   * skill name three times ("PHP PHP PHP"). The `/ ""` CSS alt text
+   * empties their accessible text. It sits in an @supports block rather
+   * than as a second `content` declaration because the CSS pipeline
+   * collapses duplicate declarations; engines without alt-text support
+   * keep the plain form. tests/e2e/misreg-a11y.spec.ts guards it. */
 
   .misreg-hover {
     position: relative;
@@ -1319,6 +1327,13 @@
     transition:
       opacity 150ms ease-out,
       transform 150ms ease-out;
+  }
+
+  @supports (content: "x" / "") {
+    .misreg-hover::before,
+    .misreg-hover::after {
+      content: attr(data-text) / "";
+    }
   }
 
   .misreg-hover::before {

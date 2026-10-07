@@ -43,6 +43,8 @@ export const SITE = {
    *  live here, not in the i18n catalogs — one file beats four JSONs
    *  in sync (same rationale as the socials). */
   repos: {
+    /** This site's own source (Work card "Source" link). */
+    portfolio: "https://github.com/manu-brighter/manus-portfolio",
     claudeCodeKit: "https://github.com/manu-brighter/claude-code-kit",
     shotCounter: "https://github.com/manu-brighter/shot-counter",
     flyConnectomeSim: "https://github.com/manu-brighter/fly-connectome-sim",

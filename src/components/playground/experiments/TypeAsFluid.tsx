@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useOrchestratorRAF } from "@/hooks/useOrchestratorRAF";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { TYPE_AS_FLUID_DEFAULTS } from "@/lib/content/playground";
+import { PLAYGROUND_SIM_TIER, TYPE_AS_FLUID_DEFAULTS } from "@/lib/content/playground";
 import { FluidOrchestrator, type PointerState } from "@/lib/gl/fluidOrchestrator";
 import { capDPR, DPR_FULL, getTierConfig } from "@/lib/gpu";
 import { randomSpot } from "@/lib/palette";
@@ -141,7 +141,7 @@ function TypeAsFluidCanvas() {
     // "storm pulling to upper-left" feel; the text should sit on
     // paper, not float in turbulent ink.
     orchestrator.init(gl, {
-      ...getTierConfig("medium"),
+      ...getTierConfig(PLAYGROUND_SIM_TIER),
       // velocity lingers ~2× longer than the prior 0.95 (~565ms
       // half-life vs ~225ms) so the post-write swirl doesn't settle
       // before the second turbulence wave lands.

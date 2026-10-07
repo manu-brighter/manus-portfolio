@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { ReactNode } from "react";
+import { preload } from "react-dom";
 import { MotionProvider } from "@/components/motion/MotionProvider";
 import { AmbientRecorderDevGate } from "@/components/scene/AmbientRecorderDevGate";
 import { InkWipeOverlay } from "@/components/scene/InkWipeOverlay";
@@ -19,6 +20,7 @@ import { SimPresetSwitcher } from "@/components/ui/SimPresetSwitcher";
 import { SimThemeSync } from "@/components/ui/SimThemeSync";
 import { loadNamespaceGroup } from "@/i18n/messages";
 import { routing } from "@/i18n/routing";
+import { CRITICAL_FONT_URLS } from "@/lib/criticalFonts";
 import { MOTION_STARTUP_SCRIPT } from "@/lib/motion/startup";
 import { escapeForScript } from "@/lib/seo/escapeForScript";
 import { buildJsonLd } from "@/lib/seo/jsonLd";
@@ -51,6 +53,13 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
     notFound();
   }
   setRequestLocale(locale);
+
+  // Hero serif + body font start downloading with the CSS instead of
+  // after it. React hoists these into <head>; crossOrigin is required
+  // for font preloads even same-origin, or the fetch is not reused.
+  for (const href of CRITICAL_FONT_URLS) {
+    preload(href, { as: "font", type: "font/woff2", crossOrigin: "anonymous" });
+  }
 
   // SF-5: pass only the `common` namespace group to the client-side
   // provider. Pages add their route-specific groups via nested

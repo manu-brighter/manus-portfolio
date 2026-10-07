@@ -8,6 +8,8 @@ import { useViewTransition } from "@/hooks/useViewTransition";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { routing } from "@/i18n/routing";
+import { SECTIONS } from "@/lib/content/sections";
+import { sectionAtViewportLine, stashHomeSection } from "@/lib/homeSection";
 import { rememberLocale } from "@/lib/localePreference";
 import { dur } from "@/lib/motion/tokens";
 
@@ -78,6 +80,32 @@ const BURST_TICKS = Array.from({ length: 8 }, (_, i) => {
 function localeHref(locale: Locale, pathname: string): string {
   const path = pathname.replace(/\/+$/, "");
   return `/${locale}${path}/`;
+}
+
+const HOME_SECTION_IDS = SECTIONS.map((s) => s.id);
+
+/**
+ * Where a locale switch should land: same route, same place on it.
+ *
+ * The option hrefs stay hash-free and static (crawlable); position is
+ * composed only at click time.
+ *
+ * On home the section actually in view wins over the URL hash: nothing
+ * on home updates the hash while scrolling, so a hash from a shared
+ * link, a middle-clicked "/#contact" or the private-window Nav fallback
+ * is usually stale. The section is handed to ScrollToOnLoad through the
+ * same sessionStorage stash the Nav uses, so the URL doesn't grow a hash
+ * the visitor never typed. In the hero nothing is needed (a fresh page
+ * starts there). The hash only counts when no section crosses the line.
+ * Other routes have no scroll-spy, so their hash is carried over as is.
+ */
+function switchTarget(pathname: string): string {
+  const hash = window.location.hash.length > 1 ? window.location.hash : "";
+  if (pathname !== "/") return `${pathname}${hash}`;
+  const section = sectionAtViewportLine(HOME_SECTION_IDS);
+  if (section === "hero") return pathname;
+  if (section) return stashHomeSection(section);
+  return `${pathname}${hash}`;
 }
 
 export function LocaleSwitcher() {
@@ -322,7 +350,8 @@ export function LocaleSwitcher() {
     // Persist the explicit choice so the bare-root language sniff
     // (src/app/page.tsx) honours it on the next visit.
     rememberLocale(locale);
-    startTransition(() => router.replace(pathname, { locale }));
+    const target = switchTarget(pathname);
+    startTransition(() => router.replace(target, { locale }));
   };
 
   const currentName = t(`locales.${currentLocale}`);

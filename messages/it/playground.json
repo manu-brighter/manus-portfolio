@@ -6,7 +6,8 @@
     "lede": "Due esperimenti shader con lo stesso inchiostro dell'hero. Qui si clicca finché non va a scatti.",
     "openLabel": "Apri esperimento",
     "shell": {
-      "back": "TORNA AL PLAYGROUND"
+      "back": "TORNA AL PLAYGROUND",
+      "techStamp": "WebGL2 · Navier-Stokes · {grid}² Grid"
     },
     "experiments": {
       "inkDropStudio": {
@@ -15,6 +16,7 @@
         "cardBody": "Foglio bianco. Un click deposita inchiostro nello spot color attuale, gli slider regolano la fisica, BOMB crea il caos, FREEZE ferma tutto.",
         "title": "Ink Drop Studio.",
         "caption": "Sandbox per la simulazione hero. Click = ink splat, slider = parametri di simulazione, «Bomb» se hai voglia di caos.",
+        "simulates": "Viene simulato un fluido incomprimibile: velocità, pressione e vortici, calcolati fotogramma per fotogramma sulla GPU.",
         "buttonBomb": "BOMB",
         "buttonFreeze": "FREEZE",
         "buttonResume": "RESUME",
@@ -27,6 +29,7 @@
         "cardBody": "Digita una parola. Viene stampata, poi inghiottita dall'inchiostro. Con dolcezza.",
         "title": "Type-as-Fluid.",
         "caption": "Digita una parola. Viene stampata, poi inghiottita dall'inchiostro. Con dolcezza.",
+        "simulates": "La parola viene stampata come inchiostro nello stesso flusso. Il campo di velocità la trascina finché si dissolve.",
         "inputLabel": "DIGITA UNA PAROLA",
         "inputPlaceholder": "Manuel",
         "triggerLabel": "Stampa di nuovo la parola",

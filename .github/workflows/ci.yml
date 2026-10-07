@@ -61,7 +61,10 @@ jobs:
     name: E2E (${{ matrix.project }})
     needs: build
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # WebKit renders the ink background in software and already ran ~18 min
+    # of a 20 min budget before the UX batch added six specs; 30 gives the
+    # slowest project headroom without hiding a real hang for long.
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
