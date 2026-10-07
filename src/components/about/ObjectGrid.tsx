@@ -18,7 +18,7 @@ import { PingPongStamp } from "./stamps/PingPongStamp";
 import { SchneeStamp } from "./stamps/SchneeStamp";
 import { TauchenStamp } from "./stamps/TauchenStamp";
 import { TileFigure } from "./TileFigure";
-import { TileRevealOverlay } from "./TileRevealOverlay";
+import { type RevealTile, TileRevealOverlay } from "./TileRevealOverlay";
 import { hasTileReveal, type RevealTileKey, type StampKey } from "./tileReveals";
 
 /**
@@ -40,6 +40,9 @@ import { hasTileReveal, type RevealTileKey, type StampKey } from "./tileReveals"
  * and closing leaves a small ink burst where the plate was pulled —
  * both ride the always-on hero FluidSim via fluidBus, so they no-op
  * on coarse pointers (no subscriber) and under reduced motion.
+ * Inside the overlay prev/next (buttons, arrow keys, swipe) walk
+ * through all revealable tiles; closing restores focus to, and drops
+ * the burst at, the tile that was showing last.
  * The corner "+" chip is the standing affordance; it rotates with the
  * hover choreography. Tiles without assets (pingpong) stay decorative
  * figures until their masters land.
@@ -70,6 +73,12 @@ const TILES: readonly Tile[] = [
   { key: "pingpong", spot: "amber", i18nKey: "pingpong" },
 ];
 
+/** The overlay's gallery: every tile with reveal assets, in grid order
+ *  (pingpong has no master yet and stays out). */
+const REVEAL_TILES: readonly RevealTile[] = TILES.flatMap((tile) =>
+  hasTileReveal(tile.key) ? [{ key: tile.key, spot: tile.spot }] : [],
+);
+
 const SPOT_VAR: Record<Tile["spot"], string> = {
   rose: "var(--color-spot-rose)",
   amber: "var(--color-spot-amber)",
@@ -99,11 +108,12 @@ export function ObjectGrid() {
   const reducedMotion = useReducedMotion();
 
   const [openTile, setOpenTile] = useState<RevealTileKey | null>(null);
-  const openerRef = useRef<HTMLButtonElement | null>(null);
+  // Stretched tile buttons by reveal key — close restores focus to the
+  // tile that was showing LAST, which may not be the opener.
+  const tileButtonsRef = useRef<Map<RevealTileKey, HTMLButtonElement>>(new Map());
   // Close-burst stagger timers — tracked per the project's setTimeout
   // discipline and cleared on unmount.
   const splatTimersRef = useRef<Set<number>>(new Set());
-  const openSpotRef = useRef<Tile["spot"]>("rose");
 
   useEffect(() => {
     const timers = splatTimersRef.current;
@@ -114,8 +124,6 @@ export function ObjectGrid() {
   }, []);
 
   const openReveal = (tile: Tile, key: RevealTileKey, e: ReactMouseEvent<HTMLButtonElement>) => {
-    openerRef.current = e.currentTarget;
-    openSpotRef.current = tile.spot;
     if (!reducedMotion && typeof window !== "undefined") {
       // Keyboard activations report detail 0 (and clientX/Y 0,0) —
       // splat from the tile centre instead of the corner then.
@@ -135,18 +143,23 @@ export function ObjectGrid() {
     setOpenTile(key);
   };
 
-  const closeReveal = () => {
+  // Focus returns to the tile of the picture shown LAST, not to the
+  // opener: after paging through the overlay that is the object the
+  // user was looking at, the close burst lands on it too, and a
+  // keyboard user continues from there instead of being teleported
+  // back to where the walk started.
+  const closeReveal = (last: RevealTile) => {
     setOpenTile(null);
-    const opener = openerRef.current;
-    opener?.focus();
-    openerRef.current = null;
+    const target = tileButtonsRef.current.get(last.key) ?? null;
+    target?.focus();
     // Pulling the plate leaves ink behind — a staggered two-splat
     // burst at the tile, visible the moment the backdrop is gone.
-    if (!reducedMotion && opener && typeof window !== "undefined") {
-      const rect = opener.getBoundingClientRect();
+    // Rect read after focus(): a focus scroll may have moved the tile.
+    if (!reducedMotion && target && typeof window !== "undefined") {
+      const rect = target.getBoundingClientRect();
       const cx = rect.left + rect.width / 2;
       const cy = rect.top + rect.height / 2;
-      const spot = openSpotRef.current;
+      const spot = last.spot;
       const timers = splatTimersRef.current;
       for (let i = 0; i < 2; i++) {
         const id = window.setTimeout(() => {
@@ -161,8 +174,6 @@ export function ObjectGrid() {
       }
     }
   };
-
-  const openSpot = TILES.find((tile) => tile.key === openTile)?.spot ?? "rose";
 
   return (
     <section
@@ -216,6 +227,10 @@ export function ObjectGrid() {
                         plate pull. Sits above the decorative layers;
                         the sr-only text names the action + subject. */}
                     <button
+                      ref={(el) => {
+                        if (el) tileButtonsRef.current.set(revealKey, el);
+                        else tileButtonsRef.current.delete(revealKey);
+                      }}
                       type="button"
                       onClick={(e) => openReveal(tile, revealKey, e)}
                       className="absolute inset-0 z-10 cursor-pointer [-webkit-tap-highlight-color:transparent] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
@@ -242,7 +257,7 @@ export function ObjectGrid() {
       </ul>
 
       {openTile ? (
-        <TileRevealOverlay tile={openTile} spot={openSpot} onClose={closeReveal} />
+        <TileRevealOverlay tiles={REVEAL_TILES} initialTile={openTile} onClose={closeReveal} />
       ) : null}
     </section>
   );

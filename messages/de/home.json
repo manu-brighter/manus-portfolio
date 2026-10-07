@@ -277,6 +277,9 @@
       "currentlyBandShort": "Snapshot 2026",
       "revealCta": "Bild ansehen",
       "revealClose": "Schliessen",
+      "revealPrevious": "Vorheriges Bild",
+      "revealNext": "Nächstes Bild",
+      "revealCounter": "{current} / {total}",
       "tiles": {
         "camera": {
           "name": "Kamera",

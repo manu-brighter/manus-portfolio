@@ -277,6 +277,9 @@
       "currentlyBandShort": "Snapshot 2026",
       "revealCta": "Guarda l'immagine",
       "revealClose": "Chiudi",
+      "revealPrevious": "Immagine precedente",
+      "revealNext": "Immagine successiva",
+      "revealCounter": "{current} / {total}",
       "tiles": {
         "camera": {
           "name": "Macchina",
