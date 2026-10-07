@@ -156,16 +156,31 @@ export function DioramaTrack({ children, mobileFallback, wideFallback, sectionLa
     // that ScrollTrigger injects around the inner wrapper dictates the
     // section's height during and after the pin.
     <section id="case-study" aria-labelledby="case-study-heading" className="relative bg-paper">
-      <div ref={pinRef} className="relative h-screen overflow-hidden bg-paper">
-        {/* Floating section identity stamp — visible on desktop diorama only. */}
-        <p
-          aria-hidden="true"
-          className="absolute top-6 left-6 z-10 type-label-stamp text-ink-muted"
-        >
-          {sectionLabel}
-        </p>
-        <div ref={trackRef} className="relative h-full" style={{ width: `${TRACK_WIDTH_VH}vh` }}>
-          {children}
+      {/* Pin host: a keyed wrapper GSAP never moves. ScrollTrigger wraps
+          the pinned div in a pin-spacer, so React must never be the one
+          to detach the pinned div itself. Without this host, a RUNTIME
+          switch to a fallback (resize below the width/height threshold,
+          DevTools docking, toggling reduced motion) made React call
+          section.removeChild(pinnedDiv) while that div sat inside the
+          spacer: NotFoundError. Neither the passive kill(true) cleanup
+          nor a layout-effect cleanup can prevent it, because React
+          applies child deletions before the parent's effect cleanups.
+          With the host, React removes the host (still a direct child of
+          the section) and the spacer goes with it. The key keeps React
+          from reusing this div for the fallback's own root div, which
+          would bring the removeChild back one level down. */}
+      <div key="diorama-pin-host">
+        <div ref={pinRef} className="relative h-screen overflow-hidden bg-paper">
+          {/* Floating section identity stamp — visible on desktop diorama only. */}
+          <p
+            aria-hidden="true"
+            className="absolute top-6 left-6 z-10 type-label-stamp text-ink-muted"
+          >
+            {sectionLabel}
+          </p>
+          <div ref={trackRef} className="relative h-full" style={{ width: `${TRACK_WIDTH_VH}vh` }}>
+            {children}
+          </div>
         </div>
       </div>
     </section>

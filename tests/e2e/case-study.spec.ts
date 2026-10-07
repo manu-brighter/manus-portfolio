@@ -55,4 +55,32 @@ test.describe("@case-study fallback breakpoint", () => {
     await expect(track, "diorama track must NOT mount on mobile").toHaveCount(0);
     await expect(section.locator('[data-case-study-layout="stacked"]')).toHaveCount(0);
   });
+
+  test("runtime switch out of the pinned diorama does not crash", async ({ page }) => {
+    // React must never detach the pinned div itself (GSAP moved it into
+    // a pin-spacer): the keyed pin host in DioramaTrack. Resizing while
+    // pinned used to throw NotFoundError from section.removeChild.
+    const errors: string[] = [];
+    page.on("pageerror", (err) => errors.push(err.message));
+
+    await page.setViewportSize({ width: 1920, height: 950 });
+    await page.goto("/de/");
+    const section = page.locator("section#case-study");
+    await expect(section.locator(".pin-spacer")).toHaveCount(1);
+    // Scroll into the pin so the spacer is active, not just created.
+    await section.evaluate((el) => {
+      window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY + 600);
+    });
+    await page.waitForTimeout(500);
+
+    await page.setViewportSize({ width: 1366, height: 650 });
+    await expect(section.locator('[data-case-study-layout="stacked"]')).toHaveCount(1);
+    await expect(section.locator(".pin-spacer")).toHaveCount(0);
+
+    await page.setViewportSize({ width: 1920, height: 950 });
+    await expect(section.locator('[data-case-study-layout="stacked"]')).toHaveCount(0);
+    await expect(section.locator(".pin-spacer")).toHaveCount(1);
+
+    expect(errors, errors.join("\n")).toEqual([]);
+  });
 });
