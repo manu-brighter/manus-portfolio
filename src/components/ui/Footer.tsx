@@ -1,10 +1,11 @@
 "use client";
 
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type { MouseEvent as ReactMouseEvent } from "react";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import { navLabelLang } from "@/lib/navLang";
 
 /**
  * Site footer — distinct paper-shade band with copyright, legal links,
@@ -42,6 +43,7 @@ const SIGNATURE_STAMPS = ["MH", "STUDIO", "MMXXVI"] as const;
 export function Footer() {
   const t = useTranslations("footer");
   const tNav = useTranslations("nav.items");
+  const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -91,6 +93,7 @@ export function Footer() {
                   onClick={onLegalLinkClick(link.href)}
                   className="text-ink underline decoration-ink-soft underline-offset-2 transition-colors hover:decoration-ink"
                   aria-label={tNav(link.key)}
+                  lang={navLabelLang(link.key, locale)}
                 >
                   {tNav(link.key)}
                 </Link>
