@@ -39,7 +39,6 @@ type MobileBackgroundSimProps = {
   measuring: boolean;
   onGLReady: (gl: WebGL2RenderingContext) => void;
   onFrametime: (ms: number) => void;
-  onSimulationReady: (ready: boolean) => void;
   onUnavailable?: () => void;
 };
 
@@ -48,7 +47,6 @@ export function MobileBackgroundSim({
   measuring,
   onGLReady,
   onFrametime,
-  onSimulationReady,
   onUnavailable,
 }: MobileBackgroundSimProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -66,8 +64,6 @@ export function MobileBackgroundSim({
   measuringRef.current = measuring;
   const onFrametimeRef = useRef(onFrametime);
   onFrametimeRef.current = onFrametime;
-  const onSimulationReadyRef = useRef(onSimulationReady);
-  onSimulationReadyRef.current = onSimulationReady;
   const warmupRef = useRef<ReturnType<typeof createInkWarmup> | null>(null);
   const onUnavailableRef = useRef(onUnavailable);
   onUnavailableRef.current = onUnavailable;
@@ -123,7 +119,6 @@ export function MobileBackgroundSim({
     const onContextLost = (event: Event) => {
       event.preventDefault();
       orchestratorRef.current = null;
-      onSimulationReadyRef.current(false);
       onUnavailableRef.current?.();
     };
     canvas.addEventListener("webglcontextlost", onContextLost);
@@ -171,7 +166,6 @@ export function MobileBackgroundSim({
       orchestrator.dispose();
       orchestratorRef.current = null;
       warmupRef.current = null;
-      onSimulationReadyRef.current(false);
     };
   }, [config, reduced, onGLReady]);
 
@@ -339,7 +333,6 @@ export function MobileBackgroundSim({
       orchestrator.step(dt, virtualElapsedMs, pointerRef.current);
       if (orchestrator.isStarted() && warmupRef.current === null) {
         warmupRef.current = createInkWarmup(performance.now());
-        onSimulationReadyRef.current(true);
       }
       if (
         measuringRef.current &&

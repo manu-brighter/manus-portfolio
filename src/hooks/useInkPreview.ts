@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   createInkWarmup,
+  DEFAULT_INK_PREFERENCE,
   INK_PREFERENCE_KEY,
   type InkPreference,
   isSlowInkWindow,
@@ -11,10 +12,11 @@ import {
 } from "@/lib/inkPreview";
 import { subscribe } from "@/lib/raf";
 
-/** Auto may use simulation on a capable desktop, with a one-way fallback
- * after sustained slow frames. Explicit visitor choices always win. */
-export function useInkPreview(paused: boolean, autoFull: boolean, rendererReady: boolean) {
-  const [preference, setPreference] = useState<InkPreference>("auto");
+/** Animation is the default on every device; Simulation only runs after an
+ * explicit choice. Sustained slow frames may lower Animation's own budget,
+ * but nothing here ever switches the renderer on the visitor's behalf. */
+export function useInkPreview(paused: boolean, rendererReady: boolean) {
+  const [preference, setPreference] = useState<InkPreference>(DEFAULT_INK_PREFERENCE);
   const [ready, setReady] = useState(false);
   const temporaryOverride = useRef(false);
   const [automaticallyReduced, setAutomaticallyReduced] = useState(false);
@@ -25,13 +27,15 @@ export function useInkPreview(paused: boolean, autoFull: boolean, rendererReady:
     let stored: string | null = null;
     try {
       stored = window.localStorage.getItem(INK_PREFERENCE_KEY);
+      // A retired value ("auto") or anything unknown is no preference. Drop
+      // it so the disclosed key only ever holds an explicit choice.
+      if (stored !== null && parseInkPreference(stored) === null) {
+        window.localStorage.removeItem(INK_PREFERENCE_KEY);
+      }
     } catch {
       // Site data may be blocked. The controls still work for this visit.
     }
-    // Touch devices start in Animation regardless of their measured GPU tier.
-    // An explicit saved choice or temporary QA override still takes priority.
-    const defaultPreference = window.matchMedia("(pointer: coarse)").matches ? "light" : "auto";
-    setPreference(resolveInkPreference(query, stored, defaultPreference));
+    setPreference(resolveInkPreference(query, stored));
     setReady(true);
   }, []);
 
@@ -46,10 +50,12 @@ export function useInkPreview(paused: boolean, autoFull: boolean, rendererReady:
     }
   }, []);
 
-  // Keep the verdict for this provider's lifetime. Choosing a manual mode
-  // must not turn returning to Auto into a different hardware assessment.
+  const light = preference === "light";
+
+  // Keep the verdict for this provider's lifetime: a detour through
+  // Simulation must not make Animation re-learn the same hardware.
   useEffect(() => {
-    if (!ready || preference !== "auto" || paused || automaticallyReduced || !rendererReady) return;
+    if (!ready || !light || paused || automaticallyReduced || !rendererReady) return;
     let last = performance.now();
     let warmedUp = createInkWarmup(last);
     let samples: number[] = [];
@@ -83,13 +89,15 @@ export function useInkPreview(paused: boolean, autoFull: boolean, rendererReady:
       document.removeEventListener("visibilitychange", resetWindow);
       window.removeEventListener("resize", resetWindow);
     };
-  }, [ready, preference, paused, automaticallyReduced, rendererReady]);
+  }, [ready, light, paused, automaticallyReduced, rendererReady]);
 
   return {
     ready,
     preference,
-    automaticallyReduced: preference === "auto" && automaticallyReduced,
-    light: preference === "light" || (preference === "auto" && (!autoFull || automaticallyReduced)),
+    // Only Animation's budget is ever reduced. An explicit Simulation runs
+    // at its own physics tier and never reports a reduction.
+    automaticallyReduced: light && automaticallyReduced,
+    light,
     select,
   };
 }

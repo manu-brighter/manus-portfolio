@@ -71,7 +71,7 @@
           "id": "inkPreference",
           "heading": "Preferenza dell’inchiostro",
           "body": [
-            "L’impostazione del movimento dell’inchiostro viene salvata come «manus-ink-mode» nel LocalStorage (Auto, Animazione o Simulazione). Rimane fino alla modifica o alla cancellazione dei dati del browser, non viene trasmessa e non contiene dati personali. I link di anteprima temporanei non salvano questa impostazione."
+            "L’impostazione del movimento dell’inchiostro viene salvata come «manus-ink-mode» nel LocalStorage (Animazione o Simulazione). Rimane fino alla modifica o alla cancellazione dei dati del browser, non viene trasmessa e non contiene dati personali. I link di anteprima temporanei non salvano questa impostazione."
           ]
         },
         {

@@ -82,31 +82,14 @@
     "intro": "Carta, colore e un po’ di movimento. Crea la tua atmosfera.",
     "theme": "Palette",
     "motion": "Movimento",
-    "auto": "Auto",
     "light": "Animazione",
     "full": "Simulazione",
-    "autoBody": "Auto avvia la simulazione su desktop e valuta le prestazioni dopo l’avvio. Rallentamenti prolungati attivano l’animazione. Su mobile si parte con l’animazione.",
-    "lightBody": "Forme fluide che reagiscono ai tuoi gesti. Pochi calcoli, un livello di dettaglio fisso.",
+    "lightBody": "Forme fluide che reagiscono ai tuoi gesti. Pochi calcoli, meno dettagli in caso di rallentamenti prolungati.",
     "fullBody": "Vortici fisici che seguono il puntatore. Richiede più potenza grafica.",
-    "reducedNotice": "Auto ora usa Animazione con meno dettagli per mantenere la pagina fluida.",
+    "reducedNotice": "Animazione ora gira con meno dettagli per mantenere la pagina fluida.",
     "reducedMotion": "La riduzione del movimento del sistema è attiva. Puoi comunque scegliere i colori.",
     "unavailable": "Questa vista dell’inchiostro non è al momento disponibile sul tuo dispositivo. Colori e contenuti restano accessibili.",
     "lightShort": "Inchiostro interattivo, meno calcoli",
     "fullShort": "Vera simulazione di fluidi, più calcoli"
-  },
-  "inkPreview": {
-    "label": "Laboratorio d’inchiostro · anteprima locale",
-    "autoTitle": "Meno vortici, più fluidità.",
-    "autoBody": "Abbiamo ridotto gli effetti automaticamente. Puoi comunque attivare la simulazione completa, ma potrebbe andare a scatti.",
-    "lightTitle": "Inchiostro leggero. Sempre in movimento.",
-    "lightBody": "L’inchiostro si muove e reagisce ai tuoi gesti con meno calcoli. Prova entrambe le versioni qui.",
-    "fullTitle": "Tutti i vortici, al completo.",
-    "fullBody": "La simulazione completa è attiva. Se va a scatti, puoi passare alla versione leggera in qualsiasi momento.",
-    "unavailableTitle": "L’inchiostro si prende una pausa.",
-    "unavailableBody": "La riduzione delle animazioni o il supporto grafico non disponibile hanno la precedenza. Tutti i contenuti restano accessibili.",
-    "switch": "Simulazione completa dell’inchiostro",
-    "automatic": "Scelta automatica",
-    "manual": "La tua scelta",
-    "reset": "Prova la modalità automatica"
   }
 }

@@ -82,31 +82,14 @@
     "intro": "Du papier, de la couleur et un peu de mouvement. Composez votre ambiance.",
     "theme": "Palette",
     "motion": "Mouvement",
-    "auto": "Auto",
     "light": "Animation",
     "full": "Simulation",
-    "autoBody": "Auto démarre avec la simulation sur ordinateur et évalue les performances après le démarrage. Des ralentissements prolongés déclenchent l’animation. Sur mobile, l’animation est activée dès le départ.",
-    "lightBody": "Des formes fluides qui réagissent à tes gestes. Peu de calcul, un niveau de détail fixe.",
+    "lightBody": "Des formes fluides qui réagissent à tes gestes. Peu de calcul, moins de détails en cas de ralentissements prolongés.",
     "fullBody": "Des tourbillons physiques qui suivent le pointeur. Demande plus de puissance graphique.",
-    "reducedNotice": "Auto utilise maintenant Animation avec moins de détails pour garder la page fluide.",
+    "reducedNotice": "Animation tourne maintenant avec moins de détails pour garder la page fluide.",
     "reducedMotion": "La réduction des animations de votre système est active. Vous pouvez toujours choisir les couleurs.",
     "unavailable": "Cette vue d’encre est actuellement indisponible sur votre appareil. Les couleurs et le contenu restent accessibles.",
     "lightShort": "Encre interactive, peu de calculs",
     "fullShort": "Simulation réelle de fluides, plus de calculs"
-  },
-  "inkPreview": {
-    "label": "Atelier d’encre · aperçu local",
-    "autoTitle": "Moins de tourbillons, plus de fluidité.",
-    "autoBody": "Nous avons réduit les effets automatiquement. Tu peux quand même activer la simulation complète, mais elle pourrait saccader.",
-    "lightTitle": "Une encre légère. Toujours en mouvement.",
-    "lightBody": "L’encre bouge et réagit à tes gestes en demandant moins de calculs. Compare les deux versions ici.",
-    "fullTitle": "Tous les tourbillons sont là.",
-    "fullBody": "La simulation complète est active. En cas de saccades, tu peux revenir à la version légère à tout moment.",
-    "unavailableTitle": "L’encre fait une pause.",
-    "unavailableBody": "La réduction des animations ou l’absence de prise en charge graphique a priorité. Tous les contenus restent accessibles.",
-    "switch": "Simulation complète de l’encre",
-    "automatic": "Choix automatique",
-    "manual": "Ton choix",
-    "reset": "Tester le mode automatique"
   }
 }

@@ -17,16 +17,9 @@ type FluidSimProps = {
   measuring: boolean;
   onGLReady: (gl: WebGL2RenderingContext) => void;
   onFrametime: (ms: number) => void;
-  onSimulationReady: (ready: boolean) => void;
 };
 
-export function FluidSim({
-  config,
-  measuring,
-  onGLReady,
-  onFrametime,
-  onSimulationReady,
-}: FluidSimProps) {
+export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSimProps) {
   const { gl, size } = useThree();
   const dpr = useThree((state) => state.viewport.dpr);
 
@@ -43,8 +36,6 @@ export function FluidSim({
   measuringRef.current = measuring;
   const onFrametimeRef = useRef(onFrametime);
   onFrametimeRef.current = onFrametime;
-  const onSimulationReadyRef = useRef(onSimulationReady);
-  onSimulationReadyRef.current = onSimulationReady;
   const warmupRef = useRef<ReturnType<typeof createInkWarmup> | null>(null);
 
   // Coarse-pointer (mobile/touch) disables sim interactivity. The hero
@@ -115,7 +106,6 @@ export function FluidSim({
       orchestrator.dispose();
       orchestratorRef.current = null;
       warmupRef.current = null;
-      onSimulationReadyRef.current(false);
     };
   }, [gl, onGLReady, config, isCoarsePointer]);
 
@@ -146,7 +136,6 @@ export function FluidSim({
 
       if (orchestrator.isStarted() && warmupRef.current === null) {
         warmupRef.current = createInkWarmup(performance.now());
-        onSimulationReadyRef.current(true);
       }
       if (
         measuringRef.current &&
