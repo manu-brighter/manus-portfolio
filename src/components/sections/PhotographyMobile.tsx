@@ -99,7 +99,17 @@ const LAYOUT_CLASS: Record<MobileSlide["layout"], string> = {
   "inset-right": "w-[88%] self-end",
 };
 
-function MobilePhotoFrame({ spotColor, children }: { spotColor: SpotColor; children: ReactNode }) {
+function MobilePhotoFrame({
+  spotColor,
+  seed,
+  aspect,
+  children,
+}: {
+  spotColor: SpotColor;
+  seed: number;
+  aspect: number;
+  children: ReactNode;
+}) {
   const { inkUnavailable, reducedMotion } = useScene();
   const animated = !inkUnavailable && !reducedMotion;
   const ref = useRef<HTMLDivElement>(null);
@@ -152,6 +162,8 @@ function MobilePhotoFrame({ spotColor, children }: { spotColor: SpotColor; child
         <PhotoInkAnimation
           spotColor={spotColor}
           reveal={reveal}
+          seed={seed}
+          aspect={aspect}
           className="z-10"
           onComplete={complete}
         />
@@ -177,7 +189,7 @@ export function PhotographyMobile() {
         {SLIDES.map((slide, i) => (
           <FadeIn key={slide.baseName} as="div" y={24} className={LAYOUT_CLASS[slide.layout]}>
             <figure data-testid="photo-slide">
-              <MobilePhotoFrame spotColor={slide.spot}>
+              <MobilePhotoFrame spotColor={slide.spot} seed={i} aspect={slide.aspect}>
                 <picture className="block">
                   <source
                     type="image/avif"
