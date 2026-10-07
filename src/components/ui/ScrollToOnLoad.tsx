@@ -16,13 +16,11 @@ import { SCROLL_TO_ON_LOAD_KEY } from "@/lib/homeSection";
  * the pin then inserts its spacer and every later section shifts
  * down, so the visitor lands one section off.
  *
- * The jump waits until `#case-study` publishes `data-case-study-layout`
- * (the pin exists, or a fallback was chosen). A fixed delay fired
- * while the main thread was still starving rAF: the scroll landed,
- * then the pin shoved the target off screen. The scroll is instant.
- * WebKit drops `scrollIntoView({ behavior: "smooth" })` once the
- * gesture that started the navigation has ended, so that glide never
- * began there and the page stayed on the hero.
+ * The jump is instant and repeats until the target has stayed in view.
+ * The case-study pin, and the phone fallback that replaces a first
+ * desktop pin, both change the page height after mount. One shot then
+ * lands a section off. WebKit also drops a smooth scroll once the
+ * navigation gesture has ended, so the correction cannot be a glide.
  *
  * The stash is consumed when the scroll runs, not when the effect
  * starts. React 19 StrictMode double-invokes effects: removing on
@@ -45,10 +43,6 @@ function readTarget(): string {
   }
 }
 
-function layoutReady(): boolean {
-  return document.getElementById("case-study")?.hasAttribute("data-case-study-layout") ?? false;
-}
-
 export function ScrollToOnLoad() {
   const lenis = useLenis();
   const lenisRef = useRef(lenis);
@@ -60,7 +54,8 @@ export function ScrollToOnLoad() {
 
     let raf = 0;
     let done = false;
-    const deadline = performance.now() + 2500;
+    const deadline = performance.now() + 4000;
+    const watchUntil = performance.now() + 1500;
 
     const element = () => document.getElementById(target);
 
@@ -98,34 +93,33 @@ export function ScrollToOnLoad() {
       }
     };
 
-    // The pin spacer can still grow a frame after it is published.
-    // One jump then lands a section high. Re-align until the target
-    // stays in view for a few frames, or the window ends.
-    let stable = 0;
+    // Keep aligning through the pin (and a view-transition scroll
+    // restore). Stopping on the first steady frames landed in the
+    // case study once the spacer finished growing.
     const settle = () => {
       if (done) return;
-      if (layoutReady() && inView()) {
-        stable += 1;
-        if (stable >= 3) {
-          finish();
-          return;
-        }
-      } else {
-        stable = 0;
-        if (layoutReady()) jump();
+      if (!inView()) jump();
+      if (performance.now() >= watchUntil && inView()) {
+        finish();
+        return;
       }
       if (performance.now() > deadline) {
-        if (layoutReady() && !inView()) jump();
+        if (!inView()) jump();
         finish();
         return;
       }
       raf = requestAnimationFrame(settle);
     };
+    const backup = window.setTimeout(() => {
+      if (!done && !inView()) jump();
+      finish();
+    }, 4000);
     settle();
 
     return () => {
       done = true;
       cancelAnimationFrame(raf);
+      window.clearTimeout(backup);
     };
   }, []);
 

@@ -574,10 +574,10 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   `stashHomeSection(id)` writes the target to the SessionStorage key
   `scrollToOnLoad` (`SCROLL_TO_ON_LOAD_KEY`) and returns `/` (or `/#id`
   when storage is blocked); `<ScrollToOnLoad />` on home reads the URL
-  hash first, then the stash, and scrolls once `#case-study` publishes
-  `data-case-study-layout` (pin created, or a fallback chosen). The jump
-  is instant: WebKit drops a smooth `scrollIntoView` after the navigation
-  gesture ends, and a fixed delay raced the pin on a starved main thread.
+  hash first, then the stash, and scrolls instantly, repeating until the
+  target stays in view. The case-study pin and the phone fallback both
+  change page height after mount; one shot lands a section off. WebKit
+  drops a smooth `scrollIntoView` after the navigation gesture ends.
   A native `/#id` jump lands one section off. Users: Nav (sub-route anchors), `CvContactLink` (CV toolbar →
   `#contact`), and the locale switcher. The key is disclosed in the
   `datenschutz` storage list (all four locales).
