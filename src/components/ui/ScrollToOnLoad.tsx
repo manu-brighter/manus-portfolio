@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { SCROLL_TO_ON_LOAD_KEY } from "@/lib/homeSection";
 
 /**
  * Post-mount anchor scroll for sub-route → home navigation.
@@ -44,7 +45,7 @@ export function ScrollToOnLoad() {
     }
     if (!target) {
       try {
-        target = sessionStorage.getItem("scrollToOnLoad") ?? "";
+        target = sessionStorage.getItem(SCROLL_TO_ON_LOAD_KEY) ?? "";
       } catch {
         // No stored target is available when site storage is blocked.
       }
@@ -63,7 +64,7 @@ export function ScrollToOnLoad() {
     timer = window.setTimeout(() => {
       timer = null;
       try {
-        sessionStorage.removeItem("scrollToOnLoad");
+        sessionStorage.removeItem(SCROLL_TO_ON_LOAD_KEY);
       } catch {
         // The URL fallback still scrolls successfully without storage.
       }

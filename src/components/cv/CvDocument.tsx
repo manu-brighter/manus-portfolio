@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import type { CSSProperties, ReactNode } from "react";
 import { CvActions } from "@/components/cv/CvActions";
+import { CvContactLink } from "@/components/cv/CvContactLink";
 import { CvDyeSync } from "@/components/cv/CvDyeSync";
 import { CvInkStamp } from "@/components/cv/CvInkStamp";
 import { PlateCornerMarks } from "@/components/ui/PlateCornerMarks";
@@ -342,6 +343,11 @@ function CvSection({
   );
 }
 
+/** Shared look of the toolbar's text links (home + contact): plain text
+ *  with a 44px tap row on phones, a small mono stamp from `sm`. */
+const CV_TOOLBAR_LINK_CLASS =
+  "inline-flex min-h-11 min-w-0 items-center gap-2 text-xs text-ink-muted transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--focus-ring) sm:min-h-0 sm:rounded-[2px] sm:border sm:border-ink sm:bg-paper sm:px-3 sm:py-1 sm:font-mono sm:text-[0.65rem] sm:text-ink sm:uppercase sm:tracking-[0.18em] sm:hover:bg-ink sm:hover:text-paper-tint";
+
 export function CvDocument() {
   const t = useTranslations("cv");
   // Preset names come from the shared `simPresets` namespace so the
@@ -405,15 +411,18 @@ export function CvDocument() {
           data-cv-toolbar
           className="mx-auto mb-6 grid w-full max-w-[184mm] grid-cols-[minmax(0,1fr)_auto] items-start gap-3 px-4 print:hidden sm:mb-8 sm:flex sm:justify-between sm:gap-4 sm:px-0"
         >
-          <Link
-            href="/"
-            className="inline-flex min-h-11 min-w-0 items-center gap-2 self-start text-xs text-ink-muted transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--focus-ring) sm:min-h-0 sm:rounded-[2px] sm:border sm:border-ink sm:bg-paper sm:px-3 sm:py-1 sm:font-mono sm:text-[0.65rem] sm:text-ink sm:uppercase sm:tracking-[0.18em] sm:hover:bg-ink sm:hover:text-paper-tint"
-          >
-            <span aria-hidden="true" className="shrink-0">
-              ←
-            </span>
-            <span>{t("backLabel")}</span>
-          </Link>
+          {/* Way out of the proof: home, or straight to the contact form.
+              Both are screen chrome only; the whole toolbar is
+              print:hidden, so the sheet geometry never sees them. */}
+          <div className="flex min-w-0 flex-col items-start self-start sm:flex-row sm:items-center sm:gap-3">
+            <Link href="/" className={CV_TOOLBAR_LINK_CLASS}>
+              <span aria-hidden="true" className="shrink-0">
+                ←
+              </span>
+              <span>{t("backLabel")}</span>
+            </Link>
+            <CvContactLink className={CV_TOOLBAR_LINK_CLASS} />
+          </div>
           <CvActions
             label={t("download.label")}
             hint={t("download.hint")}
