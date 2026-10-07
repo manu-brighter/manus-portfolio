@@ -560,8 +560,14 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   Open drops one fluidBus splat at
   the pointer, close leaves a two-splat burst at the tile (desktop
   only — no mobile subscriber).
-  The overlay is a **fixed div, NOT `dialog.showModal()`** with manual
-  focus pin/restore (single close control). Heads-up for tests: the
+  The overlay is a **fixed div, NOT `dialog.showModal()`** with a manual
+  focus cycle over prev / next / close. It is a gallery: prev/next,
+  ArrowLeft/ArrowRight and swipe page through every revealable tile
+  (wrapping, pingpong excluded), each switch replays a shorter
+  side-aware Andruck snap (`data-tile-nav`), an sr-only live region
+  announces "n / total: caption", and close returns focus (and the
+  close splat) to the tile shown LAST, not the opener. Regression spec:
+  `tests/e2e/tile-reveal-gallery.spec.ts`. Heads-up for tests: the
   mobile hamburger nav keeps a permanent `role="dialog"` node in the
   DOM — select the overlay via `[aria-labelledby="tile-reveal-caption"]`,
   never by bare dialog role. Manuel authors BOTH crops per tile
