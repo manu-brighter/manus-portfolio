@@ -498,6 +498,22 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   Only the Full renderer subscribes: under the default Animation (Light)
   every fluidBus emit is a silent no-op until LiteInkScene learns to
   take impulses (open follow-up).
+- **Cross-route section jumps go through `src/lib/homeSection.ts`.**
+  `stashHomeSection(id)` writes the target to the SessionStorage key
+  `scrollToOnLoad` (`SCROLL_TO_ON_LOAD_KEY`) and returns `/` (or `/#id`
+  when storage is blocked); `<ScrollToOnLoad />` on home reads the URL
+  hash first, then the stash, and scrolls ~800ms after mount once the
+  case-study pin extent is live. A native `/#id` jump lands one section
+  off. Users: Nav (sub-route anchors), `CvContactLink` (CV toolbar →
+  `#contact`), and the locale switcher. The key is disclosed in the
+  `datenschutz` storage list (all four locales).
+- **Locale switch keeps position** (`switchTarget()` in
+  `LocaleSwitcher`): on home the section crossing the 30% viewport line
+  (`sectionAtViewportLine`) wins over the URL hash, because nothing on
+  home updates the hash and a leftover one is usually stale; the hash
+  counts only when no section crosses the line, the hero needs nothing.
+  Other routes carry their hash over. Option hrefs stay static and
+  hash-free (crawlable). Spec: `tests/e2e/locale-switch-position.spec.ts`.
 - **`inkWipeStore`** (zustand) — 4-phase state machine for the page-transition
   primitive (PlaygroundCard → InkWipeOverlay).
 - **`sceneVisibilityStore`** (zustand) — toggles `display: none` on the root
@@ -629,11 +645,35 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 - **Case Study**: inline section, NOT a `/work/[slug]` route. Diorama design
   (one wide SVG illustration + absolute-positioned HTML cards in vh units,
   4200×1000 viewBox at 100vh tall = 420vh wide horizontal-pin track).
-  - Mobile/reduced-motion fallback breakpoint is **height-aware**:
-    `(max-width: 767px), (max-height: 899px)` — catches 1366×768, 1600×900.
+  - **Layout branch matrix** (fallback threshold is height-aware,
+    `FALLBACK_MAX_HEIGHT = 700` in DioramaTrack, i.e. `(max-height: 699px)`;
+    700 keeps 1920×1200 at 125% Windows scaling, ~744px, on the diorama):
+    - coarse pointer + width <768px → `CaseStudyMobileCarousel`
+      (decided in `CaseStudy` via `useMobileLayout`);
+    - fine pointer + width <768px → `mobileFallback`, the phone stack;
+    - width ≥768px and height <700px, OR reduced motion at width ≥768px
+      → `CaseStudyStacked` (desktop-width vertical rows: media ~35% /
+      copy ~65%, rem type only, no vh; flat laptops like 1366×768 with
+      browser chrome land here and used to get the phone stack);
+    - otherwise → the pinned horizontal diorama.
+    `CaseStudy` builds the station config once (`DioramaCardsProps`) and
+    feeds both the diorama and `CaseStudyStacked`, so content and
+    lightbox indices can't drift. `Polaroid scale="rem"` drops its vh
+    clamps for use outside the diorama.
   - `bg-paper` on `<DioramaTrack>` isolates from root FluidSim ink bleed.
   - `<DioramaTrack>` ScrollTrigger uses `kill(true)` on cleanup to revert
     pin spacers when reduced-motion / resize toggles desktop branch off.
+  - **Runtime switch out of the pin needs the keyed pin host.** The
+    pinned div sits in a `<div key="diorama-pin-host">` that GSAP never
+    moves. Without it, a resize below the threshold (or DevTools docking,
+    toggling reduced motion) made React call
+    `section.removeChild(pinnedDiv)` while the div sat inside the
+    pin-spacer → NotFoundError, and the tree died. Neither the passive
+    `kill(true)` nor a layout-effect cleanup can prevent it: React
+    applies child deletions before the parent's effect cleanups. The key
+    stops React reusing the host for the fallback's root div (which
+    would move the removeChild one level down). Regression spec:
+    `case-study.spec.ts` "runtime switch out of the pinned diorama".
   - **Pin an INNER wrapper, never the `section#case-study` itself.**
     The section is a direct child of `<main>`; ScrollTrigger's
     pin-spacer re-parents the pinned element, and on client-side
