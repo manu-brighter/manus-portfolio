@@ -167,16 +167,7 @@ export function pushSplatImpulse(
     }
   }
   const radius = liteBloomRadius(req.radius ?? LITE_BASE_SPLAT_RADIUS * radiusScale);
-  return impulses.push(
-    req.x,
-    req.y,
-    scroll,
-    req.dx ?? 0,
-    req.dy ?? 0,
-    strength,
-    slot,
-    radius,
-  );
+  return impulses.push(req.x, req.y, scroll, req.dx ?? 0, req.dy ?? 0, strength, slot, radius);
 }
 
 /**

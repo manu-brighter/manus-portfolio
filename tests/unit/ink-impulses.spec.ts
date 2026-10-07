@@ -61,7 +61,10 @@ test("preset radius scale and explicit radii size the bloom; wide blooms deposit
   expect(tiny).toBeLessThan(wide);
   expect(shapeOf(impulses, 2)[3]).toBeCloseTo(liteBloomRadius(0.004));
   // The density damp lives in the shader and must track the reference bloom.
-  const frag = readFileSync(resolve(__dirname, "../../src/shaders/ink-lite/render.frag.glsl"), "utf8");
+  const frag = readFileSync(
+    resolve(__dirname, "../../src/shaders/ink-lite/render.frag.glsl"),
+    "utf8",
+  );
   expect(liteBloomRadius(LITE_BASE_SPLAT_RADIUS).toFixed(6)).toBe("0.122474");
   expect(frag).toContain("0.122474 / max(shape.w, 0.001)");
   // Strength is the spot weight. Wide Aquarell blooms used to damp it
