@@ -2,9 +2,9 @@
   "cv": {
     "metaTitle": "CV · Manuel Heller",
     "metaDescription": "Manuel Heller, Softwareentwickler aus der Region Basel. PHP, Vue, Schnittstellen und Testautomatisierung. Verfügbar ab Dezember 2026.",
-    "sectionLabel": "Lebenslauf",
-    "editionStamp": "Ausgabe MMXXVI",
-    "calibrationLabel": "Druckprobe",
+    "sectionLabel": "CV",
+    "editionStamp": "Edition MMXXVI",
+    "calibrationLabel": "Proof",
     "name": "Manuel Heller",
     "role": "Softwareentwickler · PHP & Vue",
     "region": "Region Basel, Schweiz",
@@ -57,7 +57,7 @@
       ]
     },
     "skills": {
-      "label": "Fachkenntnisse",
+      "label": "Skills",
       "groups": [
         {
           "label": "Backend und Daten",
@@ -68,11 +68,11 @@
           "items": "Vue.js · JavaScript · HTML · CSS"
         },
         {
-          "label": "Qualitätssicherung",
+          "label": "Testing & QA",
           "items": "Cypress · Playwright · E2E · Code-Reviews"
         },
         {
-          "label": "Entwicklungsumgebung",
+          "label": "Tooling",
           "items": "Git · GitLab · Docker · Linux und nginx für eigene Projekte"
         },
         {
@@ -80,7 +80,7 @@
           "items": "TypeScript · React · Next.js · tRPC"
         },
         {
-          "label": "AI-Werkzeuge",
+          "label": "AI-Tools",
           "items": "Codex · Claude Code · eigene Skills, Agents und MCP-Anbindungen"
         }
       ]
@@ -127,8 +127,8 @@
       "items": ["Wildlife- und Autofotografie", "Reisen", "Ski und Snowboard", "Tauchen"]
     },
     "footer": {
-      "inkLabel": "Tinte",
-      "printedNote": "Gedruckt ab manuelheller.dev/cv. Die Darstellung folgt dem gewählten Tinten-Charakter.",
+      "inkLabel": "Ink",
+      "printedNote": "Gedruckt ab manuelheller.dev/cv im gewählten Ink Style.",
       "publicNote": "Öffentliche Version. Vollständige Kontaktdaten auf Anfrage."
     }
   }

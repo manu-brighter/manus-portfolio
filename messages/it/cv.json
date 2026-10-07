@@ -2,9 +2,9 @@
   "cv": {
     "metaTitle": "CV · Manuel Heller",
     "metaDescription": "Manuel Heller, sviluppatore software nella regione di Basilea. PHP, Vue, interfacce e test automatizzati. Disponibile da dicembre 2026.",
-    "sectionLabel": "Curriculum vitae",
-    "editionStamp": "Edizione MMXXVI",
-    "calibrationLabel": "Prova di stampa",
+    "sectionLabel": "CV",
+    "editionStamp": "Edition MMXXVI",
+    "calibrationLabel": "Proof",
     "name": "Manuel Heller",
     "role": "Sviluppatore software · PHP & Vue",
     "region": "Regione di Basilea, Svizzera",
@@ -57,7 +57,7 @@
       ]
     },
     "skills": {
-      "label": "Competenze tecniche",
+      "label": "Skills",
       "groups": [
         {
           "label": "Backend e dati",
@@ -68,11 +68,11 @@
           "items": "Vue.js · JavaScript · HTML · CSS"
         },
         {
-          "label": "Qualità del software",
+          "label": "Testing & QA",
           "items": "Cypress · Playwright · E2E · Code reviews"
         },
         {
-          "label": "Ambiente di sviluppo",
+          "label": "Tooling",
           "items": "Git · GitLab · Docker · Linux e nginx per i miei progetti"
         },
         {
@@ -132,8 +132,8 @@
       ]
     },
     "footer": {
-      "inkLabel": "Inchiostro",
-      "printedNote": "Stampato da manuelheller.dev/cv nello stile d’inchiostro scelto.",
+      "inkLabel": "Ink",
+      "printedNote": "Stampato da manuelheller.dev/cv nell’Ink Style scelto.",
       "publicNote": "Versione pubblica. Contatti completi su richiesta."
     }
   }

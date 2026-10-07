@@ -45,7 +45,7 @@
     "headline": "Mes domaines de travail.",
     "subhead": "Ce que je fais au travail, et ce que j’ai appris à côté.",
     "heroSkill": {
-      "eyebrow": "Spécialité professionnelle",
+      "eyebrow": "Main Stack",
       "name": "PHP · Vue · SQL",
       "description": "Des UI pour des processus métier complexes, les API derrière, et des tests de release pour que rien ne casse."
     },
@@ -53,7 +53,7 @@
     "tiers": [
       {
         "id": "daily-driver",
-        "label": "Expérience professionnelle",
+        "label": "Daily Driver",
         "weight": "xl",
         "items": [
           {
@@ -72,7 +72,7 @@
       },
       {
         "id": "production",
-        "label": "Intégrations et qualité",
+        "label": "APIs & Testing",
         "weight": "l",
         "items": [
           {
@@ -94,7 +94,7 @@
       },
       {
         "id": "vibecoded",
-        "label": "Projets personnels",
+        "label": "Side Projects",
         "description": "Appris en construisant mes propres projets. Tourne en production, mais ce n’est pas mon stack au travail.",
         "weight": "l",
         "items": [
@@ -122,7 +122,7 @@
       },
       {
         "id": "occasional",
-        "label": "Outils et exploitation",
+        "label": "Tooling & Ops",
         "description": "Codex et Claude Code avec skills, agents et intégrations MCP personnalisés ; Linux et nginx pour mes projets auto-hébergés.",
         "weight": "m",
         "items": [
@@ -145,7 +145,7 @@
       },
       {
         "id": "craft",
-        "label": "Design et médias",
+        "label": "Design & Media",
         "weight": "m",
         "items": [
           {
@@ -216,7 +216,7 @@
       "alt": "Photo portrait Manuel Heller, développeur full-stack Bâle",
       "caption": "St. Moritz · MMXXV",
       "plate": "Plate Nº 03",
-      "label": "Autoportrait",
+      "label": "Self-Portrait",
       "stamps": [
         {
           "label": "Lieu",
@@ -241,7 +241,7 @@
     "marginalia": {
       "werIchBin": {
         "counter": "01 / 04",
-        "label": "Identité",
+        "label": "Identity",
         "year": "MMXXVI"
       },
       "anfangen": {
@@ -263,11 +263,11 @@
       },
       "aiWorkflow": {
         "counter": "03 / 04",
-        "label": "Travail avec l’IA"
+        "label": "AI Workflow"
       },
       "antrieb": {
         "counter": "04 / 04",
-        "label": "Moteur"
+        "label": "Drive"
       }
     },
     "objectGrid": {
@@ -279,7 +279,7 @@
       "revealClose": "Fermer",
       "tiles": {
         "camera": {
-          "name": "Appareil",
+          "name": "Camera",
           "caption": "shooting · Sony α7 IV · wildlife",
           "reveal": {
             "alt": "Deux jeunes renards entre les branches de hêtre en forêt, photo wildlife au Sony α7 IV",
@@ -303,7 +303,7 @@
           }
         },
         "schnee": {
-          "name": "Neige",
+          "name": "Snow",
           "caption": "carving · ski/snowboard · saison d'hiver",
           "reveal": {
             "alt": "Sommets alpins enneigés sous un ciel bleu, vus depuis la crête",
@@ -311,7 +311,7 @@
           }
         },
         "tauchen": {
-          "name": "Profondeur",
+          "name": "Dive",
           "caption": "diving · certifié",
           "reveal": {
             "alt": "Manuel en plongée au récif, pouce levé vers la caméra",
@@ -319,7 +319,7 @@
           }
         },
         "pingpong": {
-          "name": "Ping-pong",
+          "name": "Ping-Pong",
           "caption": "chasing · titre de champion zvoove"
         }
       }
@@ -423,31 +423,31 @@
           "tagline": "Scoreboard de soirée · App desktop",
           "description": "Tableau de scores pour équipes avec accès par QR sur le réseau local et scores synchronisés. Application Electron pour Windows et Linux.",
           "stack": ["Vue.js", "Express", "SQLite", "SSE", "Electron"],
-          "ctaLabel": "Repo & téléchargement"
+          "ctaLabel": "Repo & Download"
         },
         {
           "id": "flyConnectomeSim",
           "title": "Fly Connectome Sim",
-          "tagline": "Simulation de connectome · En développement",
+          "tagline": "Connectome Sim · WIP",
           "description": "Je simule le connectome publié d’une drosophile. Python autour, C++ dans le noyau de calcul, chaque exécution journalisée de façon reproductible.",
           "stack": ["Python", "C++", "MaleCNS"],
-          "ctaLabel": "Code et documentation"
+          "ctaLabel": "Repo & Docs"
         },
         {
           "id": "mercurius",
           "title": "Mercurius",
-          "tagline": "Recherche quantitative · Terminée",
+          "tagline": "Quant Research · Archived",
           "description": "Projet de recherche Python sur des stratégies de trading, avec backtests reproductibles et critères de validation fixes. Trois hypothèses rejetées, sans engager de capital réel.",
           "stack": ["Python", "Alpaca", "SQLite", "Backtesting"],
-          "ctaLabel": "Code et documentation"
+          "ctaLabel": "Repo & Docs"
         },
         {
           "id": "claudeCodeKit",
           "title": "claude-code-kit",
-          "tagline": "Skills et outils pour Claude Code",
+          "tagline": "Skills & Tooling pour Claude Code",
           "description": "Mes skills, agents et workflows pour Claude Code, y compris le workflow de revue de projet. Maintenu en continu.",
           "stack": ["Claude Code", "Skills", "Agents", "MCP"],
-          "ctaLabel": "Dépôt et documentation"
+          "ctaLabel": "Repo & Docs"
         }
       ]
     }
@@ -564,7 +564,7 @@
       ]
     },
     "publicLayer": {
-      "label": "Couche publique"
+      "label": "Public"
     },
     "reflection": {
       "label": "Ce que j’ai appris",
@@ -589,7 +589,7 @@
         "screenshotAlt": "Page d'accueil Joggediballa en vue mobile"
       },
       "stack": {
-        "heading": "Note de stack"
+        "heading": "Stack Notes"
       },
       "highlightAdmin": {
         "datestamp": "Admin · v3",
@@ -660,7 +660,7 @@
       "body": "Je recherche un poste à plein temps dans la région de Bâle, en Argovie ou à Zurich. Idéalement là où développement et design se pensent ensemble et où Claude Code dans le terminal est normal."
     },
     "channels": {
-      "label": "Canaux directs",
+      "label": "Channels",
       "email": "E-mail",
       "github": "GitHub",
       "linkedin": "LinkedIn",

@@ -45,7 +45,7 @@
     "headline": "My focus.",
     "subhead": "What I do at work, and what I picked up on the side.",
     "heroSkill": {
-      "eyebrow": "Professional focus",
+      "eyebrow": "Main Stack",
       "name": "PHP · Vue · SQL",
       "description": "UIs for complex business processes, the APIs behind them, and release tests so nothing breaks."
     },
@@ -53,7 +53,7 @@
     "tiers": [
       {
         "id": "daily-driver",
-        "label": "Professional experience",
+        "label": "Daily Driver",
         "weight": "xl",
         "items": [
           {
@@ -72,7 +72,7 @@
       },
       {
         "id": "production",
-        "label": "Integrations and quality",
+        "label": "APIs & Testing",
         "weight": "l",
         "items": [
           {
@@ -94,7 +94,7 @@
       },
       {
         "id": "vibecoded",
-        "label": "Own projects",
+        "label": "Side Projects",
         "description": "Learned by building my own projects. Runs in production, just isn't my day-job stack.",
         "weight": "l",
         "items": [
@@ -122,7 +122,7 @@
       },
       {
         "id": "occasional",
-        "label": "Tools and operations",
+        "label": "Tooling & Ops",
         "description": "Codex and Claude Code with custom skills, agents and MCP integrations; Linux and nginx for self-hosted projects.",
         "weight": "m",
         "items": [
@@ -145,7 +145,7 @@
       },
       {
         "id": "craft",
-        "label": "Design and media",
+        "label": "Design & Media",
         "weight": "m",
         "items": [
           {
@@ -216,7 +216,7 @@
       "alt": "Portrait photo Manuel Heller, Full-Stack Developer Basel",
       "caption": "St. Moritz · MMXXV",
       "plate": "Plate Nº 03",
-      "label": "Self-portrait",
+      "label": "Self-Portrait",
       "stamps": [
         {
           "label": "Location",
@@ -263,7 +263,7 @@
       },
       "aiWorkflow": {
         "counter": "03 / 04",
-        "label": "AI workflow"
+        "label": "AI Workflow"
       },
       "antrieb": {
         "counter": "04 / 04",
@@ -311,7 +311,7 @@
           }
         },
         "tauchen": {
-          "name": "Depth",
+          "name": "Dive",
           "caption": "diving · certified",
           "reveal": {
             "alt": "Manuel scuba diving at the reef, thumbs up to the camera",
@@ -319,7 +319,7 @@
           }
         },
         "pingpong": {
-          "name": "Ping-pong",
+          "name": "Ping-Pong",
           "caption": "chasing · zvoove champion title"
         }
       }
@@ -421,33 +421,33 @@
           "id": "shotCounter",
           "title": "Shot-Counter",
           "tagline": "Party scoreboard · Desktop app",
-          "description": "Live team scoreboard with QR joining over the local network and synchronised scores. Built as an Electron app for Windows and Linux.",
+          "description": "Live team scoreboard with QR join over the local network and synchronised scores. Built as an Electron app for Windows and Linux.",
           "stack": ["Vue.js", "Express", "SQLite", "SSE", "Electron"],
-          "ctaLabel": "Repo & download"
+          "ctaLabel": "Repo & Download"
         },
         {
           "id": "flyConnectomeSim",
           "title": "Fly Connectome Sim",
-          "tagline": "Connectome simulation · In development",
+          "tagline": "Connectome Sim · WIP",
           "description": "I simulate the published connectome of a fruit fly. Python around it, C++ in the numerical core, every run logged reproducibly.",
           "stack": ["Python", "C++", "MaleCNS"],
-          "ctaLabel": "Code and documentation"
+          "ctaLabel": "Repo & Docs"
         },
         {
           "id": "mercurius",
           "title": "Mercurius",
-          "tagline": "Quant research · Completed",
+          "tagline": "Quant Research · Archived",
           "description": "A Python research project for trading strategies with reproducible backtests and fixed validation criteria. Three hypotheses rejected, with no real capital deployed.",
           "stack": ["Python", "Alpaca", "SQLite", "Backtesting"],
-          "ctaLabel": "Code and documentation"
+          "ctaLabel": "Repo & Docs"
         },
         {
           "id": "claudeCodeKit",
           "title": "claude-code-kit",
-          "tagline": "Skills and tools for Claude Code",
+          "tagline": "Skills & Tooling for Claude Code",
           "description": "My skills, agents and workflows for Claude Code, including the project-review workflow. Actively maintained.",
           "stack": ["Claude Code", "Skills", "Agents", "MCP"],
-          "ctaLabel": "Repository and documentation"
+          "ctaLabel": "Repo & Docs"
         }
       ]
     }
@@ -548,7 +548,7 @@
           "screenshotAlt": "Twitch overlay during stream with live score and club design",
           "features": [
             {
-              "title": "Browser-based control",
+              "title": "Control panel in the browser",
               "body": "A separate control panel manages the display, which is embedded in OBS as a browser source."
             },
             {
@@ -564,7 +564,7 @@
       ]
     },
     "publicLayer": {
-      "label": "Public layer"
+      "label": "Public"
     },
     "reflection": {
       "label": "What I learned",
@@ -589,7 +589,7 @@
         "screenshotAlt": "Joggediballa homepage in mobile view"
       },
       "stack": {
-        "heading": "Stack note"
+        "heading": "Stack Notes"
       },
       "highlightAdmin": {
         "datestamp": "Admin · v3",
@@ -660,7 +660,7 @@
       "body": "I’m looking for a full-time role in the Basel region, Aargau or Zurich. Ideally somewhere development and design are thought of together and Claude Code in the terminal is normal."
     },
     "channels": {
-      "label": "Direct channels",
+      "label": "Channels",
       "email": "Email",
       "github": "GitHub",
       "linkedin": "LinkedIn",

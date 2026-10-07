@@ -14,16 +14,16 @@
   "nav": {
     "ariaLabel": "Navigazione principale",
     "items": {
-      "work": "Lavori",
-      "about": "Chi sono",
+      "work": "Work",
+      "about": "About",
       "playground": "Playground",
-      "contact": "Contatto",
+      "contact": "Contact",
       "impressum": "Note legali",
       "datenschutz": "Privacy",
       "cv": "CV",
       "skills": "Skills",
-      "casestudy": "Caso studio",
-      "photography": "Fotografia"
+      "casestudy": "Case Study",
+      "photography": "Photography"
     },
     "mobileMenu": {
       "open": "Apri menu",
@@ -65,7 +65,7 @@
     "aboutObjectsLabel": "Off the Screen"
   },
   "simPresets": {
-    "label": "Carattere dell'inchiostro",
+    "label": "Ink Style",
     "hint": "Change the look!",
     "riso": "Riso",
     "wave": "Wave",
@@ -80,8 +80,8 @@
   "inkStudio": {
     "label": "Visuals",
     "intro": "Carta, colore e un po’ di movimento. Crea la tua atmosfera.",
-    "theme": "Palette",
-    "motion": "Movimento",
+    "theme": "Theme",
+    "motion": "Motion",
     "light": "Animazione",
     "full": "Simulazione",
     "lightBody": "Forme fluide che reagiscono ai tuoi gesti. Leggero da calcolare.",

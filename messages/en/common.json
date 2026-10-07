@@ -65,7 +65,7 @@
     "aboutObjectsLabel": "Off the Screen"
   },
   "simPresets": {
-    "label": "Ink character",
+    "label": "Ink Style",
     "hint": "Change the look!",
     "riso": "Riso",
     "wave": "Wave",
@@ -80,7 +80,7 @@
   "inkStudio": {
     "label": "Visuals",
     "intro": "Paper, colour and a little motion. Make this view your own.",
-    "theme": "Colour palette",
+    "theme": "Theme",
     "motion": "Motion",
     "light": "Animation",
     "full": "Simulation",

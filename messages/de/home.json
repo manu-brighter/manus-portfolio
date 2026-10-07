@@ -45,7 +45,7 @@
     "headline": "Meine Schwerpunkte.",
     "subhead": "Was ich im Job mache, und was ich nebenbei gelernt habe.",
     "heroSkill": {
-      "eyebrow": "Beruflicher Schwerpunkt",
+      "eyebrow": "Main Stack",
       "name": "PHP · Vue · SQL",
       "description": "UIs für komplexe Fachprozesse, APIs dahinter, und Release-Tests, damit nichts kaputtgeht."
     },
@@ -53,7 +53,7 @@
     "tiers": [
       {
         "id": "daily-driver",
-        "label": "Beruflich im Einsatz",
+        "label": "Daily Driver",
         "weight": "xl",
         "items": [
           {
@@ -72,7 +72,7 @@
       },
       {
         "id": "production",
-        "label": "Schnittstellen und Qualität",
+        "label": "APIs & Testing",
         "weight": "l",
         "items": [
           {
@@ -94,7 +94,7 @@
       },
       {
         "id": "vibecoded",
-        "label": "Eigene Projekte",
+        "label": "Side Projects",
         "description": "Gelernt beim Bauen eigener Projekte. Läuft in Produktion, ist aber nicht mein Job-Stack.",
         "weight": "l",
         "items": [
@@ -122,7 +122,7 @@
       },
       {
         "id": "occasional",
-        "label": "Werkzeuge und Betrieb",
+        "label": "Tooling & Ops",
         "description": "Codex und Claude Code mit eigenen Skills, Agents und MCP-Anbindungen; Linux und nginx für selbst betriebene Projekte.",
         "weight": "m",
         "items": [
@@ -145,7 +145,7 @@
       },
       {
         "id": "craft",
-        "label": "Gestaltung und Medien",
+        "label": "Design & Media",
         "weight": "m",
         "items": [
           {
@@ -216,7 +216,7 @@
       "alt": "Portraitfoto Manuel Heller, Full-Stack Developer Basel",
       "caption": "St. Moritz · MMXXV",
       "plate": "Plate Nº 03",
-      "label": "Selbstporträt",
+      "label": "Self-Portrait",
       "stamps": [
         {
           "label": "Location",
@@ -241,7 +241,7 @@
     "marginalia": {
       "werIchBin": {
         "counter": "01 / 04",
-        "label": "Identität",
+        "label": "Identity",
         "year": "MMXXVI"
       },
       "anfangen": {
@@ -263,11 +263,11 @@
       },
       "aiWorkflow": {
         "counter": "03 / 04",
-        "label": "AI-Workflow"
+        "label": "AI Workflow"
       },
       "antrieb": {
         "counter": "04 / 04",
-        "label": "Antrieb"
+        "label": "Drive"
       }
     },
     "objectGrid": {
@@ -279,7 +279,7 @@
       "revealClose": "Schliessen",
       "tiles": {
         "camera": {
-          "name": "Kamera",
+          "name": "Camera",
           "caption": "shooting · Sony α7 IV · Wildlife",
           "reveal": {
             "alt": "Zwei junge Füchse zwischen Buchenzweigen im Wald, Wildlife-Aufnahme mit der Sony α7 IV",
@@ -303,7 +303,7 @@
           }
         },
         "schnee": {
-          "name": "Schnee",
+          "name": "Snow",
           "caption": "carving · Ski/Snowboard · Wintersaison",
           "reveal": {
             "alt": "Verschneite Alpengipfel unter blauem Himmel, vom Grat aus gesehen",
@@ -311,7 +311,7 @@
           }
         },
         "tauchen": {
-          "name": "Tiefe",
+          "name": "Dive",
           "caption": "diving · certified",
           "reveal": {
             "alt": "Manuel beim Tauchgang am Riff, Daumen hoch in die Kamera",
@@ -421,33 +421,33 @@
           "id": "shotCounter",
           "title": "Shot-Counter",
           "tagline": "Party-Scoreboard · Desktop-App",
-          "description": "Live-Scoreboard für Teams mit QR-Beitritt über das lokale Netzwerk und synchronisierten Spielständen. Als Electron-App für Windows und Linux umgesetzt.",
+          "description": "Live-Scoreboard für Teams mit QR-Join über das lokale Netzwerk und synchronisierten Spielständen. Als Electron-App für Windows und Linux umgesetzt.",
           "stack": ["Vue.js", "Express", "SQLite", "SSE", "Electron"],
           "ctaLabel": "Repo & Download"
         },
         {
           "id": "flyConnectomeSim",
           "title": "Fly Connectome Sim",
-          "tagline": "Connectome-Simulation · In Entwicklung",
+          "tagline": "Connectome Sim · WIP",
           "description": "Ich simuliere das veröffentlichte Connectome einer Fruchtfliege. Python drumherum, C++ im Rechenkern, jeder Lauf reproduzierbar geloggt.",
           "stack": ["Python", "C++", "MaleCNS"],
-          "ctaLabel": "Code und Dokumentation"
+          "ctaLabel": "Repo & Docs"
         },
         {
           "id": "mercurius",
           "title": "Mercurius",
-          "tagline": "Quant Research · Abgeschlossen",
+          "tagline": "Quant Research · Archived",
           "description": "Python-Forschungsprojekt für Handelsstrategien mit reproduzierbaren Backtests und festen Prüfkriterien. Drei Hypothesen verworfen, ohne echtes Kapital einzusetzen.",
           "stack": ["Python", "Alpaca", "SQLite", "Backtesting"],
-          "ctaLabel": "Code und Dokumentation"
+          "ctaLabel": "Repo & Docs"
         },
         {
           "id": "claudeCodeKit",
           "title": "claude-code-kit",
-          "tagline": "Skills und Werkzeuge für Claude Code",
+          "tagline": "Skills & Tooling für Claude Code",
           "description": "Meine Skills, Agents und Workflows für Claude Code, inklusive dem Projekt-Review-Workflow. Wird laufend gepflegt.",
           "stack": ["Claude Code", "Skills", "Agents", "MCP"],
-          "ctaLabel": "Repository und Dokumentation"
+          "ctaLabel": "Repo & Docs"
         }
       ]
     }
@@ -461,14 +461,7 @@
       "ariaSlideOf": "Station {index} von {total}: {label}",
       "ariaLive": "Station {index} von {total}: {label}",
       "swipeHint": "Seitlich wischen für die ganze Case-Study",
-      "stationLabels": [
-        "Hook",
-        "Kontext",
-        "Stack",
-        "Admin-Highlight",
-        "Twitch-Overlay",
-        "Öffentliche Schicht"
-      ]
+      "stationLabels": ["Hook", "Kontext", "Stack", "Admin-Highlight", "Twitch-Overlay", "Public"]
     },
     "sectionLabel": "Section 04 · Case Study",
     "headline": "Aus einer Vereinsidee wurde eine Plattform.",
@@ -555,7 +548,7 @@
           "screenshotAlt": "Twitch-Overlay im Stream mit Live-Score und Vereinsdesign",
           "features": [
             {
-              "title": "Steuerung im Browser",
+              "title": "Control Panel im Browser",
               "body": "Ein separates Control-Panel steuert die Anzeige, die als Browser-Quelle in OBS eingebunden wird."
             },
             {
@@ -571,7 +564,7 @@
       ]
     },
     "publicLayer": {
-      "label": "Öffentliche Schicht"
+      "label": "Public"
     },
     "reflection": {
       "label": "Was ich gelernt habe",
@@ -596,7 +589,7 @@
         "screenshotAlt": "Joggediballa-Homepage in der mobilen Ansicht"
       },
       "stack": {
-        "heading": "Stack-Notiz"
+        "heading": "Stack Notes"
       },
       "highlightAdmin": {
         "datestamp": "Admin · v3",
@@ -667,7 +660,7 @@
       "body": "Ich suche eine Vollzeitstelle in der Region Basel, im Aargau oder in Zürich. Am liebsten dort, wo Entwicklung und Design zusammen gedacht werden und Claude Code im Terminal normal ist."
     },
     "channels": {
-      "label": "Direkt-Kanäle",
+      "label": "Channels",
       "email": "E-Mail",
       "github": "GitHub",
       "linkedin": "LinkedIn",
