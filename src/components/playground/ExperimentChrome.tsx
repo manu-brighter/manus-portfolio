@@ -1,7 +1,9 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { PLAYGROUND_SIM_TIER } from "@/lib/content/playground";
+import { getTierConfig } from "@/lib/gpu";
 import { PlaygroundPresetBar } from "./PlaygroundPresetBar";
 
 type ExperimentChromeProps = {
@@ -23,6 +25,10 @@ type ExperimentChromeProps = {
 export function ExperimentChrome({ i18nKey, children }: ExperimentChromeProps) {
   const t = useTranslations(`playground.experiments.${i18nKey}`);
   const tCommon = useTranslations("playground.shell");
+  const locale = useLocale();
+  // Read from the tier the experiments are actually initialised with,
+  // so the readout can't claim a grid the sim doesn't run.
+  const grid = getTierConfig(PLAYGROUND_SIM_TIER).gridSize;
 
   return (
     <div className="fixed inset-0 bg-paper">
@@ -47,7 +53,16 @@ export function ExperimentChrome({ i18nKey, children }: ExperimentChromeProps) {
               <span>{tCommon("back")}</span>
             </Link>
             <h1 className="type-h2 mt-3 italic text-ink">{t("title")}</h1>
-            <p className="type-body-sm mt-3 max-w-[36ch] text-ink-soft md:hidden">{t("caption")}</p>
+            {/* Tech readout stamp. Technical English in every locale. */}
+            <p
+              className="type-label-stamp mt-3 text-ink-muted"
+              lang={locale === "en" ? undefined : "en"}
+            >
+              {tCommon("techStamp", { grid })}
+            </p>
+            <p className="type-body-sm mt-3 max-w-[36ch] text-ink-soft md:hidden">
+              {t("caption")} {t("simulates")}
+            </p>
             {/* Docked preset switcher — flows in the title column so it
                 sits below the caption on mobile and below the title on
                 desktop (caption is bottom-left there), adapting to
@@ -65,6 +80,7 @@ export function ExperimentChrome({ i18nKey, children }: ExperimentChromeProps) {
             edge is occupied by experiment controls on small screens. */}
         <div className="container-page absolute bottom-6 left-0 right-0 hidden md:block">
           <p className="type-body-sm max-w-[60ch] text-ink-soft">{t("caption")}</p>
+          <p className="type-body-sm mt-1 max-w-[60ch] text-ink-muted">{t("simulates")}</p>
         </div>
       </div>
     </div>

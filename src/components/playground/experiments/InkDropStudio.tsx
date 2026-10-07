@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { Pane } from "tweakpane";
 import { useOrchestratorRAF } from "@/hooks/useOrchestratorRAF";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { INK_DROP_STUDIO_DEFAULTS } from "@/lib/content/playground";
+import { INK_DROP_STUDIO_DEFAULTS, PLAYGROUND_SIM_TIER } from "@/lib/content/playground";
 import { getSimPreset, type SimPresetId } from "@/lib/content/simPresets";
 import { FluidOrchestrator, type PointerState } from "@/lib/gl/fluidOrchestrator";
 import { capDPR, DPR_FULL, getTierConfig } from "@/lib/gpu";
@@ -123,7 +123,7 @@ function InkDropStudioCanvas() {
 
     // Start at medium tier; the studio is interactive so we don't bias
     // for power efficiency. The Tweakpane sliders dominate from here.
-    const baseConfig = getTierConfig("medium");
+    const baseConfig = getTierConfig(PLAYGROUND_SIM_TIER);
     const orchestrator = new FluidOrchestrator();
     const p = paramsRef.current;
     orchestrator.init(gl, {
@@ -236,7 +236,7 @@ function InkDropStudioCanvas() {
       if (preset.id === "riso") {
         Object.assign(params, INK_DROP_STUDIO_DEFAULTS);
       } else {
-        const base = getTierConfig("medium");
+        const base = getTierConfig(PLAYGROUND_SIM_TIER);
         params.velocityDissipation = preset.physics.velocityDissipation ?? base.velocityDissipation;
         params.dyeDissipation = preset.physics.dyeDissipation ?? base.dyeDissipation;
         params.vorticity = preset.physics.confinement ?? base.confinement;

@@ -6,7 +6,8 @@
     "lede": "Two shader experiments with the same ink as the hero. Click away until it stutters.",
     "openLabel": "Open experiment",
     "shell": {
-      "back": "BACK TO PLAYGROUND"
+      "back": "BACK TO PLAYGROUND",
+      "techStamp": "WebGL2 · Navier-Stokes · {grid}² Grid"
     },
     "experiments": {
       "inkDropStudio": {
@@ -15,6 +16,7 @@
         "cardBody": "Blank sheet. A click drops ink in the current spot colour, the sliders turn the physics, BOMB brings chaos, FREEZE stops everything.",
         "title": "Ink Drop Studio.",
         "caption": "Playground for the hero simulation. Click = ink splat, sliders = sim parameters, BOMB if you're in the mood for chaos.",
+        "simulates": "It simulates an incompressible fluid: velocity, pressure and vorticity, computed frame by frame on the GPU.",
         "buttonBomb": "BOMB",
         "buttonFreeze": "FREEZE",
         "buttonResume": "RESUME",
@@ -27,6 +29,7 @@
         "cardBody": "Type a word. It gets printed, then swallowed by the ink. Gently.",
         "title": "Type-as-Fluid.",
         "caption": "Type a word. It gets printed, then swallowed by the ink. Gently.",
+        "simulates": "The word is printed as ink into the same flow. The velocity field carries it off until it dissolves.",
         "inputLabel": "TYPE A WORD",
         "inputPlaceholder": "Manuel",
         "triggerLabel": "Print word again",

@@ -6,7 +6,8 @@
     "lede": "Deux expériences shader avec la même encre que dans le hero. Ici, on clique jusqu’à ce que ça saccade.",
     "openLabel": "Ouvrir l'expérimentation",
     "shell": {
-      "back": "RETOUR AU PLAYGROUND"
+      "back": "RETOUR AU PLAYGROUND",
+      "techStamp": "WebGL2 · Navier-Stokes · {grid}² Grid"
     },
     "experiments": {
       "inkDropStudio": {
@@ -15,6 +16,7 @@
         "cardBody": "Feuille blanche. Un clic dépose de l'encre dans la spot color actuelle, les sliders règlent la physique, BOMB sème le chaos, FREEZE fige tout.",
         "title": "Ink Drop Studio.",
         "caption": "Bac à sable pour la simulation hero. Clic = ink splat, sliders = paramètres de simulation, « Bomb » si tu as envie de chaos.",
+        "simulates": "Ce qui est simulé : un fluide incompressible, vitesse, pression et tourbillons, calculés image par image sur le GPU.",
         "buttonBomb": "BOMB",
         "buttonFreeze": "FREEZE",
         "buttonResume": "RESUME",
@@ -27,6 +29,7 @@
         "cardBody": "Tape un mot. Il s'imprime, puis se fait avaler par l'encre. Tout en douceur.",
         "title": "Type-as-Fluid.",
         "caption": "Tape un mot. Il s'imprime, puis se fait avaler par l'encre. Tout en douceur.",
+        "simulates": "Le mot est imprimé comme de l'encre dans le même écoulement. Le champ de vitesse l'emporte jusqu'à ce qu'il se dissolve.",
         "inputLabel": "TAPE UN MOT",
         "inputPlaceholder": "Manuel",
         "triggerLabel": "Imprimer le mot à nouveau",

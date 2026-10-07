@@ -6,7 +6,8 @@
     "lede": "Zwei Shader-Experimente mit derselben Tinte wie im Hero. Hier darf man draufklicken, bis es ruckelt.",
     "openLabel": "Experiment öffnen",
     "shell": {
-      "back": "ZURÜCK ZUM PLAYGROUND"
+      "back": "ZURÜCK ZUM PLAYGROUND",
+      "techStamp": "WebGL2 · Navier-Stokes · {grid}² Grid"
     },
     "experiments": {
       "inkDropStudio": {
@@ -15,6 +16,7 @@
         "cardBody": "Leeres Blatt. Klick setzt Tinte in der aktuellen Spot-Farbe, die Slider drehen an der Physik, BOMB macht Chaos, FREEZE hält alles an.",
         "title": "Ink Drop Studio.",
         "caption": "Spielwiese für die Hero-Simulation. Klick = Ink-Splat, Slider = Sim-Parameter, „Bomb“, wenn dir gerade nach Chaos ist.",
+        "simulates": "Simuliert wird eine inkompressible Flüssigkeit: Geschwindigkeit, Druck und Wirbel, Bild für Bild auf der GPU gerechnet.",
         "buttonBomb": "BOMB",
         "buttonFreeze": "FREEZE",
         "buttonResume": "RESUME",
@@ -27,6 +29,7 @@
         "cardBody": "Tipp ein Wort. Es wird gedruckt, dann von der Tinte verschluckt. Sanft.",
         "title": "Type-as-Fluid.",
         "caption": "Tipp ein Wort. Es wird gedruckt, dann von der Tinte verschluckt. Sanft.",
+        "simulates": "Das Wort wird als Tinte in dieselbe Strömung gedruckt. Das Geschwindigkeitsfeld trägt es weiter, bis es sich auflöst.",
         "inputLabel": "TIPPE EIN WORT",
         "inputPlaceholder": "Manuel",
         "triggerLabel": "Wort erneut drucken",
