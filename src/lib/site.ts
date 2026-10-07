@@ -18,7 +18,7 @@ export const SITE = {
   shortName: "Manuel Heller",
   tagline: "Full-Stack Developer · PHP & Vue",
   description:
-    "Softwareentwicklung mit PHP und Vue, Schnittstellen und Testautomatisierung. Eigene Webprojekte, AI-gestützte Entwicklung und Fotografie.",
+    "Full-Stack Developer aus der Region Basel. PHP und Vue im Job, eigene Webprojekte, Claude Code und Wildlife-Fotografie daneben.",
   author: {
     name: "Manuel Heller",
     region: "Region Basel, Schweiz",
