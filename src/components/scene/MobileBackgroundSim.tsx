@@ -10,6 +10,7 @@ import {
 } from "@/lib/gl/fluidOrchestrator";
 import { capDPR, getTierDPR, type TierConfig } from "@/lib/gpu";
 import { createInkWarmup } from "@/lib/inkPreview";
+import { createInkScrollTracker } from "@/lib/inkScroll";
 import { subscribeToLoaderComplete } from "@/lib/loaderSession";
 import { SPOT_COLORS, type SpotColor } from "@/lib/palette";
 import { MAX_DT_S, subscribe } from "@/lib/raf";
@@ -65,6 +66,9 @@ export function MobileBackgroundSim({
   const onFrametimeRef = useRef(onFrametime);
   onFrametimeRef.current = onFrametime;
   const warmupRef = useRef<ReturnType<typeof createInkWarmup> | null>(null);
+  // Ink sheet clock, handed from a disposed orchestrator to its
+  // replacement (tier re-init) so the composition continues, not snaps.
+  const sheetTimeRef = useRef(0);
   const onUnavailableRef = useRef(onUnavailable);
   onUnavailableRef.current = onUnavailable;
   const reduced = useReducedMotion();
@@ -106,6 +110,8 @@ export function MobileBackgroundSim({
     const orchestrator = createFluidOrchestrator();
     try {
       orchestrator.init(gl, config);
+      // Print the theme's Light composition from the fluid (see setInkSheet).
+      orchestrator.setInkSheet(true, sheetTimeRef.current);
       applySimPreset(orchestrator, getSimPreset(useSimPresetStore.getState().presetId), config);
       // Compile the first splat before declaring the renderer available.
       orchestrator.injectSplat(-1, -1, [0, 0, 0], 0, 0);
@@ -163,6 +169,7 @@ export function MobileBackgroundSim({
       if (resizeRaf !== null) cancelAnimationFrame(resizeRaf);
       unsubLoader();
       unsubPreset();
+      sheetTimeRef.current = orchestrator.getSheetTime();
       orchestrator.dispose();
       orchestratorRef.current = null;
       warmupRef.current = null;
@@ -299,14 +306,15 @@ export function MobileBackgroundSim({
       lastInjectT = now;
 
       const force = Math.min(Math.abs(velocity) * COUPLE_VELOCITY_TO_FORCE, COUPLE_MAX_FORCE);
-      // y origin is canvas-bottom: scroll-down (velocity > 0) moves
-      // content up, so the ink drifts up with it; scroll-up mirrors.
+      // y origin is canvas-bottom: scroll-down (velocity > 0) pushes the
+      // ink DOWN, against the content, matching Light's parallax drift
+      // and the sheet carry; scroll-up mirrors.
       orchestratorRef.current?.injectSplat(
         0.5,
         0.5,
         NO_DYE,
         0,
-        velocity > 0 ? force : -force,
+        velocity > 0 ? -force : force,
         COUPLE_FORCE_RADIUS,
       );
     };
@@ -319,10 +327,15 @@ export function MobileBackgroundSim({
   useEffect(() => {
     if (reduced) return;
     let virtualElapsedMs = 0;
+    // Same scroll choreography as Light: the sheet drifts against native
+    // scrolling, reading sections open a paper interval.
+    const scrollTracker = createInkScrollTracker();
     const unsub = subscribe((deltaMs) => {
       const orchestrator = orchestratorRef.current;
       if (!orchestrator) return;
       const dt = Math.min(deltaMs * 0.001, MAX_DT_S);
+      const scroll = scrollTracker.update(dt);
+      orchestrator.setScrollState(scroll.scroll, scroll.quiet);
       virtualElapsedMs += Math.min(deltaMs, MAX_DT_S * 1000);
       const startedAt = performance.now();
       const touch = touchSplatRef.current;
@@ -348,7 +361,10 @@ export function MobileBackgroundSim({
         }
       }
     }, 15);
-    return () => unsub();
+    return () => {
+      unsub();
+      scrollTracker.dispose();
+    };
   }, [reduced]);
 
   if (reduced) return null;

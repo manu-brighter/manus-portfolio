@@ -15,8 +15,9 @@ import { useSceneVisibilityStore } from "@/lib/sceneVisibilityStore";
  * Watches Lenis velocity on the shared RAF (priority 10, post-Lenis).
  * On fast flicks it dispatches an INVISIBLE whole-canvas force splat:
  * color [0,0,0] deposits zero dye (the dye pass adds nothing), while
- * the velocity pass pushes the ink already on screen in the scroll
- * direction — the ink feels attached to the page. No dots, no new
+ * the velocity pass gives the ink already on screen a short push
+ * against the scroll, the same direction as Light's parallax drift and
+ * the Full sheet carry (pushing with the page fought both). No dots, no new
  * color, no edge artefacts (the first cut injected visible splats at
  * the scroll edge and read as noise).
  *
@@ -68,9 +69,10 @@ export function ScrollInkCoupling() {
         y: 0.5,
         color: NO_DYE,
         dx: 0,
-        // y origin is canvas-bottom: scroll-down (v > 0) moves content
-        // up, so the ink drifts up with it; scroll-up mirrors.
-        dy: velocity > 0 ? force : -force,
+        // y origin is canvas-bottom: scroll-down (v > 0) pushes the ink
+        // DOWN, against the content, matching Light's parallax drift and
+        // the sheet carry; scroll-up mirrors.
+        dy: velocity > 0 ? -force : force,
         radius: FORCE_RADIUS,
       });
     }, 10);

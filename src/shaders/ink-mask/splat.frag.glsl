@@ -1,7 +1,7 @@
 #version 300 es
 precision highp float;
 
-// Ink-mask · splat step.
+// Ink-mask - splat step.
 // Adds an ink "drop" centred at uPoint with falloff radius uRadius.
 // Density is additive (additive blending owned by the consumer or
 // applied here via ADD against the previous frame texture).
