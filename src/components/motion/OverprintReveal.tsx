@@ -43,8 +43,9 @@ import gsap from "gsap";
 import { type CSSProperties, useEffect, useId, useRef } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { subscribeToLoaderComplete } from "@/lib/loaderSession";
+import { gsapEase } from "@/lib/motion/gsapEase";
 import { splitChars } from "@/lib/motion/splitChars";
-import { dur, ease } from "@/lib/motion/tokens";
+import { dur } from "@/lib/motion/tokens";
 
 type OverprintRevealProps = {
   /** Text content — keep it a string so we can split + flow chars. */
@@ -128,7 +129,7 @@ export function OverprintReveal({
     root.dataset.overprint = "pending";
 
     const resolvedStagger = stagger ?? dur.micro / 5;
-    const easeCurve = `cubic-bezier(${ease.riso.join(",")})`;
+    const easeCurve = gsapEase().riso;
 
     // Prime state — ghosts displaced further than their resting offset,
     // ink invisible. `gsap.set` avoids a one-frame flash before the
