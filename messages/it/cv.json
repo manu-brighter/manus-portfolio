@@ -8,7 +8,7 @@
     "name": "Manuel Heller",
     "role": "Sviluppatore software · PHP & Vue",
     "region": "Regione di Basilea, Svizzera",
-    "profile": "Progetto interfacce per processi aziendali complessi, sviluppo applicazioni e integrazioni e mi occupo dei test automatizzati di rilascio. Nei progetti personali unisco sviluppo e design in applicazioni web complesse che gestisco direttamente. Disponibile dal 1° dicembre 2026, a tempo pieno.",
+    "profile": "Costruisco interfacce Vue per processi aziendali complessi, i backend PHP e le integrazioni dietro, e sono responsabile dei test di rilascio automatizzati. Nel tempo libero sviluppo e gestisco applicazioni web mie, dove design e codice nascono dalla stessa mano. Disponibile dal 1° dicembre 2026, a tempo pieno.",
     "contactLabel": "Contatti",
     "download": {
       "label": "Salva in PDF",
@@ -47,7 +47,7 @@
         {
           "title": "joggediballa.ch",
           "meta": "React · TypeScript · Node.js · tRPC · MySQL",
-          "description": "Piattaforma associativa e per eventi progettata e sviluppata nell’arco di diversi mesi; usata regolarmente, ospitata e mantenuta personalmente. Permessi, soci sostenitori e statistiche di presenza; sistema di ordinazioni e cassa per servizio, cucina e bar, slideshow moderato dal vivo e overlay per lo streaming."
+          "description": "Piattaforma associativa e per eventi progettata e sviluppata nell’arco di diversi mesi; in uso dal 2024, ospitata e mantenuta personalmente. Permessi, soci sostenitori e statistiche di presenza; sistema di ordinazioni e cassa per servizio, cucina e bar, slideshow moderato dal vivo e overlay per lo streaming."
         },
         {
           "title": "manuelheller.dev",
@@ -69,7 +69,7 @@
         },
         {
           "label": "Qualità del software",
-          "items": "Cypress · Playwright · E2E · Code-Reviews"
+          "items": "Cypress · Playwright · E2E · Code reviews"
         },
         {
           "label": "Ambiente di sviluppo",

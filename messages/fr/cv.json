@@ -8,7 +8,7 @@
     "name": "Manuel Heller",
     "role": "Développeur logiciel · PHP & Vue",
     "region": "Région de Bâle, Suisse",
-    "profile": "Je conçois des interfaces pour des processus métier complexes, développe des applications et des intégrations et assure les tests automatisés de validation des versions. Dans mes projets personnels, je réunis développement et design au sein d’applications web complètes que j’exploite moi-même. Disponible dès le 1er décembre 2026, à 100 %.",
+    "profile": "Je construis des interfaces Vue pour des processus métier complexes, les backends PHP et les intégrations derrière, et je suis responsable des tests de release automatisés. À côté, je développe et exploite mes propres applications web, où design et code viennent de la même main. Disponible dès le 1er décembre 2026, à 100 %.",
     "contactLabel": "Contact",
     "download": {
       "label": "Enregistrer en PDF",
@@ -47,7 +47,7 @@
         {
           "title": "joggediballa.ch",
           "meta": "React · TypeScript · Node.js · tRPC · MySQL",
-          "description": "Plateforme associative et événementielle conçue et développée sur plusieurs mois ; utilisée régulièrement, hébergée et maintenue par mes soins. Permissions, membres de soutien et suivi des présences ; système de commandes et de caisse pour le service, la cuisine et le bar, diaporama modéré en direct et habillage de diffusion."
+          "description": "Plateforme associative et événementielle conçue et développée sur plusieurs mois ; en service depuis 2024, hébergée et maintenue par mes soins. Permissions, membres de soutien et suivi des présences ; système de commandes et de caisse pour le service, la cuisine et le bar, diaporama modéré en direct et habillage de diffusion."
         },
         {
           "title": "manuelheller.dev",
@@ -69,7 +69,7 @@
         },
         {
           "label": "Assurance qualité",
-          "items": "Cypress · Playwright · E2E · Code-Reviews"
+          "items": "Cypress · Playwright · E2E · Code reviews"
         },
         {
           "label": "Environnement de développement",

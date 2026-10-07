@@ -60,10 +60,6 @@ export type WorkCardProps = {
   ctaLabel: string;
   /** Spot-color seed used for the hover splat + accent. */
   splatColor: SpotColor;
-  /** Whether to show the [vibecoded] stamp. */
-  vibecoded?: boolean;
-  /** Marker label (i18n). */
-  vibecodedLabel?: string;
   /**
    * What clicking the card does. `"scroll-hero"` smooth-scrolls to
    * #hero and fires a large color burst once the scroll completes.
@@ -127,8 +123,6 @@ export function WorkCard(props: WorkCardProps) {
     metaNote,
     ctaLabel,
     splatColor,
-    vibecoded,
-    vibecodedLabel,
     click,
     media,
     mediaCaption,
@@ -436,13 +430,6 @@ export function WorkCard(props: WorkCardProps) {
             className="relative aspect-[16/9] overflow-hidden border-[1.5px] border-ink bg-paper-shade will-change-transform"
           >
             {media}
-
-            {/* Vibecoded stamp — bottom-right corner of the frame. */}
-            {vibecoded && vibecodedLabel ? (
-              <span className="absolute bottom-3 right-3 rounded-[2px] bg-paper px-2 py-1 font-mono text-[0.6rem] uppercase tracking-[0.18em] text-ink shadow-[2px_2px_0_var(--color-ink)]">
-                {vibecodedLabel}
-              </span>
-            ) : null}
           </div>
 
           {/* Mono caption under media. */}

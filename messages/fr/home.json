@@ -7,7 +7,7 @@
     "bioStamps": {
       "role": "zvoove · Full Stack",
       "sideProject": "Jogge di Balla · VP",
-      "location": "Basel-Region · CH"
+      "location": "Basel · CH"
     },
     "heading": {
       "family": "Heller,",
@@ -20,7 +20,7 @@
     "items": [
       {
         "verb": "je développe",
-        "value": "ce site et la plateforme du club"
+        "value": "ce site et joggediballa.ch"
       },
       {
         "verb": "j’expérimente avec",
@@ -43,11 +43,11 @@
   "skills": {
     "sectionLabel": "Section 02 · Skills",
     "headline": "Mes domaines de travail.",
-    "subhead": "Expérience professionnelle et outils de mes projets personnels.",
+    "subhead": "Ce que je fais au travail, et ce que j’ai appris à côté.",
     "heroSkill": {
       "eyebrow": "Spécialité professionnelle",
       "name": "PHP · Vue · SQL",
-      "description": "Concevoir des interfaces métier, développer des intégrations et accompagner les versions avec des tests automatisés."
+      "description": "Des UI pour des processus métier complexes, les API derrière, et des tests de release pour que rien ne casse."
     },
     "vibecodedMarker": "AI-assisted",
     "tiers": [
@@ -88,14 +88,14 @@
             "name": "SQL"
           },
           {
-            "name": "Code-Reviews"
+            "name": "Code reviews"
           }
         ]
       },
       {
         "id": "vibecoded",
         "label": "Projets personnels",
-        "description": "Utilisés avec l’aide de l’IA. J’y développe mon expérience ; PHP et Vue restent ma spécialité professionnelle.",
+        "description": "Appris en construisant mes propres projets. Tourne en production, mais ce n’est pas mon stack au travail.",
         "weight": "l",
         "items": [
           {
@@ -169,14 +169,14 @@
   },
   "about": {
     "sectionLabel": "Section 01 · About",
-    "headline": "Développeur full-stack avec un regard artistique.",
-    "subhead": "Code, photo, design : un même savoir-faire sous différentes formes.",
+    "headline": "Développeur full-stack qui aime aussi passer derrière l’appareil photo.",
+    "subhead": "PHP et Vue le jour, Lightroom et shaders le soir.",
     "parts": [
       {
         "id": "wer-ich-bin",
         "heading": "Qui je suis",
         "body": [
-          "Je suis Manuel, de la région bâloise. Au travail, je suis plongé dans PHP et Vue ; à côté, je m’occupe de photo, de Photoshop et de tout ce qui mêle code et image. C’est à ce croisement que naissent mes idées préférées.",
+          "Je suis Manuel, de la région bâloise. Au travail, plongé dans PHP et Vue ; à côté, appareil photo, Photoshop et tout ce qui se joue entre code et image.",
           "Depuis novembre 2021, je travaille chez zvoove Switzerland AG sur des logiciels destinés aux entreprises de travail temporaire. Je conçois et développe des interfaces Vue pour des processus complexes, des points d’accès PHP et des intégrations avec synchronisation de données.",
           "J’assure également une suite Cypress d’environ 30 tests de validation étendus, de leur écriture et exécution à l’analyse des erreurs. La migration vers Playwright est en cours."
         ]
@@ -193,22 +193,22 @@
         "id": "ai-workflow",
         "heading": "Mon travail avec l’IA",
         "body": [
-          "Pour moi, l’IA est comme un pinceau. J’apporte l’idée, le regard et la direction. Avec Codex et Claude Code, mes propres skills, agents et intégrations MCP, le projet prend forme étape par étape. Expérimenter, observer, affiner et tester font partie du travail.",
-          "J’ai développé la plateforme associative et ce portfolio avec l’aide de l’IA. Mon expérience de React et TypeScript vient de ces projets ; mon expérience professionnelle approfondie porte sur PHP et Vue. Je prends en charge le design, les fonctionnalités et l’exploitation."
+          "Je travaille beaucoup avec Codex et Claude Code : skills, agents et intégrations MCP maison. L’idée, le goût et le dernier mot restent à moi, l’IA tape juste plus vite. Ce qui en sort est relu, testé et souvent reconstruit.",
+          "C’est ainsi que sont nés la plateforme du club et ce portfolio. React et TypeScript, je les connais grâce à ces projets ; design, périmètre et exploitation sont entre mes mains."
         ]
       },
       {
         "id": "antrieb",
         "heading": "Ce qui me motive",
         "body": [
-          "Ce qui me motive ? La curiosité, tout simplement. J’aime essayer de nouveaux outils, peaufiner les petits détails visuels et comprendre comment les choses fonctionnent. Si le résultat sert vraiment au club, c’est encore mieux."
+          "La curiosité. J’aime essayer de nouveaux outils, peaufiner les petits détails visuels et savoir comment les choses fonctionnent. Si le club finit par vraiment utiliser le résultat, c’est encore mieux."
         ]
       },
       {
         "id": "off-screen",
         "heading": "Loin de l’écran",
         "body": [
-          "La photographie animalière est ma plus grande passion. Elle m’emmène aussi en solo au Costa Rica ou en Thaïlande, appareil en main, à la recherche d’animaux dans leur milieu naturel. Il y a aussi mon projet tuning sur l’Audi S5, le ski, le snowboard et la plongée. Chez Jogge di Balla, je suis cofondateur et vice-président et je participe aux événements, aux photos et aux vidéos. Et le titre de champion de ping-pong chez zvoove reste à décrocher."
+          "Pour des photos animalières, je pars parfois seul au Costa Rica ou en Thaïlande et je reste des heures dans les buissons avec l’appareil. Il y a aussi mon projet tuning sur l’Audi S5, le ski, le snowboard et la plongée. Chez Jogge di Balla, je suis cofondateur et vice-président et je participe aux événements, aux photos et aux vidéos. Et le titre de champion de ping-pong chez zvoove reste à décrocher."
         ]
       }
     ],
@@ -233,10 +233,10 @@
       ]
     },
     "pullQuotes": {
-      "werIchBin": "Mes idées préférées naissent [[à ce croisement]].",
+      "werIchBin": "Code, appareil photo, Photoshop : [[tout ce qui se joue entre code et image]].",
       "anfangen": "Je veux comprendre [[ce qui se passe sous le capot]].",
-      "aiWorkflow": "L’IA est mon pinceau. J’apporte [[la direction]].",
-      "antrieb": "Ce qui me motive ? [[La curiosité]], tout simplement."
+      "aiWorkflow": "L’IA tape plus vite. [[Le dernier mot]] reste à moi.",
+      "antrieb": "[[La curiosité]]. Et un club qui utilise vraiment le résultat."
     },
     "marginalia": {
       "werIchBin": {
@@ -327,13 +327,12 @@
   },
   "work": {
     "sectionLabel": "Section 03 · Work",
-    "headline": "Deux idées. Deux univers à moi.",
-    "subhead": "Un terrain de jeu pour le code et le design, une plateforme pour notre club. Développés avec l’aide de l’IA, conçus et exploités par mes soins.",
-    "vibecodedStamp": "avec l’IA",
+    "headline": "Deux projets, tous deux en ligne.",
+    "subhead": "Ce site et la plateforme de notre club. Concept, design, code et hébergement : tout est de moi, Claude Code dans le terminal.",
     "projects": [
       {
         "id": "portfolio",
-        "title": "Portfolio Manuel",
+        "title": "Ce site",
         "subtitle": "Toon Fluid",
         "year": "MMXXVI",
         "role": "Concept · Design · Développement · Hébergement",
@@ -353,15 +352,15 @@
         "summary": [
           {
             "label": "Enjeu",
-            "body": "Réunir le code, le design et la photographie dans un portfolio personnel."
+            "body": "Un portfolio qui montre ce que je sais faire, au lieu de le prétendre."
           },
           {
             "label": "Ma contribution",
-            "body": "Conception, design, développement et hébergement avec le soutien de l’IA."
+            "body": "Tout. Y compris le débogage de shaders à une heure du matin."
           },
           {
             "label": "Résultat",
-            "body": "Encre interactive sur GPU, cinq thèmes, quatre langues et tests automatisés dans le navigateur."
+            "body": "Ce site. S’il saccade, dis-moi sur quel appareil."
           }
         ],
         "metaNote": "L’encre est calculée de manière interactive sur le GPU. Des niveaux de qualité adaptent la charge à l’appareil.",
@@ -392,7 +391,7 @@
           "Tailwind CSS",
           "shadcn/ui"
         ],
-        "description": "Plateforme associative et événementielle développée sur plusieurs mois : permissions, membres de soutien et suivi des présences, avec un système de commandes et de caisse pour le service, la cuisine et le bar. Utilisée régulièrement et enrichie en continu.",
+        "description": "Plateforme associative et événementielle pour Jogge di Balla : membres et donateurs, droits par rôle, présences, et un système de caisse qui envoie les commandes directement à la cuisine et au bar. En service à chaque événement depuis 2024.",
         "summary": [
           {
             "label": "Enjeu",
@@ -400,11 +399,11 @@
           },
           {
             "label": "Ma contribution",
-            "body": "Conception, design, développement full-stack et exploitation continue avec le soutien de l’IA."
+            "body": "Conception, design, développement full-stack et exploitation continue."
           },
           {
             "label": "Résultat",
-            "body": "Utilisée régulièrement pour gérer les membres et les donateurs, suivre les présences et envoyer les commandes à la cuisine et au bar."
+            "body": "Une plateforme pour la vie du club et les soirées d’événement, de la cotisation de soutien à la commande au bar."
           }
         ],
         "screenshot": {
@@ -416,7 +415,7 @@
     ],
     "sideProjects": {
       "label": "Autres projets sur GitHub",
-      "lede": "Outils, projets de recherche et mon environnement de travail avec l’IA.",
+      "lede": "Outils, recherche et mon setup Claude Code.",
       "items": [
         {
           "id": "shotCounter",
@@ -430,7 +429,7 @@
           "id": "flyConnectomeSim",
           "title": "Fly Connectome Sim",
           "tagline": "Simulation de connectome · En développement",
-          "description": "Une expérience utilisant le réseau neuronal publié d’une drosophile. Python et un noyau de calcul natif associent des expériences contrôlées à des enregistrements vérifiables.",
+          "description": "Je simule le connectome publié d’une drosophile. Python autour, C++ dans le noyau de calcul, chaque exécution journalisée de façon reproductible.",
           "stack": ["Python", "C++", "MaleCNS"],
           "ctaLabel": "Code et documentation"
         },
@@ -446,7 +445,7 @@
           "id": "claudeCodeKit",
           "title": "claude-code-kit",
           "tagline": "Skills et outils pour Claude Code",
-          "description": "Collection active de mes skills, agents et workflows de développement pour Claude Code. J’y maintiens aussi le workflow de revue de projet, auparavant publié dans un dépôt séparé.",
+          "description": "Mes skills, agents et workflows pour Claude Code, y compris le workflow de revue de projet. Maintenu en continu.",
           "stack": ["Claude Code", "Skills", "Agents", "MCP"],
           "ctaLabel": "Dépôt et documentation"
         }
@@ -455,21 +454,14 @@
   },
   "caseStudy": {
     "carousel": {
-      "ariaLabel": "Case-Study Stationen",
-      "ariaPrev": "Vorherige Station",
-      "ariaNext": "Nächste Station",
-      "ariaDot": "Station {index} von {total}",
-      "ariaSlideOf": "Station {index} von {total}: {label}",
-      "ariaLive": "Station {index} von {total}: {label}",
-      "swipeHint": "Seitlich wischen für die ganze Case-Study",
-      "stationLabels": [
-        "Hook",
-        "Kontext",
-        "Stack",
-        "Admin-Highlight",
-        "Twitch-Overlay",
-        "Öffentliche Schicht"
-      ]
+      "ariaLabel": "Étapes de l’étude de cas",
+      "ariaPrev": "Étape précédente",
+      "ariaNext": "Étape suivante",
+      "ariaDot": "Étape {index} sur {total}",
+      "ariaSlideOf": "Étape {index} sur {total} : {label}",
+      "ariaLive": "Étape {index} sur {total} : {label}",
+      "swipeHint": "Glisse sur le côté pour toute l’étude de cas",
+      "stationLabels": ["Hook", "Contexte", "Stack", "Point fort admin", "Overlay Twitch", "Public"]
     },
     "sectionLabel": "Section 04 · Case Study",
     "headline": "Une idée de club devenue plateforme.",
@@ -496,7 +488,7 @@
       ],
       "story": [
         "L’idée est née pendant la pandémie : quatre amis, peu de choses à faire, alors nous avons organisé nos propres événements décalés. Jogge di Balla est né en août 2022, avec des événements comme Schlag den Kassier, Silvester 2.0, Harassenlauf et Lotto-Party.",
-        "Cofondateur et vice-président, je participe aux événements, à la photo et à la vidéo. Et comme j’aime construire moi-même, le club a eu sa propre plateforme : je m’occupe de la conception, du développement et de l’exploitation. Gérer les membres et les donateurs, analyser les présences, transmettre les commandes à la cuisine et au bar : nous l’utilisons régulièrement au club."
+        "Cofondateur et vice-président, je participe aux événements, à la photo et à la vidéo. Et comme j’aime construire moi-même, le club a eu sa propre plateforme : je m’occupe de la conception, du développement et de l’exploitation. Gérer les membres et les donateurs, analyser les présences, transmettre les commandes à la cuisine et au bar : aujourd’hui, tout passe par là."
       ]
     },
     "platform": {
@@ -528,8 +520,8 @@
         {
           "id": "admin",
           "kicker": "Point fort 01 · Gestion et événements",
-          "title": "Plus qu’un site associatif",
-          "lede": "La gestion et le fonctionnement des événements se rejoignent dans une même plateforme.",
+          "title": "Gestion, caisse et stream dans une seule app",
+          "lede": "Gestion des membres et organisation des événements passent par la même plateforme, avec les mêmes rôles.",
           "screenshot": "admin-dashboard",
           "screenshotAlt": "Tableau de bord admin avec card de permissions et liste des membres",
           "features": [
@@ -539,7 +531,7 @@
             },
             {
               "title": "Commandes et caisse",
-              "body": "Commandes pour le service, la cuisine et le bar avec vues distinctes et suivi des statuts. Les prix sont déterminés côté serveur ; les commandes conservent les données de leurs articles."
+              "body": "Les prix viennent du serveur, jamais du client. Les commandes figent les données de leurs articles, pour qu’un changement de prix ne modifie aucune ancienne facture."
             },
             {
               "title": "Médias et événements",
@@ -564,8 +556,8 @@
               "body": "L’habillage récupère régulièrement les scores et actualise l’affichage sans rechargement."
             },
             {
-              "title": "Suivi du jeu",
-              "body": "L’affichage du gagnant et le calcul d’une avance devenue irrattrapable accompagnent la présentation."
+              "title": "Calculer pour le public",
+              "body": "Affichage du gagnant et calcul du moment où une avance devient irrattrapable, pour que l’animation n’ait pas à compter de tête."
             }
           ]
         }
@@ -575,8 +567,8 @@
       "label": "Couche publique"
     },
     "reflection": {
-      "label": "Leçons apprises",
-      "body": "La plateforme s’est construite sur plusieurs mois et évolue avec la vie associative. Le projet comprend des tests automatisés et un serveur Linux root loué que j’ai configuré et que j’administre moi-même."
+      "label": "Ce que j’ai appris",
+      "body": "Un vrai club est le meilleur testeur QA : chaque événement trouve un nouvel edge case. C’est pour ça qu’il y a des tests automatisés, et que je gère moi-même le serveur root."
     },
     "footerLink": {
       "label": "Live en service",
@@ -626,8 +618,8 @@
   "photography": {
     "sectionLabel": "Section 05 · Photography",
     "eyebrow": "Section 05 · Photography",
-    "headline": "À travers l'objectif.",
-    "lede": "Wildlife et voitures, mes deux mondes. Les uns, je les traque seul dans la jungle du Costa Rica ou de Thaïlande, les autres me trouvent en général plus près de chez moi. Ce qui les relie : la patience, la lumière, et le moment qui justifie toute la journée.",
+    "headline": "Des animaux et des voitures. Aucun ne tient en place.",
+    "lede": "Pour les animaux, je pars seul au Costa Rica ou en Thaïlande et j’attends ; les voitures sont en général plus près. Les deux demandent de la patience et la bonne lumière. Avec le Sony α7 IV depuis 2023.",
     "techLabel": "SONY α7 IV · 24–600mm · depuis 2023",
     "ctaLabel": "Plus de photographie",
     "ctaHref": "https://manuelheller.myportfolio.com/portfolio",
@@ -637,7 +629,7 @@
         "alt": "Hypercar Koenigsegg sous une arche d'hôtel au crépuscule",
         "stamp": "ST. MORITZ · 2025 · AUTO",
         "title": "Arrêt à 30 km/h.",
-        "body": "Parfois, l'image la plus intéressante n'est pas celle avec la vitesse d'obturation la plus élevée. C'est celle avec la lumière qui n'est là que cinq minutes."
+        "body": "La vitesse d’obturation n’avait aucune importance. La lumière sous l’arche a duré cinq minutes, puis elle a disparu."
       },
       "panorama": {
         "alt": "Cargos sous une formation nuageuse spectaculaire à l'horizon",
@@ -646,8 +638,8 @@
       "treeLake": {
         "alt": "Arbre solitaire au bord d'un lac, reflet dans l'eau, Costa Rica",
         "stamp": "LAKE ARENAL · 2024 · LANDSCAPE",
-        "title": "La patience comme composition.",
-        "body": "Lake Arenal : une heure et demie à attendre que le vent tombe et lisse enfin la surface. C'est le reflet qui fait l'image, pas l'arbre."
+        "title": "Une heure et demie sans vent.",
+        "body": "Lake Arenal : attendu jusqu’à ce que le vent laisse enfin l’eau devenir lisse. L’arbre n’est qu’un prétexte pour le reflet."
       },
       "crocodile": {
         "alt": "Crocodile avec un papillon sur le museau, Costa Rica",
@@ -661,11 +653,11 @@
   },
   "contact": {
     "sectionLabel": "Section 07 · Contact",
-    "headline": "Parlons.",
+    "headline": "Écris-moi.",
     "subhead": "Une idée, une question, un conseil photo ou juste un bonjour : ma boîte mail est ouverte.",
     "intro": {
-      "label": "Quelques mots avant",
-      "body": "Je recherche un poste à plein temps dans la région de Bâle, en Argovie ou à Zurich. Je m’intéresse particulièrement aux missions qui associent développement et design et permettent de mettre à profit mon expérience de l’IA."
+      "label": "En bref",
+      "body": "Je recherche un poste à plein temps dans la région de Bâle, en Argovie ou à Zurich. Idéalement là où développement et design se pensent ensemble et où Claude Code dans le terminal est normal."
     },
     "channels": {
       "label": "Canaux directs",

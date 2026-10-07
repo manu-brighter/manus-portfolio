@@ -138,7 +138,7 @@ export default function StyleguidePage({ params }: StyleguideProps) {
         <div className="flex flex-wrap gap-2">
           <span className="type-label-stamp">zvoove · Frontend</span>
           <span className="type-label-stamp">Joggediballa · VP</span>
-          <span className="type-label-stamp">Basel-Region</span>
+          <span className="type-label-stamp">Region Basel</span>
           <span className="type-label-stamp">Section 00</span>
         </div>
       </section>

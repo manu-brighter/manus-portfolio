@@ -1,9 +1,9 @@
 {
   "notFound": {
-    "metaTitle": "404 · Perdu dans le fluide",
+    "metaTitle": "404 · Perdue dans l'encre",
     "stamp": "Error 404",
-    "headline": "Cette page s'est perdue dans le fluide.",
-    "body": "L'URL n'existe pas. Soit une faute de frappe, un vieux lien, soit l'encre l'a avalée. Tout est possible.",
+    "headline": "Cette page s'est perdue dans l'encre.",
+    "body": "L'URL n'existe pas. Une faute de frappe, un vieux lien, ou l'encre l'a avalée. On parie sur l'encre.",
     "backHome": "Retour à l'accueil"
   }
 }

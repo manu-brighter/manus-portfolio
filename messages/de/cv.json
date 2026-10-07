@@ -1,14 +1,14 @@
 {
   "cv": {
     "metaTitle": "CV · Manuel Heller",
-    "metaDescription": "Manuel Heller, Softwareentwickler aus der Basel-Region. PHP, Vue, Schnittstellen und Testautomatisierung. Verfügbar ab Dezember 2026.",
+    "metaDescription": "Manuel Heller, Softwareentwickler aus der Region Basel. PHP, Vue, Schnittstellen und Testautomatisierung. Verfügbar ab Dezember 2026.",
     "sectionLabel": "Lebenslauf",
     "editionStamp": "Ausgabe MMXXVI",
     "calibrationLabel": "Druckprobe",
     "name": "Manuel Heller",
     "role": "Softwareentwickler · PHP & Vue",
-    "region": "Basel-Region, Schweiz",
-    "profile": "Ich gestalte Benutzeroberflächen für komplexe Fachprozesse, entwickle Anwendungen und Schnittstellen und verantworte automatisierte Release-Tests. Privat verbinde ich Entwicklung und Design in umfangreichen Webanwendungen, die ich selbst betreibe. Verfügbar ab 1. Dezember 2026, Pensum 100 %.",
+    "region": "Region Basel, Schweiz",
+    "profile": "Ich baue Vue-Oberflächen für komplexe Fachprozesse, die PHP-Backends und Schnittstellen dahinter, und verantworte die automatisierten Release-Tests. Privat entwickle und betreibe ich eigene Webanwendungen, bei denen Design und Code aus einer Hand kommen. Verfügbar ab 1. Dezember 2026, Pensum 100 %.",
     "contactLabel": "Kontakt",
     "download": {
       "label": "Als PDF speichern",
@@ -47,7 +47,7 @@
         {
           "title": "joggediballa.ch",
           "meta": "React · TypeScript · Node.js · tRPC · MySQL",
-          "description": "Über mehrere Monate konzipierte und entwickelte Vereins- und Eventplattform; regelmässig genutzt, selbst betrieben und laufend weiterentwickelt. Berechtigungen, Gönnermitgliedschaften und Anwesenheitsauswertungen; Bestell- und Kassensystem für Service, Küche und Bar, moderierte Live-Diashow und Streaming-Overlay."
+          "description": "Über mehrere Monate konzipierte und entwickelte Vereins- und Eventplattform; seit 2024 im Einsatz, selbst betrieben und laufend weiterentwickelt. Berechtigungen, Gönnermitgliedschaften und Anwesenheitsauswertungen; Bestell- und Kassensystem für Service, Küche und Bar, moderierte Live-Diashow und Streaming-Overlay."
         },
         {
           "title": "manuelheller.dev",

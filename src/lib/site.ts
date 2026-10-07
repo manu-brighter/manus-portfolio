@@ -21,7 +21,7 @@ export const SITE = {
     "Softwareentwicklung mit PHP und Vue, Schnittstellen und Testautomatisierung. Eigene Webprojekte, AI-gestützte Entwicklung und Fotografie.",
   author: {
     name: "Manuel Heller",
-    region: "Basel-Region, Schweiz",
+    region: "Region Basel, Schweiz",
     /** Split on purpose: joined only in the browser (`@/lib/email`) so
      *  the address never ships as plaintext for mail harvesters. */
     email: { user: "manuelheller", domain: "bluewin.ch" },
