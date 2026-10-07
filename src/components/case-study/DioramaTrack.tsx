@@ -2,7 +2,7 @@
 
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useSceneVisibilityStore } from "@/lib/sceneVisibilityStore";
 
@@ -58,6 +58,7 @@ export function DioramaTrack({ children, mobileFallback, wideFallback, sectionLa
   // unmoved section and the whole subtree goes with it — timing-proof.
   const pinRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
   const triggerRef = useRef<ScrollTrigger | null>(null);
   const [narrow, setNarrow] = useState(false);
   const [short, setShort] = useState(false);
@@ -81,47 +82,52 @@ export function DioramaTrack({ children, mobileFallback, wideFallback, sectionLa
 
   const useFallback = narrow || short;
 
-  useEffect(() => {
+  // Layout effect, not a post-paint rAF. ScrollToOnLoad's effect runs
+  // after this, and a starved WebKit main thread can delay rAF past the
+  // moment the jump has to be correct. Measuring here, the pin spacer
+  // already exists when that jump reads section positions. A reused
+  // section node can still carry the previous page's attribute; clear
+  // it before the new pin is in, or the jump fires on the pre-pin layout.
+  useLayoutEffect(() => {
     if (reducedMotion || useFallback) return;
     const pinEl = pinRef.current;
     const track = trackRef.current;
+    const section = sectionRef.current;
     if (!pinEl || !track) return;
+    section?.removeAttribute("data-case-study-layout");
 
-    let raf2 = 0;
+    const trackWidth = track.scrollWidth;
+    const viewportWidth = pinEl.clientWidth;
+    let distance = trackWidth - viewportWidth;
+    if (distance <= 0) {
+      section?.setAttribute("data-case-study-layout", "flat");
+      return;
+    }
 
-    const raf1 = requestAnimationFrame(() => {
-      raf2 = requestAnimationFrame(() => {
-        const trackWidth = track.scrollWidth;
-        const viewportWidth = pinEl.clientWidth;
-        let distance = trackWidth - viewportWidth;
-        if (distance <= 0) return;
-
-        triggerRef.current = ScrollTrigger.create({
-          trigger: pinEl,
-          start: "top top",
-          end: () => `+=${distance}`,
-          pin: true,
-          scrub: 0.6,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-          onRefresh: () => {
-            distance = track.scrollWidth - pinEl.clientWidth;
-          },
-          onUpdate: (self) => {
-            gsap.set(track, { x: -distance * self.progress });
-          },
-        });
-
-        ScrollTrigger.refresh();
-      });
+    triggerRef.current = ScrollTrigger.create({
+      trigger: pinEl,
+      start: "top top",
+      end: () => `+=${distance}`,
+      pin: true,
+      scrub: 0.6,
+      anticipatePin: 1,
+      invalidateOnRefresh: true,
+      onRefresh: () => {
+        distance = track.scrollWidth - pinEl.clientWidth;
+      },
+      onUpdate: (self) => {
+        gsap.set(track, { x: -distance * self.progress });
+      },
     });
 
+    ScrollTrigger.refresh();
+    section?.setAttribute("data-case-study-layout", "pinned");
+
     return () => {
-      cancelAnimationFrame(raf1);
-      cancelAnimationFrame(raf2);
       triggerRef.current?.kill(true);
       triggerRef.current = null;
       gsap.set(track, { x: 0 });
+      section?.removeAttribute("data-case-study-layout");
     };
   }, [reducedMotion, useFallback]);
 
@@ -143,6 +149,7 @@ export function DioramaTrack({ children, mobileFallback, wideFallback, sectionLa
     return (
       <section
         id="case-study"
+        data-case-study-layout={narrow ? "phone" : "stacked"}
         aria-labelledby="case-study-heading"
         className="relative bg-paper py-20"
       >
@@ -155,7 +162,12 @@ export function DioramaTrack({ children, mobileFallback, wideFallback, sectionLa
     // The section is deliberately unstyled height-wise: the pin-spacer
     // that ScrollTrigger injects around the inner wrapper dictates the
     // section's height during and after the pin.
-    <section id="case-study" aria-labelledby="case-study-heading" className="relative bg-paper">
+    <section
+      ref={sectionRef}
+      id="case-study"
+      aria-labelledby="case-study-heading"
+      className="relative bg-paper"
+    >
       {/* Pin host: a keyed wrapper GSAP never moves. ScrollTrigger wraps
           the pinned div in a pin-spacer, so React must never be the one
           to detach the pinned div itself. Without this host, a RUNTIME

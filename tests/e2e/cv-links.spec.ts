@@ -29,7 +29,7 @@ test.describe("CV entry and exit links", () => {
 
     await contact.click();
     await expect(page).toHaveURL(/\/de\/$/);
-    // ScrollToOnLoad fires ~800ms after mount, then smooth-scrolls.
+    // ScrollToOnLoad jumps once the case-study layout is published.
     // Contact sits near the page end, so it may not reach the very top;
     // being on screen is the observable outcome.
     await expect(page.locator("#contact")).toBeInViewport({ ratio: 0.3, timeout: 10_000 });

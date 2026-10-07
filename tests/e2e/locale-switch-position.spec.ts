@@ -85,7 +85,7 @@ test.describe("locale switch keeps position", () => {
     test.skip(isMobile, "Desktop pinned diorama only");
     await page.goto("/de/#work");
     await expect(page.locator("#work")).toBeInViewport({ ratio: 0.1, timeout: 10_000 });
-    // Let ScrollToOnLoad's 800ms post-mount correction to #work fire
+    // Let ScrollToOnLoad's post-mount correction to #work finish
     // first, so it can't pull the page back after we move on.
     await page.waitForTimeout(1500);
     await settleOnPhotography(page);
