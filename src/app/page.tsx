@@ -97,7 +97,9 @@ const REDIRECT_SCRIPT = `
 })();
 `.trim();
 
-export default function RootRedirect() {
+export default async function RootRedirect() {
+  // Same source as <html lang>: the page is served in the default locale.
+  const t = await getTranslations({ locale: routing.defaultLocale, namespace: "rootRedirect" });
   const fallbackHref = `/${routing.defaultLocale}/`;
 
   return (
@@ -119,7 +121,9 @@ export default function RootRedirect() {
         />
         <noscript>
           <p>
-            <a href={fallbackHref}>Continue to portfolio → /{routing.defaultLocale}/</a>
+            <a href={fallbackHref}>
+              {t("continue")} → /{routing.defaultLocale}/
+            </a>
           </p>
         </noscript>
       </body>
