@@ -35,6 +35,8 @@ import styles from "./PhotoInkAnimation.module.css";
  * and the module CSS hides it as a second line.
  */
 
+/** Upper bound on spatter droplets per photo (perf, see the spatter loop). */
+const MAX_SPATTER = 6;
 const SPOT_SLOT = { mint: 0, amber: 1, rose: 2, violet: 3 } as const;
 
 type Props = {
@@ -208,9 +210,12 @@ function buildLayout(seed: number, aspect: number): Layout {
     centres.push([cx, cy, delay]);
   }
 
-  // Spatter: small droplets thrown around each landing.
+  // Spatter: small droplets thrown around each landing, capped so the
+  // masked layer stays cheap to re-rasterize (it repaints every frame).
+  let spatterLeft = MAX_SPATTER;
   for (const [i, [px, py, pDelay]] of centres.entries()) {
-    const count = 1 + Math.floor(rand() * 3);
+    const count = Math.min(spatterLeft, 1 + Math.floor(rand() * 2));
+    spatterLeft -= count;
     for (let j = 0; j < count; j++) {
       const a = rand() * Math.PI * 2;
       const dist = height * range(0.12, 0.3);
@@ -274,7 +279,9 @@ export function PhotoInkAnimation({
 
   if (settled) return null;
   const { width, drops, misreg } = layout;
-  const fronts = drops.filter((drop) => drop.kind !== "spatter");
+  // Halo only ahead of the main bloom: pools are small enough that their
+  // rim carries the edge, and every extra masked shape costs a repaint.
+  const fronts = drops.filter((drop) => drop.kind === "bloom");
   const dropClass = (drop: Drop) => styles[drop.kind];
   return (
     <div
@@ -340,7 +347,10 @@ export function PhotoInkAnimation({
             transform={`translate(${round(misreg[0])} ${round(misreg[1])})`}
             style={{ fill: inkColor }}
           >
-            <g opacity="0.2">
+            {/* fill-opacity, not group opacity: group opacity forces an
+                offscreen layer per frame; overlapping fronts simply
+                overprint a little darker, which suits the print look. */}
+            <g fillOpacity={0.2}>
               {fronts.map((drop) => (
                 <g key={drop.id} transform={`translate(${round(drop.cx)} ${round(drop.cy)})`}>
                   <use
@@ -351,7 +361,7 @@ export function PhotoInkAnimation({
                 </g>
               ))}
             </g>
-            <g opacity="0.55">
+            <g fillOpacity={0.55}>
               {drops.map((drop) => (
                 <g key={drop.id} transform={`translate(${round(drop.cx)} ${round(drop.cy)})`}>
                   <use

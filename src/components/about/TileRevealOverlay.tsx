@@ -79,16 +79,19 @@ const SIZES: Record<TileOrientation, string> = {
 };
 
 const NAV_BUTTON_CLASS =
-  "tile-reveal-meta absolute grid size-12 place-items-center border-[1.5px] border-ink bg-paper text-2xl text-ink leading-none shadow-[3px_3px_0_var(--color-ink)] transition-[transform,box-shadow] hover:shadow-[1px_1px_0_var(--color-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper motion-reduce:transition-none";
+  "tile-reveal-meta absolute grid size-12 place-items-center border-[1.5px] border-ink bg-paper text-2xl text-ink leading-none shadow-[3px_3px_0_var(--color-ink)] transition-[translate,transform,box-shadow] hover:shadow-[1px_1px_0_var(--color-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper motion-reduce:transition-none";
 
 function TilePicture({
   tile,
   alt,
   className,
+  lowPriority = false,
 }: {
   tile: RevealTileKey;
   alt: string;
   className?: string;
+  /** Hidden neighbour preloads: never compete with the visible photo. */
+  lowPriority?: boolean;
 }) {
   return (
     <picture className={className}>
@@ -117,6 +120,7 @@ function TilePicture({
       <img
         src={tileRevealJpg(tile, "landscape")}
         alt={alt}
+        fetchPriority={lowPriority ? "low" : undefined}
         sizes={SIZES.landscape}
         // The dvh term reserves the caption row, the control row and
         // the backdrop padding, so short/landscape viewports can't push
@@ -238,9 +242,15 @@ export function TileRevealOverlay({ tiles, initialTile, onClose }: TileRevealOve
   const swipeRef = useRef<{ x: number; y: number } | null>(null);
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType !== "touch" && e.pointerType !== "pen") return;
+    // A second finger (pinch) must not overwrite the swipe origin.
+    if (!e.isPrimary) {
+      swipeRef.current = null;
+      return;
+    }
     swipeRef.current = { x: e.clientX, y: e.clientY };
   };
   const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!e.isPrimary) return;
     const start = swipeRef.current;
     swipeRef.current = null;
     if (!start) return;
@@ -341,8 +351,8 @@ export function TileRevealOverlay({ tiles, initialTile, onClose }: TileRevealOve
               <source> the visible one will, so the next switch paints
               from cache instead of collapsing the frame. */}
           <div hidden>
-            <TilePicture tile={prevTile.key} alt="" />
-            <TilePicture tile={nextTile.key} alt="" />
+            <TilePicture tile={prevTile.key} alt="" lowPriority />
+            <TilePicture tile={nextTile.key} alt="" lowPriority />
           </div>
           {/* Mobile: a top-left pair beside the close button's row
               (that row is already reserved in the photo's max-height).
