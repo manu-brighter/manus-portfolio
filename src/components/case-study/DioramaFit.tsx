@@ -68,16 +68,27 @@ export function DioramaFit({ children }: Props) {
       apply(lo);
     };
 
-    const ro = new ResizeObserver(fit);
+    // One fit per frame: a window resize fires the observer for every
+    // instance, and each fit does up to FIT_STEPS forced layouts.
+    let frame: number | null = null;
+    const scheduleFit = () => {
+      if (frame !== null) return;
+      frame = requestAnimationFrame(() => {
+        frame = null;
+        fit();
+      });
+    };
+    const ro = new ResizeObserver(scheduleFit);
     ro.observe(outer);
     let cancelled = false;
     document.fonts?.ready.then(() => {
-      if (!cancelled) fit();
+      if (!cancelled) scheduleFit();
     });
 
     return () => {
       cancelled = true;
       ro.disconnect();
+      if (frame !== null) cancelAnimationFrame(frame);
     };
   }, []);
 

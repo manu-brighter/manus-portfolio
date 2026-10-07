@@ -102,7 +102,9 @@ export function DioramaLupe({ children }: Props) {
 
     // No point ticking a loop nobody can see (the diorama is one of
     // seven home sections).
-    const io = new IntersectionObserver(([entry]) => {
+    // Last entry: a batched callback can carry a stale first one.
+    const io = new IntersectionObserver((entries) => {
+      const entry = entries[entries.length - 1];
       if (entry?.isIntersecting) tween.resume();
       else tween.pause();
     });
@@ -142,7 +144,10 @@ export function DioramaLupe({ children }: Props) {
           ref={copyRef}
           inert
           className="absolute origin-top-left bg-paper"
+          // Own layer: the sweep rewrites this transform every frame, and
+          // without it Chrome repaints the scaled illustration + photo.
           style={{
+            willChange: "transform",
             left: `${-LENS_LEFT_VH}vh`,
             top: `${-LENS_TOP_VH}vh`,
             width: `${TRACK_WIDTH_VH}vh`,
