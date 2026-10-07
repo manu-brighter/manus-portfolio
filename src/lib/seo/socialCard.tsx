@@ -34,6 +34,10 @@ export async function renderSocialCard({
 }): Promise<ImageResponse> {
   const t = await getTranslations({ locale, namespace: "meta" });
   const brandSrc = await getBrandImageDataUrl();
+  // The title is "Name · Role · Role". Set as one string it wrapped right
+  // after a "·", leaving lines that end on a dot; the name gets its own
+  // line and the roles a smaller one below instead.
+  const [name, ...roles] = t("title").split(" · ");
 
   return new ImageResponse(
     <div
@@ -77,18 +81,12 @@ export async function renderSocialCard({
           paddingLeft: 40,
         }}
       >
-        <div
-          style={{
-            // 60, not 72: the three-part home title wraps to three lines
-            // at 72 and crowds the description on the 600px Twitter card.
-            fontSize: 60,
-            fontStyle: "italic",
-            lineHeight: 1,
-            marginBottom: 24,
-          }}
-        >
-          {t("title")}
-        </div>
+        <div style={{ fontSize: 76, fontStyle: "italic", lineHeight: 1 }}>{name}</div>
+        {roles.length > 0 && (
+          <div style={{ fontSize: 34, lineHeight: 1.2, marginTop: 14, marginBottom: 28 }}>
+            {roles.join(" · ")}
+          </div>
+        )}
         <div style={{ fontSize: 28, lineHeight: 1.3, opacity: 0.7 }}>{t("description")}</div>
       </div>
 
