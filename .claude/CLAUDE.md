@@ -432,7 +432,8 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   physics. `cursorSplatRadiusBase` re-scales the hover cursor by the
   preset's splatRadiusScale on each switch (turbulenz tiny, aquarell a
   bloom); under `lookOnly` it also divides the default dyeScale by
-  `max(1, scale)^2` so a bigger cursor deposits the same ink per frame
+  `max(1, scale)` (the splat's area is linear in `splatRadius`, which
+  is the Gaussian's denominator) so a bigger cursor deposits the same ink per frame
   (one sweep of aquarell's 6.5x bloom otherwise flooded the word into a
   flat pool, screenshot-verified).
   InkDropStudio instead applies full preset physics via its Tweakpane

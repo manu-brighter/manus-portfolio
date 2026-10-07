@@ -77,7 +77,10 @@ export type SyncPresetOptions = {
    * swarm feel (turbulenz's 7 droplets, high dyeScale) is tuned for
    * the hero's FAST dye dissipation and over-accumulates into a solid
    * blob under the experiment's calm-paper physics (slow fade). Look-
-   * only recolors the sim without importing that mismatch.
+   * only recolors the sim without importing that mismatch. One
+   * exception: combined with `cursorSplatRadiusBase`, a cursor scaled
+   * above 1x gets dyeScale = default / scale, so the bigger splat
+   * deposits the same ink per frame (see apply()).
    */
   lookOnly?: boolean;
   /**
@@ -123,12 +126,13 @@ export function syncPresetVisuals(
       orchestrator.setParams({ splatRadius: cursorSplatRadiusBase * scale });
       if (lookOnly) {
         // Look-only keeps the default dyeScale, while each preset tunes
-        // its own against its radius (aquarell 0.035 at 6.5x). A bigger
-        // cursor covers ~scale^2 the area, so hold the ink per frame
-        // constant: at the default, one short sweep of aquarell's bloom
-        // flooded the stamped word into a flat top-plate pool
-        // (screenshot-verified). Smaller cursors keep the default.
-        const area = Math.max(1, scale) ** 2;
+        // its own against its radius (aquarell 0.035 at 6.5x). The splat
+        // is exp(-|p|^2 / splatRadius), so its deposited area grows
+        // linearly with the radius scale: divide by it to hold the ink
+        // per frame constant. At the default, one short sweep of
+        // aquarell's bloom flooded the stamped word into a flat top-plate
+        // pool (screenshot-verified). Smaller cursors keep the default.
+        const area = Math.max(1, scale);
         orchestrator.setVisuals({ dyeScale: DEFAULT_FLUID_VISUALS.dyeScale / area });
       }
     }

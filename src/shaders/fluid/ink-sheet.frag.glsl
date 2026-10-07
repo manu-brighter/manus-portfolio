@@ -39,7 +39,7 @@ void main() {
   float inside = step(0.0, source.y) * step(source.y, 1.0);
   vec2 p = (vUv - 0.5) * vec2(uAspect, 1.0);
   // Light's parallax offset (ink-lite/render.frag.glsl), same sign.
-  p.y += uScroll * 0.075;
+  p.y += uScroll * INK_PARALLAX;
   vec2 q;
   float target = inkSheet(p, uSheetTime * 0.12, uStyle, 0.0, q);
   // Carried in from beyond the canvas edge: splat ink is blank paper and

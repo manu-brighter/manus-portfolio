@@ -10,6 +10,14 @@ import type { FluidRenderStyle, FluidVisuals } from "@/lib/gl/fluidOrchestrator"
  * two modes drift apart into different compositions per theme.
  */
 
+/**
+ * Scroll parallax in viewport heights per viewport scrolled. Must equal
+ * `INK_PARALLAX` in `src/shaders/common/ink-sheet.glsl` (the GLSL side
+ * cannot import it): the shaders drift the sheet by it, the Full sheet
+ * pass carries the advected ink by it to stay registered.
+ */
+export const INK_PARALLAX = 0.075;
+
 /** GLSL `uStyle` order -- must match the branches in ink-sheet.glsl. */
 export const INK_SHEET_STYLES: readonly FluidRenderStyle[] = [
   "riso",

@@ -7,6 +7,12 @@
 // Styles: 0 riso, 1 wave, 2 turbulenz, 3 aquarell, 4 nachtdruck.
 // p is aspect-corrected screen space (height 1), t the slow sheet clock.
 
+// Scroll parallax: the sheet drifts this many viewport heights per
+// viewport scrolled, AGAINST the scroll (p.y += uScroll * INK_PARALLAX).
+// Mirrored by SHEET_SCROLL_CARRY in src/lib/gl/fluidOrchestrator.ts,
+// which carries the Full sheet + splat dye by the same amount.
+const float INK_PARALLAX = 0.075;
+
 vec2 inkFold(vec2 p, float t) {
   return vec2(
     sin(p.y * 3.6 + sin(p.x * 2.4 + t) + t * 0.7),

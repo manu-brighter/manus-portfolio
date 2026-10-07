@@ -2,7 +2,7 @@
 
 import { compileShader } from "@/lib/gl/compileShader";
 import { createProgram as linkProgram } from "@/lib/gl/createProgram";
-import { inkSheetSpeed, inkSheetStyleIndex } from "@/lib/gl/inkSheet";
+import { INK_PARALLAX, inkSheetSpeed, inkSheetStyleIndex } from "@/lib/gl/inkSheet";
 import type { TierConfig } from "@/lib/gpu";
 import { INK_COLOR, PAPER_COLOR, SPOT_RGB, type SpotColor } from "@/lib/palette";
 import inkSheetSrc from "@/shaders/common/ink-sheet.glsl";
@@ -88,13 +88,13 @@ const SPOT_COLORS = SPOT_RGB;
 const AMBIENT_TIME_SCALE = 0.0003;
 
 // Scroll carry: the hero sheet + splat dye drift AGAINST the page scroll
-// at Light's parallax rate (viewport heights -> UV; must equal the 0.075
-// in ink-lite/render.frag.glsl and the fluid sheet/render shaders). The
+// at Light's parallax rate (viewport heights -> UV; INK_PARALLAX, the TS
+// twin of the GLSL constant in common/ink-sheet.glsl). The
 // target drifts by the same amount, so the carry keeps the advected
 // sheet and splat dye registered with it: physics distortions travel
 // with the parallax instead of cross-fading toward a moving target.
 // Per-step cap only guards a pathological scroll jump.
-const SHEET_SCROLL_CARRY = 0.075;
+const SHEET_SCROLL_CARRY = INK_PARALLAX;
 const SHEET_CARRY_MAX_STEP = 0.5;
 
 type AmbientPoint = {
