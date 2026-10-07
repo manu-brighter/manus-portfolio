@@ -576,8 +576,8 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   - The photo may not start at opacity 0: that flashed the bare
     full-size spot plate for ~2 frames.
   Open drops one fluidBus splat at
-  the pointer, close leaves a two-splat burst at the tile (desktop
-  only — no mobile subscriber).
+  the pointer, close leaves a two-splat burst at the tile (Full
+  renderer only, no Light/mobile subscriber, see `fluidBus`).
   The overlay is a **fixed div, NOT `dialog.showModal()`** with manual
   focus pin/restore (single close control). Heads-up for tests: the
   mobile hamburger nav keeps a permanent `role="dialog"` node in the
