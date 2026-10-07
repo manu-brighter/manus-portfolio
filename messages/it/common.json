@@ -68,10 +68,10 @@
     "label": "Carattere dell'inchiostro",
     "hint": "Change the look!",
     "riso": "Riso",
-    "wave": "Onda",
-    "turbulenz": "Turbolenza",
-    "aquarell": "Acquerello",
-    "nachtdruck": "Stampa notturna"
+    "wave": "Wave",
+    "turbulenz": "Turbulence",
+    "aquarell": "Watercolor",
+    "nachtdruck": "Night Shift"
   },
   "easterEgg": {
     "jamStamp": "FEHLDRUCK · REGISTRATION ERROR",
