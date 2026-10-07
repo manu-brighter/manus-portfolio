@@ -19,12 +19,10 @@ import type { WorkProjects } from "@/types/i18n-shapes";
  * Built around the agreed Phase 7 concept: cards behave like force
  * sources for the global Hero fluid-sim. The card itself is plain
  * DOM/SVG (no second WebGL canvas), but hover/click events dispatch
- * splat requests onto `fluidBus` which the FluidSim drains on its
- * next step (under the default Animation, LiteInkScene prints them as
- * ink blooms instead). When the Hero canvas is out of viewport the sim is
- * paused (Phase 4 deviation) and queued splats are discarded —
- * acceptable: the click-burst on the Portfolio card lands AFTER the
- * smooth-scroll back to the hero, when the sim has resumed.
+ * splat requests onto `fluidBus`. Animation prints them as ink blooms.
+ * Explicit Full drains them into the hero sim; while that sim is paused
+ * below the fold, those queued splats are discarded. The Portfolio
+ * click-burst is delayed so it lands after the scroll home.
  *
  * Hover choreography is GSAP-driven on the shared ticker:
  *   • 3-layer parallax (paper-shade backing → media → title overlay)
@@ -174,9 +172,9 @@ export function WorkCard(props: WorkCardProps) {
   const [hovered, setHovered] = useState(false);
 
   // Coarse-pointer (mobile/touch): the pills cascade fires on viewport
-  // entry instead of hover. The cursor-driven parallax + magnetic and
-  // the ambient splat dispatch are skipped entirely (no cursor + sim
-  // interaction is mobile-disabled per Phase 13 deviations).
+  // entry instead of hover. There is no cursor, so the hover splat stays
+  // on the fine-pointer path. A tap still dispatches (anchor click, or
+  // the Portfolio card's burst after it scrolls home).
   const isCoarse = useCoarsePointer();
 
   // Mirror coarse-pointer viewport-IO active state into the unified
@@ -314,11 +312,8 @@ export function WorkCard(props: WorkCardProps) {
     gsap.set(pills, { opacity: 0.6, y: 6 });
   }, [reducedMotion]);
 
-  // Hover-enter: fire one ambient splat in the card's color. Lands in
-  // the FluidOrchestrator queue; if hero is out of viewport it's
-  // discarded silently. Cheap pulse for "card is alive".
-  // Coarse-pointer skips this — sim interaction is mobile-disabled and
-  // the IO above already handles the visual "wake up" via setHovered.
+  // Hover-enter: one splat in the card colour. Coarse pointers skip it
+  // (no cursor; a tap dispatches instead).
   const onPointerEnter = () => {
     setHovered(true);
     if (reducedMotion || isCoarse) return;
@@ -375,8 +370,15 @@ export function WorkCard(props: WorkCardProps) {
       return;
     }
     // anchor → Lenis smooth-scroll if available, native fallback otherwise.
-    // No splat burst: anchor destinations live below the hero, where the
-    // fluid-sim is paused and dispatched splats would be silently dropped.
+    // One splat at the finger. Animation prints it in place. Explicit
+    // Full may drop it when the hero sim is paused below the fold.
+    if (!reducedMotion) {
+      dispatchSplat({
+        x: e.clientX / Math.max(1, window.innerWidth),
+        y: 1 - e.clientY / Math.max(1, window.innerHeight),
+        color: splatColor,
+      });
+    }
     e.preventDefault();
     const targetEl = document.querySelector<HTMLElement>(click.target);
     if (!targetEl) return;

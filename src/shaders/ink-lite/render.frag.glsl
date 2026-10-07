@@ -66,6 +66,7 @@ void main() {
   // swirls the sheet locally (the field reacts), lifts its density and
   // prints its own plate in the active ladder slot of its spot.
   float bloom = 0.0;
+  float reveal = 0.0;
   vec4 slotMask = vec4(0.0);
   vec2 warp = vec2(0.0);
   if (uImpulseCount > 0) {
@@ -96,6 +97,10 @@ void main() {
       // Local swirl plus a push along the throw: the sheet itself reacts.
       warp += (vec2(-d.y, d.x) / radius * 0.10 + drive.xy * 0.03) * m;
       bloom += m;
+      // Undamped twin of the density lift. Reading-section quieting
+      // must follow this, or a wide Aquarell drop (damp ~0.4) never
+      // reopens the paper enough to see its spot plate.
+      reveal += s * fall;
       int slot = int(drive.w + 0.5);
       // The spot plate holds its edge longer than the density lift, then
       // withdraws, as a printed drop dries back into the sheet.
@@ -143,6 +148,6 @@ void main() {
   // paper interval for copy and photography. Hero remains mathematically
   // intact. A live impulse reopens the ink around itself, quieter than in
   // the hero, so card and tile splats still read in a reading section.
-  float quiet = uSection * (1.0 - 0.6 * clamp(bloom, 0.0, 1.0));
+  float quiet = uSection * (1.0 - 0.6 * clamp(max(bloom, reveal), 0.0, 1.0));
   fragColor = vec4(inkQuiet(color, uPaper, vUv, quiet), 1.0);
 }

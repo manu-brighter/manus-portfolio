@@ -596,8 +596,10 @@ Source of truth: `src/app/globals.css` (`@theme` block).
     drops a centred preview bloom (ring, or a droplet cloud for swarm
     presets; the initial apply stays silent).
   - **Reading sections**: a live bloom lifts the section quieting
-    around itself (to roughly 60%), so card/tile splats still read
-    there, quieter than in the hero.
+    there, quieter than in the hero. The quiet lift follows the
+    undamped spot strength, not the damped density, so a wide Aquarell
+    drop still reopens the paper (at a full bloom, quieting falls to
+    about 40%).
   Regression specs: `tests/e2e/ink-fluidbus.spec.ts` (screenshot diff,
   pins position and y-up), `tests/unit/ink-impulses.spec.ts`.
   MobileBackgroundSim (explicit Full on coarse pointers) still has no
