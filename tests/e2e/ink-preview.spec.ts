@@ -84,7 +84,7 @@ test("studio supports theme keyboard selection, Escape and outside dismissal on 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/de/");
   const panel = await openStudio(page);
-  const night = panel.getByRole("radio", { name: "Nachtdruck", exact: true });
+  const night = panel.getByRole("radio", { name: "Night Shift", exact: true });
   await night.focus();
   await night.press("Space");
   await expect(page.locator("html")).toHaveAttribute("data-sim-theme", "night");
@@ -134,7 +134,7 @@ test("no WebGL still exposes theme settings and an honest status", async ({ page
   const panel = await openStudio(page);
   await expect(panel.getByText(/Diese Tintenansicht ist auf deinem Gerät/)).toBeVisible();
   await expect(panel.getByRole("radio", { name: "Simulation", exact: true })).toBeDisabled();
-  const night = panel.getByRole("radio", { name: "Nachtdruck", exact: true });
+  const night = panel.getByRole("radio", { name: "Night Shift", exact: true });
   await night.focus();
   await night.press("Space");
   await expect(page.locator("html")).toHaveAttribute("data-sim-theme", "night");
@@ -231,7 +231,7 @@ test("reduced motion wins over full mode while themes remain usable", async ({ p
   const panel = await openStudio(page);
   await expect(panel.getByText(/Deine Systemeinstellung für reduzierte Bewegung/)).toBeVisible();
   await expect(panel.getByRole("radio", { name: "Simulation", exact: true })).toBeDisabled();
-  const night = panel.getByRole("radio", { name: "Nachtdruck", exact: true });
+  const night = panel.getByRole("radio", { name: "Night Shift", exact: true });
   await night.focus();
   await night.press("Space");
   await expect(page.locator("html")).toHaveAttribute("data-sim-theme", "night");

@@ -225,6 +225,11 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 
 ## Sim presets & night theme
 
+- **Display names are English in every locale** (Riso, Wave, Turbulence,
+  Watercolor, Night Shift), while the preset IDs stay German
+  (`turbulenz`, `aquarell`, `nachtdruck`): the IDs are persisted in
+  localStorage, so renaming them would reset every visitor's choice.
+  Docs and code comments still use the IDs.
 - **5 user-switchable presets** (riso/wave/turbulenz/aquarell/nachtdruck)
   defined in `src/lib/content/simPresets.ts`; persisted selection in
   `src/lib/simPresetStore.ts` (zustand + localStorage `manus-sim-preset`).
