@@ -354,9 +354,11 @@ export function LocaleSwitcher() {
   return (
     <div ref={rootRef} data-no-splat className="relative flex shrink-0 items-center">
       {/* 36px hit area without growing the navbar row: negative margins
-          give the layout a 12px box. They are asymmetric (10px/14px) so
-          the globe centres on the label text box, which sits 2px below
-          the row centre (tests/e2e/ink-entry-layout.spec.ts). */}
+          give the layout a 12px box. They are asymmetric (11px/13px) so
+          the globe's ink centres on the CAP height of the "CV" label, not
+          on its text box: the box reserves descender space the uppercase
+          label never uses, so box-centring left the globe ~1px low
+          (tests/e2e/ink-entry-layout.spec.ts measures the cap centre). */}
       <button
         ref={toggleRef}
         type="button"
@@ -365,7 +367,7 @@ export function LocaleSwitcher() {
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((v) => !v)}
-        className="relative -mx-2 -mt-2.5 -mb-3.5 flex size-9 items-center justify-center text-ink transition-transform active:scale-[0.92] active:duration-100"
+        className="relative -mx-2 -mt-[11px] -mb-[13px] flex size-9 items-center justify-center text-ink transition-transform active:scale-[0.92] active:duration-100"
       >
         <span
           ref={globeRef}
