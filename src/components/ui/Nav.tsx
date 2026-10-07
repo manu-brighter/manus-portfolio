@@ -227,10 +227,8 @@ export function Nav() {
           </span>
 
           {/* Locale switcher: globe toggle + crawlable hreflang links.
-              TODO: `usePathname` strips query + hash. If `#work`-
-              anchored users switch locale they lose position; compose
-              href from `usePathname()` + `window.location.hash` once
-              that's a real complaint. */}
+              The switch keeps position (URL hash, or the home section in
+              view), composed at click time in switchTarget(). */}
           <LocaleSwitcher />
         </div>
       </div>
