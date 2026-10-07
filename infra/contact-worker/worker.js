@@ -109,8 +109,8 @@ export default {
         body: JSON.stringify({
           from: `${FROM_NAME} <${FROM_ADDRESS}>`,
           to: [TO_ADDRESS],
-          reply_to: name ? `${name} <${email}>` : email,
-          subject: `${SUBJECT} — ${name}`,
+          reply_to: `${quoteDisplayName(name)} <${email}>`,
+          subject: `${SUBJECT} · ${stripControl(name)}`,
           html: emailHtml(name, email, message),
           text: emailText(name, email, message),
         }),
@@ -128,6 +128,21 @@ export default {
     }
   },
 };
+
+/** Drop control characters (incl. CR/LF) so a name can never break a header line. */
+function stripControl(value) {
+  return value.replace(/\p{Cc}/gu, " ").trim();
+}
+
+/**
+ * RFC 5322 quoted-string display name. Unquoted, a name like "Elias <3"
+ * turned `Elias <3 <a@b.ch>` into an invalid address, Resend rejected the
+ * send and the visitor only got the mailto fallback. Quoting (with `\`
+ * and `"` escaped) accepts any name: commas, angle brackets, @, emoji.
+ */
+function quoteDisplayName(name) {
+  return `"${stripControl(name).replace(/[\\"]/g, "\\$&")}"`;
+}
 
 /** Pragmatic email check (matches the form's HTML5 type=email expectation). */
 function isEmail(value) {
