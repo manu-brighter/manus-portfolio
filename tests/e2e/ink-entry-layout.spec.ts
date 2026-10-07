@@ -81,6 +81,19 @@ test("header CV typography aligns with language and navigation labels", async ({
         const rect = range.getBoundingClientRect();
         return rect.top + rect.height / 2;
       };
+      // Optical centre of an uppercase label: baseline minus half the cap
+      // height. The text box also holds descender space the caps never
+      // use, so its centre sits ~0.5px below what the eye reads.
+      const capCenter = (element: Element) => {
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        const rect = range.getBoundingClientRect();
+        const style = getComputedStyle(element);
+        const ctx = document.createElement("canvas").getContext("2d")!;
+        ctx.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+        const metrics = ctx.measureText(element.textContent?.trim() ?? "");
+        return rect.top + metrics.fontBoundingBoxAscent - metrics.actualBoundingBoxAscent / 2;
+      };
       const links = [...document.querySelectorAll("nav ul a")].filter(
         (element) =>
           element.getBoundingClientRect().width > 0 &&
@@ -89,14 +102,14 @@ test("header CV typography aligns with language and navigation labels", async ({
       );
       return {
         languageOffset: Math.abs(
-          textCenter(cv) -
+          capCenter(cv) -
             (language.getBoundingClientRect().top + language.getBoundingClientRect().height / 2),
         ),
         navigationOffsets: links.map((link) => Math.abs(textCenter(cv) - textCenter(link))),
         border: getComputedStyle(cv).borderTopWidth,
       };
     });
-    expect(layout.languageOffset).toBeLessThanOrEqual(1);
+    expect(layout.languageOffset).toBeLessThanOrEqual(0.75);
     for (const offset of layout.navigationOffsets) expect(offset).toBeLessThanOrEqual(1);
     expect(layout.border).toBe("0px");
   }

@@ -2,7 +2,7 @@
   "meta": {
     "title": "Manuel Heller · Software Developer · Photographer",
     "titleTemplate": "%s · Manuel Heller",
-    "description": "Développeur logiciel dans la région de Bâle. PHP, Vue, interfaces métier, intégrations et tests automatisés. Projets web personnels, outils IA et photographie."
+    "description": "Développeur full-stack de la région de Bâle. PHP et Vue au travail, projets web personnels, Claude Code et photo animalière à côté."
   },
   "skipLink": {
     "label": "Aller au contenu"
@@ -14,16 +14,16 @@
   "nav": {
     "ariaLabel": "Navigation principale",
     "items": {
-      "work": "Travaux",
-      "about": "À propos",
+      "work": "Work",
+      "about": "About",
       "playground": "Playground",
       "contact": "Contact",
       "impressum": "Mentions légales",
       "datenschutz": "Confidentialité",
       "cv": "CV",
       "skills": "Skills",
-      "casestudy": "Étude de cas",
-      "photography": "Photographie"
+      "casestudy": "Case Study",
+      "photography": "Photography"
     },
     "mobileMenu": {
       "open": "Ouvrir le menu",
@@ -65,7 +65,7 @@
     "aboutObjectsLabel": "Off the Screen"
   },
   "simPresets": {
-    "label": "Caractère d'encre",
+    "label": "Ink Style",
     "hint": "Change the look!",
     "riso": "Riso",
     "wave": "Wave",
@@ -80,8 +80,8 @@
   "inkStudio": {
     "label": "Visuals",
     "intro": "Du papier, de la couleur et un peu de mouvement. Composez votre ambiance.",
-    "theme": "Palette",
-    "motion": "Mouvement",
+    "theme": "Theme",
+    "motion": "Motion",
     "light": "Animation",
     "full": "Simulation",
     "lightBody": "Des formes fluides qui réagissent à tes gestes. Peu gourmand en calcul.",

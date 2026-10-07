@@ -1,7 +1,8 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { type MouseEvent, useCallback, useEffect, useRef, useState } from "react";
+import { navLabelLang } from "@/lib/navLang";
 
 /**
  * Mobile hamburger menu — only mounts the dropdown subtree on mobile
@@ -42,6 +43,7 @@ type Props = {
 
 export function NavMobileMenu({ items, activeSection, buildHref, onAnchorClick }: Props) {
   const t = useTranslations();
+  const locale = useLocale();
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   // WCAG 2.4.3: focus must return to the trigger that opened the dialog
@@ -174,6 +176,7 @@ export function NavMobileMenu({ items, activeSection, buildHref, onAnchorClick }
                   }`}
                 >
                   <span
+                    lang={navLabelLang(item.key, locale)}
                     className={
                       isActive
                         ? "underline decoration-ink decoration-[1.5px] underline-offset-[6px]"

@@ -102,6 +102,9 @@ type PhotoInkMaskProps = {
   /** Set true once the slot has entered the viewport — triggers the
    * scripted reveal-burst once. Subsequent toggles are ignored. */
   reveal: boolean;
+  /** Light-mode reveal only: photo index (layout seed) and width/height. */
+  seed?: number;
+  aspect?: number;
 };
 
 // Soft-failure wrapper around the shared compileShader helper. The mount

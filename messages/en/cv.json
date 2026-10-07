@@ -2,13 +2,13 @@
   "cv": {
     "metaTitle": "CV · Manuel Heller",
     "metaDescription": "Manuel Heller, software developer in the Basel region. PHP, Vue, integrations and test automation. Available from December 2026.",
-    "sectionLabel": "Curriculum vitae",
+    "sectionLabel": "CV",
     "editionStamp": "Edition MMXXVI",
-    "calibrationLabel": "Ink proof",
+    "calibrationLabel": "Proof",
     "name": "Manuel Heller",
     "role": "Software developer · PHP & Vue",
     "region": "Basel region, Switzerland",
-    "profile": "I design interfaces for complex business processes, develop applications and integrations, and take responsibility for automated release tests. In my own projects, I combine development and design in substantial web applications that I operate myself. Available from 1 December 2026, full-time.",
+    "profile": "I build Vue interfaces for complex business processes, the PHP backends and integrations behind them, and own the automated release tests. On the side I develop and run my own web applications where design and code come from one hand. Available from 1 December 2026, full-time.",
     "contactLabel": "Contact",
     "download": {
       "label": "Save as PDF",
@@ -47,7 +47,7 @@
         {
           "title": "joggediballa.ch",
           "meta": "React · TypeScript · Node.js · tRPC · MySQL",
-          "description": "Club and event platform designed and developed over several months; used regularly, self-hosted and continuously developed. Permissions, supporting memberships and attendance reporting; order and point-of-sale system for service, kitchen and bar, moderated live slideshow and streaming overlay."
+          "description": "Club and event platform designed and developed over several months; in use since 2024, self-hosted and continuously developed. Permissions, supporting memberships and attendance reporting; order and point-of-sale system for service, kitchen and bar, moderated live slideshow and streaming overlay."
         },
         {
           "title": "manuelheller.dev",
@@ -57,7 +57,7 @@
       ]
     },
     "skills": {
-      "label": "Technical skills",
+      "label": "Skills",
       "groups": [
         {
           "label": "Backend and data",
@@ -68,11 +68,11 @@
           "items": "Vue.js · JavaScript · HTML · CSS"
         },
         {
-          "label": "Quality assurance",
-          "items": "Cypress · Playwright · E2E · Code-Reviews"
+          "label": "Testing & QA",
+          "items": "Cypress · Playwright · E2E · Code reviews"
         },
         {
-          "label": "Development environment",
+          "label": "Tooling",
           "items": "Git · GitLab · Docker · Linux and nginx for own projects"
         },
         {
@@ -133,7 +133,7 @@
     },
     "footer": {
       "inkLabel": "Ink",
-      "printedNote": "Printed from manuelheller.dev/cv in the selected ink style.",
+      "printedNote": "Printed from manuelheller.dev/cv in the selected Ink Style.",
       "publicNote": "Public version. Full contact details on request."
     }
   }

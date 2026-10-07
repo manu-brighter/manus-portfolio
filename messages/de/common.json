@@ -2,7 +2,7 @@
   "meta": {
     "title": "Manuel Heller · Software Developer · Photographer",
     "titleTemplate": "%s · Manuel Heller",
-    "description": "Softwareentwickler aus der Basel-Region. PHP, Vue, Fachoberflächen, Schnittstellen und Testautomatisierung. Eigene Webprojekte, AI-Werkzeuge und Fotografie."
+    "description": "Full-Stack Developer aus der Region Basel. PHP und Vue im Job, eigene Webprojekte, Claude Code und Wildlife-Fotografie daneben."
   },
   "skipLink": {
     "label": "Zum Inhalt springen"
@@ -14,16 +14,16 @@
   "nav": {
     "ariaLabel": "Hauptnavigation",
     "items": {
-      "work": "Arbeiten",
-      "about": "Über",
+      "work": "Work",
+      "about": "About",
       "playground": "Playground",
-      "contact": "Kontakt",
+      "contact": "Contact",
       "impressum": "Impressum",
       "datenschutz": "Datenschutz",
       "cv": "CV",
       "skills": "Skills",
       "casestudy": "Case Study",
-      "photography": "Fotografie"
+      "photography": "Photography"
     },
     "mobileMenu": {
       "open": "Menü öffnen",
@@ -65,7 +65,7 @@
     "aboutObjectsLabel": "Off the Screen"
   },
   "simPresets": {
-    "label": "Tinten-Charakter",
+    "label": "Ink Style",
     "hint": "Change the look!",
     "riso": "Riso",
     "wave": "Wave",
@@ -80,8 +80,8 @@
   "inkStudio": {
     "label": "Visuals",
     "intro": "Papier, Farbe und ein wenig Bewegung. Stell dir deine Ansicht zusammen.",
-    "theme": "Farbwelt",
-    "motion": "Bewegung",
+    "theme": "Theme",
+    "motion": "Motion",
     "light": "Animation",
     "full": "Simulation",
     "lightBody": "Fliessende Formen, die auf dich reagieren. Braucht wenig Rechenleistung.",
