@@ -2,6 +2,7 @@
 
 import gsap from "gsap";
 import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from "react";
+import { ExternalLinkIcon } from "@/components/ui/ExternalLinkIcon";
 import { useCoarsePointer } from "@/hooks/useCoarsePointer";
 import { useHoverOrCenterViewport } from "@/hooks/useHoverOrCenterViewport";
 import { useLenis } from "@/hooks/useLenis";
@@ -79,6 +80,16 @@ export type WorkCardProps = {
   className?: string;
   /** Pass-through style for outer wrapper. */
   style?: CSSProperties;
+  /** Optional second destination (live site, source repo), rendered as
+   *  its own external link next to the CTA stamp. */
+  secondaryLink?: {
+    href: string;
+    label: string;
+    /** `lang` for an English chrome label on de/fr/it pages. */
+    lang?: string;
+    /** Screen-reader hint that the link opens a new tab. */
+    newTabHint: string;
+  };
 };
 
 /** Magnetic-pull max distance (CSS px). Plan §6.7 calls for 12px. */
@@ -129,6 +140,7 @@ export function WorkCard(props: WorkCardProps) {
     offsetY = 0,
     className,
     style,
+    secondaryLink,
   } = props;
 
   const reducedMotion = useReducedMotion();
@@ -375,55 +387,63 @@ export function WorkCard(props: WorkCardProps) {
   };
 
   const href = click.kind === "anchor" ? click.target : "#hero";
+  const titleId = `work-${id}-title`;
 
   return (
+    // Hover state lives on the article, not the link: the card holds a
+    // second link (live site / source) outside the card anchor, and
+    // moving the pointer onto it must not read as "leaving the card".
     <article
       ref={rootRef}
       id={id}
-      aria-labelledby={`work-${id}-title`}
-      className={`relative ${className ?? ""}`}
+      aria-labelledby={titleId}
+      className={`group relative ${className ?? ""}`}
       style={style}
+      onPointerEnter={onPointerEnter}
+      onPointerLeave={() => setHovered(false)}
     >
-      <a
-        href={href}
-        onClick={onClick}
-        onPointerEnter={onPointerEnter}
-        onPointerLeave={() => setHovered(false)}
-        onFocus={() => setHovered(true)}
-        onBlur={() => setHovered(false)}
-        className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-4 focus-visible:ring-offset-paper"
-        {...(href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-      >
-        <div ref={cardRef} className="relative will-change-transform">
-          {/* Backing block — riso underlay pinned at the card's top-left,
-              oversized bottom-right by BACKING_OVERHANG_PX so the offset
-              look never uncovers card text (see the constant's comment).
-              Under that overhang the panel bleeds a uniform pad past
-              EVERY edge (12px, 20px from `md`), so media and copy sit
-              inside the color with breathing room instead of on its
-              edge. The pad has to clear the Instrument Serif italic
-              titles' negative side bearing: the "J" of "Jogge di Balla"
-              paints left of its text box and touched the panel edge with
-              the old 8px left-only bleed. Bleeding the panel beats
-              indenting the content, which would break the shared left
-              edge of media frame and copy. On coarse pointers
-              (mobile/touch) there is no cursor parallax (gated by
-              isCoarse below), so the bottom-right overhang is dropped
-              and the pad stays symmetric. */}
-          <div
-            ref={backingRef}
-            aria-hidden="true"
-            className={`absolute will-change-transform ${
-              isCoarse
-                ? "-inset-3 md:-inset-5"
-                : "-top-3 -left-3 -right-6 -bottom-6 md:-top-5 md:-left-5 md:-right-8 md:-bottom-8"
-            }`}
-            style={{
-              background: `var(--color-spot-${splatColor})`,
-              opacity: 0.18,
-            }}
-          />
+      <div ref={cardRef} className="relative will-change-transform">
+        {/* Backing block — riso underlay pinned at the card's top-left,
+            oversized bottom-right by BACKING_OVERHANG_PX so the offset
+            look never uncovers card text (see the constant's comment).
+            Under that overhang the panel bleeds a uniform pad past
+            EVERY edge (12px, 20px from `md`), so media and copy sit
+            inside the color with breathing room instead of on its
+            edge. The pad has to clear the Instrument Serif italic
+            titles' negative side bearing: the "J" of "Jogge di Balla"
+            paints left of its text box and touched the panel edge with
+            the old 8px left-only bleed. Bleeding the panel beats
+            indenting the content, which would break the shared left
+            edge of media frame and copy. On coarse pointers
+            (mobile/touch) there is no cursor parallax (gated by
+            isCoarse below), so the bottom-right overhang is dropped
+            and the pad stays symmetric. */}
+        <div
+          ref={backingRef}
+          aria-hidden="true"
+          className={`absolute will-change-transform ${
+            isCoarse
+              ? "-inset-3 md:-inset-5"
+              : "-top-3 -left-3 -right-6 -bottom-6 md:-top-5 md:-left-5 md:-right-8 md:-bottom-8"
+          }`}
+          style={{
+            background: `var(--color-spot-${splatColor})`,
+            opacity: 0.18,
+          }}
+        />
 
+        {/* Card link: media, title block and CTA stamp, as before. The
+            secondary link lives in its own row after it, so no anchor is
+            ever nested in another and the media keeps its own pointer
+            events (the Portfolio hover stage listens on them). */}
+        <a
+          href={href}
+          onClick={onClick}
+          onFocus={() => setHovered(true)}
+          onBlur={() => setHovered(false)}
+          className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-4 focus-visible:ring-offset-paper"
+          {...(href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+        >
           {/* Media frame — screenshot or generative visual. */}
           <div
             ref={mediaRef}
@@ -443,7 +463,7 @@ export function WorkCard(props: WorkCardProps) {
             </div>
 
             <h3
-              id={`work-${id}-title`}
+              id={titleId}
               className="mt-3 font-display italic text-ink text-[clamp(2rem,4.5vw,3.5rem)] leading-[1.05] tracking-[-0.02em]"
             >
               {title}
@@ -491,8 +511,26 @@ export function WorkCard(props: WorkCardProps) {
               {click.kind !== "scroll-hero" ? <span aria-hidden="true"> →</span> : null}
             </span>
           </div>
-        </div>
-      </a>
+        </a>
+
+        {/* Secondary destination: a mono link row under the card link,
+            still inside cardRef so it rides the magnetic translate and
+            sits on the colored backing. */}
+        {secondaryLink ? (
+          <a
+            href={secondaryLink.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            lang={secondaryLink.lang}
+            data-no-splat
+            className="type-label relative mt-4 inline-flex min-h-6 items-center gap-1.5 border-ink border-b-[1.5px] text-ink transition-colors hover:border-spot-mint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+          >
+            {secondaryLink.label}
+            <ExternalLinkIcon className="size-3.5" />
+            <span className="sr-only">{secondaryLink.newTabHint}</span>
+          </a>
+        ) : null}
+      </div>
     </article>
   );
 }

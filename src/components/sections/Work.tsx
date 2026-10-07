@@ -1,4 +1,4 @@
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { WorkCard } from "@/components/ui/WorkCard";
@@ -47,6 +47,8 @@ function isSideProjectId(id: string): id is SideProjectId {
 
 export function Work() {
   const t = useTranslations("work");
+  const locale = useLocale();
+  const newTabHint = t("links.newTab");
   const projects = t.raw("projects") as WorkProjects;
   const sideProjects = t.raw("sideProjects.items") as WorkSideProjects;
 
@@ -87,6 +89,13 @@ export function Work() {
               ctaLabel={portfolio.ctaLabel}
               splatColor="rose"
               click={{ kind: "scroll-hero" }}
+              // "Source" is an English chrome label in every locale.
+              secondaryLink={{
+                href: SITE.repos.portfolio,
+                label: t("links.source"),
+                lang: locale === "en" ? undefined : "en",
+                newTabHint,
+              }}
               media={
                 portfolio.reveal ? (
                   <PortfolioCardReveal
@@ -137,6 +146,11 @@ export function Work() {
               ctaLabel={joggediballa.ctaLabel}
               splatColor="amber"
               click={{ kind: "anchor", target: "#case-study" }}
+              secondaryLink={{
+                href: SITE.joggediballa.url,
+                label: t("links.live"),
+                newTabHint,
+              }}
               media={
                 // Theme-aware: swaps to the real darkmode homepage
                 // shot while the Nachtdruck preset is active.

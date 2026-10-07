@@ -333,6 +333,11 @@
     "sectionLabel": "Section 03 · Work",
     "headline": "Deux projets, tous deux en ligne.",
     "subhead": "Ce site et la plateforme de notre club. Concept, design, code et hébergement : tout est de moi, Claude Code dans le terminal.",
+    "links": {
+      "live": "joggediballa.ch",
+      "source": "Source",
+      "newTab": "ouvre dans un nouvel onglet"
+    },
     "projects": [
       {
         "id": "portfolio",
