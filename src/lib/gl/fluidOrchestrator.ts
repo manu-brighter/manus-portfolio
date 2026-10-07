@@ -56,9 +56,9 @@ type Programs = {
   divergence: WebGLProgram;
   pressure: WebGLProgram;
   gradientSub: WebGLProgram;
-  // One genuinely distinct render shader per preset style — not one
-  // parametrized shader. All four compile at init (cheap, one-time)
-  // so a live preset switch is just a program swap in runRender().
+  // One render shader per preset style, each a port of its Light style
+  // branch. All five compile at init (cheap, one-time) so a live preset
+  // switch is just a program swap in runRender().
   renderRiso: WebGLProgram;
   renderWave: WebGLProgram;
   renderTurbulenz: WebGLProgram;
@@ -201,13 +201,15 @@ const AMBIENT_POINTS: readonly AmbientPoint[] = [
 export type RGB = readonly [number, number, number];
 
 /**
- * The five style-specific render shaders. Each is a genuinely
- * different fragment shader, not a parameter set on one shader:
- * riso = the original soft-ladder + Sobel ink pooling (quiet default),
- * wave = overprint plates with misregistration + ink bleed,
- * turbulenz = screenprint comic (hard bands, halftone, ink contours),
- * aquarell = wet watercolor (wide blur, granulation, wet-edge rims),
- * nachtdruck = neon print (hard bands, additive glow, chroma fringes).
+ * The five style-specific render shaders (`render-*.frag.glsl`). Each
+ * ports its Light renderer style branch (ink-lite/render.frag.glsl):
+ * the same translucent plate thresholds, printed from the advected
+ * sheet (hero, see setInkSheet()) plus splat dye.
+ * riso = quiet soft plates with faint rims (default),
+ * wave = long rolling swells + fine diagonal screen,
+ * turbulenz = crisp angular islands with rim shading,
+ * aquarell = widest plate ramp, pigment deposits, coloured wet-edge rims,
+ * nachtdruck = hollow luminous filaments with halo + glow rims.
  * Ids mirror `SimPresetId` today but stay a separate type — a future
  * preset may reuse an existing style.
  */
@@ -226,13 +228,17 @@ export type FluidRenderStyle = "riso" | "wave" | "turbulenz" | "aquarell" | "nac
  * location = no-op).
  */
 export type FluidVisuals = {
-  /** Which of the four render shaders draws the dye field. */
+  /** Which of the five render shaders draws the dye field. */
   style: FluidRenderStyle;
+  /** Unread since the Light alignment (no render shader declares
+   *  uOutlineThreshold any more); kept so presets and the look-key
+   *  sync stay stable. */
   outlineThreshold: number;
   grainStrength: number;
-  /** Per-style intensity knob: riso ignores it, turbulenz = ink
-   *  contour-line strength, aquarell = wet-edge rim darkening,
-   *  nachtdruck = glow-halo gain. */
+  /** Per-style rim knob, same meanings as Light's `uEdge`: riso = rim
+   *  darkening (0.35 = Light's fixed 0.045), turbulenz = rim shading,
+   *  aquarell = coloured wet-edge rims, nachtdruck = glow-rim gain;
+   *  wave ignores it. */
   edgeStrength: number;
   paper: RGB;
   ink: RGB;
@@ -242,8 +248,8 @@ export type FluidVisuals = {
   ladder: readonly [RGB, RGB, RGB, RGB];
   /** Multiplier on pointer/splat velocity injection. */
   velocityScale: number;
-  /** How much dye a splat deposits (kept well below 1 so dye stays in
-   *  range and the render shaders' edge passes aren't overwhelmed). */
+  /** How much dye a splat deposits (kept well below 1 so overlapping
+   *  splats don't saturate every plate into the top band). */
   dyeScale: number;
   /** Splats emitted per pointer-move frame (>= 1). Above 1 the splats
    *  scatter around the pointer (see splatScatter) — Turbulenz throws
@@ -490,8 +496,9 @@ export class FluidOrchestrator {
   // Light renderer's analytic field. Off by default so playground sims
   // keep a clean paper canvas.
   private sheetEnabled = false;
-  // False until the sheet has been seeded; the first sheet pass snaps to
-  // the analytic field instead of fading in from blank paper.
+  // False until the sheet has been seeded (and again after resize/reset
+  // reallocate or clear the dye). step() primes it before rendering, so
+  // the render pass never shows blank paper or a fade-in from it.
   private sheetPrimed = false;
   private sheetTime = 0;
   // Page scroll (viewport heights) + section quieting, fed per frame by
@@ -613,6 +620,9 @@ export class FluidOrchestrator {
     if (!this.state) return;
     this.destroyFBOs(this.state);
     this.createSimFBOs(this.state);
+    // The fresh dye FBO is blank: the next step() re-seeds the sheet
+    // before its render pass (no GL work here, outside the frame loop,
+    // so R3F's bound state stays untouched).
     this.sheetPrimed = false;
   }
 
@@ -756,11 +766,21 @@ export class FluidOrchestrator {
    * velocity field advects it and one cheap sim-resolution pass relaxes
    * it back toward the analytic target (`visuals.sheetRelax`). Splat
    * dye keeps printing on top. Playground sims leave this off.
+   *
+   * `sheetTime` continues a previous instance's clock (getSheetTime()):
+   * the tier auto-tune re-creates the orchestrator, and restarting the
+   * clock at 0 would snap the composition to a different frame.
    */
-  setInkSheet(enabled: boolean): void {
+  setInkSheet(enabled: boolean, sheetTime?: number): void {
     this.sheetEnabled = enabled;
     this.sheetPrimed = false;
     this.carriedScroll = null;
+    if (sheetTime !== undefined) this.sheetTime = sheetTime;
+  }
+
+  /** Current sheet clock, to hand over to a re-created instance. */
+  getSheetTime(): number {
+    return this.sheetTime;
   }
 
   /**
@@ -1005,8 +1025,8 @@ export class FluidOrchestrator {
     this.drawQuad();
     state.velocity.swap();
 
-    // Dye splat — dyeScale keeps dye in [0,1] range so it doesn't
-    // overwhelm the render shaders' edge passes. dyeMul lets the
+    // Dye splat — dyeScale keeps dye in [0,1] range so overlapping
+    // splats don't saturate into the top plate. dyeMul lets the
     // ambient churn fade a point's ink deposit in/out with its life
     // cycle instead of popping.
     const d = dyeScale * dyeMul;
@@ -1092,25 +1112,35 @@ export class FluidOrchestrator {
     state.velocity.swap();
   }
 
-  /** Advect-compatible sheet pass: scroll carry + relaxation toward the
-   *  analytic Light field. Runs at sim resolution right before the dye
-   *  advect, so the relaxed sheet is transported in the same step. */
-  private runInkSheet(dt: number): void {
+  /** Sheet pass at sim resolution. Step mode (`prime` false) runs right
+   *  before the dye advect: scroll carry + relaxation toward the analytic
+   *  Light field, pre-compensated for the advect's dissipation. Prime
+   *  mode snaps the sheet onto the target with no advect following (no
+   *  carry, no dissipation compensation): it seeds a blank dye FBO before
+   *  the first render and keeps the sheet live while the warmup gate is
+   *  closed, at the cost of one cheap pass instead of the sim pipeline. */
+  private runInkSheet(dt: number, prime: boolean): void {
     const state = this.requireState();
     const gl = state.gl;
     const p = state.programs.inkSheet;
-    // Relaxation is time-based so half-rate tiers (sim every 2nd frame)
-    // keep the same feel.
-    const simDt = dt * (state.config.halfRate ? 2 : 1);
-    const relax = this.sheetPrimed ? 1 - Math.exp(-this.visuals.sheetRelax * simDt) : 1;
+    let relax = 1;
+    let carry = 0;
+    let dissipation = 1;
+    if (prime || this.carriedScroll === null) this.carriedScroll = this.scroll;
+    if (!prime) {
+      // Relaxation is time-based so half-rate tiers (sim every 2nd
+      // frame) keep the same feel.
+      const simDt = dt * (state.config.halfRate ? 2 : 1);
+      relax = 1 - Math.exp(-this.visuals.sheetRelax * simDt);
+      carry =
+        Math.max(
+          -SHEET_CARRY_MAX_STEP,
+          Math.min(SHEET_CARRY_MAX_STEP, this.scroll - this.carriedScroll),
+        ) * SHEET_SCROLL_CARRY;
+      this.carriedScroll = this.scroll;
+      dissipation = state.config.dyeDissipation;
+    }
     this.sheetPrimed = true;
-    if (this.carriedScroll === null) this.carriedScroll = this.scroll;
-    const carry =
-      Math.max(
-        -SHEET_CARRY_MAX_STEP,
-        Math.min(SHEET_CARRY_MAX_STEP, this.scroll - this.carriedScroll),
-      ) * SHEET_SCROLL_CARRY;
-    this.carriedScroll = this.scroll;
 
     this.activateProgram(p);
     this.bindTexture(p, "uDye", state.dye.read.texture, 0);
@@ -1119,7 +1149,7 @@ export class FluidOrchestrator {
     this.setFloat(p, "uScroll", this.scroll);
     gl.uniform1i(this.getUniform(p, "uStyle"), inkSheetStyleIndex(this.visuals.style));
     this.setFloat(p, "uRelax", relax);
-    this.setFloat(p, "uDissipation", state.config.dyeDissipation);
+    this.setFloat(p, "uDissipation", dissipation);
     this.setFloat(p, "uCarry", carry);
     this.renderToFBO(state.dye.write);
     this.drawQuad();
@@ -1149,13 +1179,9 @@ export class FluidOrchestrator {
     this.activateProgram(p);
     this.bindTexture(p, "uDye", state.dye.read.texture, 0);
     this.setVec2(p, "uTexelSize", 1.0 / this.canvasWidth, 1.0 / this.canvasHeight);
-    // Sim-grid texel for passes that step the dye texture (Sobel in
-    // render-turbulenz) — canvas-texel steps starve at high viewport
-    // resolutions because the dye FBO is sim-resolution.
-    this.setVec2(p, "uSimTexel", 1.0 / this.simWidth, 1.0 / this.simHeight);
     // Uniforms a style's shader doesn't declare resolve to a null
     // location — setting them is a spec-defined no-op, so one uniform
-    // pass serves all four programs.
+    // pass serves all five programs.
     const v = this.visuals;
     this.setFloat(p, "uOutlineThreshold", v.outlineThreshold);
     this.setFloat(p, "uGrainStrength", v.grainStrength);
@@ -1237,6 +1263,13 @@ export class FluidOrchestrator {
     // keeps the theme's tempo.
     this.sheetTime += dt * inkSheetSpeed(this.visuals);
 
+    // Hero sheet seed: before the first render, after resize()/reset()
+    // re-created or cleared the dye, and on every frame while the warmup
+    // gate is closed (one sim-resolution pass, no physics), so the theme's
+    // composition is on screen from the first frame and stays live through
+    // the hero reveal instead of popping in when start() fires.
+    const primeSheet = this.sheetEnabled && (!this.started || !this.sheetPrimed);
+
     // Pre-warmup gate: while !started, skip all expensive sim passes
     // (curl + vorticity + 2 advects + divergence + N-iter pressure +
     // gradient-subtract) and only paint the render pass so the canvas
@@ -1248,6 +1281,7 @@ export class FluidOrchestrator {
       this.pendingSplats.length = 0;
       gl.bindVertexArray(state.emptyVAO);
       gl.disable(gl.BLEND);
+      if (primeSheet) this.runInkSheet(dt, true);
       this.runRender(elapsed);
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
       gl.bindVertexArray(null);
@@ -1285,6 +1319,9 @@ export class FluidOrchestrator {
 
     // Disable blending for all sim passes
     gl.disable(gl.BLEND);
+
+    // Half-rate odd frames skip the sim block below but still render.
+    if (primeSheet) this.runInkSheet(dt, true);
 
     // Sim-step: skipped on odd frames at half-rate
     const runSim = !state.config.halfRate || this.frameCount % 2 === 0;
@@ -1383,7 +1420,7 @@ export class FluidOrchestrator {
       this.runDivergence();
       this.runPressure();
       this.runGradientSubtract();
-      if (this.sheetEnabled) this.runInkSheet(dt);
+      if (this.sheetEnabled) this.runInkSheet(dt, false);
       this.runAdvect(state.dye, state.config.dyeDissipation, dt);
     }
 

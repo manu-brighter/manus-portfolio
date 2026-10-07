@@ -30,7 +30,12 @@ out vec4 fragColor;
 // shading match ink-lite/render.frag.glsl, style 2 (the old halftone +
 // black contour look is retired: owner preferred the Light colours).
 
-const float SPLAT_SOLO = 1.0;
+// Splat dye weight with and without the sheet underneath. Without a sheet
+// (playground sims) the scale keeps the old banded shader's saturation
+// point: its top band sat at dye length 1.0, the plates here top out at
+// 0.57. At 1.0 Type-as-Fluid words and studio pools printed as one solid
+// top-band mass (screenshot-verified).
+const float SPLAT_SOLO = 0.6;
 const float SPLAT_ON_SHEET = 0.35;
 
 vec3 plateColor(int index) {

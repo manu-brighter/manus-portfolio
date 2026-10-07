@@ -15,8 +15,11 @@ uniform int uStyle;
 // Fraction of the way the advected sheet moves back toward the analytic
 // target this sim step (0 = pure physics, 1 = snap to the Light field).
 uniform float uRelax;
-// The dye advect multiplies every channel by this; the sheet undoes it so
-// only the relaxation decides how long a physical distortion survives.
+// The dye advect that follows this pass multiplies every channel by this.
+// The sheet pre-divides the relaxed value by it, so the advected alpha the
+// render pass reads settles on exactly the target (not dissipation x
+// target, which under-inked Full vs Light, worse on half-rate tiers where
+// the dissipation is squared). 1.0 when no advect follows (priming).
 uniform float uDissipation;
 // Vertical UV shift for this step: scrolling carries the printed ink
 // with the page (positive = up, like the content).
@@ -40,6 +43,8 @@ void main() {
   p.y -= uScroll * 0.075;
   vec2 q;
   float target = inkSheet(p, uSheetTime * 0.12, uStyle, 0.0, q);
-  float sheet = dye.a / max(uDissipation, 0.5);
-  fragColor = vec4(dye.rgb * inside, mix(sheet, target, uRelax));
+  // advect(mix(a, T, r) / d) = mix(a, T, r): steady state is exactly T,
+  // and only the relaxation decides how long a physical distortion lives.
+  float sheet = mix(dye.a, target, uRelax) / max(uDissipation, 0.5);
+  fragColor = vec4(dye.rgb * inside, sheet);
 }

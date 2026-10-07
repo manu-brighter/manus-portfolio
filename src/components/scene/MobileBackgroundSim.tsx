@@ -66,6 +66,9 @@ export function MobileBackgroundSim({
   const onFrametimeRef = useRef(onFrametime);
   onFrametimeRef.current = onFrametime;
   const warmupRef = useRef<ReturnType<typeof createInkWarmup> | null>(null);
+  // Ink sheet clock, handed from a disposed orchestrator to its
+  // replacement (tier re-init) so the composition continues, not snaps.
+  const sheetTimeRef = useRef(0);
   const onUnavailableRef = useRef(onUnavailable);
   onUnavailableRef.current = onUnavailable;
   const reduced = useReducedMotion();
@@ -108,7 +111,7 @@ export function MobileBackgroundSim({
     try {
       orchestrator.init(gl, config);
       // Print the theme's Light composition from the fluid (see setInkSheet).
-      orchestrator.setInkSheet(true);
+      orchestrator.setInkSheet(true, sheetTimeRef.current);
       applySimPreset(orchestrator, getSimPreset(useSimPresetStore.getState().presetId), config);
       // Compile the first splat before declaring the renderer available.
       orchestrator.injectSplat(-1, -1, [0, 0, 0], 0, 0);
@@ -166,6 +169,7 @@ export function MobileBackgroundSim({
       if (resizeRaf !== null) cancelAnimationFrame(resizeRaf);
       unsubLoader();
       unsubPreset();
+      sheetTimeRef.current = orchestrator.getSheetTime();
       orchestrator.dispose();
       orchestratorRef.current = null;
       warmupRef.current = null;

@@ -274,9 +274,27 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   The splat shader passes alpha through; render shaders print
   `alpha * uSheet + splatDensity * SPLAT_ON_SHEET`. **Only the hero
   renderers call `setInkSheet(true)`** (FluidSim, MobileBackgroundSim);
-  playground sims keep clean paper and the old splat-only behaviour
-  (`uSheet = 0`). Splat dye is deliberately quieter on the sheet so the
-  theme's structure stays the composition.
+  playground sims keep clean paper (`uSheet = 0`) but DO print through
+  the new plates. Their splat-only density is scaled by each shader's
+  `SPLAT_SOLO` (riso 0.62, wave 1, turbulenz 0.6, aquarell 0.7,
+  nachtdruck 0.75) so the top plate saturates at the same dye level as
+  the retired shaders the playground was tuned against; at 1.0
+  Type-as-Fluid words printed as one solid top-band mass. `SPLAT_SOLO`
+  never reaches the hero (it only acts at `uSheet = 0`). Splat dye is
+  deliberately quieter on the sheet so the theme's structure stays the
+  composition.
+  - **Steady state is exactly the target**: the dye advect after the
+    sheet pass multiplies alpha by `dyeDissipation` (squared on
+    half-rate tiers), so the sheet pass writes
+    `mix(alpha, target, relax) / dissipation`. Without the division Full
+    settled at `dissipation x target` and under-inked vs Light,
+    tier-dependently.
+  - **The sheet is primed before every render that could see it
+    blank**: first frame, after `resize()`/`reset()` (fresh/cleared dye),
+    and on every frame while the warmup gate is closed (one sim-res pass,
+    no physics), so the composition never flashes paper or pops in at
+    `start()`. The sheet clock survives tier re-init via
+    `getSheetTime()` -> `setInkSheet(true, time)` in both hero renderers.
 - **Turbulenz chop**: Light's turbulenz twists its island field through
   six wandering analytic point vortices plus a fast shear (`inkChop`, the
   owner wanted Full's "wilde, zerhackte Wirbeln" in Animation too). Full
@@ -290,9 +308,14 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   because FluidSim sits inside R3F without router context). In Full the
   sheet pass carries alpha AND splat dye up with the page at 0.35x page
   speed (`SHEET_SCROLL_CARRY`, capped per step) while the target drifts
-  with Light's 0.075 offset; reading sections fade to paper exactly like
-  Light. The old zero-dye velocity coupling (ScrollInkCoupling, mobile
-  onScroll) still runs on top.
+  by Light's 0.075 offset with the OPPOSITE sign (Light `p.y += ...`,
+  Full `p.y -= ...`, both in the same y-up vUv space): Full's sheet rides
+  up with the page, Light's sheet drifts down against it. Reading
+  sections fade to paper exactly like Light. The tracker re-observes
+  sections on resize only after a 200ms debounce and keeps the current
+  section (iOS URL-bar resizes fire mid-scroll). The old zero-dye
+  velocity coupling (ScrollInkCoupling, mobile onScroll) still runs on
+  top.
 - **Idle ambient swarm**: the ambient rig runs up to 10 wandering points
   (3 hand-tuned A/B/C + 7 procedural golden-angle extras) —
   `FluidVisuals.ambientPointCount` picks how many, `ambientChurn` (0..1)
@@ -324,8 +347,9 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 - **Two-channel application**: physics subset via `setParams()` (reset to tier
   baseline first — never touches gridSize/halfRate/pressureIterations, so weak
   GPUs can't regress), look via `setVisuals(FluidVisuals)` (style,
-  outline, grain, paper, 4-slot color ladder, splat scales/count/scatter,
-  ambient multipliers).
+  grain, edges, paper, 4-slot color ladder, splat scales/count/scatter,
+  ambient multipliers, sheetRelax). `outlineThreshold` is still a field
+  but no shader reads it since the Light alignment.
 - **Multi-splat swarm**: `splatCount`/`splatScatter` in FluidVisuals —
   turbulenz throws 7 tiny jittered droplets per pointer frame (position AND
   direction jitter; N parallel copies of one stroke otherwise).
@@ -336,17 +360,17 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   **Color and blend mode are ONE decision** (the layers multiply by
   default, and the native cursor is hidden site-wide, so getting this
   wrong means NO cursor): night's light ink screens — the dark-mode
-  highlight treatment. Warm needs the other answer: its sim paints
-  near-black under the pointer (droplet swarm parks the deep-violet
-  pool there) but the theme is still LIGHT-mode, so the ink stays dark
+  highlight treatment. Warm needs the other answer: the theme is
+  LIGHT-mode but its sim parks a dark pool under the pointer (the
+  droplet swarm stacks the violet plates there), so the ink stays dark
   and the layer goes `normal` instead. Multiply can only darken, so no
   dark ink survives the pool under it; over near-white paper multiply ≈
   normal, so the light surfaces don't notice. Pick the ink between the
   sim's darkest tone and the paper — render it against the live sim,
-  the margin is narrow at both ends. Since the Light alignment the Full
-  Turbulenz pool is Light's translucent violet stack, not near-black;
-  the warm cursor tokens were not re-tuned for that (re-check if the
-  cursor gets lost over the lighter pools).
+  the margin is narrow at both ends. The warm tokens were tuned against
+  the retired near-black pool; since the Light alignment the darkest
+  Full Turbulenz tone is Light's translucent violet stack, and the
+  tokens were not re-tuned (re-check if the cursor gets lost over it).
 - **FluidSim re-applies the preset after every orchestrator init** (tier
   auto-tune re-creates the orchestrator) and fires a center splat-burst on
   live switches only. `firePresetBurst` previews the preset's STEADY-STATE
@@ -397,17 +421,20 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   grain/edges) and leaves the caller's splat-feel (count/scatter/
   velocity/dye scale) alone — Type-as-Fluid needs this because the
   preset swarm feel is tuned for the hero's fast dye fade and piles
-  into a solid dark mass under the experiment's slow-fade text physics
-  (turbulenz's density-to-dark shader makes it obvious). `cursor-
-  SplatRadiusBase` re-scales the hover cursor by the preset's
-  splatRadiusScale on each switch (turbulenz tiny, aquarell a bloom).
+  into a solid top-plate mass under the experiment's slow-fade text
+  physics. `cursorSplatRadiusBase` re-scales the hover cursor by the
+  preset's splatRadiusScale on each switch (turbulenz tiny, aquarell a
+  bloom); under `lookOnly` it also divides the default dyeScale by
+  `max(1, scale)^2` so a bigger cursor deposits the same ink per frame
+  (one sweep of aquarell's 6.5x bloom otherwise flooded the word into a
+  flat pool, screenshot-verified).
   InkDropStudio instead applies full preset physics via its Tweakpane
   sync, so it keeps the swarm.
 - **Type-as-Fluid auto-writes a fresh word every 6.5s** (continuous
   self-rearming rotation) AND re-inks immediately on preset switch.
   The catch: each stamped word blooms + spreads viewport-wide, so
-  repeated stamping piles the dye into a solid mass under turbulenz's
-  density-to-dark shader. The fix is `autoStamp()` = `orchestrator
+  repeated stamping piles the dye into a solid top-plate mass. The fix
+  is `autoStamp()` = `orchestrator
   .reset()` THEN stampWord, so the canvas is always one clean word at
   a time on EVERY device — no reliance on the dye fading fast enough
   between stamps (which throttles hard on weak GPUs / headless).

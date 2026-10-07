@@ -29,7 +29,11 @@ out vec4 fragColor;
 // Filament + halo + glow rim (uEdgeStrength = glow gain) match
 // ink-lite/render.frag.glsl, style 4.
 
-const float SPLAT_SOLO = 1.0;
+// Splat dye weight with and without the sheet underneath. Without a sheet
+// (playground sims) the scale keeps the old contour spacing (thresholds
+// 0.12..0.78 in dye length vs 0.12..0.57 here): at 1.0 a stamped word's
+// counters closed into one outline.
+const float SPLAT_SOLO = 0.75;
 const float SPLAT_ON_SHEET = 0.3;
 
 vec3 plateColor(int index) {

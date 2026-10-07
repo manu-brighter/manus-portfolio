@@ -29,6 +29,8 @@ out vec4 fragColor;
 // plates, registration drift and the fine diagonal screen match
 // ink-lite/render.frag.glsl, style 1.
 
+// Without a sheet (playground sims) splat dye prints 1:1: the old overprint
+// shader's top plate also sat at dye length ~0.6, matching 0.57 here.
 const float SPLAT_SOLO = 1.0;
 const float SPLAT_ON_SHEET = 0.12;
 

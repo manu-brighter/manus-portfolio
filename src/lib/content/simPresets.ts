@@ -112,8 +112,8 @@ export const SIM_PRESETS: readonly SimPreset[] = [
     },
   },
   {
-    // Overprint-plate print (render-wave.frag.glsl): four
-    // misregistered drum passes with ink bleed + needle speckle, in a
+    // Long rolling swells (render-wave.frag.glsl, Light's style 1):
+    // stacked horizontal plate bands with a fine diagonal screen, in a
     // cool blue plate ladder. Full page theme — cool blue-white paper
     // AND blue-black ink family (globals.css "wave" block).
     id: "wave",
@@ -135,8 +135,8 @@ export const SIM_PRESETS: readonly SimPreset[] = [
     },
   },
   {
-    // Screenprint comic (render-turbulenz.frag.glsl): hard bands,
-    // halftone ramps, true ink contour lines. Feel-side it throws a
+    // Crisp angular islands (render-turbulenz.frag.glsl, Light's
+    // style 2) that the droplet swarm tears apart. Feel-side it throws a
     // SWARM — 7 tiny scattered droplets per pointer frame instead of
     // one stroke (splatCount/splatScatter), radius well below every
     // other preset. dye/velocityScale are per-droplet, hence far
@@ -161,7 +161,7 @@ export const SIM_PRESETS: readonly SimPreset[] = [
       splatCount: 7,
       splatScatter: 0.035,
       grainStrength: 0.07,
-      // Ink contour-line strength (per-style meaning of edgeStrength).
+      // Plate rim shading (per-style meaning of edgeStrength).
       edgeStrength: 0.7,
       // The swarm persists while idle: 8 ambient points with full
       // spawn/despawn churn (~5-8 alive at any moment). Force scale
@@ -179,9 +179,9 @@ export const SIM_PRESETS: readonly SimPreset[] = [
     },
   },
   {
-    // Wet watercolor (render-aquarell.frag.glsl): the dye field is
-    // read through a wide blur with granulation and wet-edge rims —
-    // by far the softest of the four styles. Single HUGE blooms
+    // Wet watercolor (render-aquarell.frag.glsl, Light's style 3): the
+    // widest plate ramp with pigment deposits and coloured wet-edge
+    // rims, by far the softest of the five styles. Single HUGE blooms
     // (radius 6.5x tier baseline), velocity dies fast, dye lingers.
     id: "aquarell",
     i18nKey: "aquarell",
@@ -205,7 +205,7 @@ export const SIM_PRESETS: readonly SimPreset[] = [
       // -> 6.5 radius bump so the wash doesn't flood into one pool.
       dyeScale: 0.035,
       grainStrength: 0.04,
-      // Wet-edge rim darkening (per-style meaning of edgeStrength).
+      // Coloured wet-edge rims (per-style meaning of edgeStrength).
       edgeStrength: 0.3,
       ambientTimeScale: 0.5,
       ambientForceScale: 0.7,
@@ -215,8 +215,8 @@ export const SIM_PRESETS: readonly SimPreset[] = [
   {
     // Neon print (render-nachtdruck.frag.glsl): the page flips to the
     // dark token set (theme: "night" -> SimThemeSync), the sim paints
-    // near-black paper with hollow luminous contours, restrained
-    // glow halos and chromatic misreg fringes. Dark dye under dark
+    // near-black paper with hollow luminous filaments and restrained
+    // glow halos (Light's style 4). Dark dye under dark
     // text was unreadable (screenshot-verified), hence the full theme
     // flip instead of a dark-ink-on-light-paper compromise.
     id: "nachtdruck",
@@ -237,7 +237,7 @@ export const SIM_PRESETS: readonly SimPreset[] = [
       ladder: [WINE, VIOLET_DEEP, ROSE_DEEP, [0.65, 0.5, 0.95]],
       dyeScale: 0.16,
       grainStrength: 0.09,
-      // Glow-halo gain (per-style meaning of edgeStrength).
+      // Glow-rim gain (per-style meaning of edgeStrength).
       edgeStrength: 0.85,
       // Neon terraces breathe: 6 points, most cycling in and out.
       ambientPointCount: 6,

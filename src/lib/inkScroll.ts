@@ -5,6 +5,9 @@ import { SECTIONS } from "@/lib/content/sections";
 const SECTION_SELECTOR = SECTIONS.map(({ id }) => `#${id}`).join(", ");
 /** Frames between checks for a page swap (client navigation). */
 const RECONNECT_CHECK_FRAMES = 60;
+/** Resize settle time before the observer band is rebuilt. iOS fires a
+ *  resize per URL-bar step while momentum-scrolling. */
+const RESIZE_DEBOUNCE_MS = 200;
 
 export type InkScrollState = {
   /** Smoothed scroll position in viewport heights. */
@@ -16,7 +19,8 @@ export type InkScrollState = {
 export type InkScrollTracker = {
   /** Advance the smoothing by `dt` seconds and return the current state. */
   update: (dt: number) => InkScrollState;
-  /** Re-observe the page's sections (after client navigation or resize). */
+  /** Re-observe the page's sections after client navigation (resize is
+   *  handled internally, debounced). */
   refresh: () => void;
   dispose: () => void;
 };
@@ -58,10 +62,11 @@ export function createInkScrollTracker(onSection?: (id: string | null) => void):
     }
   };
 
-  const refresh = () => {
+  // Rebuild the observer band for the current viewport height. The
+  // initial IntersectionObserver notification re-reports the section in
+  // the band, so the current target can stand until then.
+  const observe = () => {
     observer?.disconnect();
-    targetQuiet = 0.55;
-    onSection?.(null);
     const margin = Math.round(window.innerHeight * 0.45);
     observer = new IntersectionObserver(onEntries, {
       rootMargin: `-${margin}px 0px -${margin}px 0px`,
@@ -71,8 +76,26 @@ export function createInkScrollTracker(onSection?: (id: string | null) => void):
     for (const section of observed) observer.observe(section);
   };
 
+  // New page: forget the previous page's section before re-observing.
+  const refresh = () => {
+    targetQuiet = 0.55;
+    onSection?.(null);
+    observe();
+  };
+
+  // Resize keeps the section (same page): a reset to the neutral level
+  // on every iOS URL-bar step would pump the quieting mid-scroll.
+  let resizeTimer: number | null = null;
+  const onResize = () => {
+    if (resizeTimer !== null) window.clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(() => {
+      resizeTimer = null;
+      observe();
+    }, RESIZE_DEBOUNCE_MS);
+  };
+
   refresh();
-  window.addEventListener("resize", refresh);
+  window.addEventListener("resize", onResize);
 
   return {
     update: (dt) => {
@@ -94,7 +117,8 @@ export function createInkScrollTracker(onSection?: (id: string | null) => void):
       observer?.disconnect();
       observer = null;
       observed = [];
-      window.removeEventListener("resize", refresh);
+      if (resizeTimer !== null) window.clearTimeout(resizeTimer);
+      window.removeEventListener("resize", onResize);
     },
   };
 }

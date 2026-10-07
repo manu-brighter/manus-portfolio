@@ -30,7 +30,11 @@ out vec4 fragColor;
 // match ink-lite/render.frag.glsl, style 3. Softness comes from the
 // plate ramp, not a blur: the field is already sim-resolution smooth.
 
-const float SPLAT_SOLO = 1.0;
+// Splat dye weight with and without the sheet underneath. Without a sheet
+// (playground sims) the scale keeps the old wash shader's ramp: its plates
+// centred near dye length 0.18/0.40/0.60/0.81, these at 0.12..0.57, so at
+// 1.0 cursor blooms and stamped words flattened into the top plate.
+const float SPLAT_SOLO = 0.7;
 const float SPLAT_ON_SHEET = 0.3;
 
 vec3 plateColor(int index) {

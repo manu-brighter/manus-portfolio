@@ -121,6 +121,16 @@ export function syncPresetVisuals(
     if (cursorSplatRadiusBase !== undefined) {
       const scale = preset.physics.splatRadiusScale ?? 1;
       orchestrator.setParams({ splatRadius: cursorSplatRadiusBase * scale });
+      if (lookOnly) {
+        // Look-only keeps the default dyeScale, while each preset tunes
+        // its own against its radius (aquarell 0.035 at 6.5x). A bigger
+        // cursor covers ~scale^2 the area, so hold the ink per frame
+        // constant: at the default, one short sweep of aquarell's bloom
+        // flooded the stamped word into a flat top-plate pool
+        // (screenshot-verified). Smaller cursors keep the default.
+        const area = Math.max(1, scale) ** 2;
+        orchestrator.setVisuals({ dyeScale: DEFAULT_FLUID_VISUALS.dyeScale / area });
+      }
     }
   };
   apply(useSimPresetStore.getState().presetId);
