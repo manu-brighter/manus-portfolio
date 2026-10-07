@@ -697,11 +697,13 @@
         "sending": "Envoi …"
       },
       "requiredNote": "Tous les champs sont obligatoires",
+      "privacyNote": "Ton message m’arrive par e-mail et est supprimé après ma réponse · <link>Confidentialité</link>",
       "status": {
         "fromLabel": "De :",
         "success": "Merci, ton message est bien arrivé. Je te recontacte.",
         "error": "Ça n'a pas fonctionné, écris-moi directement :",
-        "mailSubject": "Demande via manuelheller.dev"
+        "mailSubject": "Demande via manuelheller.dev",
+        "stamp": "Reçu"
       }
     }
   }

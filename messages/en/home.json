@@ -697,11 +697,13 @@
         "sending": "Sending …"
       },
       "requiredNote": "All fields required",
+      "privacyNote": "Lands in my inbox as an email and is deleted once I have replied · <link>Privacy</link>",
       "status": {
         "fromLabel": "From:",
         "success": "Thanks, your message arrived. I'll be in touch.",
         "error": "Didn't go through, write me directly:",
-        "mailSubject": "Enquiry via manuelheller.dev"
+        "mailSubject": "Enquiry via manuelheller.dev",
+        "stamp": "Received"
       }
     }
   }

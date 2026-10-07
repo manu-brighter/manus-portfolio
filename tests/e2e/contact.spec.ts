@@ -42,6 +42,17 @@ test.describe("contact form", () => {
     const status = page.locator('#contact [aria-live="polite"]');
     await expect(status).toContainText(/angekommen|Danke/i, { timeout: 3000 });
     await expect(status.locator('a[href^="mailto:"]')).toHaveCount(0);
+    // Decorative "received" stamp lands next to the button; it is
+    // aria-hidden because the live region already announces success.
+    const stamp = page.getByTestId("contact-received-stamp");
+    await expect(stamp).toBeVisible();
+    await expect(stamp).toHaveText(/angekommen/i);
+    await expect(stamp.locator("xpath=..")).toHaveAttribute("aria-hidden", "true");
+  });
+
+  test("privacy line under the submit button links to the privacy policy", async ({ page }) => {
+    const link = page.locator("#contact form").getByRole("link", { name: "Datenschutz" });
+    await expect(link).toHaveAttribute("href", /^\/de\/datenschutz\/?$/);
   });
 
   test("no endpoint → graceful mailto fallback link appears", async ({ page }) => {

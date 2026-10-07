@@ -697,11 +697,13 @@
         "sending": "Sende …"
       },
       "requiredNote": "Alle Felder erforderlich",
+      "privacyNote": "Landet als E-Mail direkt bei mir und wird nach meiner Antwort gelöscht · <link>Datenschutz</link>",
       "status": {
         "fromLabel": "Von:",
         "success": "Danke, deine Nachricht ist angekommen. Ich melde mich.",
         "error": "Hat nicht geklappt, schreib mir direkt:",
-        "mailSubject": "Anfrage über manuelheller.dev"
+        "mailSubject": "Anfrage über manuelheller.dev",
+        "stamp": "Angekommen"
       }
     }
   }

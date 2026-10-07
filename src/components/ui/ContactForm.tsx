@@ -3,6 +3,8 @@
 import gsap from "gsap";
 import { useTranslations } from "next-intl";
 import { useEffect, useId, useRef, useState } from "react";
+import { ReceivedStamp } from "@/components/ui/ReceivedStamp";
+import { Link } from "@/i18n/navigation";
 import { assembleEmail } from "@/lib/email";
 
 /**
@@ -234,14 +236,28 @@ export function ContactForm() {
         />
       </div>
 
-      <button
-        ref={submitButtonRef}
-        type="submit"
-        disabled={isSending}
-        className="riso-submit self-start"
-      >
-        {isSending ? t("submit.sending") : t("submit.label")}
-      </button>
+      <div className="flex flex-col items-start gap-3">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+          <button ref={submitButtonRef} type="submit" disabled={isSending} className="riso-submit">
+            {isSending ? t("submit.sending") : t("submit.label")}
+          </button>
+          {status === "sent" ? <ReceivedStamp label={t("status.stamp")} /> : null}
+        </div>
+        {/* What happens to the message, in one line, with the long form
+            one click away. */}
+        <p className="type-body-sm text-ink-muted">
+          {t.rich("privacyNote", {
+            link: (chunks) => (
+              <Link
+                href="/datenschutz"
+                className="underline decoration-1 underline-offset-4 transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-spot-mint focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+              >
+                {chunks}
+              </Link>
+            ),
+          })}
+        </p>
+      </div>
 
       <div
         id="contact-status"
