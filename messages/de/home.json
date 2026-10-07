@@ -698,7 +698,7 @@
         "sending": "Sende …"
       },
       "requiredNote": "Alle Felder erforderlich",
-      "privacyNote": "Landet als E-Mail direkt bei mir und wird nach meiner Antwort gelöscht · <link>Datenschutz</link>",
+      "privacyNote": "Landet als E-Mail bei mir und wird nach meiner Antwort gelöscht · <link>Datenschutz</link>",
       "status": {
         "fromLabel": "Von:",
         "success": "Danke, deine Nachricht ist angekommen. Ich melde mich.",
