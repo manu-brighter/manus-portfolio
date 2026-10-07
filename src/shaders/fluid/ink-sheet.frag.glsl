@@ -1,0 +1,45 @@
+#version 300 es
+// highp: the sheet clock and the relaxed density accumulate across
+// thousands of frames; fp16 would quantize the slow drift into steps.
+precision highp float;
+
+// #include <ink-sheet>
+
+in vec2 vUv;
+
+uniform sampler2D uDye;
+uniform float uAspect;
+uniform float uSheetTime;
+uniform float uScroll;
+uniform int uStyle;
+// Fraction of the way the advected sheet moves back toward the analytic
+// target this sim step (0 = pure physics, 1 = snap to the Light field).
+uniform float uRelax;
+// The dye advect multiplies every channel by this; the sheet undoes it so
+// only the relaxation decides how long a physical distortion survives.
+uniform float uDissipation;
+// Vertical UV shift for this step: scrolling carries the printed ink
+// with the page (positive = up, like the content).
+uniform float uCarry;
+
+out vec4 fragColor;
+
+// Full-mode ink sheet: rgb = splat dye (untouched apart from the scroll
+// carry), alpha = the theme's printed sheet. The sheet is advected by the
+// real velocity field together with the dye, then pulled back toward the
+// Light renderer's analytic field here. Physics bends, rolls and chops
+// the bands; the target keeps the theme's composition legible.
+void main() {
+  vec2 source = vUv - vec2(0.0, uCarry);
+  vec4 dye = texture(uDye, source);
+  // Splat ink carried in from beyond the canvas edge is blank paper;
+  // the sheet relaxes back in on its own.
+  float inside = step(0.0, source.y) * step(source.y, 1.0);
+  vec2 p = (vUv - 0.5) * vec2(uAspect, 1.0);
+  // Same offset as Light, mirrored so the target rides up with the carry.
+  p.y -= uScroll * 0.075;
+  vec2 q;
+  float target = inkSheet(p, uSheetTime * 0.12, uStyle, 0.0, q);
+  float sheet = dye.a / max(uDissipation, 0.5);
+  fragColor = vec4(dye.rgb * inside, mix(sheet, target, uRelax));
+}

@@ -2,16 +2,17 @@
 
 import { compileShader } from "@/lib/gl/compileShader";
 import { createProgram as linkProgram } from "@/lib/gl/createProgram";
+import { inkSheetSpeed, inkSheetStyleIndex } from "@/lib/gl/inkSheet";
 import type { TierConfig } from "@/lib/gpu";
 import { INK_COLOR, PAPER_COLOR, SPOT_RGB, type SpotColor } from "@/lib/palette";
-import noiseSrc from "@/shaders/common/noise.glsl";
+import inkSheetSrc from "@/shaders/common/ink-sheet.glsl";
 import quadVert from "@/shaders/common/quad.vert.glsl";
-import sobelSrc from "@/shaders/common/sobel.glsl";
 import advectFrag from "@/shaders/fluid/advect.frag.glsl";
 import curlFrag from "@/shaders/fluid/curl.frag.glsl";
 import divergenceFrag from "@/shaders/fluid/divergence.frag.glsl";
 import gradientSubFrag from "@/shaders/fluid/gradient-subtract.frag.glsl";
 import injectDensityFrag from "@/shaders/fluid/inject-density.frag.glsl";
+import inkSheetFrag from "@/shaders/fluid/ink-sheet.frag.glsl";
 import pressureFrag from "@/shaders/fluid/pressure.frag.glsl";
 import renderAquarellFrag from "@/shaders/fluid/render-aquarell.frag.glsl";
 import renderNachtdruckFrag from "@/shaders/fluid/render-nachtdruck.frag.glsl";
@@ -64,6 +65,9 @@ type Programs = {
   renderAquarell: WebGLProgram;
   renderNachtdruck: WebGLProgram;
   injectDensity: WebGLProgram;
+  // Hero-only sheet pass: relaxes the advected dye alpha toward the
+  // Light renderer's analytic field (see setInkSheet()).
+  inkSheet: WebGLProgram;
 };
 
 // ---------------------------------------------------------------------------
@@ -82,6 +86,13 @@ const SPOT_COLORS = SPOT_RGB;
 // the rest are generated procedurally so presets can raise the count
 // (Turbulenz runs a swarm of 8). Time-scale governs the whole rig.
 const AMBIENT_TIME_SCALE = 0.0003;
+
+// Scroll carry: the hero sheet + splat dye travel with the page at this
+// fraction of its speed (viewport heights -> UV), so scrolling visibly
+// drags the ink the way Light's sheet drifts. Per-step cap keeps a long
+// anchor jump from smearing the whole field in one frame.
+const SHEET_SCROLL_CARRY = 0.35;
+const SHEET_CARRY_MAX_STEP = 0.08;
 
 type AmbientPoint = {
   center: readonly [number, number];
@@ -254,6 +265,12 @@ export type FluidVisuals = {
   ambientTimeScale: number;
   /** Multiplier on each ambient point's forceStrength. */
   ambientForceScale: number;
+  /** Per-second pull of the hero ink sheet back toward the Light
+   *  renderer's analytic field (only read while setInkSheet(true)).
+   *  Low = the physics keeps its distortions longer (Turbulenz chops
+   *  the islands apart), high = the composition stays close to Light
+   *  (Wave keeps its long swells legible). */
+  sheetRelax: number;
 };
 
 // Frozen: instances hold this object by reference until the first
@@ -275,6 +292,7 @@ export const DEFAULT_FLUID_VISUALS: FluidVisuals = Object.freeze<FluidVisuals>({
   ambientChurn: 0,
   ambientTimeScale: 1,
   ambientForceScale: 1,
+  sheetRelax: 1.5,
 });
 
 // ---------------------------------------------------------------------------
@@ -296,13 +314,16 @@ function createProgram(
   return linkProgram(gl, vert, frag, label);
 }
 
-function injectIncludes(source: string, includes: Record<string, string>): string {
+export function injectIncludes(source: string, includes: Record<string, string>): string {
   let result = source;
   for (const [name, code] of Object.entries(includes)) {
     result = result.replace(`// #include <${name}>`, code);
   }
   return result;
 }
+
+/** Include set for the render passes and the hero sheet pass. */
+const SHEET_INCLUDES = { "ink-sheet": inkSheetSrc };
 
 function createFBO(
   gl: WebGL2RenderingContext,
@@ -465,6 +486,20 @@ export class FluidOrchestrator {
   // Using a nested Map because WebGLProgram.toString() is not unique.
   private uniformCache = new Map<WebGLProgram, Map<string, WebGLUniformLocation | null>>();
 
+  // Hero ink sheet (setInkSheet): dye alpha holds an advected copy of the
+  // Light renderer's analytic field. Off by default so playground sims
+  // keep a clean paper canvas.
+  private sheetEnabled = false;
+  // False until the sheet has been seeded; the first sheet pass snaps to
+  // the analytic field instead of fading in from blank paper.
+  private sheetPrimed = false;
+  private sheetTime = 0;
+  // Page scroll (viewport heights) + section quieting, fed per frame by
+  // the hero renderers through setScrollState().
+  private scroll = 0;
+  private carriedScroll: number | null = null;
+  private sectionQuiet = 0;
+
   // ---------------------------------------------------------------------------
   // Lifecycle
   // ---------------------------------------------------------------------------
@@ -501,34 +536,40 @@ export class FluidOrchestrator {
       renderRiso: createProgram(
         gl,
         quadVert,
-        injectIncludes(renderRisoFrag, { noise: noiseSrc, sobel: sobelSrc }),
+        injectIncludes(renderRisoFrag, SHEET_INCLUDES),
         "fluid.render-riso",
       ),
       renderWave: createProgram(
         gl,
         quadVert,
-        injectIncludes(renderWaveFrag, { noise: noiseSrc }),
+        injectIncludes(renderWaveFrag, SHEET_INCLUDES),
         "fluid.render-wave",
       ),
       renderTurbulenz: createProgram(
         gl,
         quadVert,
-        injectIncludes(renderTurbulenzFrag, { noise: noiseSrc, sobel: sobelSrc }),
+        injectIncludes(renderTurbulenzFrag, SHEET_INCLUDES),
         "fluid.render-turbulenz",
       ),
       renderAquarell: createProgram(
         gl,
         quadVert,
-        injectIncludes(renderAquarellFrag, { noise: noiseSrc }),
+        injectIncludes(renderAquarellFrag, SHEET_INCLUDES),
         "fluid.render-aquarell",
       ),
       renderNachtdruck: createProgram(
         gl,
         quadVert,
-        injectIncludes(renderNachtdruckFrag, { noise: noiseSrc }),
+        injectIncludes(renderNachtdruckFrag, SHEET_INCLUDES),
         "fluid.render-nachtdruck",
       ),
       injectDensity: createProgram(gl, quadVert, injectDensityFrag, "fluid.inject-density"),
+      inkSheet: createProgram(
+        gl,
+        quadVert,
+        injectIncludes(inkSheetFrag, SHEET_INCLUDES),
+        "fluid.ink-sheet",
+      ),
     };
 
     // FBO geometry derives from the current drawing buffer; createSimFBOs()
@@ -572,6 +613,7 @@ export class FluidOrchestrator {
     if (!this.state) return;
     this.destroyFBOs(this.state);
     this.createSimFBOs(this.state);
+    this.sheetPrimed = false;
   }
 
   /**
@@ -708,6 +750,32 @@ export class FluidOrchestrator {
   }
 
   /**
+   * Hero renderers only (FluidSim, MobileBackgroundSim): print the
+   * active theme's Light composition from the fluid. Dye alpha carries
+   * the analytic ink sheet of `ink-sheet.glsl`; every sim step the real
+   * velocity field advects it and one cheap sim-resolution pass relaxes
+   * it back toward the analytic target (`visuals.sheetRelax`). Splat
+   * dye keeps printing on top. Playground sims leave this off.
+   */
+  setInkSheet(enabled: boolean): void {
+    this.sheetEnabled = enabled;
+    this.sheetPrimed = false;
+    this.carriedScroll = null;
+  }
+
+  /**
+   * Page scroll (viewport heights, smoothed) and section quieting
+   * (0 = full ink, 1 = reading section), as tracked by
+   * `createInkScrollTracker()`. Scroll drifts the sheet target and
+   * carries the printed ink with the page; quiet opens Light's paper
+   * interval around reading sections in the render pass.
+   */
+  setScrollState(scroll: number, quiet: number): void {
+    this.scroll = scroll;
+    this.sectionQuiet = quiet;
+  }
+
+  /**
    * Clear the simulation state — empties velocity, dye, pressure,
    * divergence, and curl FBOs back to zero, drops queued splats, and
    * resets the ambient timer/strength. After reset() the canvas reads
@@ -738,6 +806,7 @@ export class FluidOrchestrator {
     this.ambientActive = false;
     this.lastPointerTime = performance.now();
     this.frameCount = 0;
+    this.sheetPrimed = false;
   }
 
   /**
@@ -1023,6 +1092,40 @@ export class FluidOrchestrator {
     state.velocity.swap();
   }
 
+  /** Advect-compatible sheet pass: scroll carry + relaxation toward the
+   *  analytic Light field. Runs at sim resolution right before the dye
+   *  advect, so the relaxed sheet is transported in the same step. */
+  private runInkSheet(dt: number): void {
+    const state = this.requireState();
+    const gl = state.gl;
+    const p = state.programs.inkSheet;
+    // Relaxation is time-based so half-rate tiers (sim every 2nd frame)
+    // keep the same feel.
+    const simDt = dt * (state.config.halfRate ? 2 : 1);
+    const relax = this.sheetPrimed ? 1 - Math.exp(-this.visuals.sheetRelax * simDt) : 1;
+    this.sheetPrimed = true;
+    if (this.carriedScroll === null) this.carriedScroll = this.scroll;
+    const carry =
+      Math.max(
+        -SHEET_CARRY_MAX_STEP,
+        Math.min(SHEET_CARRY_MAX_STEP, this.scroll - this.carriedScroll),
+      ) * SHEET_SCROLL_CARRY;
+    this.carriedScroll = this.scroll;
+
+    this.activateProgram(p);
+    this.bindTexture(p, "uDye", state.dye.read.texture, 0);
+    this.setFloat(p, "uAspect", this.canvasWidth / this.canvasHeight);
+    this.setFloat(p, "uSheetTime", this.sheetTime);
+    this.setFloat(p, "uScroll", this.scroll);
+    gl.uniform1i(this.getUniform(p, "uStyle"), inkSheetStyleIndex(this.visuals.style));
+    this.setFloat(p, "uRelax", relax);
+    this.setFloat(p, "uDissipation", state.config.dyeDissipation);
+    this.setFloat(p, "uCarry", carry);
+    this.renderToFBO(state.dye.write);
+    this.drawQuad();
+    state.dye.swap();
+  }
+
   /** The render program for the active visual style. Exhaustive switch
    *  keeps TS honest when a fifth style is added. */
   private renderProgram(state: GLState): WebGLProgram {
@@ -1058,6 +1161,11 @@ export class FluidOrchestrator {
     this.setFloat(p, "uGrainStrength", v.grainStrength);
     this.setFloat(p, "uEdgeStrength", v.edgeStrength);
     this.setFloat(p, "uTime", elapsed * 0.001);
+    // Hero sheet: alpha is only meaningful once a sheet pass has run.
+    this.setFloat(p, "uSheet", this.sheetEnabled && this.sheetPrimed ? 1 : 0);
+    this.setFloat(p, "uSheetTime", this.sheetTime);
+    this.setFloat(p, "uScroll", this.scroll);
+    this.setFloat(p, "uSection", this.sectionQuiet);
 
     this.setVec3(p, "uPaperColor", v.paper[0], v.paper[1], v.paper[2]);
     this.setVec3(p, "uInkColor", v.ink[0], v.ink[1], v.ink[2]);
@@ -1125,6 +1233,9 @@ export class FluidOrchestrator {
     const state = this.state;
     const gl = state.gl;
     this.frameCount++;
+    // Same clock as the Light renderer (LiteInkScene), so a mode switch
+    // keeps the theme's tempo.
+    this.sheetTime += dt * inkSheetSpeed(this.visuals);
 
     // Pre-warmup gate: while !started, skip all expensive sim passes
     // (curl + vorticity + 2 advects + divergence + N-iter pressure +
@@ -1272,6 +1383,7 @@ export class FluidOrchestrator {
       this.runDivergence();
       this.runPressure();
       this.runGradientSubtract();
+      if (this.sheetEnabled) this.runInkSheet(dt);
       this.runAdvect(state.dye, state.config.dyeDissipation, dt);
     }
 

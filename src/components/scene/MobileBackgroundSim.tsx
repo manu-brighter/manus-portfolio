@@ -10,6 +10,7 @@ import {
 } from "@/lib/gl/fluidOrchestrator";
 import { capDPR, getTierDPR, type TierConfig } from "@/lib/gpu";
 import { createInkWarmup } from "@/lib/inkPreview";
+import { createInkScrollTracker } from "@/lib/inkScroll";
 import { subscribeToLoaderComplete } from "@/lib/loaderSession";
 import { SPOT_COLORS, type SpotColor } from "@/lib/palette";
 import { MAX_DT_S, subscribe } from "@/lib/raf";
@@ -106,6 +107,8 @@ export function MobileBackgroundSim({
     const orchestrator = createFluidOrchestrator();
     try {
       orchestrator.init(gl, config);
+      // Print the theme's Light composition from the fluid (see setInkSheet).
+      orchestrator.setInkSheet(true);
       applySimPreset(orchestrator, getSimPreset(useSimPresetStore.getState().presetId), config);
       // Compile the first splat before declaring the renderer available.
       orchestrator.injectSplat(-1, -1, [0, 0, 0], 0, 0);
@@ -319,10 +322,15 @@ export function MobileBackgroundSim({
   useEffect(() => {
     if (reduced) return;
     let virtualElapsedMs = 0;
+    // Same scroll choreography as Light: the sheet rides with native
+    // scrolling, reading sections open a paper interval.
+    const scrollTracker = createInkScrollTracker();
     const unsub = subscribe((deltaMs) => {
       const orchestrator = orchestratorRef.current;
       if (!orchestrator) return;
       const dt = Math.min(deltaMs * 0.001, MAX_DT_S);
+      const scroll = scrollTracker.update(dt);
+      orchestrator.setScrollState(scroll.scroll, scroll.quiet);
       virtualElapsedMs += Math.min(deltaMs, MAX_DT_S * 1000);
       const startedAt = performance.now();
       const touch = touchSplatRef.current;
@@ -348,7 +356,10 @@ export function MobileBackgroundSim({
         }
       }
     }, 15);
-    return () => unsub();
+    return () => {
+      unsub();
+      scrollTracker.dispose();
+    };
   }, [reduced]);
 
   if (reduced) return null;

@@ -15,6 +15,8 @@ void main() {
   vec2 p = vUv - uPoint;
   p.x *= uAspectRatio;
   vec3 splat = exp(-dot(p, p) / uRadius) * uColor;
-  vec3 base = texture(uTarget, vUv).xyz;
-  fragColor = vec4(base + splat, 1.0);
+  vec4 base = texture(uTarget, vUv);
+  // Alpha passes through: on the dye target it carries the hero ink
+  // sheet (fluid/ink-sheet.frag.glsl), which splats must not overwrite.
+  fragColor = vec4(base.xyz + splat, base.w);
 }

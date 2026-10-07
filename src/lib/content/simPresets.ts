@@ -108,6 +108,7 @@ export const SIM_PRESETS: readonly SimPreset[] = [
     visuals: {
       ambientChurn: 0.65,
       ambientForceScale: 1.3,
+      sheetRelax: 1.5,
     },
   },
   {
@@ -127,6 +128,10 @@ export const SIM_PRESETS: readonly SimPreset[] = [
       ladder: [WAVE_SKY, SPOT_RGB.mint, WAVE_ULTRA, SPOT_RGB.violet],
       ambientPointCount: 6,
       ambientChurn: 0.7,
+      // Gentler ambient currents + a strong pull: the long swells stay
+      // the composition, the fluid only bends and rolls them.
+      ambientForceScale: 0.75,
+      sheetRelax: 3.5,
     },
   },
   {
@@ -166,6 +171,11 @@ export const SIM_PRESETS: readonly SimPreset[] = [
       ambientChurn: 1,
       ambientTimeScale: 1.6,
       ambientForceScale: 1.3,
+      // Moderate pull: the swarm's vortices keep tearing the islands
+      // apart (the chopped-up swirl the Full mode is loved for), while
+      // the islands keep their full four-band depth. Below ~0.8 the
+      // high-confinement mixing averages them down to the amber band.
+      sheetRelax: 1,
     },
   },
   {
@@ -199,6 +209,7 @@ export const SIM_PRESETS: readonly SimPreset[] = [
       edgeStrength: 0.3,
       ambientTimeScale: 0.5,
       ambientForceScale: 0.7,
+      sheetRelax: 1,
     },
   },
   {
@@ -231,6 +242,7 @@ export const SIM_PRESETS: readonly SimPreset[] = [
       // Neon terraces breathe: 6 points, most cycling in and out.
       ambientPointCount: 6,
       ambientChurn: 0.8,
+      sheetRelax: 1.5,
     },
   },
 ];

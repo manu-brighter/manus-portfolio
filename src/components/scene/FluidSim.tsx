@@ -8,6 +8,7 @@ import { subscribeToSplats } from "@/lib/fluidBus";
 import { FluidOrchestrator, type PointerState } from "@/lib/gl/fluidOrchestrator";
 import type { TierConfig } from "@/lib/gpu";
 import { createInkWarmup } from "@/lib/inkPreview";
+import { createInkScrollTracker } from "@/lib/inkScroll";
 import { subscribeToLoaderComplete } from "@/lib/loaderSession";
 import { MAX_DT_S, subscribe } from "@/lib/raf";
 import { useSimPresetStore } from "@/lib/simPresetStore";
@@ -67,6 +68,8 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
 
     const orchestrator = new FluidOrchestrator();
     orchestrator.init(context, config);
+    // Print the theme's Light composition from the fluid (see setInkSheet).
+    orchestrator.setInkSheet(true);
     if (isCoarsePointer) {
       orchestrator.setPointerSplatEnabled(false);
     }
@@ -125,12 +128,18 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
   // the warmup window only capture the render pass (~1ms) and would
   // mis-tier first-time visitors as `high`.
   useEffect(() => {
-    return subscribe((deltaMs, elapsedMs) => {
+    // Same scroll choreography as Light: the sheet drifts and rides with
+    // the page, reading sections open a paper interval. Self-refreshing
+    // on client navigation (this tree sits outside the router context).
+    const scrollTracker = createInkScrollTracker();
+    const unsubscribe = subscribe((deltaMs, elapsedMs) => {
       const orchestrator = orchestratorRef.current;
       if (!orchestrator) return;
 
       const dt = Math.min(deltaMs * 0.001, MAX_DT_S);
       const t0 = performance.now();
+      const scroll = scrollTracker.update(dt);
+      orchestrator.setScrollState(scroll.scroll, scroll.quiet);
 
       orchestrator.step(dt, elapsedMs, pointerRef.current);
 
@@ -153,6 +162,10 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
       pointerRef.current.dy = 0;
       pointerRef.current.moved = false;
     }, 15);
+    return () => {
+      unsubscribe();
+      scrollTracker.dispose();
+    };
   }, [gl]);
 
   // Pointer events on document — canvas is behind HTML content,
