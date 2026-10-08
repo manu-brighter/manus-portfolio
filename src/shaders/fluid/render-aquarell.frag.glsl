@@ -34,8 +34,8 @@ out vec4 fragColor;
 // (playground sims) the scale keeps the old wash shader's ramp: its plates
 // centred near dye length 0.18/0.40/0.60/0.81, these at 0.12..0.57, so at
 // 1.0 cursor blooms and stamped words flattened into the top plate.
+// On the hero the colored drop is drawn on top of the plates.
 const float SPLAT_SOLO = 0.7;
-const float SPLAT_ON_SHEET = 0.3;
 
 vec3 plateColor(int index) {
   if (index == 0) return uSpotMint;
@@ -46,8 +46,12 @@ vec3 plateColor(int index) {
 
 void main() {
   vec4 dye = texture(uDye, vUv);
-  float splat = length(clamp(dye.rgb, vec3(0.0), vec3(1.0)));
-  float density = dye.a * uSheet + splat * mix(SPLAT_SOLO, SPLAT_ON_SHEET, uSheet);
+  vec3 dropColor;
+  float dropCover;
+  float folded;
+  inkCursorSplit(dye.rgb, dropColor, dropCover, folded);
+  float raw = length(clamp(dye.rgb, vec3(0.0), vec3(1.0)));
+  float density = dye.a * uSheet + folded * 0.86 * uSheet + raw * SPLAT_SOLO * (1.0 - uSheet);
 
   // Pigment deposits read Light Aquarell's wash coordinate.
   float t = uSheetTime * 0.12;
@@ -70,5 +74,6 @@ void main() {
   }
 
   color += inkGrain(gl_FragCoord.xy) * uGrainStrength * 0.22 * smoothstep(0.05, 0.3, density);
+  if (uSheet > 0.5) color = mix(color, dropColor, dropCover);
   fragColor = vec4(inkQuiet(color, uPaperColor, vUv, uSection), 1.0);
 }

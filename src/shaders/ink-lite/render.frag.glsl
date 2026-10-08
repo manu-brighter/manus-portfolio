@@ -117,7 +117,10 @@ void main() {
     wake += influence * 0.04;
   }
   vec2 q;
-  float density = inkSheet(p, t, uStyle, 1.0, q) + wake + bloom * 0.7;
+  // chop stays off. The fast analytic vortices raced the islands; the
+  // chopped corners belong to Simulation's droplet swarm, and Animation
+  // keeps the slower island drift.
+  float density = inkSheet(p, t, uStyle, 0.0, q) + wake + bloom * 0.7;
   // A quiet right edge leaves room for typography (riso and night only;
   // the other plates keep their full rhythm across the page).
   if (uStyle == 0 || uStyle == 4) density -= smoothstep(0.45, 1.0, vUv.x) * 0.12;

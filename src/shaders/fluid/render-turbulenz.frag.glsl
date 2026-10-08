@@ -34,9 +34,9 @@ out vec4 fragColor;
 // (playground sims) the scale keeps the old banded shader's saturation
 // point: its top band sat at dye length 1.0, the plates here top out at
 // 0.57. At 1.0 Type-as-Fluid words and studio pools printed as one solid
-// top-band mass (screenshot-verified).
+// top-band mass (screenshot-verified). On the hero the colored drop is
+// drawn on top of the plates, in the spot that was splatted.
 const float SPLAT_SOLO = 0.6;
-const float SPLAT_ON_SHEET = 0.35;
 
 vec3 plateColor(int index) {
   if (index == 0) return uSpotMint;
@@ -47,8 +47,12 @@ vec3 plateColor(int index) {
 
 void main() {
   vec4 dye = texture(uDye, vUv);
-  float splat = length(clamp(dye.rgb, vec3(0.0), vec3(1.0)));
-  float density = dye.a * uSheet + splat * mix(SPLAT_SOLO, SPLAT_ON_SHEET, uSheet);
+  vec3 dropColor;
+  float dropCover;
+  float folded;
+  inkCursorSplit(dye.rgb, dropColor, dropCover, folded);
+  float raw = length(clamp(dye.rgb, vec3(0.0), vec3(1.0)));
+  float density = dye.a * uSheet + folded * 0.86 * uSheet + raw * SPLAT_SOLO * (1.0 - uSheet);
 
   // Registration drift on Light's island coordinate (without the chop:
   // the physics already tears the plates).
@@ -71,5 +75,6 @@ void main() {
   }
 
   color += inkGrain(gl_FragCoord.xy) * uGrainStrength * 0.22 * smoothstep(0.05, 0.3, density);
+  if (uSheet > 0.5) color = mix(color, dropColor, dropCover);
   fragColor = vec4(inkQuiet(color, uPaperColor, vUv, uSection), 1.0);
 }

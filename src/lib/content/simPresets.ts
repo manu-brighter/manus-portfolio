@@ -128,10 +128,11 @@ export const SIM_PRESETS: readonly SimPreset[] = [
       ladder: [WAVE_SKY, SPOT_RGB.mint, WAVE_ULTRA, SPOT_RGB.violet],
       ambientPointCount: 6,
       ambientChurn: 0.7,
-      // Gentler ambient currents + a strong pull: the long swells stay
-      // the composition, the fluid only bends and rolls them.
+      // The long swells stay the composition. The pull is gentle enough
+      // that a cursor splat's velocity can roll them instead of being
+      // snapped back before the drop reads.
       ambientForceScale: 0.75,
-      sheetRelax: 3.5,
+      sheetRelax: 1.4,
     },
   },
   {
@@ -309,8 +310,8 @@ export function applySimPreset(
  * center, colored from the incoming preset's ladder, so the switch
  * itself detonates in the new palette. Queued via injectSplat — the
  * warmup gate drops queued splats while the sim hasn't started, so a
- * switch during the loader can't leak into the hero reveal. Shared by
- * the Desktop FluidSim and the MobileBackgroundSim.
+ * switch during the loader can't leak into the hero reveal. The hero
+ * does not call this: a switch must not plant a splat in the middle.
  *
  * The burst previews the preset's steady-state character instead of a
  * one-size celebration (start must match idle — user feedback):

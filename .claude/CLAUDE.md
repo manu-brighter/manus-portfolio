@@ -268,21 +268,23 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   `lib/gl/inkSheet.ts`). In Full, dye ALPHA holds an advected copy of it:
   `fluid/ink-sheet.frag.glsl` runs once per sim step at sim resolution
   (before the dye advect) and relaxes alpha toward the analytic field at
-  `FluidVisuals.sheetRelax` per second (wave 3.5 keeps the swells,
-  turbulenz 1 lets the swarm tear the islands; below ~0.8 the
-  high-confinement mixing averages turbulenz down to one amber band).
-  The splat shader passes alpha through; render shaders print
-  `alpha * uSheet + splatDensity * SPLAT_ON_SHEET`. **Only the hero
-  renderers call `setInkSheet(true)`** (FluidSim, MobileBackgroundSim);
-  playground sims keep clean paper (`uSheet = 0`) but DO print through
-  the new plates. Their splat-only density is scaled by each shader's
-  `SPLAT_SOLO` (riso 0.62, wave 1, turbulenz 0.6, aquarell 0.7,
-  nachtdruck 0.75) so the top plate saturates at the same dye level as
-  the retired shaders the playground was tuned against; at 1.0
-  Type-as-Fluid words printed as one solid top-band mass. `SPLAT_SOLO`
-  never reaches the hero (it only acts at `uSheet = 0`). Splat dye is
-  deliberately quieter on the sheet so the theme's structure stays the
-  composition.
+  `FluidVisuals.sheetRelax` per second (wave 1.4 lets a cursor splat
+  roll the swells, turbulenz 1 lets the swarm tear the islands; below
+  ~0.8 the high-confinement mixing averages turbulenz down to one
+  amber band).
+  The splat shader passes alpha through; render shaders print the sheet
+  from alpha. A strong cursor deposit is drawn afterwards in its own
+  spot (`inkCursorSplit`: hue is the unclamped dye over its strongest
+  channel, one colour per pointer stroke). Weaker ambient dye only
+  folds into the plates, so it does not paint a solid drop over them. **Only the hero renderers call `setInkSheet(true)`**
+  (FluidSim, MobileBackgroundSim); playground sims keep clean paper
+  (`uSheet = 0`) but DO print through the new plates. Their splat-only
+  density is scaled by each shader's `SPLAT_SOLO` (riso 0.62, wave 1,
+  turbulenz 0.6, aquarell 0.7, nachtdruck 0.75) so the top plate
+  saturates at the same dye level as the retired shaders the playground
+  was tuned against; at 1.0 Type-as-Fluid words printed as one solid
+  top-band mass. `SPLAT_SOLO` never reaches the hero (it only acts at
+  `uSheet = 0`).
   - **Steady state is exactly the target**: the dye advect after the
     sheet pass multiplies alpha by `dyeDissipation` (squared on
     half-rate tiers), so the sheet pass writes
@@ -295,12 +297,15 @@ Source of truth: `src/app/globals.css` (`@theme` block).
     no physics), so the composition never flashes paper or pops in at
     `start()`. The sheet clock survives tier re-init via
     `getSheetTime()` -> `setInkSheet(true, time)` in both hero renderers.
-- **Turbulenz chop**: Light's turbulenz twists its island field through
-  six wandering analytic point vortices plus a fast shear (`inkChop`, the
-  owner wanted Full's "wilde, zerhackte Wirbeln" in Animation too). Full
-  passes `chop = 0` to the sheet target: the real droplet swarm does the
-  chopping, and an analytic chop on top moved faster than the relax pull
-  and only blurred the sheet.
+- **Turbulenz chop**: the angular islands are the shared sheet
+  (style 2, `chop = 0` in both modes). A fast analytic vortex chop
+  (`inkChop`) raced those islands on Animation; the owner wanted the
+  previous, slower drift back. The small swirling corners stay on
+  Simulation, where the real droplet swarm tears the islands.
+- **No centre splat on load or theme switch.** Hero preset changes only
+  re-apply the preset. Point C (the ambient source at screen centre) is
+  skipped while the hero sheet is on. `firePresetBurst` /
+  `pushPresetImpulses` still exist but the hero does not call them.
 - **Scroll drives the Full ink like Light**: `lib/inkScroll.ts`
   (`createInkScrollTracker`) is the single source for smoothed scroll +
   section quieting, used by LiteInkScene, FluidSim and
@@ -379,11 +384,8 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   Full Turbulenz tone is Light's translucent violet stack, and the
   tokens were not re-tuned (re-check if the cursor gets lost over it).
 - **FluidSim re-applies the preset after every orchestrator init** (tier
-  auto-tune re-creates the orchestrator) and fires a center splat-burst on
-  live switches only. `firePresetBurst` previews the preset's STEADY-STATE
-  character (radius × splatRadiusScale, swarm presets detonate a scattered
-  droplet cloud, ring splats seat off-centre) — "start must match idle"
-  was explicit user feedback; don't revert to a one-size celebration.
+  auto-tune re-creates the orchestrator). A live switch does not fire a
+  center splat.
 - **Theme follows through to content**: the Work-card Joggediballa shot
   swaps to the real darkmode screenshot under Nachtdruck
   (`JoggediballaScreenshot`, gated like SimThemeSync so static tier keeps

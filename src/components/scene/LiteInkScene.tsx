@@ -8,7 +8,7 @@ import { subscribeToSplats } from "@/lib/fluidBus";
 import { compileShader } from "@/lib/gl/compileShader";
 import { createProgram } from "@/lib/gl/createProgram";
 import { DEFAULT_FLUID_VISUALS, injectIncludes } from "@/lib/gl/fluidOrchestrator";
-import { createInkImpulses, pushPresetImpulses, pushSplatImpulse } from "@/lib/gl/inkImpulses";
+import { createInkImpulses, pushSplatImpulse } from "@/lib/gl/inkImpulses";
 import { inkSheetSpeed, inkSheetStyleIndex } from "@/lib/gl/inkSheet";
 import { createInkScrollTracker } from "@/lib/inkScroll";
 import { subscribe } from "@/lib/raf";
@@ -154,15 +154,8 @@ export function LiteInkScene({
       pushSplatImpulse(impulses, req, lastScroll, splatRadiusScale);
     });
     const unsubscribePreset = useSimPresetStore.subscribe((current, previous) => {
-      applyPreset();
-      // Only a live switch previews the preset; the initial apply is silent.
       if (current.presetId === previous.presetId) return;
-      pushPresetImpulses(
-        impulses,
-        getSimPreset(current.presetId),
-        lastScroll,
-        canvas.width / Math.max(1, canvas.height),
-      );
+      applyPreset();
     });
     // Section quieting + smoothed scroll, shared with the Full renderers.
     const scrollTracker = createInkScrollTracker((id) => {

@@ -48,9 +48,8 @@ vec2 inkChop(vec2 p, float t) {
 // Sheet density before pointer wake and the screen-anchored right-edge
 // quieting (callers own both). q receives the folded domain coordinate
 // the plate-drift wobble reads. chop (0/1) enables the Turbulenz vortex
-// chop: Light draws it analytically; Full leaves it to the real swarm,
-// whose vortices tear the sheet on their own (an analytic chop on top
-// only blurs the relaxed sheet, since it moves faster than the pull).
+// chop. Both hero modes pass 0: the fast clock raced the islands.
+// Simulation's droplet swarm supplies the small swirling corners instead.
 float inkSheet(vec2 p, float t, int style, float chop, out vec2 q) {
   vec2 fold = inkFold(p, t);
   q = p + fold * 0.48;
@@ -95,6 +94,19 @@ float inkSheet(vec2 p, float t, int style, float chop, out vec2 q) {
   // ink streams meeting. Reuse the field rather than adding a noise octave.
   float channel = 1.0 - smoothstep(0.035, 0.16, abs(field - 0.72));
   return field * 0.34 + 0.12 - channel * 0.31;
+}
+
+// Split hero dye into a cursor drop and a weaker fold into the plates.
+// Hue is the unclamped dye divided by its strongest channel, so stacked
+// deposits stay the spot colour instead of clamping toward grey.
+// Cover starts above a scaled-down ambient deposit; that dye only folds
+// into the sheet.
+void inkCursorSplit(vec3 dyeRgb, out vec3 dropColor, out float dropCover, out float folded) {
+  vec3 safe = max(dyeRgb, vec3(0.0));
+  float peak = max(safe.r, max(safe.g, safe.b));
+  dropColor = safe / max(peak, 1e-4);
+  dropCover = smoothstep(0.08, 0.20, peak);
+  folded = length(safe) * (1.0 - dropCover);
 }
 
 // Stationary paper grain hash (does not shimmer between frames).

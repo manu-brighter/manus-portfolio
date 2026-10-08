@@ -29,9 +29,9 @@ out vec4 fragColor;
 // adds the pointer/ambient ink on top. Same thresholds, opacity, rims
 // and grain as ink-lite/render.frag.glsl, style 0.
 
-// Splat dye weight with and without the sheet underneath.
+// Splat dye weight without the sheet (playground sims). On the hero the
+// colored drop is drawn on top of the plates instead.
 const float SPLAT_SOLO = 0.62;
-const float SPLAT_ON_SHEET = 0.35;
 
 vec3 plateColor(int index) {
   if (index == 0) return uSpotMint;
@@ -42,15 +42,22 @@ vec3 plateColor(int index) {
 
 void main() {
   vec4 dye = texture(uDye, vUv);
+  vec3 dropColor;
+  float dropCover;
+  float folded;
+  inkCursorSplit(dye.rgb, dropColor, dropCover, folded);
   vec3 dyeClamped = clamp(dye.rgb, vec3(0.0), vec3(1.0));
-  float splat = length(dyeClamped) * mix(SPLAT_SOLO, SPLAT_ON_SHEET, uSheet);
+  float raw = length(dyeClamped);
+  // Hero plates are the sheet plus weak (ambient) dye. The cursor drop
+  // is composited afterwards in its own spot colour.
+  float splat = raw * mix(SPLAT_SOLO, 0.0, uSheet);
   // Without a sheet, a narrow paper seam follows an advected splat
   // iso-contour where differently colored currents meet. The sheet
   // carries Light's own channel, so the seam would double up there.
   float channel = 1.0 - smoothstep(0.012, 0.055, abs(splat - 0.36));
   float separation = smoothstep(0.015, 0.20, abs(dyeClamped.r - dyeClamped.g));
   splat -= channel * separation * 0.23 * (1.0 - uSheet);
-  float density = dye.a * uSheet + splat;
+  float density = dye.a * uSheet + splat + folded * 0.86 * uSheet;
   // Quiet right edge, as in Light Riso.
   density -= smoothstep(0.45, 1.0, vUv.x) * 0.12 * uSheet;
 
@@ -74,5 +81,6 @@ void main() {
   }
 
   color += inkGrain(gl_FragCoord.xy) * uGrainStrength * 0.22 * smoothstep(0.05, 0.3, density);
+  if (uSheet > 0.5) color = mix(color, dropColor, dropCover);
   fragColor = vec4(inkQuiet(color, uPaperColor, vUv, uSection), 1.0);
 }
