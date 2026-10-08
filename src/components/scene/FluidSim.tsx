@@ -3,7 +3,7 @@
 import { useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import { useCoarsePointer } from "@/hooks/useCoarsePointer";
-import { applySimPreset, firePresetBurst, getSimPreset } from "@/lib/content/simPresets";
+import { applySimPreset, getSimPreset } from "@/lib/content/simPresets";
 import { subscribeToSplats } from "@/lib/fluidBus";
 import { FluidOrchestrator, type PointerState } from "@/lib/gl/fluidOrchestrator";
 import type { TierConfig } from "@/lib/gpu";
@@ -81,14 +81,11 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
 
     // Preset: apply the persisted selection on every fresh init (first
     // mount, tier auto-tune re-init, locale switch) and re-apply live
-    // on store change. Only live changes fire the celebration burst —
-    // the initial application must stay silent.
+    // on store change. A switch does not plant a splat in the middle.
     applySimPreset(orchestrator, getSimPreset(useSimPresetStore.getState().presetId), config);
     const unsubPreset = useSimPresetStore.subscribe((current, previous) => {
       if (current.presetId === previous.presetId) return;
-      const preset = getSimPreset(current.presetId);
-      applySimPreset(orchestrator, preset, config);
-      firePresetBurst(orchestrator, preset, config.splatRadius);
+      applySimPreset(orchestrator, getSimPreset(current.presetId), config);
     });
 
     // Ambient warmup-trigger — short residual settle (~100ms) after

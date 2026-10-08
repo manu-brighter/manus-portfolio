@@ -29,10 +29,9 @@ out vec4 fragColor;
 // plates, registration drift and the fine diagonal screen match
 // ink-lite/render.frag.glsl, style 1.
 
-// Without a sheet (playground sims) splat dye prints 1:1: the old overprint
-// shader's top plate also sat at dye length ~0.6, matching 0.57 here.
+// Playground sims have no sheet, so the drop goes through the plates.
+// On the hero the colored drop is drawn on top of the swells.
 const float SPLAT_SOLO = 1.0;
-const float SPLAT_ON_SHEET = 0.12;
 
 vec3 plateColor(int index) {
   if (index == 0) return uSpotMint;
@@ -43,8 +42,8 @@ vec3 plateColor(int index) {
 
 void main() {
   vec4 dye = texture(uDye, vUv);
-  float splat = length(clamp(dye.rgb, vec3(0.0), vec3(1.0)));
-  float density = dye.a * uSheet + splat * mix(SPLAT_SOLO, SPLAT_ON_SHEET, uSheet);
+  float raw = length(clamp(dye.rgb, vec3(0.0), vec3(1.0)));
+  float density = dye.a * uSheet + raw * SPLAT_SOLO * (1.0 - uSheet);
 
   // Registration drift follows Light Wave's swell coordinate.
   float aspect = uTexelSize.y / uTexelSize.x;
@@ -62,9 +61,9 @@ void main() {
   }
 
   color += inkGrain(gl_FragCoord.xy) * uGrainStrength * 0.22 * smoothstep(0.05, 0.3, density);
-  // Fine diagonal screen inside the printed areas.
   vec2 pixel = floor(gl_FragCoord.xy);
   float screen = step(0.87, fract(pixel.x * 0.25 + pixel.y * 0.25));
   color *= 1.0 - screen * 0.025 * smoothstep(0.1, 0.4, density);
+  if (uSheet > 0.5) color = inkSplatOver(color, dye.rgb);
   fragColor = vec4(inkQuiet(color, uPaperColor, vUv, uSection), 1.0);
 }

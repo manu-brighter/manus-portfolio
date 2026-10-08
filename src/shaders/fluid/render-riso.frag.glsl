@@ -29,9 +29,9 @@ out vec4 fragColor;
 // adds the pointer/ambient ink on top. Same thresholds, opacity, rims
 // and grain as ink-lite/render.frag.glsl, style 0.
 
-// Splat dye weight with and without the sheet underneath.
+// Splat dye weight without the sheet (playground sims). On the hero the
+// colored drop is drawn on top of the plates instead.
 const float SPLAT_SOLO = 0.62;
-const float SPLAT_ON_SHEET = 0.35;
 
 vec3 plateColor(int index) {
   if (index == 0) return uSpotMint;
@@ -43,7 +43,10 @@ vec3 plateColor(int index) {
 void main() {
   vec4 dye = texture(uDye, vUv);
   vec3 dyeClamped = clamp(dye.rgb, vec3(0.0), vec3(1.0));
-  float splat = length(dyeClamped) * mix(SPLAT_SOLO, SPLAT_ON_SHEET, uSheet);
+  float raw = length(dyeClamped);
+  // Hero: the sheet owns the plates. The colored drop is composited
+  // afterwards, so a near-paper plate cannot cover it.
+  float splat = raw * mix(SPLAT_SOLO, 0.0, uSheet);
   // Without a sheet, a narrow paper seam follows an advected splat
   // iso-contour where differently colored currents meet. The sheet
   // carries Light's own channel, so the seam would double up there.
@@ -74,5 +77,6 @@ void main() {
   }
 
   color += inkGrain(gl_FragCoord.xy) * uGrainStrength * 0.22 * smoothstep(0.05, 0.3, density);
+  if (uSheet > 0.5) color = inkSplatOver(color, dye.rgb);
   fragColor = vec4(inkQuiet(color, uPaperColor, vUv, uSection), 1.0);
 }

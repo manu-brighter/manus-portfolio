@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { applySimPreset, firePresetBurst, getSimPreset } from "@/lib/content/simPresets";
+import { applySimPreset, getSimPreset } from "@/lib/content/simPresets";
 import {
   createFluidOrchestrator,
   type FluidOrchestrator,
@@ -132,13 +132,11 @@ export function MobileBackgroundSim({
 
     // Preset: mirror the Desktop FluidSim wiring — apply the persisted
     // selection on every fresh init and re-apply live on store change
-    // (the switcher is available on Mobile-phone layouts too). Only
-    // live changes fire the celebration burst.
+    // (the switcher is available on Mobile-phone layouts too). A switch
+    // does not plant a splat in the middle.
     const unsubPreset = useSimPresetStore.subscribe((current, previous) => {
       if (current.presetId === previous.presetId) return;
-      const preset = getSimPreset(current.presetId);
-      applySimPreset(orchestrator, preset, config);
-      firePresetBurst(orchestrator, preset, config.splatRadius);
+      applySimPreset(orchestrator, getSimPreset(current.presetId), config);
     });
 
     // Ambient opens the warmup gate after the loader + hero reveal settle.

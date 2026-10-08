@@ -690,7 +690,9 @@ export class FluidOrchestrator {
   triggerAmbient(): void {
     this.start();
     this.ambientReady = true;
-    this.ambientStrength = 1.0;
+    // Stay under point C's gate (0.5). Full strength would deposit a
+    // splat at screen center the moment the sim wakes. A and B still run.
+    this.ambientStrength = 0.49;
     this.ambientActive = true;
     // 5s grace window: pointer movement during this window does NOT
     // reset `lastPointerTime` (see step()), so ambient stays at full

@@ -48,9 +48,8 @@ vec2 inkChop(vec2 p, float t) {
 // Sheet density before pointer wake and the screen-anchored right-edge
 // quieting (callers own both). q receives the folded domain coordinate
 // the plate-drift wobble reads. chop (0/1) enables the Turbulenz vortex
-// chop: Light draws it analytically; Full leaves it to the real swarm,
-// whose vortices tear the sheet on their own (an analytic chop on top
-// only blurs the relaxed sheet, since it moves faster than the pull).
+// chop. Both hero modes pass 0: the fast clock raced the islands.
+// Simulation's droplet swarm supplies the small swirling corners instead.
 float inkSheet(vec2 p, float t, int style, float chop, out vec2 q) {
   vec2 fold = inkFold(p, t);
   q = p + fold * 0.48;
@@ -95,6 +94,16 @@ float inkSheet(vec2 p, float t, int style, float chop, out vec2 q) {
   // ink streams meeting. Reuse the field rather than adding a noise octave.
   float channel = 1.0 - smoothstep(0.035, 0.16, abs(field - 0.72));
   return field * 0.34 + 0.12 - channel * 0.31;
+}
+
+// Colored fluid drawn after the sheet plates. Mixing the dye into the
+// sheet density painted the lowest, near-paper plate over the drop and
+// hid the spot that was actually splatted.
+vec3 inkSplatOver(vec3 color, vec3 dyeRgb) {
+  vec3 clamped = clamp(dyeRgb, vec3(0.0), vec3(1.0));
+  float ink = length(clamped);
+  float cover = smoothstep(0.012, 0.08, ink);
+  return mix(color, clamped / max(ink, 1e-4), cover);
 }
 
 // Stationary paper grain hash (does not shimmer between frames).
