@@ -1173,6 +1173,15 @@
     cursor: not-allowed;
   }
 
+  /* Night flips --color-ink to cream, so a solid ink fill becomes a light
+   * stamp. Contact keeps the sim at full strength, so a transparent
+   * button would sit on bright dye. Fill it with the dark paper; the
+   * outline buttons read the same because that paper matches the page. */
+  [data-sim-theme="night"] .riso-submit {
+    color: var(--color-ink);
+    background: var(--color-paper);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .riso-submit:hover:not(:disabled),
     .riso-submit:focus-visible:not(:disabled) {
