@@ -96,19 +96,6 @@ float inkSheet(vec2 p, float t, int style, float chop, out vec2 q) {
   return field * 0.34 + 0.12 - channel * 0.31;
 }
 
-// Split hero dye into a cursor drop and a weaker fold into the plates.
-// Hue is the unclamped dye divided by its strongest channel, so stacked
-// deposits stay the spot colour instead of clamping toward grey.
-// Cover starts above a scaled-down ambient deposit; that dye only folds
-// into the sheet.
-void inkCursorSplit(vec3 dyeRgb, out vec3 dropColor, out float dropCover, out float folded) {
-  vec3 safe = max(dyeRgb, vec3(0.0));
-  float peak = max(safe.r, max(safe.g, safe.b));
-  dropColor = safe / max(peak, 1e-4);
-  dropCover = smoothstep(0.08, 0.20, peak);
-  folded = length(safe) * (1.0 - dropCover);
-}
-
 // Stationary paper grain hash (does not shimmer between frames).
 float inkGrain(vec2 fragCoord) {
   vec2 pixel = floor(fragCoord);
@@ -117,7 +104,4 @@ float inkGrain(vec2 fragCoord) {
 
 // Reading sections keep the field at the edges, opening a broad paper
 // interval for copy and photography. Hero (quiet 0) stays intact.
-vec3 inkQuiet(vec3 color, vec3 paper, vec2 uv, float quiet) {
-  float edgeSpace = smoothstep(0.20, 0.49, abs(uv.x - 0.5));
-  return mix(paper, color, 1.0 - quiet * (0.94 - edgeSpace * 0.65));
-}
+// #include <ink-quiet>

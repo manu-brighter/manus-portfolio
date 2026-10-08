@@ -25,6 +25,9 @@ uniform float uDissipation;
 // drift so the advected sheet and splat dye stay registered with it.
 // Positive = down: like Light, the ink drifts AGAINST the page scroll.
 uniform float uCarry;
+// 1 = shift the dye with the scroll and leave rgb untouched.
+// 0 = also relax alpha toward the analytic Light sheet.
+uniform float uCarryOnly;
 
 out vec4 fragColor;
 
@@ -37,6 +40,10 @@ void main() {
   vec2 source = vUv + vec2(0.0, uCarry);
   vec4 dye = texture(uDye, source);
   float inside = step(0.0, source.y) * step(source.y, 1.0);
+  if (uCarryOnly > 0.5) {
+    fragColor = vec4(dye.rgb, dye.a) * inside;
+    return;
+  }
   vec2 p = (vUv - 0.5) * vec2(uAspect, 1.0);
   // Light's parallax offset (ink-lite/render.frag.glsl), same sign.
   p.y += uScroll * INK_PARALLAX;

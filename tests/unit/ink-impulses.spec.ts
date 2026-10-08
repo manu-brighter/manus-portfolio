@@ -125,10 +125,15 @@ test("a preset switch previews a centred bloom within half the buffer", () => {
 test("the Animation shader compiles with the impulse uniforms", async ({ page }) => {
   const root = resolve(__dirname, "..", "..");
   const read = (path: string) => readFileSync(resolve(root, path), "utf8");
-  const fragment = read("src/shaders/ink-lite/render.frag.glsl").replace(
-    "// #include <ink-sheet>",
-    read("src/shaders/common/ink-sheet.glsl"),
-  );
+  // Same order as LiteInkScene: ink-sheet is inlined first, then the
+  // quiet function it includes. A single replace leaves inkQuiet undefined.
+  let fragment = read("src/shaders/ink-lite/render.frag.glsl");
+  for (const [name, path] of [
+    ["ink-sheet", "src/shaders/common/ink-sheet.glsl"],
+    ["ink-quiet", "src/shaders/common/ink-quiet.glsl"],
+  ] as const) {
+    fragment = fragment.replace(`// #include <${name}>`, read(path));
+  }
   await page.goto("about:blank");
   const log = await page.evaluate(
     ({ vertex, fragment: frag }) => {

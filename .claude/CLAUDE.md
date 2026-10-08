@@ -248,64 +248,22 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 - **5 user-switchable presets** (riso/wave/turbulenz/aquarell/nachtdruck)
   defined in `src/lib/content/simPresets.ts`; persisted selection in
   `src/lib/simPresetStore.ts` (zustand + localStorage `manus-sim-preset`).
-- **Simulation looks like Animation** (owner feedback: "versuch die
-  simulation überall nach animation anzugleichen"). Each Full render
-  shader (`render-*.frag.glsl`) ports its Light style branch 1:1:
-  same plate thresholds (0.12 + i*0.15), translucent mix opacity, rims,
-  hash grain, right-edge and section quieting. riso = quiet soft plates
-  (still the default under the hero text), wave = long rolling swells +
-  fine diagonal screen, turbulenz = crisp angular islands in Light's
-  colours (the old halftone + black contour look is retired), aquarell =
-  widest plate ramp + coloured wet-edge rims (no blur taps any more),
-  nachtdruck = hollow luminous filaments. Softness hierarchy mirrors
-  Light: aquarell 0.095 >> wave/nachtdruck 0.045 > riso 0.016 >
-  turbulenz 0.014, each floored by `fwidth` so low tiers don't alias.
-  All five compile at `init()`; selection via `FluidVisuals.style`
-  (exhaustive switch in `renderProgram()`).
-- **The hero ink sheet** is what makes the composition match: the Light
-  field lives in ONE shared include (`common/ink-sheet.glsl`, used by
-  `ink-lite/render.frag.glsl` AND the Full passes; clock + style index in
-  `lib/gl/inkSheet.ts`). In Full, dye ALPHA holds an advected copy of it:
-  `fluid/ink-sheet.frag.glsl` runs once per sim step at sim resolution
-  (before the dye advect) and relaxes alpha toward the analytic field at
-  `FluidVisuals.sheetRelax` per second (wave 1.4 lets a cursor splat
-  roll the swells, turbulenz 1 lets the swarm tear the islands; below
-  ~0.8 the high-confinement mixing averages turbulenz down to one
-  amber band).
-  The splat shader passes alpha through; render shaders print the sheet
-  from alpha. A strong cursor deposit is drawn afterwards in its own
-  spot (`inkCursorSplit`: hue is the unclamped dye over its strongest
-  channel, one colour per pointer stroke). Weaker ambient dye only
-  folds into the plates, so it does not paint a solid drop over them. **Only the hero renderers call `setInkSheet(true)`**
-  (FluidSim, MobileBackgroundSim); playground sims keep clean paper
-  (`uSheet = 0`) but DO print through the new plates. Their splat-only
-  density is scaled by each shader's `SPLAT_SOLO` (riso 0.62, wave 1,
-  turbulenz 0.6, aquarell 0.7, nachtdruck 0.75) so the top plate
-  saturates at the same dye level as the retired shaders the playground
-  was tuned against; at 1.0 Type-as-Fluid words printed as one solid
-  top-band mass. `SPLAT_SOLO` never reaches the hero (it only acts at
-  `uSheet = 0`).
-  - **Steady state is exactly the target**: the dye advect after the
-    sheet pass multiplies alpha by `dyeDissipation` (squared on
-    half-rate tiers), so the sheet pass writes
-    `mix(alpha, target, relax) / dissipation`. Without the division Full
-    settled at `dissipation x target` and under-inked vs Light,
-    tier-dependently.
-  - **The sheet is primed before every render that could see it
-    blank**: first frame, after `resize()`/`reset()` (fresh/cleared dye),
-    and on every frame while the warmup gate is closed (one sim-res pass,
-    no physics), so the composition never flashes paper or pops in at
-    `start()`. The sheet clock survives tier re-init via
-    `getSheetTime()` -> `setInkSheet(true, time)` in both hero renderers.
-- **Turbulenz chop**: the angular islands are the shared sheet
-  (style 2, `chop = 0` in both modes). A fast analytic vortex chop
-  (`inkChop`) raced those islands on Animation; the owner wanted the
-  previous, slower drift back. The small swirling corners stay on
-  Simulation, where the real droplet swarm tears the islands.
+- **Simulation is the fluid, not a copy of Animation.** The hero
+  (FluidSim, MobileBackgroundSim) does not call `setInkSheet`. Its five
+  render shaders paint the dye field: riso ladder, wave overprint plates,
+  turbulenz halftone plus Sobel contours, aquarell blur, nachtdruck
+  filaments. `noise.glsl` / `sobel.glsl` are included at compile.
+  The Light analytic sheet stays in `ink-lite` only. The hero still
+  shifts that dye against the scroll (`setScrollCarry`, `uCarryOnly`)
+  and still fades reading sections (`inkQuiet` / `uSection`). Neither
+  paints the analytic sheet.
+- **Turbulenz chop** stays off in Animation (`chop = 0`). The fast
+  analytic vortices raced the islands. Simulation's chopped corners
+  come from the droplet swarm and the Sobel contours, not from that chop.
 - **No centre splat on load or theme switch.** Hero preset changes only
-  re-apply the preset. Point C (the ambient source at screen centre) is
-  skipped while the hero sheet is on. `firePresetBurst` /
-  `pushPresetImpulses` still exist but the hero does not call them.
+  re-apply the preset. `setAllowCenterAmbient(false)` skips point C.
+  `firePresetBurst` / `pushPresetImpulses` still exist but the hero
+  does not call them.
 - **Scroll drives the Full ink like Light**: `lib/inkScroll.ts`
   (`createInkScrollTracker`) is the single source for smoothed scroll +
   section quieting, used by LiteInkScene, FluidSim and
@@ -324,8 +282,9 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   Light. The zero-dye velocity coupling (ScrollInkCoupling, mobile
   onScroll) was flipped to push DOWN on scroll-down so it never fights
   the drift. Verified with a Light-vs-Full scroll-frame comparison
-  (riso + wave, low tier). Reading sections fade to paper exactly like
-  Light. The tracker re-observes sections on resize only after a 200ms
+  (riso + wave, low tier). Reading sections still fade to paper
+  (`inkQuiet` in the dye shaders). The hero carry pass only shifts the
+  dye (`uCarryOnly`); it does not write the analytic Light sheet. The tracker re-observes sections on resize only after a 200ms
   debounce and keeps the current section (iOS URL-bar resizes fire
   mid-scroll).
 - **Idle ambient swarm**: the ambient rig runs up to 10 wandering points
@@ -349,8 +308,8 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   relaxed sheet accumulates over thousands of steps. This is load-bearing,
   so **never flag `highp` as a defect**. The sim passes are highp too:
   dropping them to mediump for bandwidth is a possible optimisation, not
-  the current state. The old `common/noise.glsl` + `sobel.glsl` includes
-  were removed with the Light alignment (no shader used them any more).
+  the current state. `noise.glsl` and `sobel.glsl` are back: the dye
+  render shaders use them again.
 - **Per-style knob reuse**: `FluidVisuals.edgeStrength` means rim
   shading (turbulenz), coloured wet-edge rims (aquarell), glow gain
   (nachtdruck), rim darkening (riso, 0.35 = Light's 0.045): the same
@@ -360,8 +319,8 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   baseline first — never touches gridSize/halfRate/pressureIterations, so weak
   GPUs can't regress), look via `setVisuals(FluidVisuals)` (style,
   grain, edges, paper, 4-slot color ladder, splat scales/count/scatter,
-  ambient multipliers, sheetRelax). `outlineThreshold` is still a field
-  but no shader reads it since the Light alignment.
+  ambient multipliers, sheetRelax). `outlineThreshold` is read again by
+  the restored turbulenz dye shader.
 - **Multi-splat swarm**: `splatCount`/`splatScatter` in FluidVisuals —
   turbulenz throws 7 tiny jittered droplets per pointer frame (position AND
   direction jitter; N parallel copies of one stroke otherwise).

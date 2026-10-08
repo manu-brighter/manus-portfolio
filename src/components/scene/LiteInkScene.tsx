@@ -13,6 +13,7 @@ import { inkSheetSpeed, inkSheetStyleIndex } from "@/lib/gl/inkSheet";
 import { createInkScrollTracker } from "@/lib/inkScroll";
 import { subscribe } from "@/lib/raf";
 import { useSimPresetStore } from "@/lib/simPresetStore";
+import inkQuietSource from "@/shaders/common/ink-quiet.glsl";
 import inkSheetSource from "@/shaders/common/ink-sheet.glsl";
 import quadSource from "@/shaders/common/quad.vert.glsl";
 import fragmentSource from "@/shaders/ink-lite/render.frag.glsl";
@@ -74,7 +75,10 @@ export function LiteInkScene({
       fragment = compileShader(
         gl,
         gl.FRAGMENT_SHADER,
-        injectIncludes(fragmentSource, { "ink-sheet": inkSheetSource }),
+        injectIncludes(fragmentSource, {
+          "ink-sheet": inkSheetSource,
+          "ink-quiet": inkQuietSource,
+        }),
         "lite-ink.frag",
       );
       program = createProgram(gl, vertex, fragment, "lite-ink");
