@@ -70,12 +70,11 @@ export function FadeIn({
   const reducedMotion = useReducedMotion();
 
   useEffect(() => {
-    if (
-      reducedMotion ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
-      document.documentElement.dataset.motion === "static"
-    )
-      return;
+    // Same rule as OverprintReveal: `data-motion="static"` only means
+    // hydration missed the startup window. This effect is the app, so
+    // the fade still runs. MotionProvider restores "enabled" in the
+    // parent effect, which is too late to revive an early return.
+    if (reducedMotion || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const el = ref.current;
     if (!el) return;
 
@@ -96,9 +95,11 @@ export function FadeIn({
     let fired = false;
     let tween: gsap.core.Tween | null = null;
     let settleTimer: number | null = null;
+    let safetyTimer: number | null = null;
     let unsubLoader: (() => void) | null = null;
 
     const start = () => {
+      if (tween) return;
       el.dataset.fade = "active";
       tween = gsap.to(el, {
         opacity: 1,
@@ -137,10 +138,31 @@ export function FadeIn({
     );
     io.observe(el);
 
+    if (waitForLoader) {
+      safetyTimer = window.setTimeout(() => {
+        if (el.dataset.fade === "settled") return;
+        if (!fired) {
+          fired = true;
+          io.disconnect();
+        }
+        if (settleTimer !== null) {
+          window.clearTimeout(settleTimer);
+          settleTimer = null;
+        }
+        unsubLoader?.();
+        unsubLoader = null;
+        start();
+        tween?.progress(1);
+        gsap.set(el, { opacity: 1 });
+        el.dataset.fade = "settled";
+      }, 2500);
+    }
+
     return () => {
       io.disconnect();
       tween?.kill();
       if (settleTimer !== null) window.clearTimeout(settleTimer);
+      if (safetyTimer !== null) window.clearTimeout(safetyTimer);
       unsubLoader?.();
       // Clear primed inline styles so a mid-session reduced-motion
       // flip (which reuses the same node in the static branch) can't
