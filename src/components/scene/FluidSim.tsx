@@ -38,9 +38,6 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
   const onFrametimeRef = useRef(onFrametime);
   onFrametimeRef.current = onFrametime;
   const warmupRef = useRef<ReturnType<typeof createInkWarmup> | null>(null);
-  // Ink sheet clock, handed from a disposed orchestrator to its
-  // replacement (tier re-init) so the composition continues, not snaps.
-  const sheetTimeRef = useRef(0);
 
   // Coarse-pointer (mobile/touch) disables sim interactivity. The hero
   // showcase moves to playgrounds; on the long-scroll only ambient
@@ -71,8 +68,7 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
 
     const orchestrator = new FluidOrchestrator();
     orchestrator.init(context, config);
-    // Print the theme's Light composition from the fluid (see setInkSheet).
-    orchestrator.setInkSheet(true, sheetTimeRef.current);
+    orchestrator.setAllowCenterAmbient(false);
     if (isCoarsePointer) {
       orchestrator.setPointerSplatEnabled(false);
     }
@@ -106,7 +102,6 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
       if (ambientTimer !== null) window.clearTimeout(ambientTimer);
       unsubLoader();
       unsubPreset();
-      sheetTimeRef.current = orchestrator.getSheetTime();
       orchestrator.dispose();
       orchestratorRef.current = null;
       warmupRef.current = null;

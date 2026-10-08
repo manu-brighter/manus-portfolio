@@ -114,12 +114,11 @@ const SLIDES: readonly [Slide, Slide, Slide, Slide, Slide] = [
 
 /**
  * Reveal trigger line: the photo fires its ink-dissolve only once the
- * photo's OWN vertical centre crosses the viewport's vertical centre —
- * i.e. after the middle of the photo has passed the middle of the screen.
- * This leaves the still photo on screen long enough for the user to play
- * with the live fluid sim over it before it auto-dissolves. (The earlier
- * "-44%" band fired when the photo's *edge* merely reached the central
- * strip, which read as revealing far too early.)
+ * photo's vertical centre is still a little below the viewport centre.
+ * The sentinel's top edge sits at 44% of the photo, so scrolling down
+ * fires about 6% of the photo height before the middle lines up.
+ * (The earlier "-44%" root band fired when the photo's edge merely
+ * reached the central strip, which read as revealing far too early.)
  *
  * Mechanic: `rootMargin: "-49.5% 0px -49.5% 0px"` shrinks the IO root to a
  * ~1%-tall band straddling the viewport centre (a sliver of height, not a
@@ -130,8 +129,8 @@ const SLIDES: readonly [Slide, Slide, Slide, Slide, Slide] = [
  * when its top edge reached the line (way too early). Instead each frame
  * exposes a sentinel that
  * spans the figure's BOTTOM HALF, so the sentinel's leading *top* edge
- * sits exactly on the photo's centre. Scrolling down, that top edge
- * touches the centre line at the instant the photo's centre reaches it,
+ * sits at 44% of the photo height. Scrolling down, that top edge
+ * touches the centre line a little before the photo's centre does,
  * and `isIntersecting` flips true there — firing the one-shot reveal.
  * The sentinel is tall (~half the photo), so fast wheel flicks and
  * Lenis smooth-scroll jumps can't skip the crossing the way a thin marker
@@ -278,15 +277,13 @@ function PhotoFrame({ slide, index, total }: { slide: Slide; index: number; tota
         interactive ? t("revealLabel", { alt: t(`slides.${slide.altKey}.alt`) }) : undefined
       }
     >
-      {/* Centre sentinel: spans the figure's bottom half, so its leading
-          top edge lands exactly on the photo's vertical centre. The shared
-          reveal observer watches this (not the figure) so the ink-dissolve
-          only fires once the photo's middle crosses the viewport middle.
-          Decorative + inert: aria-hidden, pointer-events-none, no paint. */}
+      {/* Sentinel top sits slightly above the photo centre, so the
+          ink-dissolve starts a little before the middle of the photo
+          reaches the middle of the screen. */}
       <div
         ref={sentinelRef}
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-1/2 bottom-0"
+        className="pointer-events-none absolute inset-x-0 top-[44%] bottom-0"
       />
       <picture>
         <source type="image/avif" srcSet={avif} sizes={sizes} />

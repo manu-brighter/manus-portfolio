@@ -1,8 +1,9 @@
 #version 300 es
-// highp: the sheet clock and pixel-space grain exceed fp16 range.
+// highp: the noise include exceeds fp16 range -- see
+// render-riso.frag.glsl.
 precision highp float;
 
-// #include <ink-sheet>
+// #include <noise>
 
 in vec2 vUv;
 
@@ -10,10 +11,7 @@ uniform sampler2D uDye;
 uniform vec2 uTexelSize;
 uniform float uGrainStrength;
 uniform float uEdgeStrength;
-uniform float uSheet;
-uniform float uSheetTime;
-uniform float uScroll;
-uniform float uSection;
+uniform float uTime;
 
 uniform vec3 uPaperColor;
 uniform vec3 uSpotRose;
@@ -23,57 +21,65 @@ uniform vec3 uSpotViolet;
 
 out vec4 fragColor;
 
-// Aquarell -- Light Aquarell's broad wet washes printed from the real
-// fluid: the advected sheet (dye alpha) drifts as wide washes, the huge
-// splat blooms soak in on top. The softest plate edges of all styles,
-// broken pigment deposits and coloured wet-edge rims (uEdgeStrength)
-// match ink-lite/render.frag.glsl, style 3. Softness comes from the
-// plate ramp, not a blur: the field is already sim-resolution smooth.
+// Watercolor: the dye field is read through a wide soft blur (wet
+// paper diffusion), pigment granulates into the paper tooth, and
+// washes rim-darken where the water front dried (uEdgeStrength). No
+// contours, no quantization -- the soft pole of the four styles.
 
-// Splat dye weight with and without the sheet underneath. Without a sheet
-// (playground sims) the scale keeps the old wash shader's ramp: its plates
-// centred near dye length 0.18/0.40/0.60/0.81, these at 0.12..0.57, so at
-// 1.0 cursor blooms and stamped words flattened into the top plate.
-// On the hero the colored drop is drawn on top of the plates.
-const float SPLAT_SOLO = 0.7;
+// Blur radius in UV -- deliberately huge relative to a sim texel so
+// washes lose any hard silhouette.
+const float BLUR_UV = 0.009;
 
-vec3 plateColor(int index) {
-  if (index == 0) return uSpotMint;
-  if (index == 1) return uSpotAmber;
-  if (index == 2) return uSpotRose;
-  return uSpotViolet;
+float densityAt(vec2 uv) {
+  vec3 dye = clamp(texture(uDye, uv).rgb, vec3(0.0), vec3(1.0));
+  return min(length(dye), 1.0);
+}
+
+float ringDensity(vec2 uv, vec2 radius) {
+  // 8-tap ring (center is shared by both blur radii in main). The dye
+  // texture is sim-resolution and LINEAR-filtered, so the sparse taps
+  // read as a smooth bloom.
+  float sum = densityAt(uv + vec2( radius.x, 0.0));
+  sum += densityAt(uv + vec2(-radius.x, 0.0));
+  sum += densityAt(uv + vec2(0.0,  radius.y));
+  sum += densityAt(uv + vec2(0.0, -radius.y));
+  vec2 diag = radius * 0.7071;
+  sum += densityAt(uv + vec2( diag.x,  diag.y));
+  sum += densityAt(uv + vec2( diag.x, -diag.y));
+  sum += densityAt(uv + vec2(-diag.x,  diag.y));
+  sum += densityAt(uv + vec2(-diag.x, -diag.y));
+  return sum;
 }
 
 void main() {
-  vec4 dye = texture(uDye, vUv);
-  vec3 dropColor;
-  float dropCover;
-  float folded;
-  inkCursorSplit(dye.rgb, dropColor, dropCover, folded);
-  float raw = length(clamp(dye.rgb, vec3(0.0), vec3(1.0)));
-  float density = dye.a * uSheet + folded * 0.86 * uSheet + raw * SPLAT_SOLO * (1.0 - uSheet);
+  // Aspect-corrected radius: equal VISUAL extent in x and y (a raw UV
+  // offset would stretch the bloom into an ellipse on 16:9).
+  vec2 radius = vec2(uTexelSize.x / uTexelSize.y, 1.0) * BLUR_UV;
+  float center = densityAt(vUv);
+  float inner = (center * 2.0 + ringDensity(vUv, radius * 0.5)) * 0.1;
+  float outer = (center * 2.0 + ringDensity(vUv, radius * 1.6)) * 0.1;
 
-  // Pigment deposits read Light Aquarell's wash coordinate.
-  float t = uSheetTime * 0.12;
-  float aspect = uTexelSize.y / uTexelSize.x;
-  vec2 p = (vUv - 0.5) * vec2(aspect, 1.0);
-  p.y += uScroll * INK_PARALLAX;
-  vec2 q = p * 0.78 + vec2(sin(p.y * 3.1 + t * 0.3), cos(p.x * 2.6 - t * 0.25)) * 0.26;
+  // Granulation: pigment settles into the paper tooth at two scales.
+  // Kept coarse and gentle -- at 320/0.22 the band transitions
+  // speckled like TV static (screenshot-verified).
+  float tooth = snoise(vUv * 180.0) * 0.6 + snoise(vUv * 70.0 + 7.0) * 0.4;
+  float density = clamp(inner * (1.0 + tooth * 0.12), 0.0, 1.0);
 
-  float softness = max(0.095, fwidth(density) * 0.8);
+  // Extra-wide soft ladder: washes bleed into each other wet-in-wet.
   vec3 color = uPaperColor;
-  for (int i = 0; i < 4; i++) {
-    float threshold = 0.12 + float(i) * 0.15;
-    float plate = density + sin(q.y * 7.0 + float(i) * 1.7) * 0.025;
-    plate += sin(q.x * 17.0 + q.y * 11.0 + float(i)) * 0.012;
-    float coverage = smoothstep(threshold - softness, threshold + softness, plate);
-    color = mix(color, plateColor(i), coverage * 0.66);
-    // Wet edge: pigment collects where the wash front dried.
-    float rim = 1.0 - smoothstep(0.005, 0.023, abs(plate - threshold));
-    color = mix(color, plateColor(i), rim * uEdgeStrength * 0.40);
-  }
+  color = mix(color, uSpotMint,   smoothstep(0.02, 0.34, density));
+  color = mix(color, uSpotAmber,  smoothstep(0.22, 0.58, density));
+  color = mix(color, uSpotRose,   smoothstep(0.42, 0.78, density));
+  color = mix(color, uSpotViolet, smoothstep(0.62, 1.00, density));
 
-  color += inkGrain(gl_FragCoord.xy) * uGrainStrength * 0.22 * smoothstep(0.05, 0.3, density);
-  if (uSheet > 0.5) color = mix(color, dropColor, dropCover);
-  fragColor = vec4(inkQuiet(color, uPaperColor, vUv, uSection), 1.0);
+  // Wet edge: where the narrow blur exceeds the wide blur we sit on a
+  // wash rim -- dried pigment accumulates and darkens the color.
+  float rim = smoothstep(0.01, 0.10, inner - outer);
+  color *= 1.0 - rim * uEdgeStrength;
+
+  // Fine grain only -- watercolor paper is smoother than riso stock.
+  float grain = snoise(vUv * 420.0 + uTime * 0.05);
+  color *= 1.0 + grain * uGrainStrength;
+
+  fragColor = vec4(color, 1.0);
 }

@@ -2,19 +2,15 @@
 // Full precision keeps the stationary grain hash stable on mobile GPUs.
 precision highp float;
 
-// #include <ink-sheet>
 
 in vec2 vUv;
 
 uniform sampler2D uDye;
 uniform vec2 uTexelSize;
+uniform float uOutlineThreshold;
 uniform float uGrainStrength;
 uniform float uEdgeStrength;
-// 1 on the hero renderers: dye alpha carries the advected Light sheet.
-uniform float uSheet;
-uniform float uSheetTime;
-uniform float uScroll;
-uniform float uSection;
+uniform float uTime;
 
 uniform vec3 uPaperColor;
 uniform vec3 uSpotRose;
@@ -24,63 +20,46 @@ uniform vec3 uSpotViolet;
 
 out vec4 fragColor;
 
-// Riso -- Light Riso's translucent plates printed from the real fluid:
-// the advected sheet (dye alpha) supplies the composition, splat dye
-// adds the pointer/ambient ink on top. Same thresholds, opacity, rims
-// and grain as ink-lite/render.frag.glsl, style 0.
+// The real advected dye field supplies every contour. Restrained plate
+// opacity and narrow edges match Lite Riso's print character without
+// replacing fluid dynamics with procedural shapes.
 
-// Splat dye weight without the sheet (playground sims). On the hero the
-// colored drop is drawn on top of the plates instead.
-const float SPLAT_SOLO = 0.62;
-
-vec3 plateColor(int index) {
-  if (index == 0) return uSpotMint;
-  if (index == 1) return uSpotAmber;
-  if (index == 2) return uSpotRose;
-  return uSpotViolet;
+vec3 mapToSpotColor(float density) {
+  float d = clamp(density, 0.0, 1.0);
+  vec3 c = uPaperColor;
+  // Screen derivatives keep thin plate edges stable on low-resolution tiers.
+  float softness = max(0.016, fwidth(d) * 0.8);
+  c = mix(c, uSpotMint,   smoothstep(0.12 - softness, 0.12 + softness, d) * 0.55);
+  c = mix(c, uSpotAmber,  smoothstep(0.27 - softness, 0.27 + softness, d) * 0.55);
+  c = mix(c, uSpotRose,   smoothstep(0.42 - softness, 0.42 + softness, d) * 0.55);
+  c = mix(c, uSpotViolet, smoothstep(0.57 - softness, 0.57 + softness, d) * 0.55);
+  float nearestPlate = min(min(abs(d - 0.12), abs(d - 0.27)),
+    min(abs(d - 0.42), abs(d - 0.57)));
+  float rim = 1.0 - smoothstep(softness * 0.3, softness * 1.4, nearestPlate);
+  // Preserve the shared edge-intensity control; 0.35 is the Riso default.
+  c *= 1.0 - rim * clamp(uEdgeStrength, 0.0, 1.0) * (0.045 / 0.35);
+  return c;
 }
 
 void main() {
   vec4 dye = texture(uDye, vUv);
-  vec3 dropColor;
-  float dropCover;
-  float folded;
-  inkCursorSplit(dye.rgb, dropColor, dropCover, folded);
   vec3 dyeClamped = clamp(dye.rgb, vec3(0.0), vec3(1.0));
-  float raw = length(dyeClamped);
-  // Hero plates are the sheet plus weak (ambient) dye. The cursor drop
-  // is composited afterwards in its own spot colour.
-  float splat = raw * mix(SPLAT_SOLO, 0.0, uSheet);
-  // Without a sheet, a narrow paper seam follows an advected splat
-  // iso-contour where differently colored currents meet. The sheet
-  // carries Light's own channel, so the seam would double up there.
-  float channel = 1.0 - smoothstep(0.012, 0.055, abs(splat - 0.36));
+  float density = length(dyeClamped) * 0.62;
+  // A narrow paper seam follows an advected iso-contour. Its strength varies
+  // with the transported color mix, so it opens and fades as currents meet.
+  float channel = 1.0 - smoothstep(0.012, 0.055, abs(density - 0.36));
   float separation = smoothstep(0.015, 0.20, abs(dyeClamped.r - dyeClamped.g));
-  splat -= channel * separation * 0.23 * (1.0 - uSheet);
-  float density = dye.a * uSheet + splat + folded * 0.86 * uSheet;
-  // Quiet right edge, as in Light Riso.
-  density -= smoothstep(0.45, 1.0, vUv.x) * 0.12 * uSheet;
+  density -= channel * separation * 0.23;
 
-  // Plate drift reads Light's folded domain on the same clock.
-  float aspect = uTexelSize.y / uTexelSize.x;
-  vec2 p = (vUv - 0.5) * vec2(aspect, 1.0);
-  p.y += uScroll * INK_PARALLAX;
-  vec2 q = p + inkFold(p, uSheetTime * 0.12) * 0.48;
+  vec3 color = mapToSpotColor(density);
 
-  // Screen derivatives keep thin plate edges stable on low-resolution tiers.
-  float softness = max(0.016, fwidth(density) * 0.8);
-  vec3 color = uPaperColor;
-  for (int i = 0; i < 4; i++) {
-    float threshold = 0.12 + float(i) * 0.15;
-    float plate = density + sin(q.y * 7.0 + float(i) * 1.7) * 0.025;
-    float coverage = smoothstep(threshold - softness, threshold + softness, plate);
-    color = mix(color, plateColor(i), coverage * 0.55);
-    float rim = 1.0 - smoothstep(0.005, max(0.023, softness * 1.4), abs(plate - threshold));
-    // Shared edge-intensity control; 0.35 is the Riso default (= Light 0.045).
-    color *= 1.0 - rim * coverage * clamp(uEdgeStrength, 0.0, 1.0) * (0.045 / 0.35);
-  }
+  // Blend to paper at low density
+  color = mix(uPaperColor, color, smoothstep(0.0, 0.08, density));
 
-  color += inkGrain(gl_FragCoord.xy) * uGrainStrength * 0.22 * smoothstep(0.05, 0.3, density);
-  if (uSheet > 0.5) color = mix(color, dropColor, dropCover);
-  fragColor = vec4(inkQuiet(color, uPaperColor, vUv, uSection), 1.0);
+  // Stationary fine grain only in printed areas, matching Lite's quiet paper.
+  vec2 pixel = floor(gl_FragCoord.xy);
+  float grain = fract(sin(dot(pixel, vec2(12.9898, 78.233))) * 43758.5453) - 0.5;
+  color += grain * uGrainStrength * 0.22 * smoothstep(0.05, 0.3, density);
+
+  fragColor = vec4(color, 1.0);
 }

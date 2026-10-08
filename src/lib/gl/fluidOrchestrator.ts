@@ -6,7 +6,9 @@ import { INK_PARALLAX, inkSheetSpeed, inkSheetStyleIndex } from "@/lib/gl/inkShe
 import type { TierConfig } from "@/lib/gpu";
 import { INK_COLOR, PAPER_COLOR, SPOT_RGB, type SpotColor } from "@/lib/palette";
 import inkSheetSrc from "@/shaders/common/ink-sheet.glsl";
+import noiseSrc from "@/shaders/common/noise.glsl";
 import quadVert from "@/shaders/common/quad.vert.glsl";
+import sobelSrc from "@/shaders/common/sobel.glsl";
 import advectFrag from "@/shaders/fluid/advect.frag.glsl";
 import curlFrag from "@/shaders/fluid/curl.frag.glsl";
 import divergenceFrag from "@/shaders/fluid/divergence.frag.glsl";
@@ -331,8 +333,11 @@ export function injectIncludes(source: string, includes: Record<string, string>)
   return result;
 }
 
-/** Include set for the render passes and the hero sheet pass. */
+/** Include set for the hero sheet pass. Render shaders use the dye
+ * field directly (noise / sobel), not the Light sheet. */
 const SHEET_INCLUDES = { "ink-sheet": inkSheetSrc };
+const NOISE_INCLUDES = { noise: noiseSrc };
+const NOISE_SOBEL_INCLUDES = { noise: noiseSrc, sobel: sobelSrc };
 
 function createFBO(
   gl: WebGL2RenderingContext,
@@ -453,9 +458,6 @@ export class FluidOrchestrator {
   private ambientGraceUntil = 0;
   private ambientStrength = 0;
   private splatColorIndex = 0;
-  // One spot colour for a whole pointer stroke. Ambient points use
-  // nextSplatColor() on their own and must not rotate this mid-stroke.
-  private pointerStrokeColor: readonly [number, number, number] | null = null;
   private ambientActive = false;
   // Auto-ambient gate: the 3s-idle timer in step() only fires once
   // `triggerAmbient()` has been called. Without this, the orchestrator
@@ -502,6 +504,8 @@ export class FluidOrchestrator {
   // Light renderer's analytic field. Off by default so playground sims
   // keep a clean paper canvas.
   private sheetEnabled = false;
+  // Hero turns this off so the centre ambient source never deposits.
+  private allowCenterAmbient = true;
   // False until the sheet has been seeded (and again after resize/reset
   // reallocate or clear the dye). step() primes it before rendering, so
   // the render pass never shows blank paper or a fade-in from it.
@@ -546,34 +550,29 @@ export class FluidOrchestrator {
       divergence: createProgram(gl, quadVert, divergenceFrag, "fluid.divergence"),
       pressure: createProgram(gl, quadVert, pressureFrag, "fluid.pressure"),
       gradientSub: createProgram(gl, quadVert, gradientSubFrag, "fluid.gradient-sub"),
-      renderRiso: createProgram(
-        gl,
-        quadVert,
-        injectIncludes(renderRisoFrag, SHEET_INCLUDES),
-        "fluid.render-riso",
-      ),
+      renderRiso: createProgram(gl, quadVert, renderRisoFrag, "fluid.render-riso"),
       renderWave: createProgram(
         gl,
         quadVert,
-        injectIncludes(renderWaveFrag, SHEET_INCLUDES),
+        injectIncludes(renderWaveFrag, NOISE_INCLUDES),
         "fluid.render-wave",
       ),
       renderTurbulenz: createProgram(
         gl,
         quadVert,
-        injectIncludes(renderTurbulenzFrag, SHEET_INCLUDES),
+        injectIncludes(renderTurbulenzFrag, NOISE_SOBEL_INCLUDES),
         "fluid.render-turbulenz",
       ),
       renderAquarell: createProgram(
         gl,
         quadVert,
-        injectIncludes(renderAquarellFrag, SHEET_INCLUDES),
+        injectIncludes(renderAquarellFrag, NOISE_INCLUDES),
         "fluid.render-aquarell",
       ),
       renderNachtdruck: createProgram(
         gl,
         quadVert,
-        injectIncludes(renderNachtdruckFrag, SHEET_INCLUDES),
+        injectIncludes(renderNachtdruckFrag, NOISE_INCLUDES),
         "fluid.render-nachtdruck",
       ),
       injectDensity: createProgram(gl, quadVert, injectDensityFrag, "fluid.inject-density"),
@@ -782,6 +781,11 @@ export class FluidOrchestrator {
     this.sheetPrimed = false;
     this.carriedScroll = null;
     if (sheetTime !== undefined) this.sheetTime = sheetTime;
+  }
+
+  /** Hero leaves the centre ambient source off. */
+  setAllowCenterAmbient(enabled: boolean): void {
+    this.allowCenterAmbient = enabled;
   }
 
   /** Current sheet clock, to hand over to a re-created instance. */
@@ -1186,6 +1190,8 @@ export class FluidOrchestrator {
     this.activateProgram(p);
     this.bindTexture(p, "uDye", state.dye.read.texture, 0);
     this.setVec2(p, "uTexelSize", 1.0 / this.canvasWidth, 1.0 / this.canvasHeight);
+    // Turbulenz Sobel steps the sim-resolution dye, not the screen.
+    this.setVec2(p, "uSimTexel", 1.0 / this.simWidth, 1.0 / this.simHeight);
     // Uniforms a style's shader doesn't declare resolve to a null
     // location — setting them is a spec-defined no-op, so one uniform
     // pass serves all five programs.
@@ -1232,14 +1238,6 @@ export class FluidOrchestrator {
     this.splatColorIndex++;
     // Safe: index is always 0..3 because colors has exactly 4 entries
     return colors[index] as readonly [number, number, number];
-  }
-
-  // Hold one spot for the whole time the pointer is down or moving.
-  // A fresh stroke, after the pointer has been still, takes the next spot.
-  private pointerStrokeSpot(): readonly [number, number, number] {
-    if (this.splatColorOverride) return this.splatColorOverride;
-    if (!this.pointerStrokeColor) this.pointerStrokeColor = this.nextSplatColor();
-    return this.pointerStrokeColor;
   }
 
   // Public splat-injection API for external callers (e.g. Work-cards
@@ -1349,16 +1347,14 @@ export class FluidOrchestrator {
       // otherwise N splats read as N parallel copies of one stroke.
       if (this.pointerSplatEnabled && (pointer.moved || pointer.down)) {
         const { splatCount, splatScatter } = this.visuals;
-        const color = this.pointerStrokeSpot();
         for (let i = 0; i < splatCount; i++) {
+          const color = this.splatColorOverride ?? this.nextSplatColor();
           const jx = (Math.random() - 0.5) * 2 * splatScatter;
           const jy = (Math.random() - 0.5) * 2 * splatScatter;
           const jdx = pointer.dx + (Math.random() - 0.5) * splatScatter * 0.8;
           const jdy = pointer.dy + (Math.random() - 0.5) * splatScatter * 0.8;
           this.runSplat(pointer.x + jx, pointer.y + jy, jdx, jdy, color);
         }
-      } else {
-        this.pointerStrokeColor = null;
       }
 
       // Drain external splats queued via injectSplat() — Work-card click
@@ -1394,7 +1390,9 @@ export class FluidOrchestrator {
           // Point C lives at screen centre and only appears at full ambient.
           // On the hero sheet that reads as a splat forming in the middle.
           if (pt.gateThreshold !== undefined) {
-            if (this.sheetEnabled) continue;
+            // Hero turns this off: point C sits at screen centre and
+            // reads as a splat forming in the middle.
+            if (!this.allowCenterAmbient) continue;
             if (s <= pt.gateThreshold) continue;
             pointS = s - pt.gateThreshold;
           }
@@ -1420,17 +1418,7 @@ export class FluidOrchestrator {
             Math.cos(t * pt.forceFreqX + pt.phaseFX) * pointS * fs * pt.forceStrength * life;
           const dy =
             Math.sin(t * pt.forceFreqY + pt.phaseFY) * pointS * fs * pt.forceStrength * life;
-          this.runSplat(
-            x,
-            y,
-            dx,
-            dy,
-            this.nextSplatColor(),
-            undefined,
-            // On the hero sheet a full ambient deposit is bright enough to
-            // read as a solid drop. Scale it down so it only tints the plates.
-            this.sheetEnabled ? life * 0.35 : life,
-          );
+          this.runSplat(x, y, dx, dy, this.nextSplatColor(), undefined, life);
         }
       }
 
