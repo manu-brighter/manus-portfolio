@@ -453,6 +453,9 @@ export class FluidOrchestrator {
   private ambientGraceUntil = 0;
   private ambientStrength = 0;
   private splatColorIndex = 0;
+  // One spot colour for a whole pointer stroke. Ambient points use
+  // nextSplatColor() on their own and must not rotate this mid-stroke.
+  private pointerStrokeColor: readonly [number, number, number] | null = null;
   private ambientActive = false;
   // Auto-ambient gate: the 3s-idle timer in step() only fires once
   // `triggerAmbient()` has been called. Without this, the orchestrator
@@ -690,9 +693,7 @@ export class FluidOrchestrator {
   triggerAmbient(): void {
     this.start();
     this.ambientReady = true;
-    // Stay under point C's gate (0.5). Full strength would deposit a
-    // splat at screen center the moment the sim wakes. A and B still run.
-    this.ambientStrength = 0.49;
+    this.ambientStrength = 1.0;
     this.ambientActive = true;
     // 5s grace window: pointer movement during this window does NOT
     // reset `lastPointerTime` (see step()), so ambient stays at full
@@ -1233,6 +1234,14 @@ export class FluidOrchestrator {
     return colors[index] as readonly [number, number, number];
   }
 
+  // Hold one spot for the whole time the pointer is down or moving.
+  // A fresh stroke, after the pointer has been still, takes the next spot.
+  private pointerStrokeSpot(): readonly [number, number, number] {
+    if (this.splatColorOverride) return this.splatColorOverride;
+    if (!this.pointerStrokeColor) this.pointerStrokeColor = this.nextSplatColor();
+    return this.pointerStrokeColor;
+  }
+
   // Public splat-injection API for external callers (e.g. Work-cards
   // dispatching a click-burst). Coordinates are normalised 0..1 with
   // y measured from the bottom (same convention as `pointer`). `color`
@@ -1340,14 +1349,16 @@ export class FluidOrchestrator {
       // otherwise N splats read as N parallel copies of one stroke.
       if (this.pointerSplatEnabled && (pointer.moved || pointer.down)) {
         const { splatCount, splatScatter } = this.visuals;
+        const color = this.pointerStrokeSpot();
         for (let i = 0; i < splatCount; i++) {
-          const color = this.splatColorOverride ?? this.nextSplatColor();
           const jx = (Math.random() - 0.5) * 2 * splatScatter;
           const jy = (Math.random() - 0.5) * 2 * splatScatter;
           const jdx = pointer.dx + (Math.random() - 0.5) * splatScatter * 0.8;
           const jdy = pointer.dy + (Math.random() - 0.5) * splatScatter * 0.8;
           this.runSplat(pointer.x + jx, pointer.y + jy, jdx, jdy, color);
         }
+      } else {
+        this.pointerStrokeColor = null;
       }
 
       // Drain external splats queued via injectSplat() — Work-card click
@@ -1379,10 +1390,11 @@ export class FluidOrchestrator {
           // Safe: i < count <= AMBIENT_POINTS.length
           const pt = AMBIENT_POINTS[i] as AmbientPoint;
 
-          // Legacy point-C gate: appears only at full ambient strength
-          // (i.e. vanishes while the pointer is active).
           let pointS = s;
+          // Point C lives at screen centre and only appears at full ambient.
+          // On the hero sheet that reads as a splat forming in the middle.
           if (pt.gateThreshold !== undefined) {
+            if (this.sheetEnabled) continue;
             if (s <= pt.gateThreshold) continue;
             pointS = s - pt.gateThreshold;
           }
@@ -1408,7 +1420,17 @@ export class FluidOrchestrator {
             Math.cos(t * pt.forceFreqX + pt.phaseFX) * pointS * fs * pt.forceStrength * life;
           const dy =
             Math.sin(t * pt.forceFreqY + pt.phaseFY) * pointS * fs * pt.forceStrength * life;
-          this.runSplat(x, y, dx, dy, this.nextSplatColor(), undefined, life);
+          this.runSplat(
+            x,
+            y,
+            dx,
+            dy,
+            this.nextSplatColor(),
+            undefined,
+            // On the hero sheet a full ambient deposit is bright enough to
+            // read as a solid drop. Scale it down so it only tints the plates.
+            this.sheetEnabled ? life * 0.35 : life,
+          );
         }
       }
 

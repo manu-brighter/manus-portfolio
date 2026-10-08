@@ -273,9 +273,10 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   ~0.8 the high-confinement mixing averages turbulenz down to one
   amber band).
   The splat shader passes alpha through; render shaders print the sheet
-  from alpha. Colored dye is drawn afterwards in the spot that was
-  splatted (`inkSplatOver`), so the sheet's pale, near-paper plate
-  cannot cover it. **Only the hero renderers call `setInkSheet(true)`**
+  from alpha. A strong cursor deposit is drawn afterwards in its own
+  spot (`inkCursorSplit`: hue is the unclamped dye over its strongest
+  channel, one colour per pointer stroke). Weaker ambient dye only
+  folds into the plates, so it does not paint a solid drop over them. **Only the hero renderers call `setInkSheet(true)`**
   (FluidSim, MobileBackgroundSim); playground sims keep clean paper
   (`uSheet = 0`) but DO print through the new plates. Their splat-only
   density is scaled by each shader's `SPLAT_SOLO` (riso 0.62, wave 1,
@@ -302,10 +303,9 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   previous, slower drift back. The small swirling corners stay on
   Simulation, where the real droplet swarm tears the islands.
 - **No centre splat on load or theme switch.** Hero preset changes only
-  re-apply the preset. `triggerAmbient()` starts under point C's gate
-  (0.5) so the sim does not deposit a splat at screen center when it
-  wakes. `firePresetBurst` / `pushPresetImpulses` still exist but the
-  hero does not call them.
+  re-apply the preset. Point C (the ambient source at screen centre) is
+  skipped while the hero sheet is on. `firePresetBurst` /
+  `pushPresetImpulses` still exist but the hero does not call them.
 - **Scroll drives the Full ink like Light**: `lib/inkScroll.ts`
   (`createInkScrollTracker`) is the single source for smoothed scroll +
   section quieting, used by LiteInkScene, FluidSim and

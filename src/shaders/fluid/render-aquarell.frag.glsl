@@ -46,8 +46,12 @@ vec3 plateColor(int index) {
 
 void main() {
   vec4 dye = texture(uDye, vUv);
+  vec3 dropColor;
+  float dropCover;
+  float folded;
+  inkCursorSplit(dye.rgb, dropColor, dropCover, folded);
   float raw = length(clamp(dye.rgb, vec3(0.0), vec3(1.0)));
-  float density = dye.a * uSheet + raw * SPLAT_SOLO * (1.0 - uSheet);
+  float density = dye.a * uSheet + folded * 0.86 * uSheet + raw * SPLAT_SOLO * (1.0 - uSheet);
 
   // Pigment deposits read Light Aquarell's wash coordinate.
   float t = uSheetTime * 0.12;
@@ -70,6 +74,6 @@ void main() {
   }
 
   color += inkGrain(gl_FragCoord.xy) * uGrainStrength * 0.22 * smoothstep(0.05, 0.3, density);
-  if (uSheet > 0.5) color = inkSplatOver(color, dye.rgb);
+  if (uSheet > 0.5) color = mix(color, dropColor, dropCover);
   fragColor = vec4(inkQuiet(color, uPaperColor, vUv, uSection), 1.0);
 }

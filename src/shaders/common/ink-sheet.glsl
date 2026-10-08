@@ -96,14 +96,17 @@ float inkSheet(vec2 p, float t, int style, float chop, out vec2 q) {
   return field * 0.34 + 0.12 - channel * 0.31;
 }
 
-// Colored fluid drawn after the sheet plates. Mixing the dye into the
-// sheet density painted the lowest, near-paper plate over the drop and
-// hid the spot that was actually splatted.
-vec3 inkSplatOver(vec3 color, vec3 dyeRgb) {
-  vec3 clamped = clamp(dyeRgb, vec3(0.0), vec3(1.0));
-  float ink = length(clamped);
-  float cover = smoothstep(0.012, 0.08, ink);
-  return mix(color, clamped / max(ink, 1e-4), cover);
+// Split hero dye into a cursor drop and a weaker fold into the plates.
+// Hue is the unclamped dye divided by its strongest channel, so stacked
+// deposits stay the spot colour instead of clamping toward grey.
+// Cover starts above a scaled-down ambient deposit; that dye only folds
+// into the sheet.
+void inkCursorSplit(vec3 dyeRgb, out vec3 dropColor, out float dropCover, out float folded) {
+  vec3 safe = max(dyeRgb, vec3(0.0));
+  float peak = max(safe.r, max(safe.g, safe.b));
+  dropColor = safe / max(peak, 1e-4);
+  dropCover = smoothstep(0.08, 0.20, peak);
+  folded = length(safe) * (1.0 - dropCover);
 }
 
 // Stationary paper grain hash (does not shimmer between frames).

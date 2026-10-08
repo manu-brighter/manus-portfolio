@@ -42,10 +42,14 @@ vec3 plateColor(int index) {
 
 void main() {
   vec4 dye = texture(uDye, vUv);
+  vec3 dropColor;
+  float dropCover;
+  float folded;
+  inkCursorSplit(dye.rgb, dropColor, dropCover, folded);
   vec3 dyeClamped = clamp(dye.rgb, vec3(0.0), vec3(1.0));
   float raw = length(dyeClamped);
-  // Hero: the sheet owns the plates. The colored drop is composited
-  // afterwards, so a near-paper plate cannot cover it.
+  // Hero plates are the sheet plus weak (ambient) dye. The cursor drop
+  // is composited afterwards in its own spot colour.
   float splat = raw * mix(SPLAT_SOLO, 0.0, uSheet);
   // Without a sheet, a narrow paper seam follows an advected splat
   // iso-contour where differently colored currents meet. The sheet
@@ -53,7 +57,7 @@ void main() {
   float channel = 1.0 - smoothstep(0.012, 0.055, abs(splat - 0.36));
   float separation = smoothstep(0.015, 0.20, abs(dyeClamped.r - dyeClamped.g));
   splat -= channel * separation * 0.23 * (1.0 - uSheet);
-  float density = dye.a * uSheet + splat;
+  float density = dye.a * uSheet + splat + folded * 0.86 * uSheet;
   // Quiet right edge, as in Light Riso.
   density -= smoothstep(0.45, 1.0, vUv.x) * 0.12 * uSheet;
 
@@ -77,6 +81,6 @@ void main() {
   }
 
   color += inkGrain(gl_FragCoord.xy) * uGrainStrength * 0.22 * smoothstep(0.05, 0.3, density);
-  if (uSheet > 0.5) color = inkSplatOver(color, dye.rgb);
+  if (uSheet > 0.5) color = mix(color, dropColor, dropCover);
   fragColor = vec4(inkQuiet(color, uPaperColor, vUv, uSection), 1.0);
 }
