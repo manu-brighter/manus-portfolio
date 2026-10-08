@@ -38,9 +38,11 @@ import { hasTileReveal, type RevealTileKey, type StampKey } from "./tileReveals"
  * felt slow — user feedback). The click also drops a real sim splat
  * at the pointer (visible for the beat before the backdrop covers),
  * and closing leaves a small ink burst where the plate was pulled —
- * both ride the hero FluidSim via fluidBus, so they only show under
- * an explicit Simulation choice and no-op under the default Animation,
- * on coarse pointers (no subscriber) and under reduced motion.
+ * both ride fluidBus: the default Animation prints them as short ink
+ * blooms (LiteInkScene, phones included), an explicit Simulation
+ * splats them into the desktop FluidSim. They no-op only under
+ * explicit Simulation on coarse pointers (no subscriber) and under
+ * reduced motion.
  * Inside the overlay prev/next (buttons, arrow keys, swipe) walk
  * through all revealable tiles; closing restores focus to, and drops
  * the burst at, the tile that was showing last.

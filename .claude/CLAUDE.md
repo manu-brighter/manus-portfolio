@@ -567,9 +567,43 @@ Source of truth: `src/app/globals.css` (`@theme` block).
 
 - **`fluidBus`** (`src/lib/fluidBus.ts`) — pub/sub for fire-and-forget splat
   injection (Work cards → root FluidSim). Cleared when sim is paused.
-  Only the Full renderer subscribes: under the default Animation (Light)
-  every fluidBus emit is a silent no-op until LiteInkScene learns to
-  take impulses (open follow-up).
+  Two renderers subscribe: desktop Full splats into the solver,
+  Animation (`LiteInkScene`, every device) turns each emit into a short
+  ink bloom in its single pass (`src/lib/gl/inkImpulses.ts`). Six things it encodes:
+  - **Bounded, packed buffer**: 16 slots (two `vec4[16]` uniforms:
+    x/y/age/radius + dx/dy/strength/ladder slot), live ones packed at
+    the front, `uImpulseCount` stops the shader loop, so idle frames
+    cost one uniform branch and upload nothing. Life 2.2s; a full
+    buffer only recycles a slot past 90% of its life (earlier the drop
+    is still visible and pops), otherwise the newcomer is dropped.
+  - **Same ink, not an overlay**: a bloom lifts the sheet density (the
+    theme's own plates ring outward around it), swirls the sheet
+    locally, and prints a small core in the ladder slot of its spot
+    (mint 0 / amber 1 / rose 2 / violet 3, the PhotoInkMask order)
+    through the SAME `printPlate()` as the sheet, so Nachtdruck gets
+    neon contours and Aquarell soft washes for free.
+  - **Coordinates exactly as FluidSim reads them**: normalised to the
+    full-viewport canvas, y from the bottom. The y anchor is stored in
+    sheet space at the smoothed scroll, so a bloom rides the sheet's
+    `INK_PARALLAX` drift like Full's carried dye.
+  - **Zero-dye requests are ignored** (`ScrollInkCoupling`'s invisible
+    scroll force): Light's parallax already drifts the sheet; a second
+    push would double it.
+  - **Radius follows the preset** like Full's: no-radius splats use
+    Full's medium splatRadius × `splatRadiusScale`, wide blooms damp
+    only the density lift (the spot plate stays full strength, or
+    Aquarell never clears its plate threshold), and a live preset switch
+    drops a centred preview bloom (ring, or a droplet cloud for swarm
+    presets; the initial apply stays silent).
+  - **Reading sections**: a live bloom lifts the section quieting
+    there, quieter than in the hero. The quiet lift follows the
+    undamped spot strength, not the damped density, so a wide Aquarell
+    drop still reopens the paper (at a full bloom, quieting falls to
+    about 40%).
+  Regression specs: `tests/e2e/ink-fluidbus.spec.ts` (screenshot diff,
+  pins position and y-up), `tests/unit/ink-impulses.spec.ts`.
+  MobileBackgroundSim (explicit Full on coarse pointers) still has no
+  subscriber.
 - **Cross-route section jumps go through `src/lib/homeSection.ts`.**
   `stashHomeSection(id)` writes the target to the SessionStorage key
   `scrollToOnLoad` (`SCROLL_TO_ON_LOAD_KEY`) and returns `/` (or `/#id`
@@ -670,8 +704,11 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   - The photo may not start at opacity 0: that flashed the bare
     full-size spot plate for ~2 frames.
   Open drops one fluidBus splat at
-  the pointer, close leaves a two-splat burst at the tile (Full
-  renderer only, no Light/mobile subscriber, see `fluidBus`).
+  the pointer, close leaves a two-splat burst at the tile, under
+  Animation as ink blooms too (phones included, Light is their
+  default); only explicit Full on coarse pointers has no subscriber,
+  see `fluidBus`. The tiles are opaque, so the close burst mostly
+  shows around the tile edges in both renderers.
   The overlay is a **fixed div, NOT `dialog.showModal()`** with a manual
   focus cycle over prev / next / close. It is a gallery: prev/next,
   ArrowLeft/ArrowRight and swipe page through every revealable tile

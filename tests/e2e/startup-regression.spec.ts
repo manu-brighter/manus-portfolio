@@ -27,6 +27,37 @@ test("animated text is primed before application scripts hydrate", async ({ page
   await expect(page.locator('#hero-heading [data-layer="ink"]').first()).toHaveCSS("opacity", "1");
 });
 
+test("slow hydration still finishes the printed hero accents", async ({ page }) => {
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route("**/_next/static/**/*.js", async (route) => {
+    await gate;
+    await route.continue();
+  });
+  const navigation = page.goto("/de/", { waitUntil: "domcontentloaded" });
+  try {
+    // startup.ts gives the bundle 2s, then marks the document static so
+    // unhydrated text stays readable. This waits that window out on purpose.
+    await expect(page.locator("html")).toHaveAttribute("data-motion", "static", {
+      timeout: 5000,
+    });
+  } finally {
+    release();
+    await navigation;
+  }
+  const heading = page.locator("#hero-heading");
+  const ink = heading.locator('[data-layer="ink"]').first();
+  await expect(heading.locator('[data-overprint="settled"]')).toHaveCount(2, {
+    timeout: 10000,
+  });
+  await expect(ink).toHaveCSS("opacity", "1");
+  await expect(ink).not.toHaveCSS("text-shadow", "none");
+  await expect(heading.locator('[data-layer="rose"]').first()).toBeHidden();
+  await expect(heading.locator('[data-layer="mint"]').first()).toBeHidden();
+});
+
 test("fresh documents never revive a startup overlay from an old session marker", async ({
   page,
 }) => {

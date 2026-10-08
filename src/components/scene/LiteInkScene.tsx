@@ -4,9 +4,11 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { getSimPreset } from "@/lib/content/simPresets";
+import { subscribeToSplats } from "@/lib/fluidBus";
 import { compileShader } from "@/lib/gl/compileShader";
 import { createProgram } from "@/lib/gl/createProgram";
 import { DEFAULT_FLUID_VISUALS, injectIncludes } from "@/lib/gl/fluidOrchestrator";
+import { createInkImpulses, pushPresetImpulses, pushSplatImpulse } from "@/lib/gl/inkImpulses";
 import { inkSheetSpeed, inkSheetStyleIndex } from "@/lib/gl/inkSheet";
 import { createInkScrollTracker } from "@/lib/inkScroll";
 import { subscribe } from "@/lib/raf";
@@ -99,6 +101,9 @@ export function LiteInkScene({
       grain: uniform("uGrain"),
       edge: uniform("uEdge"),
       section: uniform("uSection"),
+      impulseCount: uniform("uImpulseCount"),
+      impulseShape: uniform("uImpulseShape[0]"),
+      impulseDrive: uniform("uImpulseDrive[0]"),
     };
     // biome-ignore lint/correctness/useHookAtTopLevel: WebGL API method, not a React hook
     gl.useProgram(activeProgram);
@@ -114,6 +119,7 @@ export function LiteInkScene({
       gl.uniform2f(uniforms.resolution, canvas.width, canvas.height);
     };
     let speed = 1;
+    let splatRadiusScale = 1;
     let currentQuality = qualityRef.current;
     const ladder = new Float32Array(12);
     const targetLadder = new Float32Array(12);
@@ -134,10 +140,30 @@ export function LiteInkScene({
       // Shared with the Full renderer's sheet clock (inkSheetSpeed), so
       // both modes run each theme at the same tempo.
       speed = inkSheetSpeed(visuals);
+      splatRadiusScale = preset.physics.splatRadiusScale ?? 1;
     };
     resize();
     applyPreset();
-    const unsubscribePreset = useSimPresetStore.subscribe(applyPreset);
+    // fluidBus splats (Work cards, object tiles, console burst, Fehldruck)
+    // become short ink blooms in the sheet. They anchor at the smoothed
+    // scroll the next draw uses, so a bloom lands under its pointer/tile
+    // and then rides the sheet's parallax drift, as Full carries its dye.
+    const impulses = createInkImpulses();
+    let lastScroll = window.scrollY / Math.max(1, window.innerHeight);
+    const unsubscribeSplats = subscribeToSplats((req) => {
+      pushSplatImpulse(impulses, req, lastScroll, splatRadiusScale);
+    });
+    const unsubscribePreset = useSimPresetStore.subscribe((current, previous) => {
+      applyPreset();
+      // Only a live switch previews the preset; the initial apply is silent.
+      if (current.presetId === previous.presetId) return;
+      pushPresetImpulses(
+        impulses,
+        getSimPreset(current.presetId),
+        lastScroll,
+        canvas.width / Math.max(1, canvas.height),
+      );
+    });
     // Section quieting + smoothed scroll, shared with the Full renderers.
     const scrollTracker = createInkScrollTracker((id) => {
       if (id === null) delete canvas.dataset.inkSection;
@@ -188,6 +214,8 @@ export function LiteInkScene({
       lastDrawAt = performance.now();
       movedDistance = 0;
       pointerKnown = false;
+      // A bloom frozen behind a hidden tab would replay stale on return.
+      impulses.clear();
     };
     const contextLost = (event: Event) => {
       event.preventDefault();
@@ -219,6 +247,7 @@ export function LiteInkScene({
       sinceDraw = 0;
       accumulated %= frameMs;
       const { scroll, quiet } = scrollTracker.update(dt);
+      lastScroll = scroll;
       for (let i = 0; i < ladder.length; i++) {
         const color = ladder[i] ?? 0;
         ladder[i] = color + ((targetLadder[i] ?? color) - color) * (1 - Math.exp(-dt * 5));
@@ -248,10 +277,21 @@ export function LiteInkScene({
       gl.uniform3fv(uniforms.trail, trail);
       gl.uniform3fv(uniforms.ladder, ladder);
       gl.uniform1f(uniforms.section, quiet);
+      // Blooms age on visible wall time (like the pointer response), so the
+      // slow-frame throttle keeps their duration; idle frames upload nothing.
+      if (impulses.advance(Math.min(responseDt, 0.25))) {
+        const count = impulses.count;
+        gl.uniform1i(uniforms.impulseCount, count);
+        if (count > 0) {
+          gl.uniform4fv(uniforms.impulseShape, impulses.shape, 0, count * 4);
+          gl.uniform4fv(uniforms.impulseDrive, impulses.drive, 0, count * 4);
+        }
+      }
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     }, 25);
     return () => {
       unsubscribeTick();
+      unsubscribeSplats();
       unsubscribePreset();
       scrollTracker.dispose();
       refreshSectionsRef.current = null;

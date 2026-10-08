@@ -36,7 +36,14 @@ export function MotionProvider({ children }: MotionProviderProps) {
   const [lenis, setLenis] = useState<Lenis | null>(null);
 
   useEffect(() => {
-    document.documentElement.dataset.motionReady = "true";
+    const root = document.documentElement;
+    root.dataset.motionReady = "true";
+    // startup.ts flips motion to "static" when hydration misses a 2s
+    // window. Reaching this effect means the app did load, so hand
+    // motion back unless the reader asked for reduced motion.
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      root.dataset.motion = "enabled";
+    }
     bootstrap();
     return teardown;
   }, []);

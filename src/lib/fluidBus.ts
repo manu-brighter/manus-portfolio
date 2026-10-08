@@ -7,6 +7,11 @@
  * page.tsx). This module provides a tiny pub/sub so the dispatch
  * site stays component-local.
  *
+ * Subscribers: FluidSim (explicit Simulation, desktop) splats into the
+ * solver; LiteInkScene (Animation, the default) prints each request as
+ * a short ink bloom (src/lib/gl/inkImpulses.ts). Both read the same
+ * coordinates.
+ *
  * Coordinates are normalised 0..1, with `y` measured from the bottom
  * of the canvas (the same convention FluidOrchestrator already uses
  * for pointer state).

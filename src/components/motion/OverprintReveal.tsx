@@ -111,12 +111,11 @@ export function OverprintReveal({
   const chars = splitChars(text);
 
   useEffect(() => {
-    if (
-      reducedMotion ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
-      document.documentElement.dataset.motion === "static"
-    )
-      return;
+    // `data-motion="static"` is the pre-hydration fallback in startup.ts.
+    // A slow WebKit crosses that 2s window before this effect, and the
+    // heading is already readable. Bailing left it pending, without the
+    // printed accents. Replaying the reveal would blank that text first.
+    if (reducedMotion || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const root = rootRef.current;
     if (!root) return;
 
@@ -126,6 +125,17 @@ export function OverprintReveal({
     const layers = [...roseLayer, ...mintLayer, ...inkLayer];
 
     if (roseLayer.length === 0) return;
+
+    // Child effects run before MotionProvider restores "enabled", so
+    // this still reads the fallback. The hero is already on screen;
+    // settle the printed end state instead of priming ink to opacity 0.
+    if (waitForLoader && document.documentElement.dataset.motion === "static") {
+      root.dataset.overprint = "settled";
+      return () => {
+        root.dataset.overprint = "pending";
+      };
+    }
+
     root.dataset.overprint = "pending";
 
     const resolvedStagger = stagger ?? dur.micro / 5;
@@ -141,12 +151,27 @@ export function OverprintReveal({
     let fired = false;
     let timeline: gsap.core.Timeline | null = null;
     let settleTimer: number | null = null;
+    let safetyTimer: number | null = null;
     let unsubLoader: (() => void) | null = null;
 
+    const markSettled = () => {
+      if (root.dataset.overprint === "settled") return;
+      timeline?.progress(1);
+      // progress() can miss the ink tween when the ticker itself is
+      // what stalled. The printed end state is opaque ink.
+      gsap.set(inkLayer, { opacity: 1 });
+      root.dataset.overprint = "settled";
+      gsap.set(layers, { clearProps: "willChange" });
+    };
+
     const startTimeline = () => {
+      if (timeline) return;
       timeline = gsap.timeline({
         delay,
         onStart: () => {
+          // A wall-clock snap may already have settled this reveal.
+          // A late ticker tick must not walk it back to "active".
+          if (root.dataset.overprint === "settled") return;
           root.dataset.overprint = "active";
           gsap.set([...roseLayer, ...mintLayer], { willChange: "transform, opacity" });
           gsap.set(inkLayer, { willChange: "opacity" });
@@ -247,12 +272,39 @@ export function OverprintReveal({
 
     observer.observe(root);
 
+    // Hydration on software WebKit can miss the 2s startup window. The
+    // reveal still runs once this effect is alive. If that timeline has
+    // not reached its printed end state within 2.5s of wall time, snap
+    // there: opaque ink, resting ghosts, will-change cleared. Below-fold
+    // reveals keep their scroll trigger.
+    if (waitForLoader) {
+      safetyTimer = window.setTimeout(() => {
+        if (root.dataset.overprint === "settled") return;
+        if (!fired) {
+          fired = true;
+          observer.disconnect();
+        }
+        // Skip the loader settle delay: this timer already waited.
+        // startTimeline is idempotent, so a reveal already in flight
+        // is only jumped to its end state.
+        if (settleTimer !== null) {
+          window.clearTimeout(settleTimer);
+          settleTimer = null;
+        }
+        unsubLoader?.();
+        unsubLoader = null;
+        startTimeline();
+        markSettled();
+      }, 2500);
+    }
+
     return () => {
       observer.disconnect();
       timeline?.kill();
       gsap.set(layers, { clearProps: "willChange" });
       root.dataset.overprint = "pending";
       if (settleTimer !== null) window.clearTimeout(settleTimer);
+      if (safetyTimer !== null) window.clearTimeout(safetyTimer);
       unsubLoader?.();
     };
   }, [reducedMotion, threshold, delay, stagger, waitForLoader]);

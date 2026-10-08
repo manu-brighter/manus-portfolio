@@ -70,14 +70,16 @@ export function FadeIn({
   const reducedMotion = useReducedMotion();
 
   useEffect(() => {
-    if (
-      reducedMotion ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
-      document.documentElement.dataset.motion === "static"
-    )
-      return;
+    // Same rule as OverprintReveal: after the startup fallback the hero
+    // slash is already visible. Fading it from opacity 0 would blank it.
+    if (reducedMotion || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const el = ref.current;
     if (!el) return;
+
+    if (waitForLoader && document.documentElement.dataset.motion === "static") {
+      el.dataset.fade = "settled";
+      return;
+    }
 
     // display:inline can't carry transforms — promote plain-inline
     // elements to inline-block when a transform entrance is requested.
@@ -96,9 +98,11 @@ export function FadeIn({
     let fired = false;
     let tween: gsap.core.Tween | null = null;
     let settleTimer: number | null = null;
+    let safetyTimer: number | null = null;
     let unsubLoader: (() => void) | null = null;
 
     const start = () => {
+      if (tween) return;
       el.dataset.fade = "active";
       tween = gsap.to(el, {
         opacity: 1,
@@ -137,10 +141,31 @@ export function FadeIn({
     );
     io.observe(el);
 
+    if (waitForLoader) {
+      safetyTimer = window.setTimeout(() => {
+        if (el.dataset.fade === "settled") return;
+        if (!fired) {
+          fired = true;
+          io.disconnect();
+        }
+        if (settleTimer !== null) {
+          window.clearTimeout(settleTimer);
+          settleTimer = null;
+        }
+        unsubLoader?.();
+        unsubLoader = null;
+        start();
+        tween?.progress(1);
+        gsap.set(el, { opacity: 1 });
+        el.dataset.fade = "settled";
+      }, 2500);
+    }
+
     return () => {
       io.disconnect();
       tween?.kill();
       if (settleTimer !== null) window.clearTimeout(settleTimer);
+      if (safetyTimer !== null) window.clearTimeout(safetyTimer);
       unsubLoader?.();
       // Clear primed inline styles so a mid-session reduced-motion
       // flip (which reuses the same node in the static branch) can't
