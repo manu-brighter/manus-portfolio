@@ -66,14 +66,28 @@ test.describe("overprint — default (ghosts rendered)", () => {
     page,
     browserName,
   }) => {
-    // The settled state is the assertion. WebKit CI renders the hero ink
-    // in software and can stall the reveal's rAF well past 10s; the
-    // same check just gets a longer window there.
-    test.slow(browserName === "webkit", "Software-rendered WebGL starves the main thread in CI");
+    // Headless WebKit often reports the document as hidden. GSAP's ticker
+    // sleeps in that state, so the reveal stays on "pending" and never
+    // settles no matter how long we wait. A visible tab is what this
+    // assertion is about. Software GL can still stall the timeline, so
+    // WebKit gets a longer window for the same settled-accent check.
+    if (browserName === "webkit") {
+      test.slow(true, "Software-rendered WebGL starves the main thread in CI");
+      await page.addInitScript(() => {
+        Object.defineProperty(Document.prototype, "hidden", {
+          configurable: true,
+          get: () => false,
+        });
+        Object.defineProperty(Document.prototype, "visibilityState", {
+          configurable: true,
+          get: () => "visible",
+        });
+      });
+    }
     await page.goto("/de/");
     const heading = page.locator("#hero-heading");
     await expect(heading.locator('[data-overprint="settled"]')).toHaveCount(2, {
-      timeout: browserName === "webkit" ? 30_000 : 10_000,
+      timeout: browserName === "webkit" ? 20_000 : 10_000,
     });
     const ink = heading.locator('[data-layer="ink"]').first();
     await expect(ink).toBeVisible();
