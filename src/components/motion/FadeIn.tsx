@@ -70,13 +70,16 @@ export function FadeIn({
   const reducedMotion = useReducedMotion();
 
   useEffect(() => {
-    // Same rule as OverprintReveal: `data-motion="static"` only means
-    // hydration missed the startup window. This effect is the app, so
-    // the fade still runs. MotionProvider restores "enabled" in the
-    // parent effect, which is too late to revive an early return.
+    // Same rule as OverprintReveal: after the startup fallback the hero
+    // slash is already visible. Fading it from opacity 0 would blank it.
     if (reducedMotion || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const el = ref.current;
     if (!el) return;
+
+    if (waitForLoader && document.documentElement.dataset.motion === "static") {
+      el.dataset.fade = "settled";
+      return;
+    }
 
     // display:inline can't carry transforms — promote plain-inline
     // elements to inline-block when a transform entrance is requested.

@@ -111,11 +111,10 @@ export function OverprintReveal({
   const chars = splitChars(text);
 
   useEffect(() => {
-    // `data-motion="static"` is only the pre-hydration fallback in
-    // startup.ts. On a slow WebKit that 2s timer fires before this
-    // effect, and bailing here left the heading on "pending" forever:
-    // readable, but without the printed accents. Once the effect runs
-    // the app is alive, so the reveal plays anyway.
+    // `data-motion="static"` is the pre-hydration fallback in startup.ts.
+    // A slow WebKit crosses that 2s window before this effect, and the
+    // heading is already readable. Bailing left it pending, without the
+    // printed accents. Replaying the reveal would blank that text first.
     if (reducedMotion || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const root = rootRef.current;
     if (!root) return;
@@ -126,6 +125,17 @@ export function OverprintReveal({
     const layers = [...roseLayer, ...mintLayer, ...inkLayer];
 
     if (roseLayer.length === 0) return;
+
+    // Child effects run before MotionProvider restores "enabled", so
+    // this still reads the fallback. The hero is already on screen;
+    // settle the printed end state instead of priming ink to opacity 0.
+    if (waitForLoader && document.documentElement.dataset.motion === "static") {
+      root.dataset.overprint = "settled";
+      return () => {
+        root.dataset.overprint = "pending";
+      };
+    }
+
     root.dataset.overprint = "pending";
 
     const resolvedStagger = stagger ?? dur.micro / 5;
