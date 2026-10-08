@@ -69,6 +69,7 @@ export function FluidSim({ config, measuring, onGLReady, onFrametime }: FluidSim
     const orchestrator = new FluidOrchestrator();
     orchestrator.init(context, config);
     orchestrator.setAllowCenterAmbient(false);
+    orchestrator.setScrollCarry(true);
     if (isCoarsePointer) {
       orchestrator.setPointerSplatEnabled(false);
     }

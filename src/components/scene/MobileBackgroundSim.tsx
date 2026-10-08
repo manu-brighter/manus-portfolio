@@ -108,6 +108,7 @@ export function MobileBackgroundSim({
     try {
       orchestrator.init(gl, config);
       orchestrator.setAllowCenterAmbient(false);
+      orchestrator.setScrollCarry(true);
       applySimPreset(orchestrator, getSimPreset(useSimPresetStore.getState().presetId), config);
       // Compile the first splat before declaring the renderer available.
       orchestrator.injectSplat(-1, -1, [0, 0, 0], 0, 0);

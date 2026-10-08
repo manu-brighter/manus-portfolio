@@ -2,12 +2,14 @@
 precision highp float;
 
 // #include <noise>
+// #include <ink-quiet>
 
 in vec2 vUv;
 uniform sampler2D uDye;
 uniform float uGrainStrength;
 uniform float uEdgeStrength;
 uniform float uTime;
+uniform float uSection;
 uniform vec3 uPaperColor;
 uniform vec3 uSpotRose;
 uniform vec3 uSpotAmber;
@@ -53,5 +55,5 @@ void main() {
   // Stationary stock grain avoids shimmer in the slender lines.
   float grain = snoise(vUv * 340.0);
   color *= 1.0 + grain * uGrainStrength;
-  fragColor = vec4(clamp(color, vec3(0.0), vec3(1.0)), 1.0);
+  fragColor = vec4(inkQuiet(clamp(color, vec3(0.0), vec3(1.0)), uPaperColor, vUv, uSection), 1.0);
 }

@@ -5,6 +5,7 @@ import { createProgram as linkProgram } from "@/lib/gl/createProgram";
 import { INK_PARALLAX, inkSheetSpeed, inkSheetStyleIndex } from "@/lib/gl/inkSheet";
 import type { TierConfig } from "@/lib/gpu";
 import { INK_COLOR, PAPER_COLOR, SPOT_RGB, type SpotColor } from "@/lib/palette";
+import inkQuietSrc from "@/shaders/common/ink-quiet.glsl";
 import inkSheetSrc from "@/shaders/common/ink-sheet.glsl";
 import noiseSrc from "@/shaders/common/noise.glsl";
 import quadVert from "@/shaders/common/quad.vert.glsl";
@@ -335,9 +336,10 @@ export function injectIncludes(source: string, includes: Record<string, string>)
 
 /** Include set for the hero sheet pass. Render shaders use the dye
  * field directly (noise / sobel), not the Light sheet. */
-const SHEET_INCLUDES = { "ink-sheet": inkSheetSrc };
-const NOISE_INCLUDES = { noise: noiseSrc };
-const NOISE_SOBEL_INCLUDES = { noise: noiseSrc, sobel: sobelSrc };
+const SHEET_INCLUDES = { "ink-sheet": inkSheetSrc, "ink-quiet": inkQuietSrc };
+const NOISE_INCLUDES = { noise: noiseSrc, "ink-quiet": inkQuietSrc };
+const NOISE_SOBEL_INCLUDES = { noise: noiseSrc, sobel: sobelSrc, "ink-quiet": inkQuietSrc };
+const QUIET_INCLUDES = { "ink-quiet": inkQuietSrc };
 
 function createFBO(
   gl: WebGL2RenderingContext,
@@ -504,6 +506,8 @@ export class FluidOrchestrator {
   // Light renderer's analytic field. Off by default so playground sims
   // keep a clean paper canvas.
   private sheetEnabled = false;
+  // Hero shifts the dye with the scroll without copying the Light sheet.
+  private scrollCarry = false;
   // Hero turns this off so the centre ambient source never deposits.
   private allowCenterAmbient = true;
   // False until the sheet has been seeded (and again after resize/reset
@@ -550,7 +554,12 @@ export class FluidOrchestrator {
       divergence: createProgram(gl, quadVert, divergenceFrag, "fluid.divergence"),
       pressure: createProgram(gl, quadVert, pressureFrag, "fluid.pressure"),
       gradientSub: createProgram(gl, quadVert, gradientSubFrag, "fluid.gradient-sub"),
-      renderRiso: createProgram(gl, quadVert, renderRisoFrag, "fluid.render-riso"),
+      renderRiso: createProgram(
+        gl,
+        quadVert,
+        injectIncludes(renderRisoFrag, QUIET_INCLUDES),
+        "fluid.render-riso",
+      ),
       renderWave: createProgram(
         gl,
         quadVert,
@@ -781,6 +790,11 @@ export class FluidOrchestrator {
     this.sheetPrimed = false;
     this.carriedScroll = null;
     if (sheetTime !== undefined) this.sheetTime = sheetTime;
+  }
+
+  /** Hero shifts dye against the scroll without painting the Light sheet. */
+  setScrollCarry(enabled: boolean): void {
+    this.scrollCarry = enabled;
   }
 
   /** Hero leaves the centre ambient source off. */
@@ -1130,7 +1144,7 @@ export class FluidOrchestrator {
    *  carry, no dissipation compensation): it seeds a blank dye FBO before
    *  the first render and keeps the sheet live while the warmup gate is
    *  closed, at the cost of one cheap pass instead of the sim pipeline. */
-  private runInkSheet(dt: number, prime: boolean): void {
+  private runInkSheet(dt: number, prime: boolean, carryOnly = false): void {
     const state = this.requireState();
     const gl = state.gl;
     const p = state.programs.inkSheet;
@@ -1162,6 +1176,7 @@ export class FluidOrchestrator {
     this.setFloat(p, "uRelax", relax);
     this.setFloat(p, "uDissipation", dissipation);
     this.setFloat(p, "uCarry", carry);
+    this.setFloat(p, "uCarryOnly", carryOnly ? 1 : 0);
     this.renderToFBO(state.dye.write);
     this.drawQuad();
     state.dye.swap();
@@ -1437,6 +1452,7 @@ export class FluidOrchestrator {
       this.runPressure();
       this.runGradientSubtract();
       if (this.sheetEnabled) this.runInkSheet(dt, false);
+      else if (this.scrollCarry) this.runInkSheet(dt, false, true);
       this.runAdvect(state.dye, state.config.dyeDissipation, dt);
     }
 

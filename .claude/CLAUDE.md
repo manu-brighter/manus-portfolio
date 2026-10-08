@@ -253,8 +253,10 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   render shaders paint the dye field: riso ladder, wave overprint plates,
   turbulenz halftone plus Sobel contours, aquarell blur, nachtdruck
   filaments. `noise.glsl` / `sobel.glsl` are included at compile.
-  The Light analytic sheet stays in `ink-lite` only. The sheet pass
-  still exists for anyone who calls `setInkSheet(true)`; the hero does not.
+  The Light analytic sheet stays in `ink-lite` only. The hero still
+  shifts that dye against the scroll (`setScrollCarry`, `uCarryOnly`)
+  and still fades reading sections (`inkQuiet` / `uSection`). Neither
+  paints the analytic sheet.
 - **Turbulenz chop** stays off in Animation (`chop = 0`). The fast
   analytic vortices raced the islands. Simulation's chopped corners
   come from the droplet swarm and the Sobel contours, not from that chop.
@@ -280,8 +282,9 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   Light. The zero-dye velocity coupling (ScrollInkCoupling, mobile
   onScroll) was flipped to push DOWN on scroll-down so it never fights
   the drift. Verified with a Light-vs-Full scroll-frame comparison
-  (riso + wave, low tier). Reading sections fade to paper exactly like
-  Light. The tracker re-observes sections on resize only after a 200ms
+  (riso + wave, low tier). Reading sections still fade to paper
+  (`inkQuiet` in the dye shaders). The hero carry pass only shifts the
+  dye (`uCarryOnly`); it does not write the analytic Light sheet. The tracker re-observes sections on resize only after a 200ms
   debounce and keeps the current section (iOS URL-bar resizes fire
   mid-scroll).
 - **Idle ambient swarm**: the ambient rig runs up to 10 wandering points
@@ -305,8 +308,8 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   relaxed sheet accumulates over thousands of steps. This is load-bearing,
   so **never flag `highp` as a defect**. The sim passes are highp too:
   dropping them to mediump for bandwidth is a possible optimisation, not
-  the current state. The old `common/noise.glsl` + `sobel.glsl` includes
-  were removed with the Light alignment (no shader used them any more).
+  the current state. `noise.glsl` and `sobel.glsl` are back: the dye
+  render shaders use them again.
 - **Per-style knob reuse**: `FluidVisuals.edgeStrength` means rim
   shading (turbulenz), coloured wet-edge rims (aquarell), glow gain
   (nachtdruck), rim darkening (riso, 0.35 = Light's 0.045): the same
@@ -316,8 +319,8 @@ Source of truth: `src/app/globals.css` (`@theme` block).
   baseline first — never touches gridSize/halfRate/pressureIterations, so weak
   GPUs can't regress), look via `setVisuals(FluidVisuals)` (style,
   grain, edges, paper, 4-slot color ladder, splat scales/count/scatter,
-  ambient multipliers, sheetRelax). `outlineThreshold` is still a field
-  but no shader reads it since the Light alignment.
+  ambient multipliers, sheetRelax). `outlineThreshold` is read again by
+  the restored turbulenz dye shader.
 - **Multi-splat swarm**: `splatCount`/`splatScatter` in FluidVisuals —
   turbulenz throws 7 tiny jittered droplets per pointer frame (position AND
   direction jitter; N parallel copies of one stroke otherwise).

@@ -5,6 +5,7 @@
 precision highp float;
 
 // #include <noise>
+// #include <ink-quiet>
 
 in vec2 vUv;
 
@@ -12,6 +13,7 @@ uniform sampler2D uDye;
 uniform vec2 uTexelSize;
 uniform float uGrainStrength;
 uniform float uTime;
+uniform float uSection;
 
 uniform vec3 uPaperColor;
 uniform vec3 uSpotRose;
@@ -95,5 +97,5 @@ void main() {
   float grain = snoise(vUv * 400.0 + uTime * 0.05);
   color *= 1.0 + grain * uGrainStrength;
 
-  fragColor = vec4(color, 1.0);
+  fragColor = vec4(inkQuiet(color, uPaperColor, vUv, uSection), 1.0);
 }

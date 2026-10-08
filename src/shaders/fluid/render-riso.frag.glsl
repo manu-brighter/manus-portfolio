@@ -2,6 +2,7 @@
 // Full precision keeps the stationary grain hash stable on mobile GPUs.
 precision highp float;
 
+// #include <ink-quiet>
 
 in vec2 vUv;
 
@@ -11,6 +12,7 @@ uniform float uOutlineThreshold;
 uniform float uGrainStrength;
 uniform float uEdgeStrength;
 uniform float uTime;
+uniform float uSection;
 
 uniform vec3 uPaperColor;
 uniform vec3 uSpotRose;
@@ -61,5 +63,5 @@ void main() {
   float grain = fract(sin(dot(pixel, vec2(12.9898, 78.233))) * 43758.5453) - 0.5;
   color += grain * uGrainStrength * 0.22 * smoothstep(0.05, 0.3, density);
 
-  fragColor = vec4(color, 1.0);
+  fragColor = vec4(inkQuiet(color, uPaperColor, vUv, uSection), 1.0);
 }
