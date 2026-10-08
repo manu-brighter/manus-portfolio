@@ -1173,6 +1173,15 @@
     cursor: not-allowed;
   }
 
+  /* Night flips --color-ink to cream, so a solid ink fill becomes a light
+   * stamp. The other buttons stay an ink outline on the dark paper.
+   * Match that: cream type and border, dark paper showing through. */
+  [data-sim-theme="night"] .riso-submit {
+    color: var(--color-ink);
+    background: transparent;
+    border-color: var(--color-ink);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .riso-submit:hover:not(:disabled),
     .riso-submit:focus-visible:not(:disabled) {
